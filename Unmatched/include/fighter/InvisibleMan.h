@@ -3,11 +3,11 @@
 using namespace std;
 #include "Hero.h"
 
-class invisibleMan : public Hero
+class InvisibleMan : public Hero
 {
     public:
-        invisibleMan();
-        ~invisibleMan() = default;
+        InvisibleMan();
+        ~InvisibleMan() = default;
         virtual void useAbility(Game& game, Player &player) override;
 };
 #endif
