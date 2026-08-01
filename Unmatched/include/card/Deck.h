@@ -27,6 +27,7 @@ class Deck
 
         static void DraculaDeck(Deck& deck);
         static void SherlockDeck(Deck& deck);
+        static void InvisibleManDeck(Deck& deck);
 };
 
 #endif

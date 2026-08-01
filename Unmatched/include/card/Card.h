@@ -87,5 +87,16 @@ public:
     static Card createAdministerAid();
     static Card createEliminateTheImpossible();
     static Card createMasterOfDisguise();
+
+    static Card createCodedNotes();
+    static Card createDreamingOfRevenge();
+    static Card createEmergeFromMist();
+    static Card createImpossibleToSee();
+    static Card createIntoThinAir();
+    static Card createLurking();
+    static Card createReignOfTerror();
+    static Card createRollingFog();
+    static Card createSlipAway();
+    static Card createStepLightly();
 };
 #endif

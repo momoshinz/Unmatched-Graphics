@@ -27,6 +27,17 @@
 #include "effect/SherlockCards/MasterOfDisguise.h"
 #include "effect/SherlockCards/StudyMethods.h"
 #include "effect/SherlockCards/TheGameIsAfoot.h"
+#include "effect/InvisibleManCards/CodedNotes.h"
+#include "effect/InvisibleManCards/DreamingOfRevenge.h"
+#include "effect/InvisibleManCards/EmergeFromMist.h"
+#include "effect/InvisibleManCards/ImpossibleToSee.h"
+#include "effect/InvisibleManCards/IntoThinAir.h"
+#include "effect/InvisibleManCards/Lurking.h"
+#include "effect/InvisibleManCards/ReignOfTerror.h"
+#include "effect/InvisibleManCards/RollingFog.h"
+#include "effect/InvisibleManCards/SlipAway.h"
+#include "effect/InvisibleManCards/StepLightly.h"
+
 using namespace std;
 
 Card::Card(const string &name, CardType cardType, OwnerType ownerType, Timing timing,
@@ -465,3 +476,64 @@ Card Card::createMasterOfDisguise()
     return Card("Master Of Disguise", CardType::Scheme, OwnerType::Hero,
                 Timing::None, 2, 2, 0, new MasterOfDisguise());
 }
+
+Card Card::createCodedNotes()
+{
+    return Card("Coded Notes", CardType::Defense, OwnerType::Hero,
+                Timing::AfterCombat, 2, 2, 3, new CodedNotes());
+}
+
+Card Card::createDreamingOfRevenge()
+{
+    return Card("Dreaming Of Revenge", CardType::Scheme, OwnerType::Hero,
+                Timing::AfterCombat, 1, 2, 3, new DreamingOfRevenge());
+}
+
+Card Card::createEmergeFromMist()
+{
+    return Card("Emerge From Mist", CardType::Attack, OwnerType::Hero,
+                Timing::DuringCombat, 2, 2, 3, new EmergeFromMist());
+}
+
+Card Card::createImpossibleToSee()
+{
+    return Card("Impossible To See", CardType::Scheme, OwnerType::Hero,
+                Timing::Immediately, 2, 2, 2, new ImpossibleToSee());
+}
+
+Card Card::createIntoThinAir()
+{
+    return Card("Into Thin Air", CardType::Defense, OwnerType::Hero,
+                Timing::AfterCombat, 1, 2, 4, new IntoThinAir());
+}
+
+Card Card::createLurking()
+{
+    return Card("Lurking", CardType::Defense, OwnerType::Hero,
+                Timing::AfterCombat, 2, 2, 2, new Lurking());
+}
+
+Card Card::createReignOfTerror()
+{
+    return Card("Reign Of Terror", CardType::Scheme, OwnerType::Hero,
+                Timing::None, 1, 2, 0, new ReignOfTerror());
+}
+
+Card Card::createRollingFog()
+{
+    return Card("Rolling Fog", CardType::Scheme, OwnerType::Hero,
+                Timing::None, 1, 2, 0, new RollingFog());
+}
+
+Card Card::createSlipAway()
+{
+    return Card("Slip Away", CardType::Attack, OwnerType::Hero,
+                Timing::AfterCombat, 2, 3, 3, new SlipAway());
+}
+
+Card Card::createStepLightly()
+{
+    return Card("Step Lightly", CardType::Scheme, OwnerType::Hero,
+                Timing::None, 1, 2, 0, new StepLightly());
+}
+

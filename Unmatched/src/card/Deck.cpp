@@ -111,3 +111,21 @@ void Deck::SherlockDeck(Deck &deck)
 
     deck.shuffle();
 }
+
+void Deck::InvisibleManDeck(Deck &deck)
+{
+    deck.addCopies(Card::createCodedNotes(), 2);
+    deck.addCopies(Card::createDreamingOfRevenge(), 2);
+    deck.addCopies(Card::createEmergeFromMist(), 2);
+    deck.addCopies(Card::createImpossibleToSee(), 2);
+    deck.addCopies(Card::createIntoThinAir(), 2);
+    deck.addCopies(Card::createLurking(), 2);
+    deck.addCopies(Card::createReignOfTerror(), 2);
+    deck.addCopies(Card::createRollingFog(), 2);
+    deck.addCopies(Card::createSlipAway(), 3);
+    deck.addCopies(Card::createStepLightly(), 2);
+    deck.addCopies(Card::createThirstForSustenance(), 3);
+    deck.addCopies(Card::createFeintDracula(), 3);
+
+    deck.shuffle();
+}
