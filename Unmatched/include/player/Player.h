@@ -8,6 +8,7 @@ using namespace std;
 #include "card/DiscardPile.h"
 #include "fighter/Sisters.h"
 #include "fighter/DrWatson.h"
+#include "fighter/Fog.h"
 
 class Hero;
 class Sidekick;
@@ -21,6 +22,7 @@ private:
     Deck deck;
     Hand hand;
     DiscardPile discardPile;
+    vector<Fog *> fogs;
 
 public:
     Player(int age);

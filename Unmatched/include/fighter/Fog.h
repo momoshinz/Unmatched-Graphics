@@ -2,11 +2,18 @@
 #define FOG_H
 #include "Sidekick.h"
 
-class Fog : public Sidekick
+class Fog
 {
+    private:
+        int id;
+        Space* position;
+
     public:
-        Fog();
-        ~Fog() override = default;
+        Fog(int id);
+        ~Fog() = default;
+        int getID() const;
+        Space* getPosition() const;
+        void setPosition(Space* space);
 };
 
 #endif

@@ -4,7 +4,7 @@
 #include <stdexcept>
 using namespace std;
 
-Space::Space(int id) : id(id), fighter(nullptr), secretPassage(false)
+Space::Space(int id) : id(id), fighter(nullptr), secretPassage(false), fogToken(false)
 {
 }
 
@@ -106,6 +106,16 @@ bool Space::hasSecretPassage() const
 void Space::setSecretPassage(bool value)
 {
     secretPassage = value;
+}
+
+bool Space::hasFogToken() const
+{
+    return fogToken;
+}
+
+void Space::setFogToken(bool value)
+{
+    fogToken = value;
 }
 
 void Space::display() const

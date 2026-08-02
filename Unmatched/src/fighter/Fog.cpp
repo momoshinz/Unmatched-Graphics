@@ -3,8 +3,20 @@
 
 using namespace std;
 
-Fog::Fog()
-    : Sidekick("Fog", 15, 2, AttackType::Melee)
+Fog::Fog(int id) : id(id), position(nullptr)
 {
 }
 
+int Fog::getID() const
+{
+    return id;
+}
+Space* Fog::getPosition() const
+{
+    return position;
+}
+
+void Fog::setPosition(Space* space)
+{
+    position = space;
+}

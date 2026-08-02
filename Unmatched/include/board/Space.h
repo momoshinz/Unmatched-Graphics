@@ -14,6 +14,7 @@ class Space
         vector<Space *> neighbors;
         vector<ZoneType> zones;
         bool secretPassage;
+        bool fogToken;
 
     public:
         explicit Space(int id);
@@ -35,6 +36,9 @@ class Space
 
         bool hasSecretPassage() const;
         void setSecretPassage(bool value);
+
+        bool hasFogToken() const;
+        void setFogToken(bool value);
 
         void display() const;
 };
