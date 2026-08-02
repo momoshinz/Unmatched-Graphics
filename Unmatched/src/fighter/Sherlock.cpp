@@ -1,6 +1,5 @@
 #include "fighter/Sherlock.h"
 #include "game/Game.h"
-
 #include <iostream>
 #include <iomanip>
 #include <stdexcept>

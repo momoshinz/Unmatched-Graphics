@@ -32,5 +32,6 @@ public:
     vector<pair<Space *, int>> getAvailableMovesWithDistance(Fighter *fighter, int maxStep) const;
     bool moveFighter(Fighter *fighter, Space *destination);
     bool swapFighters(Fighter *first, Fighter *second);
+    void addFogConnections(Fighter *fighter, Space *current, vector<Space *> &nextSpaces) const;
 };
 #endif

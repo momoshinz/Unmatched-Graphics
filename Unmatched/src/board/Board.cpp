@@ -1,5 +1,6 @@
 #include "board/Board.h"
 #include "fighter/Fighter.h"
+#include "fighter/InvisibleMan.h"
 #include <iostream>
 #include <stdexcept>
 #include <vector>
@@ -303,6 +304,9 @@ vector<Space *> Board::getAvailableMoves(Fighter *fighter, int maxStep) const
                 }
             }
         }
+
+        addFogConnections(fighter, current, nextSpaces);
+
         for (auto next : nextSpaces)
         {
             if (visited.count(next))
@@ -368,6 +372,9 @@ vector<pair<Space *, int>> Board::getAvailableMovesWithDistance(Fighter *fighter
                 }
             }
         }
+
+        addFogConnections(fighter, current, nextSpaces);
+
         for (auto next : nextSpaces)
         {
             if (visited.count(next))
@@ -455,4 +462,30 @@ vector<int> Board::getZoneHomes(ZoneType zone) const
     }
 
     return homes;
+}
+
+void Board::addFogConnections(Fighter *fighter, Space *current, vector<Space *> &nextSpaces) const
+{
+    if (fighter == nullptr)
+        return;
+
+    if (current == nullptr)
+        return;
+
+    if (dynamic_cast<InvisibleMan *>(fighter) == nullptr)
+        return;
+
+    if (!current->hasFogToken())
+        return;
+
+    for (Space *space : spaces)
+    {
+        if (space == current)
+            continue;
+
+        if (!space->hasFogToken())
+            continue;
+
+        nextSpaces.push_back(space);
+    }
 }

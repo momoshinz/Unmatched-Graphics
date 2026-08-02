@@ -29,6 +29,12 @@ Player::~Player()
     }
 
     sidekicks.clear();
+
+    for (Fog *fog : fogs)
+    {
+        delete fog;
+    }
+    fogs.clear();
 }
 
 int Player::getAge() const
@@ -89,9 +95,24 @@ void Player::addSideKick(Sidekick *sidekick)
     sidekicks.push_back(sidekick);
 }
 
+void Player::addFog(Fog *fog)
+{
+    if (fog == nullptr)
+    {
+        throw invalid_argument("\n[!] ERROR : Fog cannot be NULL!\n");
+    }
+
+    fogs.push_back(fog);
+}
+
 const vector<Sidekick *> &Player::getSideKicks() const
 {
     return sidekicks;
+}
+
+const vector<Fog *> &Player::getFogs() const
+{
+    return fogs;
 }
 
 vector<Sisters *> Player::getSisters() const

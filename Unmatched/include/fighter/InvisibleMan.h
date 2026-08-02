@@ -5,9 +5,11 @@ using namespace std;
 
 class InvisibleMan : public Hero
 {
-    public:
-        InvisibleMan();
-        ~InvisibleMan() = default;
-        virtual void useAbility(Game& game, Player &player) override;
+public:
+    InvisibleMan();
+    virtual void useAbility(Game& game, Player& player) override;
+    bool isOnFog() const;
+    bool canTeleport() const;
 };
+
 #endif

@@ -37,12 +37,14 @@ public:
     bool hasHero() const;
 
     void addSideKick(Sidekick *sidekick);
+    void addFog(Fog* fog);
     const vector<Sidekick *> &getSideKicks() const;
-    vector<Sisters *> getSisters() const;
     Sidekick *removeSideKick(int index);
     bool drawCardToHand();
     int drawCards(int count);
+    vector<Sisters *> getSisters() const;
     Watson *getWatson() const;
+    const vector<Fog*>& getFogs() const;
 
     Deck &getDeck();
     Hand &getHand();

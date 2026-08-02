@@ -7,6 +7,7 @@
 #include "effect/DraculaCards/FeintDracula.h"
 #include "effect/SherlockCards/DeduceStrategy.h"
 #include "effect/SherlockCards/FeintSherlock.h"
+#include "fighter/InvisibleMan.h"
 #include <iostream>
 #include <stdexcept>
 
@@ -166,24 +167,24 @@ void CombatSystem::applyEffects(Timing timing, Fighter &user, Fighter &target, C
         return;
     }
 
-    Card* opponentCard = nullptr;
-    if(&card == attackCard)
+    Card *opponentCard = nullptr;
+    if (&card == attackCard)
     {
         opponentCard = defenceCard;
     }
-    else if(&card == defenceCard)
+    else if (&card == defenceCard)
     {
         opponentCard = attackCard;
     }
 
-    if(opponentCard == nullptr)
+    if (opponentCard == nullptr)
     {
-        if(dynamic_cast<FeintDracula*>(effect) != nullptr || 
-           dynamic_cast<FeintSherlock*>(effect) != nullptr ||
-           dynamic_cast<DeduceStrategy*>(effect) != nullptr)
-           {
-                return;
-           }
+        if (dynamic_cast<FeintDracula *>(effect) != nullptr ||
+            dynamic_cast<FeintSherlock *>(effect) != nullptr ||
+            dynamic_cast<DeduceStrategy *>(effect) != nullptr)
+        {
+            return;
+        }
     }
 
     effect->apply(*currentGame, user, target, card, opponentCard, didUserWin);
@@ -230,7 +231,7 @@ void CombatSystem::resolveCombat(Game &game, Fighter &attacker, Fighter &defende
         applyEffects(Timing::Immediately, defender, attacker, *defenceCard, false);
     }
 
-    if(!attackCard.isEffectsCanceled())
+    if (!attackCard.isEffectsCanceled())
     {
         applyEffects(Timing::Immediately, attacker, defender, attackCard, false);
     }
@@ -240,7 +241,7 @@ void CombatSystem::resolveCombat(Game &game, Fighter &attacker, Fighter &defende
         applyEffects(Timing::DuringCombat, defender, attacker, *defenceCard, false);
     }
 
-    if(!attackCard.isEffectsCanceled())
+    if (!attackCard.isEffectsCanceled())
     {
         applyEffects(Timing::DuringCombat, attacker, defender, attackCard, false);
     }
@@ -266,6 +267,15 @@ void CombatSystem::resolveCombat(Game &game, Fighter &attacker, Fighter &defende
         else
         {
             defenceValue = calculateFinalDefenseValue(*defenceCard, defender);
+            InvisibleMan *invisible = dynamic_cast<InvisibleMan *>(&defender);
+
+            if (invisible != nullptr)
+            {
+                if (invisible->isOnFog())
+                {
+                    defenceValue++;
+                }
+            }
         }
     }
     else
@@ -286,10 +296,9 @@ void CombatSystem::resolveCombat(Game &game, Fighter &attacker, Fighter &defende
         applyEffects(Timing::AfterCombat, defender, attacker, *defenceCard, !attackerWon);
     }
 
-    if(!attackCard.isEffectsCanceled())
+    if (!attackCard.isEffectsCanceled())
     {
         applyEffects(Timing::AfterCombat, attacker, defender, attackCard, attackerWon);
-
     }
     attackCard.resetEffectsCancel();
     if (defenceCard != nullptr)

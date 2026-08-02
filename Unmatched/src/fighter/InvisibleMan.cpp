@@ -6,14 +6,25 @@
 
 using namespace std;
 
-InvisibleMan::InvisibleMan()
-    : Hero("Invisible Man", 15, 2, AttackType::Melee,
-           "> Sherlock Holmes and Dr. Watson's abilities can never be disabled.")
+InvisibleMan::InvisibleMan() : Hero("Invisible Man", 15, 2, AttackType::Melee, "> If Invisible Man is on a Fog token while defending, "
+                                                                               "his defense value gains +1. "
+                                                                               "He may also move directly between Fog tokens.")
 {
+}
+
+bool InvisibleMan::isOnFog() const
+{
+    if (getPosition() == nullptr)
+        return false;
+
+    return getPosition()->hasFogToken();
+}
+
+bool InvisibleMan::canTeleport() const
+{
+    return isOnFog();
 }
 
 void InvisibleMan::useAbility(Game &game, Player &player)
 {
 }
-
-
