@@ -129,3 +129,8 @@ void Deck::InvisibleManDeck(Deck &deck)
 
     deck.shuffle();
 }
+
+void Deck::addToTop(Card* card)
+{
+    cards.push_back(card);
+}
