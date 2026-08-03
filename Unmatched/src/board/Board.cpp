@@ -489,3 +489,62 @@ void Board::addFogConnections(Fighter *fighter, Space *current, vector<Space *> 
         nextSpaces.push_back(space);
     }
 }
+
+vector<Space*> Board::getAvailableFogMoves(Fog* fog,int maxStep) const
+{
+    vector<Space*> result;
+
+    if(fog == nullptr)
+        return result;
+
+    Space* start = fog->getPosition();
+
+    if(start == nullptr)
+        return result;
+
+    queue<pair<Space*,int>> q;
+    set<Space*> visited;
+
+    q.push({start,0});
+    visited.insert(start);
+
+    while(!q.empty())
+    {
+        Space* current = q.front().first;
+        int distance = q.front().second;
+        q.pop();
+
+        if(distance == maxStep)
+            continue;
+
+        vector<Space*> nextSpaces =
+            current->getNeighbors();
+
+        if(current->hasSecretPassage())
+        {
+            for(auto space : spaces)
+            {
+                if(space != current &&
+                   space->hasSecretPassage())
+                {
+                    nextSpaces.push_back(space);
+                }
+            }
+        }
+
+        for(auto next : nextSpaces)
+        {
+            if(visited.count(next))
+                continue;
+
+            visited.insert(next);
+            if(!next->hasFogToken())
+            {
+                result.push_back(next);
+            }
+
+            q.push({next,distance+1});
+        }
+    }
+    return result;
+}

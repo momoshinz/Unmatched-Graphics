@@ -33,5 +33,6 @@ public:
     bool moveFighter(Fighter *fighter, Space *destination);
     bool swapFighters(Fighter *first, Fighter *second);
     void addFogConnections(Fighter *fighter, Space *current, vector<Space *> &nextSpaces) const;
+    vector<Space*> getAvailableFogMoves(Fog* fog, int maxstep) const;
 };
 #endif

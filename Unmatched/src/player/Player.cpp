@@ -4,6 +4,7 @@
 #include "fighter/DrWatson.h"
 #include "fighter/Sisters.h"
 #include "card/Card.h"
+#include "fighter/Fog.h"
 #include <iostream>
 #include <stdexcept>
 #include <iomanip>
