@@ -22,12 +22,9 @@ void CodedNotes::apply(Game &game, Fighter &fighter, Fighter &target, const Card
     }
 
     cout << "\n========================================\n";
-    cout << "-< Look Into My Eyes >- ACTIVATED!\n";
+    cout << "-< Coded Notes >- ACTIVATED!\n";
 
-    for(int i=0 ; i<3 ; i++)
-    {
-        player->drawCardToHand();
-    }
+    player->drawCards(3);
     cout << "\n[+] Invisible Man drew 3 cards.\n";
 
     Hand &hand = player->getHand();
@@ -40,7 +37,7 @@ void CodedNotes::apply(Game &game, Fighter &fighter, Fighter &target, const Card
     int choice;
     while(true)
     {
-        cout << "\n> Choose the first card to place on top of your deck: ";
+        cout << "\n> Choose the first card to place on top of your deck : ";
         cin >> choice;
         if(cin.fail())
         {

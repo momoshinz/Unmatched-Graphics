@@ -22,6 +22,7 @@ protected:
     int combatValue;
     Effect *effect;
     bool effectsCanceled = false;
+    int temporaryCombatValue = -1;
 
 public:
     Card(const string &name,
@@ -59,6 +60,10 @@ public:
     void cancelEffects();
     bool isEffectsCanceled() const;
     void resetEffectsCancel();
+    
+    void setTemporaryCombatValue(int value);
+    void clearTemporaryCombatValue();
+    bool hasTemporaryCombatValue() const;
 
     void display() const;
     void printWrapped(const string &text, int width) const;

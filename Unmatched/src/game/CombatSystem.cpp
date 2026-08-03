@@ -300,6 +300,13 @@ void CombatSystem::resolveCombat(Game &game, Fighter &attacker, Fighter &defende
     {
         applyEffects(Timing::AfterCombat, attacker, defender, attackCard, attackerWon);
     }
+    attackCard.clearTemporaryCombatValue();
+
+    if (defenceCard != nullptr)
+    {
+        defenceCard->clearTemporaryCombatValue();
+    }
+    
     attackCard.resetEffectsCancel();
     if (defenceCard != nullptr)
     {

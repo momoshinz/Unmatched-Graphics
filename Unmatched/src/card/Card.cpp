@@ -86,6 +86,11 @@ int Card::getAmount() const
 
 int Card::getCombatValue() const
 {
+    if (temporaryCombatValue != -1)
+    {
+        return temporaryCombatValue;
+    }
+
     return combatValue;
 }
 
@@ -178,6 +183,21 @@ bool Card::isEffectsCanceled() const
 void Card::resetEffectsCancel()
 {
     effectsCanceled = false;
+}
+
+void Card::setTemporaryCombatValue(int value)
+{
+    temporaryCombatValue = value;
+}
+
+void Card::clearTemporaryCombatValue()
+{
+    temporaryCombatValue = -1;
+}
+
+bool Card::hasTemporaryCombatValue() const
+{
+    return temporaryCombatValue != -1;
 }
 
 void Card::printWrapped(const string &text, int width) const
@@ -536,4 +556,3 @@ Card Card::createStepLightly()
     return Card("Step Lightly", CardType::Scheme, OwnerType::Hero,
                 Timing::None, 1, 2, 0, new StepLightly());
 }
-

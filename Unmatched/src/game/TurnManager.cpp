@@ -33,6 +33,14 @@ void TurnManager::startGame(Player *younger,
 void TurnManager::startTurn()
 {
     remainingActions = 2;
+    Hero *hero = currentPlayer->getHero();
+
+    if (hero != nullptr)
+    {
+        Space *space = hero->getPosition();
+
+        hero->setStartedTurnOnFog(space != nullptr && space->hasFogToken());
+    }
 }
 
 void TurnManager::useAction()

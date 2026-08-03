@@ -188,3 +188,13 @@ void Fighter::setOpponentBoostValue(int value)
 {
     OpponentBoostValue = value;
 }
+
+void Fighter::setStartedTurnOnFog(bool value)
+{
+    startedTurnOnFog = value;
+}
+
+bool Fighter::hasStartedTurnOnFog() const
+{
+    return startedTurnOnFog;
+}
