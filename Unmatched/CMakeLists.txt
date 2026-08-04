@@ -36,6 +36,8 @@ set(SOURCES
     src/fighter/Sidekick.cpp
     src/fighter/Sisters.cpp
     src/fighter/DrWatson.cpp
+    src/fighter/InvisibleMan.cpp
+    src/fighter/Fog.cpp
     src/effect/Effect.cpp
     src/effect/DraculaCards/Ambush.cpp
     src/effect/DraculaCards/BaptismOfBlood.cpp
@@ -59,6 +61,16 @@ set(SOURCES
     src/effect/SherlockCards/MasterOfDisguise.cpp
     src/effect/SherlockCards/StudyMethods.cpp
     src/effect/SherlockCards/TheGameIsAfoot.cpp
+    src/effect/InvisibleManCards/CodedNotes.cpp
+    src/effect/InvisibleManCards/DreamingOfRevenge.cpp
+    src/effect/InvisibleManCards/EmergeFromMist.cpp
+    src/effect/InvisibleManCards/ImpossibleToSee.cpp
+    src/effect/InvisibleManCards/IntoThinAir.cpp
+    src/effect/InvisibleManCards/Lurking.cpp
+    src/effect/InvisibleManCards/ReignOfTerror.cpp
+    src/effect/InvisibleManCards/RollingFog.cpp
+    src/effect/InvisibleManCards/SlipAway.cpp
+    src/effect/InvisibleManCards/StepLightly.cpp
     src/game/CombatSystem.cpp
     src/game/Game.cpp
     src/game/TurnManager.cpp
@@ -68,9 +80,9 @@ set(SOURCES
 )
 
 # Build the executable
-add_executable(Unmatched ${SOURCES})
+add_executable(Unmatched-Graphics ${SOURCES})
 
-target_link_libraries(Unmatched
+target_link_libraries(Unmatched-Graphics
     PRIVATE
         ftxui::screen
         ftxui::dom

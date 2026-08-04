@@ -1,6 +1,7 @@
 #include "game/Game.h"
 #include "fighter/Dracula.h"
 #include "fighter/Sherlock.h"
+#include "fighter/InvisibleMan.h"
 #include "fighter/Sisters.h"
 #include "fighter/DrWatson.h"
 #include "fighter/Sidekick.h"
@@ -52,7 +53,7 @@ void Game::initialize()
             continue;
         }
 
-        if (age1 < 0 || age2 < 0)
+        if (age1 <= 0 || age2 <= 0)
         {
             cout << "\nAge, not temperature :> ..\n\n";
             continue;
@@ -88,52 +89,130 @@ void Game::initialize()
         younger = player2;
         older = player1;
     }
-    cout << "\n** Younger player what will you choose ?\n";
+
+    cout << "    **  Younger Player - Hero Selection  **\n";
     cout << "1. Dracula\n";
-    cout << "2. Sherlock\n~~> ";
+    cout << "2. Sherlock\n";
+    cout << "3. Invisible Man\n~~> ";
 
-    int heroChoice;
-    cin >> heroChoice;
+    int youngerHeroChoice;
 
-    while (heroChoice != 1 && heroChoice != 2)
+    while (true)
     {
-        cout << "[!] Choose 1 or 2 : ";
-        cin >> heroChoice;
+        cout << "\n> Younger player, choose your hero : ";
+        cin >> youngerHeroChoice;
+
+        if (cin.fail())
+        {
+            cin.clear();
+            cin.ignore(1000, '\n');
+            cout << "[!] Please enter a number!\n";
+            continue;
+        }
+
+        if (youngerHeroChoice >= 1 && youngerHeroChoice <= 3)
+        {
+            break;
+        }
+
+        cout << "[!] Choose between 1 and 3!\n";
     }
 
-    int heroSpace;
-    ui.renderBoardOnly(*this);
-    cout << "\n> Choose starting home { 7 or 22 } : ";
-    cin >> heroSpace;
+    cout << "    **  Older Player - Hero Selection  **\n";
+    cout << "1. Dracula\n";
+    cout << "2. Sherlock\n";
+    cout << "3. Invisible Man\n";
 
-    while (heroSpace != 7 && heroSpace != 22)
+    int olderHeroChoice;
+
+    while (true)
     {
-        cin >> heroSpace;
+        cout << "\n> Older player, choose your hero : ";
+        cin >> olderHeroChoice;
+
+        if (cin.fail())
+        {
+            cin.clear();
+            cin.ignore(1000, '\n');
+            cout << "[!] Please enter a number!\n";
+            continue;
+        }
+
+        if (olderHeroChoice < 1 || olderHeroChoice > 3)
+        {
+            cout << "[!] Choose between 1 and 3!\n";
+            continue;
+        }
+
+        if (olderHeroChoice == youngerHeroChoice)
+        {
+            cout << "[!] This hero has already been selected!\n";
+            cout << "    Please choose another hero.\n";
+            continue;
+        }
+
+        break;
     }
 
-    if (heroChoice == 1)
+    if (youngerHeroChoice == 1)
     {
         younger->setHero(new Dracula());
 
         younger->addSideKick(new Sisters(1));
         younger->addSideKick(new Sisters(2));
         younger->addSideKick(new Sisters(3));
-
-        older->setHero(new Sherlock());
-
-        older->addSideKick(new Watson());
     }
-    else
+    else if (youngerHeroChoice == 2)
     {
         younger->setHero(new Sherlock());
 
         younger->addSideKick(new Watson());
+    }
+    else if (youngerHeroChoice == 3)
+    {
+        younger->setHero(new InvisibleMan());
 
+        younger->addFog(new Fog(1));
+        younger->addFog(new Fog(2));
+        younger->addFog(new Fog(3));
+    }
+
+    if (olderHeroChoice == 1)
+    {
         older->setHero(new Dracula());
 
         older->addSideKick(new Sisters(1));
         older->addSideKick(new Sisters(2));
         older->addSideKick(new Sisters(3));
+    }
+    else if (olderHeroChoice == 2)
+    {
+        older->setHero(new Sherlock());
+
+        older->addSideKick(new Watson());
+    }
+    else if (olderHeroChoice == 3)
+    {
+        older->setHero(new InvisibleMan());
+
+        older->addFog(new Fog(1));
+        older->addFog(new Fog(2));
+        older->addFog(new Fog(3));
+    }
+
+    int heroSpace;
+
+    ui.renderBoardOnly(*this);
+
+    cout << "\n> " << younger->getHero()->getName()
+         << ", choose your starting home { 7 or 22 } : ";
+
+    cin >> heroSpace;
+
+    while (heroSpace != 7 && heroSpace != 22)
+    {
+        cout << "[!] Choose only home 7 or 22 : ";
+        cin >> heroSpace;
     }
 
     board.moveFighter(younger->getHero(), board.getSpace(heroSpace));
@@ -267,6 +346,7 @@ void Game::initialize()
 
     Player *draculaPlayer = nullptr;
     Player *sherlockPlayer = nullptr;
+    Player *invisibleManPlayer = nullptr;
 
     for (Player *player : players)
     {
@@ -274,18 +354,29 @@ void Game::initialize()
         {
             draculaPlayer = player;
         }
-        else
+        else if (dynamic_cast<Sherlock *>(player->getHero()) != nullptr)
         {
             sherlockPlayer = player;
         }
+        else if (dynamic_cast<InvisibleMan *>(player->getHero()) != nullptr)
+        {
+            invisibleManPlayer = player;
+        }
     }
+
     if (draculaPlayer != nullptr)
     {
         Deck::DraculaDeck(draculaPlayer->getDeck());
     }
+
     if (sherlockPlayer != nullptr)
     {
         Deck::SherlockDeck(sherlockPlayer->getDeck());
+    }
+
+    if (invisibleManPlayer != nullptr)
+    {
+        Deck::InvisibleManDeck(invisibleManPlayer->getDeck());
     }
 
     for (Player *player : players)

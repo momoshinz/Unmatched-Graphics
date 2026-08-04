@@ -1,13 +1,13 @@
 #ifndef FIGHTER_H
 #define FIGHTER_H
 #include <string>
-#include "board/Board.h"
 #include "utils/Types.h"
 
 using namespace std;
 
 class Player;
 class Space;
+class Board;
 
 class Fighter
 {

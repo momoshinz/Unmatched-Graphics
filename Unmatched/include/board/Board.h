@@ -2,6 +2,7 @@
 #define BOARD_H
 #include <vector>
 #include "Space.h"
+#include "fighter/Fog.h"
 using namespace std;
 
 class Board
