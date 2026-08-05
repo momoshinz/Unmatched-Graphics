@@ -505,7 +505,7 @@ Card Card::createCodedNotes()
 
 Card Card::createDreamingOfRevenge()
 {
-    return Card("Dreaming Of Revenge", CardType::Scheme, OwnerType::Hero,
+    return Card("Dreaming Of Revenge", CardType::Versatile, OwnerType::Hero,
                 Timing::AfterCombat, 1, 2, 3, new DreamingOfRevenge());
 }
 
@@ -517,7 +517,7 @@ Card Card::createEmergeFromMist()
 
 Card Card::createImpossibleToSee()
 {
-    return Card("Impossible To See", CardType::Scheme, OwnerType::Hero,
+    return Card("Impossible To See", CardType::Versatile, OwnerType::Hero,
                 Timing::Immediately, 2, 2, 2, new ImpossibleToSee());
 }
 
