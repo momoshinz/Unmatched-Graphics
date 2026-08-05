@@ -117,3 +117,13 @@ void Space::setFogToken(bool value)
 {
     fogToken = value;
 }
+
+Fog *Space::getFog() const
+{
+    return fog;
+}
+
+void Space::setFog(Fog *value)
+{
+    fog = value;
+}

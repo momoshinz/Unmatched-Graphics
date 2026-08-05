@@ -55,6 +55,8 @@ public:
                           int damage) const;
 
     void showWinner(const Player &winner) const;
+
+    void drawFogs(vector<string> &canvas, const vector<Player *> &players) const;
 };
 
 #endif

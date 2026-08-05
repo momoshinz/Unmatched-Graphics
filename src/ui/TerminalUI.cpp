@@ -433,6 +433,8 @@ vector<string> TerminalUI::buildBoard(const Board &board, const vector<Player *>
 
     drawFighters(canvas, players);
 
+    drawFogs(canvas, players);
+
     return canvas;
 }
 
@@ -499,12 +501,6 @@ string TerminalUI::getSymbol(Fighter *fighter) const
     if (sister != nullptr)
     {
         return "S" + to_string(sister->getID());
-    }
-
-    Fog *fog = dynamic_cast<Fog *>(fighter);
-    if (fog != nullptr)
-    {
-        return "F" + to_string(fog->getID());
     }
 
     return "?";
@@ -578,4 +574,43 @@ int TerminalUI::chooseIndexOnly() const
     cin >> choice;
 
     return choice;
+}
+
+void TerminalUI::drawFogs(vector<string> &canvas, const vector<Player *> &players) const
+{
+    for (Player *player : players)
+    {
+        for (Fog *fog : player->getFogs())
+        {
+            if (fog == nullptr)
+                continue;
+
+            if (fog->getPosition() == nullptr)
+                continue;
+
+            int homeId = fog->getPosition()->getId();
+
+            CellPosition pos = homePositions[homeId];
+
+            string fogSymbol = "F" + to_string(fog->getID());
+
+            Fighter *fighter = fog->getPosition()->getFighter();
+
+            string symbol;
+
+            if (fighter != nullptr)
+            {
+                symbol = getSymbol(fighter) + fogSymbol;
+            }
+            else
+            {
+                symbol = fogSymbol;
+            }
+
+            for (int i = 0; i < symbol.size(); i++)
+            {
+                canvas[pos.row][pos.col + i] = symbol[i];
+            }
+        }
+    }
 }

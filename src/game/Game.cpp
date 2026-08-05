@@ -110,7 +110,7 @@ void Game::initialize()
         younger = player2;
         older = player1;
     }
-    cout << "\n    **  Younger Player - Hero Selection  **\n";
+    cout << "\n\n   **  Younger Player - Hero Selection  **\n";
     cout << "1. Dracula\n";
     cout << "2. Sherlock\n";
     cout << "3. Invisible Man";
@@ -299,6 +299,11 @@ void Game::initialize()
         }
     }
 
+    for (Fog *fog : younger->getFogs())
+    {
+        placeFog(fog);
+    }
+
     vector<ZoneType> opponentHeroZones = board.getSpace(otherHeroSpace)->getZones();
     for (Sidekick *sidekick : older->getSideKicks())
     {
@@ -360,6 +365,11 @@ void Game::initialize()
 
             break;
         }
+    }
+
+    for (Fog *fog : older->getFogs())
+    {
+        placeFog(fog);
     }
 
     cout << "\n==========<  Drawing Cards To Hands  >==========\n";
@@ -1341,4 +1351,66 @@ const Board &Game::getBoard() const
 const CombatSystem &Game::getCombatSystem() const
 {
     return combatSystem;
+}
+
+void Game::placeFog(Fog *fog)
+{
+    if (fog == nullptr)
+    {
+        return;
+    }
+
+    while (true)
+    {
+        ui.renderBoardOnly(*this);
+
+        vector<Space *> validSpaces;
+
+        cout << "\nPlace Fog " << fog->getID() << endl;
+        cout << "Available homes :\n";
+        cout << "======================================\n";
+
+        for (Space *space : board.getSpaces())
+        {
+            if (space->hasFogToken())
+            {
+                continue;
+            }
+
+            validSpaces.push_back(space);
+
+            cout << validSpaces.size()
+                 << ". Home "
+                 << space->getId()
+                 << endl;
+        }
+
+        cout << "\n> Choose a home : ";
+
+        int choice;
+        cin >> choice;
+
+        if (cin.fail())
+        {
+            cin.clear();
+            cin.ignore(1000, '\n');
+
+            cout << "\n[!] Please enter a number!\n";
+            continue;
+        }
+
+        if (choice < 1 || choice > static_cast<int>(validSpaces.size()))
+        {
+            cout << "\n[!] Invalid choice!\n";
+            continue;
+        }
+
+        Space *selectedSpace = validSpaces[choice - 1];
+
+        fog->setPosition(selectedSpace);
+        selectedSpace->setFog(fog);
+        selectedSpace->setFogToken(true);
+
+        break;
+    }
 }

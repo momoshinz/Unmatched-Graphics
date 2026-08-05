@@ -46,5 +46,6 @@ class Game
         TurnManager &getTurnManager();
         const TurnManager& getTurnManager() const;
         TerminalUI &getUI();
+        void placeFog(Fog *fog);
 };
 #endif

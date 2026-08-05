@@ -2,6 +2,7 @@
 #define FOG_H
 #include "Sidekick.h"
 
+
 class Fog
 {
     private:

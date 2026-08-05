@@ -4,6 +4,7 @@
 #include "utils/Types.h"
 
 class Fighter;
+class Fog;
 
 class Space
 {
@@ -14,6 +15,7 @@ private:
     vector<ZoneType> zones;
     bool secretPassage;
     bool fogToken;
+    Fog *fog = nullptr;
 
 public:
     explicit Space(int id);
@@ -38,6 +40,9 @@ public:
 
     bool hasFogToken() const;
     void setFogToken(bool value);
+
+    Fog *getFog() const;
+    void setFog(Fog *fog);
 };
 
 #endif

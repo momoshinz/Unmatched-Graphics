@@ -1,4 +1,5 @@
 #include "fighter/Fog.h"
+#include "board/Space.h"
 #include <iostream>
 
 using namespace std;
