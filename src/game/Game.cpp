@@ -85,6 +85,9 @@ Card *createCardByName(const string &name)
     if (name == "Service Revolver")
         return new Card(Card::createServiceRevolver());
 
+    if (name == "Feint")
+        return new Card(Card::createFeintSherlock());
+
     if (name == "Coded Notes")
         return new Card(Card::createCodedNotes());
 
@@ -1372,7 +1375,7 @@ void Game::run(bool loaded)
 
     try
     {
-        if(!loaded)
+        if (!loaded)
         {
             initialize();
         }
@@ -1829,7 +1832,6 @@ void Game::loadGame(const string &filename)
 
     cout << "\n[+] Game Loaded Successfully!\n";
 }
-
 
 void Game::saveMenu()
 {

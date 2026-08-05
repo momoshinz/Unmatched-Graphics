@@ -123,8 +123,6 @@ void Deck::InvisibleManDeck(Deck &deck)
     deck.addCopies(Card::createRollingFog(), 2);
     deck.addCopies(Card::createSlipAway(), 3);
     deck.addCopies(Card::createStepLightly(), 2);
-    deck.addCopies(Card::createThirstForSustenance(), 3);
-    deck.addCopies(Card::createFeintDracula(), 3);
 
     deck.shuffle();
 }
