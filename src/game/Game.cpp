@@ -110,16 +110,16 @@ void Game::initialize()
         younger = player2;
         older = player1;
     }
-    cout << "    **  Younger Player - Hero Selection  **\n";
+    cout << "\n    **  Younger Player - Hero Selection  **\n";
     cout << "1. Dracula\n";
     cout << "2. Sherlock\n";
-    cout << "3. Invisible Man\n~~> ";
+    cout << "3. Invisible Man";
 
     int youngerHeroChoice;
 
     while (true)
     {
-        cout << "\n> Younger player, choose your hero : ";
+        cout << "\n\n> Younger player, choose your hero : ";
         cin >> youngerHeroChoice;
 
         if (cin.fail())
@@ -138,7 +138,7 @@ void Game::initialize()
         cout << "[!] Choose between 1 and 3!\n";
     }
 
-    cout << "    **  Older Player - Hero Selection  **\n";
+    cout << "\n\n    **  Older Player - Hero Selection  **\n";
     cout << "1. Dracula\n";
     cout << "2. Sherlock\n";
     cout << "3. Invisible Man\n";
@@ -166,7 +166,7 @@ void Game::initialize()
 
         if (olderHeroChoice == youngerHeroChoice)
         {
-            cout << "[!] This hero has already been selected!\n";
+            cout << "\n[!] This hero has already been selected!\n";
             cout << "    Please choose another hero.\n";
             continue;
         }
