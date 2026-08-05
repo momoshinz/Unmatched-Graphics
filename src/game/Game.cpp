@@ -690,11 +690,12 @@ void Game::processPlayerAction()
     cout << "\n[o] Choose an action :\n";
     cout << "1. Maneuver\n";
     cout << "2. Attack\n";
-    cout << "3. Play Scheme\n ~~> ";
+    cout << "3. Play Scheme\n";
+    cout << "4. Save Game\n ~~> ";
 
     int choice;
     cin >> choice;
-    while (choice < 1 || choice > 3)
+    while (choice < 1 || choice > 4)
     {
         cout << "\n[!] ERROR : Invalid choice! :( Try again.\n";
         cout << "\n ~~> ";
@@ -713,6 +714,10 @@ void Game::processPlayerAction()
 
     case 3:
         playSchemeCard();
+        break;
+
+    case 4:
+        saveMenu();
         break;
     }
 }
@@ -1354,20 +1359,23 @@ void Game::discardUntilHandLimit()
     }
 }
 
-void Game::run()
+void Game::run(bool loaded)
 {
 
     vector<string> entries =
         {
-            "Play",
-            "Help",
+            "New Game",
+            "Load Game",
             "Exit"};
 
     int selected = 0;
 
     try
     {
-        initialize();
+        if(!loaded)
+        {
+            initialize();
+        }
 
         while (!isGameOver())
         {
@@ -1820,4 +1828,124 @@ void Game::loadGame(const string &filename)
     turnManager.setTurnNumber(turnNumber);
 
     cout << "\n[+] Game Loaded Successfully!\n";
+}
+
+
+void Game::saveMenu()
+{
+    cout << "\n========== Save Game ==========\n";
+
+    for (int i = 1; i <= 3; i++)
+    {
+        string filename = "save" + to_string(i) + ".json";
+
+        ifstream file(filename);
+
+        if (file)
+            cout << i << ". Slot " << i << " (Occupied)\n";
+        else
+            cout << i << ". Slot " << i << " (Empty)\n";
+    }
+
+    cout << "0. Cancel\n";
+
+    int choice;
+
+    while (true)
+    {
+        cout << "\n> Choose slot: ";
+        cin >> choice;
+
+        if (choice >= 0 && choice <= 3)
+            break;
+
+        cout << "\n[!] ERROR : Invalid choice!\n";
+    }
+
+    if (choice == 0)
+        return;
+
+    string filename = "save" + to_string(choice) + ".json";
+
+    ifstream test(filename);
+
+    if (test)
+    {
+        int answer;
+
+        cout << "\nThis slot already contains a saved game.\n";
+        cout << "Overwrite?\n";
+        cout << "1. Yes\n";
+        cout << "2. No\n";
+        cout << "Choice: ";
+
+        cin >> answer;
+
+        if (answer != 1)
+            return;
+    }
+
+    saveGame(filename);
+
+    cout << "\n[+] Game saved successfully.\n";
+}
+
+bool Game::loadMenu()
+{
+    vector<string> saves;
+
+    for (int i = 1; i <= 3; i++)
+    {
+        string filename = "save" + to_string(i) + ".json";
+
+        ifstream file(filename);
+
+        if (file)
+        {
+            saves.push_back(filename);
+        }
+    }
+
+    if (saves.empty())
+    {
+        cout << "\n[!] ERROR : No saved games found.\n";
+        cout << "> Press Enter to return...";
+        return false;
+    }
+
+    cout << "\n========== LOAD GAME ==========\n";
+
+    for (int i = 0; i < saves.size(); i++)
+    {
+        cout << i + 1 << ". " << saves[i] << endl;
+    }
+
+    cout << "0. Back\n";
+
+    int choice;
+
+    while (true)
+    {
+        cout << "\n> Choose a save: ";
+        cin >> choice;
+
+        if (cin.fail())
+        {
+            cin.clear();
+            cin.ignore(1000, '\n');
+            continue;
+        }
+
+        if (choice == 0)
+            return false;
+
+        if (choice >= 1 && choice <= saves.size())
+            break;
+
+        cout << "\n[!] ERROR : Invalid choice!\n";
+    }
+
+    loadGame(saves[choice - 1]);
+
+    return true;
 }

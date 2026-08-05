@@ -11,8 +11,8 @@ int MainMenu::show()
     ScreenInteractive screen = ScreenInteractive::TerminalOutput();
 
     std::vector<std::string> entries = {
-        "[o] Play",
-        "[?] Help",
+        "[o] New Game",
+        "[?] Load Game",
         "[>] Exit",
     };
 

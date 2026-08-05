@@ -23,7 +23,7 @@ class Game
 
         void initialize();
         void addPlayer(Player *player);
-        void run();
+        void run(bool loaded = false);
         void processTurn();
         void processPlayerAction();
         void playSchemeCard();
@@ -50,5 +50,7 @@ class Game
 
         void saveGame(const string &filename);
         void loadGame(const string &filename);
+        void saveMenu();
+        bool loadMenu();
 };
 #endif
