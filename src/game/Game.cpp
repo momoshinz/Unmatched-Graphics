@@ -22,7 +22,7 @@ Card *createCardByName(const string &name)
     if (name == "Feeding Frenzy")
         return new Card(Card::createFeedingFrenzy());
 
-    if (name == "Mist Form")
+    if (name == "Mistform")
         return new Card(Card::createMistForm());
 
     if (name == "Ambush")
