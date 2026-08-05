@@ -7,6 +7,8 @@
 #include "fighter/Sherlock.h"
 #include "fighter/Sidekick.h"
 #include "fighter/Sisters.h"
+#include "fighter/InvisibleMan.h"
+#include "fighter/Fog.h"
 #include "player/Player.h"
 #include <iostream>
 #include <iomanip>
@@ -485,16 +487,26 @@ string TerminalUI::getSymbol(Fighter *fighter) const
         return "Sh";
 
     if (dynamic_cast<Watson *>(fighter))
-        return "ّW ";
+        return "W ";
 
     if (dynamic_cast<Dracula *>(fighter))
         return "D ";
+
+    if (dynamic_cast<InvisibleMan *>(fighter))
+        return "IM";
 
     Sisters *sister = dynamic_cast<Sisters *>(fighter);
     if (sister != nullptr)
     {
         return "S" + to_string(sister->getID());
     }
+
+    Fog *fog = dynamic_cast<Fog *>(fighter);
+    if (fog != nullptr)
+    {
+        return "F" + to_string(fog->getID());
+    }
+
     return "?";
 }
 

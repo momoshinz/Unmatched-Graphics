@@ -9,6 +9,8 @@
 #include <iostream>
 #include <stdexcept>
 #include <unordered_map>
+#include <cstdlib>
+#include <ctime>
 using namespace std;
 
 Game::Game()
@@ -79,7 +81,26 @@ void Game::initialize()
     Player *younger;
     Player *older;
 
-    if (player1->isYounger(*player2))
+    if (age1 == age2)
+    {
+        srand(time(0));
+
+        if (rand() % 2 == 0)
+        {
+            younger = player1;
+            older = player2;
+            cout << "\nBoth players have the same age.\n";
+            cout << "Player 1 was randomly chosen to play first.\n\n";
+        }
+        else
+        {
+            younger = player2;
+            older = player1;
+            cout << "\nBoth players have the same age.\n";
+            cout << "Player 2 was randomly chosen to play first.\n\n";
+        }
+    }
+    else if (player1->isYounger(*player2))
     {
         younger = player1;
         older = player2;
@@ -89,7 +110,6 @@ void Game::initialize()
         younger = player2;
         older = player1;
     }
-
     cout << "    **  Younger Player - Hero Selection  **\n";
     cout << "1. Dracula\n";
     cout << "2. Sherlock\n";
