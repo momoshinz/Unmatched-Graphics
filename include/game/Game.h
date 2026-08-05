@@ -47,5 +47,8 @@ class Game
         const TurnManager& getTurnManager() const;
         TerminalUI &getUI();
         void placeFog(Fog *fog);
+
+        void saveGame(const string &filename);
+        void loadGame(const string &filename);
 };
 #endif

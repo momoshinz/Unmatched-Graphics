@@ -13,6 +13,14 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(ftxui)
 
+FetchContent_Declare(
+    json
+    GIT_REPOSITORY https://github.com/nlohmann/json.git
+    GIT_TAG v3.12.0
+)
+
+FetchContent_MakeAvailable(json)
+
 # C++ standard
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -87,4 +95,5 @@ target_link_libraries(Unmatched-Graphics
         ftxui::screen
         ftxui::dom
         ftxui::component
+        nlohmann_json::nlohmann_json
 )

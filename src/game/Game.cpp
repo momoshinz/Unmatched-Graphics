@@ -11,6 +11,10 @@
 #include <unordered_map>
 #include <cstdlib>
 #include <ctime>
+#include <iomanip>
+#include <fstream>
+#include <nlohmann/json.hpp>
+using json = nlohmann::json;
 using namespace std;
 
 Game::Game()
@@ -1413,4 +1417,130 @@ void Game::placeFog(Fog *fog)
 
         break;
     }
+}
+
+void Game::saveGame(const string &filename)
+{
+    json j;
+
+    json playersArray = json::array();
+
+    for (Player *player : players)
+    {
+        json playerJson;
+
+        playerJson["Age"] = player->getAge();
+
+        Hero *hero = player->getHero();
+
+        playerJson["Hero"]["Type"] = hero->getName();
+        playerJson["Hero"]["Health"] = hero->getHealth();
+
+        if (hero->getPosition() != nullptr)
+            playerJson["Hero"]["Position"] = hero->getPosition()->getId();
+        else
+            playerJson["Hero"]["Position"] = -1;
+
+        json sidekickArray = json::array();
+
+        for (Sidekick *sidekick : player->getSideKicks())
+        {
+            json s;
+
+            s["Type"] = sidekick->getName();
+            s["Health"] = sidekick->getHealth();
+
+            Sisters *sister = dynamic_cast<Sisters *>(sidekick);
+
+            if (sister != nullptr)
+                s["ID"] = sister->getID();
+
+            Watson *watson = dynamic_cast<Watson *>(sidekick);
+
+            if (watson != nullptr)
+                s["ID"] = 0;
+
+            if (sidekick->getPosition() != nullptr)
+                s["Position"] = sidekick->getPosition()->getId();
+            else
+                s["Position"] = -1;
+
+            sidekickArray.push_back(s);
+        }
+
+        playerJson["Sidekicks"] = sidekickArray;
+
+        json fogArray = json::array();
+
+        for (Fog *fog : player->getFogs())
+        {
+            json f;
+
+            f["ID"] = fog->getID();
+
+            if (fog->getPosition() != nullptr)
+                f["Position"] = fog->getPosition()->getId();
+            else
+                f["Position"] = -1;
+
+            fogArray.push_back(f);
+        }
+
+        playerJson["Fogs"] = fogArray;
+
+        json handArray = json::array();
+
+        for (Card *card : player->getHand().getCards())
+        {
+            handArray.push_back(card->getName());
+        }
+
+        playerJson["Hand"] = handArray;
+
+        json deckArray = json::array();
+
+        for (Card *card : player->getDeck().getCards())
+        {
+            deckArray.push_back(card->getName());
+        }
+
+        playerJson["Deck"] = deckArray;
+
+        json discardArray = json::array();
+
+        for (Card *card : player->getDiscardPile().getCards())
+        {
+            discardArray.push_back(card->getName());
+        }
+
+        playerJson["Discard"] = discardArray;
+
+        playersArray.push_back(playerJson);
+    }
+
+    j["Players"] = playersArray;
+
+    j["Turn"]["RemainingActions"] =
+        turnManager.getRemainingActions();
+
+    j["Turn"]["TurnNumber"] =
+        turnManager.getTurnNumber();
+
+    Player *current = turnManager.getCurrentPlayer();
+
+    if (current == players[0])
+        j["Turn"]["CurrentPlayer"] = 0;
+    else
+        j["Turn"]["CurrentPlayer"] = 1;
+
+    ofstream file(filename);
+
+    if (!file)
+        throw runtime_error("Cannot open save file.");
+
+    file << setw(4) << j;
+
+    file.close();
+
+    cout << "\n[+] Game Saved Successfully!\n";
 }
