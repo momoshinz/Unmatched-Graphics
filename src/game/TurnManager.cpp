@@ -112,3 +112,19 @@ bool TurnManager::checkHandLimit() const
 
     return currentPlayer->getHand().getSize() > 7;
 }
+
+void TurnManager::setPlayers(Player *current, Player *waiting)
+{
+    currentPlayer = current;
+    waitingPlayer = waiting;
+}
+
+void TurnManager::setRemainingActions(int actions)
+{
+    remainingActions = actions;
+}
+
+void TurnManager::setTurnNumber(int number)
+{
+    turnNumber = number;
+}

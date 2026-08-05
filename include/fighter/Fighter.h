@@ -61,5 +61,7 @@ public:
     bool shouldUseOpponentBoostValue() const;
     void setStartedTurnOnFog(bool value);
     bool hasStartedTurnOnFog() const;
+
+    void setHealth(int health);
 };
 #endif

@@ -29,7 +29,7 @@ void BeastForm::apply(Game &game, Fighter &fighter, Fighter &target, const Card 
         return;
     }
     cout << "\n========================================";
-    cout << "\n-< BeastForm >- ACTIVATED!\n";
+    cout << "\n-< Beastform >- ACTIVATED!\n";
 
     cout << "\nYour hand :\n";
     hand.display();

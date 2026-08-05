@@ -198,3 +198,8 @@ bool Fighter::hasStartedTurnOnFog() const
 {
     return startedTurnOnFog;
 }
+
+void Fighter::setHealth(int health)
+{
+    this->health = health;
+}

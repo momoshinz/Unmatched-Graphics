@@ -17,6 +17,107 @@
 using json = nlohmann::json;
 using namespace std;
 
+Card *createCardByName(const string &name)
+{
+    if (name == "Feeding Frenzy")
+        return new Card(Card::createFeedingFrenzy());
+
+    if (name == "Mist Form")
+        return new Card(Card::createMistForm());
+
+    if (name == "Ambush")
+        return new Card(Card::createAmbush());
+
+    if (name == "Baptism of Blood")
+        return new Card(Card::createBaptismOfBlood());
+
+    if (name == "Beastform")
+        return new Card(Card::createBeastform());
+
+    if (name == "Dash")
+        return new Card(Card::createDash());
+
+    if (name == "Exploit")
+        return new Card(Card::createExploit());
+
+    if (name == "Look Into My Eyes")
+        return new Card(Card::createLookIntoMyEyes());
+
+    if (name == "Prey Upon")
+        return new Card(Card::createPreyUpon());
+
+    if (name == "Ravening Seduction")
+        return new Card(Card::createRaveningSeduction());
+
+    if (name == "Thirst for Sustenance")
+        return new Card(Card::createThirstForSustenance());
+
+    if (name == "Feint")
+        return new Card(Card::createFeintDracula());
+
+    if (name == "Administer Aid")
+        return new Card(Card::createAdministerAid());
+
+    if (name == "Counter Punch")
+        return new Card(Card::createCounterPunch());
+
+    if (name == "Deduce Strategy")
+        return new Card(Card::createDeduceStrategy());
+
+    if (name == "Education Never Ends")
+        return new Card(Card::createEducationNeverEnds());
+
+    if (name == "Eliminate the Impossible")
+        return new Card(Card::createEliminateTheImpossible());
+
+    if (name == "Fixed Point")
+        return new Card(Card::createFixedPoint());
+
+    if (name == "Master of Disguise")
+        return new Card(Card::createMasterOfDisguise());
+
+    if (name == "Study Methods")
+        return new Card(Card::createStudyMethods());
+
+    if (name == "The Game Is Afoot")
+        return new Card(Card::createTheGameIsAfoot());
+
+    if (name == "Service Revolver")
+        return new Card(Card::createServiceRevolver());
+
+    if (name == "Coded Notes")
+        return new Card(Card::createCodedNotes());
+
+    if (name == "Dreaming of Revenge")
+        return new Card(Card::createDreamingOfRevenge());
+
+    if (name == "Emerge From Mist")
+        return new Card(Card::createEmergeFromMist());
+
+    if (name == "Impossible to See")
+        return new Card(Card::createImpossibleToSee());
+
+    if (name == "Into Thin Air")
+        return new Card(Card::createIntoThinAir());
+
+    if (name == "Lurking")
+        return new Card(Card::createLurking());
+
+    if (name == "Reign of Terror")
+        return new Card(Card::createReignOfTerror());
+
+    if (name == "Rolling Fog")
+        return new Card(Card::createRollingFog());
+
+    if (name == "Slip Away")
+        return new Card(Card::createSlipAway());
+
+    if (name == "Step Lightly")
+        return new Card(Card::createStepLightly());
+
+    return nullptr;
+}
+
 Game::Game()
 {
 }
@@ -1543,4 +1644,180 @@ void Game::saveGame(const string &filename)
     file.close();
 
     cout << "\n[+] Game Saved Successfully!\n";
+}
+
+void Game::loadGame(const string &filename)
+{
+    ifstream file(filename);
+
+    if (!file)
+    {
+        throw runtime_error("Cannot open save file.");
+    }
+
+    json j;
+    file >> j;
+    file.close();
+
+    for (Player *player : players)
+    {
+        delete player;
+    }
+
+    players.clear();
+    board.setupMap();
+
+    for (const auto &playerJson : j["Players"])
+    {
+        int age = playerJson["Age"];
+
+        Player *player = new Player(age);
+
+        string heroType = playerJson["Hero"]["Type"];
+
+        Hero *hero = nullptr;
+
+        if (heroType == "Dracula")
+        {
+            hero = new Dracula();
+        }
+        else if (heroType == "Sherlock")
+        {
+            hero = new Sherlock();
+        }
+        else if (heroType == "Invisible Man")
+        {
+            hero = new InvisibleMan();
+        }
+        else
+        {
+            delete player;
+            throw runtime_error("Unknown hero type : " + heroType);
+        }
+
+        player->setHero(hero);
+
+        hero->setHealth(playerJson["Hero"]["Health"]);
+
+        int heroPosition = playerJson["Hero"]["Position"];
+
+        if (heroPosition != -1)
+        {
+            board.moveFighter(hero, board.getSpace(heroPosition));
+        }
+
+        for (const auto &sidekickJson : playerJson["Sidekicks"])
+        {
+            string type = sidekickJson["Type"];
+
+            Sidekick *sidekick = nullptr;
+
+            if (type == "Sisters")
+            {
+                int id = sidekickJson["ID"];
+                sidekick = new Sisters(id);
+            }
+            else if (type == "Watson")
+            {
+                sidekick = new Watson();
+            }
+            else
+            {
+                throw runtime_error("Unknown sidekick type : " + type);
+            }
+
+            sidekick->setHealth(sidekickJson["Health"]);
+
+            player->addSideKick(sidekick);
+
+            int position = sidekickJson["Position"];
+
+            if (position != -1)
+            {
+                board.moveFighter(sidekick, board.getSpace(position));
+            }
+        }
+
+        for (const auto &fogJson : playerJson["Fogs"])
+        {
+            int id = fogJson["ID"];
+
+            Fog *fog = new Fog(id);
+
+            player->addFog(fog);
+
+            int position = fogJson["Position"];
+
+            if (position != -1)
+            {
+                Space *space = board.getSpace(position);
+
+                fog->setPosition(space);
+
+                space->setFogToken(true);
+            }
+        }
+
+        for (const auto &cardName : playerJson["Hand"])
+        {
+            Card *card = createCardByName(cardName);
+
+            if (card == nullptr)
+            {
+                throw runtime_error(
+                    "Unknown card : " + cardName.get<string>());
+            }
+
+            player->getHand().addCard(card);
+        }
+
+        for (const auto &cardName : playerJson["Deck"])
+        {
+            Card *card = createCardByName(cardName);
+
+            if (card == nullptr)
+            {
+                throw runtime_error("Unknown card : " + cardName.get<string>());
+            }
+
+            player->getDeck().addCard(card);
+        }
+
+        for (const auto &cardName : playerJson["Discard"])
+        {
+            Card *card = createCardByName(cardName);
+
+            if (card == nullptr)
+            {
+                throw runtime_error("Unknown card : " + cardName.get<string>());
+            }
+
+            player->getDiscardPile().addCard(card);
+        }
+
+        players.push_back(player);
+    }
+
+    int currentPlayerIndex = j["Turn"]["CurrentPlayer"];
+
+    int remainingActions = j["Turn"]["RemainingActions"];
+
+    int turnNumber = j["Turn"]["TurnNumber"];
+
+    if (players.size() != 2)
+    {
+        throw runtime_error("Save file must contain exactly 2 players.");
+    }
+
+    Player *currentPlayer = players[currentPlayerIndex];
+
+    Player *waitingPlayer = players[currentPlayerIndex == 0 ? 1 : 0];
+
+    turnManager.setPlayers(currentPlayer, waitingPlayer);
+
+    turnManager.setRemainingActions(remainingActions);
+
+    turnManager.setTurnNumber(turnNumber);
+
+    cout << "\n[+] Game Loaded Successfully!\n";
 }

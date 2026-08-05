@@ -32,6 +32,10 @@ public:
 
     int getRemainingActions() const;
     int getTurnNumber() const;
+
+    void setPlayers(Player *current, Player *waiting);
+    void setRemainingActions(int actions);
+    void setTurnNumber(int number);
 };
 
 #endif
