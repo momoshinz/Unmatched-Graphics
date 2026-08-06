@@ -267,22 +267,15 @@ void CombatSystem::resolveCombat(Game &game, Fighter &attacker, Fighter &defende
         else
         {
             defenceValue = calculateFinalDefenseValue(*defenceCard, defender);
-            InvisibleMan *invisible = dynamic_cast<InvisibleMan *>(&defender);
+        }
 
-            if (invisible != nullptr)
-            {
-                if (invisible->isOnFog())
-                {
-                    defenceValue++;
-                }
-            }
+        InvisibleMan *invisible = dynamic_cast<InvisibleMan *>(&defender);
+
+        if (invisible != nullptr && invisible->isOnFog())
+        {
+            defenceValue++;
         }
     }
-    else
-    {
-        defenceValue = 0;
-    }
-
     cout << "\n-> Attack Value : " << attackValue << endl;
 
     cout << "-> Defense Value : " << defenceValue << endl;
@@ -306,7 +299,7 @@ void CombatSystem::resolveCombat(Game &game, Fighter &attacker, Fighter &defende
     {
         defenceCard->clearTemporaryCombatValue();
     }
-    
+
     attackCard.resetEffectsCancel();
     if (defenceCard != nullptr)
     {
