@@ -28,7 +28,7 @@ Card *createCardByName(const string &name)
     if (name == "Ambush")
         return new Card(Card::createAmbush());
 
-    if (name == "Baptism of Blood")
+    if (name == "Baptism Of Blood")
         return new Card(Card::createBaptismOfBlood());
 
     if (name == "Beastform")
@@ -49,7 +49,7 @@ Card *createCardByName(const string &name)
     if (name == "Ravening Seduction")
         return new Card(Card::createRaveningSeduction());
 
-    if (name == "Thirst for Sustenance")
+    if (name == "Thirst For Sustenance")
         return new Card(Card::createThirstForSustenance());
 
     if (name == "Feint")
@@ -67,13 +67,13 @@ Card *createCardByName(const string &name)
     if (name == "Education Never Ends")
         return new Card(Card::createEducationNeverEnds());
 
-    if (name == "Eliminate the Impossible")
+    if (name == "Eliminate The Impossible")
         return new Card(Card::createEliminateTheImpossible());
 
     if (name == "Fixed Point")
         return new Card(Card::createFixedPoint());
 
-    if (name == "Master of Disguise")
+    if (name == "Master Of Disguise")
         return new Card(Card::createMasterOfDisguise());
 
     if (name == "Study Methods")
@@ -91,13 +91,13 @@ Card *createCardByName(const string &name)
     if (name == "Coded Notes")
         return new Card(Card::createCodedNotes());
 
-    if (name == "Dreaming of Revenge")
+    if (name == "Dreaming Of Revenge")
         return new Card(Card::createDreamingOfRevenge());
 
     if (name == "Emerge From Mist")
         return new Card(Card::createEmergeFromMist());
 
-    if (name == "Impossible to See")
+    if (name == "Impossible To See")
         return new Card(Card::createImpossibleToSee());
 
     if (name == "Into Thin Air")
@@ -1654,7 +1654,7 @@ void Game::saveGame(const string &filename)
 
     file.close();
 
-    cout << "\n[+] Game Saved Successfully!\n";
+    cout << "\n[+] Game Saved Successfully.\n";
 }
 
 void Game::loadGame(const string &filename)
@@ -1688,15 +1688,15 @@ void Game::loadGame(const string &filename)
 
         Hero *hero = nullptr;
 
-        if (heroType == "Dracula")
+        if (heroType == "DRUCULA")
         {
             hero = new Dracula();
         }
-        else if (heroType == "Sherlock")
+        else if (heroType == "SHERLOCK HOLMES")
         {
             hero = new Sherlock();
         }
-        else if (heroType == "Invisible Man")
+        else if (heroType == "INVISIBLE MAN")
         {
             hero = new InvisibleMan();
         }
@@ -1888,8 +1888,6 @@ void Game::saveMenu()
     }
 
     saveGame(filename);
-
-    cout << "\n[+] Game saved successfully.\n";
 }
 
 bool Game::loadMenu()
