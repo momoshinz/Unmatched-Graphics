@@ -267,15 +267,19 @@ void Board::setupMap()
 vector<Space *> Board::getAvailableMoves(Fighter *fighter, int maxStep) const
 {
     vector<Space *> result;
+
     if (fighter == nullptr)
     {
         return result;
     }
+
     Space *start = fighter->getPosition();
+
     if (start == nullptr)
     {
         return result;
     }
+
     queue<pair<Space *, int>> q;
     set<Space *> visited;
 
@@ -292,11 +296,12 @@ vector<Space *> Board::getAvailableMoves(Fighter *fighter, int maxStep) const
         {
             continue;
         }
+
         vector<Space *> nextSpaces = current->getNeighbors();
 
         if (current->hasSecretPassage())
         {
-            for (auto space : spaces)
+            for (Space *space : spaces)
             {
                 if (space != current && space->hasSecretPassage())
                 {
@@ -305,28 +310,41 @@ vector<Space *> Board::getAvailableMoves(Fighter *fighter, int maxStep) const
             }
         }
 
-        addFogConnections(fighter, current, nextSpaces);
+        if (dynamic_cast<InvisibleMan *>(fighter) != nullptr && current->hasFogToken())
+        {
+            for (Space *space : spaces)
+            {
+                if (space == current)
+                {
+                    continue;
+                }
 
-        for (auto next : nextSpaces)
+                if (!space->hasFogToken())
+                {
+                    continue;
+                }
+                nextSpaces.push_back(space);
+            }
+        }
+        for (Space *next : nextSpaces)
         {
             if (visited.count(next))
             {
                 continue;
             }
+            Fighter *user = next->getFighter();
+            if (user != nullptr && user->getOwner() != fighter->getOwner())
+            {
+                continue;
+            }
+
             visited.insert(next);
 
-            Fighter *user = next->getFighter();
             if (user == nullptr)
             {
                 result.push_back(next);
-                q.push({next, distance + 1});
-                continue;
             }
-            if (user->getOwner() == fighter->getOwner())
-            {
-                q.push({next, distance + 1});
-                continue;
-            }
+            q.push({next, distance + 1});
         }
     }
     return result;
@@ -335,15 +353,19 @@ vector<Space *> Board::getAvailableMoves(Fighter *fighter, int maxStep) const
 vector<pair<Space *, int>> Board::getAvailableMovesWithDistance(Fighter *fighter, int maxStep) const
 {
     vector<pair<Space *, int>> result;
+
     if (fighter == nullptr)
     {
         return result;
     }
+
     Space *start = fighter->getPosition();
+
     if (start == nullptr)
     {
         return result;
     }
+
     queue<pair<Space *, int>> q;
     set<Space *> visited;
 
@@ -360,11 +382,12 @@ vector<pair<Space *, int>> Board::getAvailableMovesWithDistance(Fighter *fighter
         {
             continue;
         }
+
         vector<Space *> nextSpaces = current->getNeighbors();
 
         if (current->hasSecretPassage())
         {
-            for (auto space : spaces)
+            for (Space *space : spaces)
             {
                 if (space != current && space->hasSecretPassage())
                 {
@@ -373,32 +396,46 @@ vector<pair<Space *, int>> Board::getAvailableMovesWithDistance(Fighter *fighter
             }
         }
 
-        addFogConnections(fighter, current, nextSpaces);
+        if (dynamic_cast<InvisibleMan *>(fighter) != nullptr &&
+            current->hasFogToken())
+        {
+            for (Space *space : spaces)
+            {
+                if (space == current)
+                {
+                    continue;
+                }
+                if (!space->hasFogToken())
+                {
+                    continue;
+                }
+                nextSpaces.push_back(space);
+            }
+        }
 
-        for (auto next : nextSpaces)
+        for (Space *next : nextSpaces)
         {
             if (visited.count(next))
+                continue;
+
+            Fighter *user = next->getFighter();
+            if (user != nullptr && user->getOwner() != fighter->getOwner())
             {
                 continue;
             }
+
             visited.insert(next);
 
-            Fighter *user = next->getFighter();
             if (user == nullptr)
             {
                 result.push_back({next, distance + 1});
-                q.push({next, distance + 1});
-                continue;
             }
-            if (user->getOwner() == fighter->getOwner())
-            {
-                q.push({next, distance + 1});
-                continue;
-            }
+            q.push({next, distance + 1});
         }
     }
     return result;
 }
+
 
 bool Board::moveFighter(Fighter *fighter, Space *destination)
 {
@@ -421,8 +458,7 @@ bool Board::moveFighter(Fighter *fighter, Space *destination)
     return true;
 }
 
-bool Board::swapFighters(Fighter *first,
-                         Fighter *second)
+bool Board::swapFighters(Fighter *first, Fighter *second)
 {
     if (first == nullptr || second == nullptr)
         return false;
