@@ -1750,7 +1750,7 @@ void Game::loadGame(const string &filename)
 
             Sidekick *sidekick = nullptr;
 
-            if (type == "Sister ")
+            if (type == "Sister 1" || type == "Sister 2" || type == "Sister 3")
             {
                 int id = sidekickJson["ID"];
                 sidekick = new Sisters(id);
