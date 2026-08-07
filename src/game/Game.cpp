@@ -13,6 +13,7 @@
 #include <ctime>
 #include <iomanip>
 #include <fstream>
+#include <cstdio>
 #include <nlohmann/json.hpp>
 using json = nlohmann::json;
 using namespace std;
@@ -1645,11 +1646,37 @@ void Game::saveGame(const string &filename)
     else
         j["Turn"]["CurrentPlayer"] = 1;
 
+    Hero *hero1 = players[0]->getHero();
+    Hero *hero2 = players[1]->getHero();
+
+    j["GameOver"] = isGameOver();
+
+    if (isGameOver())
+    {
+        if (hero1->isAlive() && !hero2->isAlive())
+        {
+            j["Winner"] = hero1->getName();
+        }
+        else if (!hero1->isAlive() && hero2->isAlive())
+        {
+            j["Winner"] = hero2->getName();
+        }
+        else
+        {
+            j["Winner"] = "Draw";
+        }
+    }
+    else
+    {
+        j["Winner"] = "";
+    }
     ofstream file(filename);
 
     if (!file)
+    {
         throw runtime_error("Cannot open save file.");
 
+    }
     file << setw(4) << j;
 
     file.close();
@@ -1837,18 +1864,21 @@ void Game::saveMenu()
 {
     cout << "\n========== Save Game ==========\n";
 
-    for (int i = 1; i <= 3; i++)
+    int slot = 1;
+    while (true)
     {
-        string filename = "save" + to_string(i) + ".json";
+        string filename = "save" + to_string(slot) + ".json";
 
         ifstream file(filename);
 
-        if (file)
-            cout << i << ". Slot " << i << " (Occupied)\n";
-        else
-            cout << i << ". Slot " << i << " (Empty)\n";
-    }
+        if (!file)
+            break;
 
+        cout << slot << ". " << filename << endl;
+
+        slot++;
+    }
+    cout << slot << ". New Save\n";
     cout << "0. Cancel\n";
 
     int choice;
@@ -1894,16 +1924,19 @@ bool Game::loadMenu()
 {
     vector<string> saves;
 
-    for (int i = 1; i <= 3; i++)
+    int slot = 1;
+
+    while(true)
     {
-        string filename = "save" + to_string(i) + ".json";
+        string filename = "save" + to_string(slot) + ".json";
 
         ifstream file(filename);
 
-        if (file)
-        {
-            saves.push_back(filename);
-        }
+        if(!file)
+            break;
+
+        saves.push_back(filename);
+        slot++;
     }
 
     if (saves.empty())
