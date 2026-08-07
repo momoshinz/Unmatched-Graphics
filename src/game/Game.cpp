@@ -107,7 +107,7 @@ Card *createCardByName(const string &name)
     if (name == "Lurking")
         return new Card(Card::createLurking());
 
-    if (name == "Reign of Terror")
+    if (name == "Reign Of Terror")
         return new Card(Card::createReignOfTerror());
 
     if (name == "Rolling Fog")
