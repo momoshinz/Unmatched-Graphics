@@ -1715,7 +1715,7 @@ void Game::loadGame(const string &filename)
 
         Hero *hero = nullptr;
 
-        if (heroType == "DRUCULA")
+        if (heroType == "DRACULA")
         {
             hero = new Dracula();
         }
@@ -1750,12 +1750,12 @@ void Game::loadGame(const string &filename)
 
             Sidekick *sidekick = nullptr;
 
-            if (type == "Sisters")
+            if (type == "Sister ")
             {
                 int id = sidekickJson["ID"];
                 sidekick = new Sisters(id);
             }
-            else if (type == "Watson")
+            else if (type == "Dr. Watson")
             {
                 sidekick = new Watson();
             }
