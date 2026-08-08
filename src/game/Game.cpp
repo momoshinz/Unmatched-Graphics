@@ -743,21 +743,24 @@ void Game::processTurn()
         cout << "\nTURN : " << currentPlayer->getHero()->getName() << endl;
 
         Hero *hero = currentPlayer->getHero();
-        if (dynamic_cast<Dracula *>(hero) != nullptr)
-        {
-            cout << "\n[*] Dracula may use his special ability.\n";
 
-            try
+        if (turnManager.consumeTurnStart())
+        {
+            if (dynamic_cast<Dracula *>(hero) != nullptr)
             {
-                hero->useAbility(*this, *currentPlayer);
-            }
-            catch (const exception &e)
-            {
-                cerr << "\n[!] Error using Dracula's ability : " << e.what() << endl;
+                cout << "\n[*] Dracula may use his special ability.\n";
+
+                try
+                {
+                    hero->useAbility(*this, *currentPlayer);
+                }
+                catch (const exception &e)
+                {
+                    cerr << "\n[!] Error using Dracula's ability : "
+                         << e.what() << endl;
+                }
             }
         }
-
-        turnManager.resetActions();
 
         while (turnManager.hasActions())
         {
@@ -1639,6 +1642,8 @@ void Game::saveGame(const string &filename)
     j["Turn"]["TurnNumber"] =
         turnManager.getTurnNumber();
 
+    j["Turn"]["TurnJustStarted"] = turnManager.getTurnJustStarted();
+
     Player *current = turnManager.getCurrentPlayer();
 
     if (current == players[0])
@@ -1675,7 +1680,6 @@ void Game::saveGame(const string &filename)
     if (!file)
     {
         throw runtime_error("Cannot open save file.");
-
     }
     file << setw(4) << j;
 
@@ -1857,6 +1861,8 @@ void Game::loadGame(const string &filename)
 
     turnManager.setTurnNumber(turnNumber);
 
+    turnManager.setTurnJustStarted(j["Turn"]["TurnJustStarted"]);
+
     cout << "\n[+] Game Loaded Successfully!\n";
 }
 
@@ -1926,13 +1932,13 @@ bool Game::loadMenu()
 
     int slot = 1;
 
-    while(true)
+    while (true)
     {
         string filename = "save" + to_string(slot) + ".json";
 
         ifstream file(filename);
 
-        if(!file)
+        if (!file)
             break;
 
         saves.push_back(filename);

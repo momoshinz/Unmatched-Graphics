@@ -33,6 +33,7 @@ void TurnManager::startGame(Player *younger,
 void TurnManager::startTurn()
 {
     remainingActions = 2;
+    turnJustStarted = true;
     Hero *hero = currentPlayer->getHero();
 
     if (hero != nullptr)
@@ -127,4 +128,25 @@ void TurnManager::setRemainingActions(int actions)
 void TurnManager::setTurnNumber(int number)
 {
     turnNumber = number;
+}
+
+bool TurnManager::consumeTurnStart()
+{
+    if (!turnJustStarted)
+    {
+        return false;
+    }
+
+    turnJustStarted = false;
+    return true;
+}
+
+bool TurnManager::getTurnJustStarted() const
+{
+    return turnJustStarted;
+}
+
+void TurnManager::setTurnJustStarted(bool value)
+{
+    turnJustStarted = value;
 }

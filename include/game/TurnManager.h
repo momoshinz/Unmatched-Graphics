@@ -12,6 +12,8 @@ private:
     int remainingActions;
     int turnNumber;
 
+    bool turnJustStarted;
+
 public:
     TurnManager();
     ~TurnManager() = default;
@@ -26,6 +28,9 @@ public:
     bool hasActions() const;
     bool isTurnFinished() const;
     bool checkHandLimit() const;
+    bool consumeTurnStart();
+    bool getTurnJustStarted() const;
+    void setTurnJustStarted(bool value);
 
     Player *getCurrentPlayer() const;
     Player *getWaitingPlayer() const;
