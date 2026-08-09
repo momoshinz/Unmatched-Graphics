@@ -50,7 +50,38 @@ set(SOURCES
     src/fighter/Fog.cpp
 
     src/effect/Effect.cpp
-    # ... بقیه effect ها
+    src/effect/DraculaCards/Ambush.cpp
+    src/effect/DraculaCards/BaptismOfBlood.cpp
+    src/effect/DraculaCards/BeastForm.cpp
+    src/effect/DraculaCards/Dash.cpp
+    src/effect/DraculaCards/Exploit.cpp
+    src/effect/DraculaCards/FeedingFrenzy.cpp
+    src/effect/DraculaCards/FeintDracula.cpp
+    src/effect/DraculaCards/LookIntoMyEyes.cpp
+    src/effect/DraculaCards/MistForm.cpp
+    src/effect/DraculaCards/PreyUpon.cpp
+    src/effect/DraculaCards/RaveningSeduction.cpp
+    src/effect/DraculaCards/ThirstForSustenance.cpp
+    src/effect/SherlockCards/AdministerAid.cpp
+    src/effect/SherlockCards/CounterPunch.cpp
+    src/effect/SherlockCards/DeduceStrategy.cpp
+    src/effect/SherlockCards/EducationNeverEnds.cpp
+    src/effect/SherlockCards/EliminateTheImpossible.cpp
+    src/effect/SherlockCards/FeintSherlock.cpp
+    src/effect/SherlockCards/FixedPoint.cpp
+    src/effect/SherlockCards/MasterOfDisguise.cpp
+    src/effect/SherlockCards/StudyMethods.cpp
+    src/effect/SherlockCards/TheGameIsAfoot.cpp
+    src/effect/InvisibleManCards/CodedNotes.cpp
+    src/effect/InvisibleManCards/DreamingOfRevenge.cpp
+    src/effect/InvisibleManCards/EmergeFromMist.cpp
+    src/effect/InvisibleManCards/ImpossibleToSee.cpp
+    src/effect/InvisibleManCards/IntoThinAir.cpp
+    src/effect/InvisibleManCards/Lurking.cpp
+    src/effect/InvisibleManCards/ReignOfTerror.cpp
+    src/effect/InvisibleManCards/RollingFog.cpp
+    src/effect/InvisibleManCards/SlipAway.cpp
+    src/effect/InvisibleManCards/StepLightly.cpp
 
     src/game/CombatSystem.cpp
     src/game/Game.cpp
