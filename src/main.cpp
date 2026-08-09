@@ -1,39 +1,27 @@
-#include <iostream>
-#include "game/Game.h"
-#include "ui/MainMenu.h"
-#include <limits>
-using namespace std;
-MainMenu menu;
+#include "raylib.h"
+
 int main()
 {
-    while (true)
+    InitWindow(800, 450, "Unmatched");
+
+    while (!WindowShouldClose())
     {
-        int choice = menu.show();
+        BeginDrawing();
 
-        switch (choice)
-        {
-            case 0:
-            {
-                Game game;
-                game.run(false);
-                break;
-            }
+        ClearBackground(RAYWHITE);
 
-            case 1:
-            {
-                Game game;
-                if(game.loadMenu())
-                {
-                    game.run(true);
-                }
-                break;
-            }
+        DrawText(
+            "UNMATCHED",
+            300,
+            200,
+            40,
+            DARKBLUE
+        );
 
-            case 2:
-            {
-                cout << "\nBye! But Hope You'll Change Your Mind Later :<\n";
-                return 0;
-            }
-        }
+        EndDrawing();
     }
+
+    CloseWindow();
+
+    return 0;
 }
