@@ -2,20 +2,34 @@
 
 int main()
 {
-    InitWindow(800, 450, "Unmatched");
+    InitWindow(1000, 700, "Unmatched");
+
+    SetTargetFPS(60);
 
     while (!WindowShouldClose())
     {
         BeginDrawing();
 
-        ClearBackground(RAYWHITE);
+        ClearBackground(DARKBLUE);
+
+        // دکمه
+        Rectangle button = {
+            350, 300,   // x, y
+            300, 80     // width, height
+        };
+
+        DrawRectangleRounded(
+            button,
+            1.0f,       // میزان گردی
+            32,         // تعداد segment برای صاف‌تر شدن
+            SKYBLUE     // رنگ
+        );
 
         DrawText(
-            "UNMATCHED",
-            300,
-            200,
-            40,
-            DARKBLUE
+            "START GAME",
+            410, 325,
+            30,
+            WHITE
         );
 
         EndDrawing();
