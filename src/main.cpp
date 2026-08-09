@@ -1,263 +1,220 @@
 #include "raylib.h"
 
-struct Button
-{
-    Rectangle rectangle;
-    const char *text;
-};
-
 int main()
 {
-    // ---------------------------------------
+    // -----------------------------
     // Window
-    // ---------------------------------------
-
+    // -----------------------------
     const int screenWidth = 1000;
     const int screenHeight = 700;
 
-    InitWindow(
-        screenWidth,
-        screenHeight,
-        "Unmatched"
-    );
-
+    InitWindow(screenWidth, screenHeight, "Unmatched");
     SetTargetFPS(60);
 
+    // -----------------------------
+    // Load custom font
+    // -----------------------------
+    Font gameFont = LoadFont("assets/fonts/MyFont.ttf");
 
-    // ---------------------------------------
-    // Main Menu Buttons
-    // ---------------------------------------
+    // -----------------------------
+    // Main menu state
+    // -----------------------------
+    int selectedButton = 0;
 
-    Button startButton = {
-        {350, 300, 300, 70},
-        "START GAME"
-    };
-
-    Button loadButton = {
-        {350, 390, 300, 70},
-        "LOAD GAME"
-    };
-
-    Button exitButton = {
-        {350, 480, 300, 70},
+    const char *buttons[] = {
+        "START GAME",
+        "LOAD GAME",
         "EXIT"
     };
 
+    const int buttonCount = 3;
 
-    // ---------------------------------------
-    // Main Loop
-    // ---------------------------------------
-
+    // -----------------------------
+    // Main loop
+    // -----------------------------
     while (!WindowShouldClose())
     {
-        // Mouse position
+        // =====================================
+        // INPUT
+        // =====================================
+
+        if (IsKeyPressed(KEY_UP))
+        {
+            selectedButton--;
+
+            if (selectedButton < 0)
+                selectedButton = buttonCount - 1;
+        }
+
+        if (IsKeyPressed(KEY_DOWN))
+        {
+            selectedButton++;
+
+            if (selectedButton >= buttonCount)
+                selectedButton = 0;
+        }
+
+        // Mouse selection
         Vector2 mousePosition = GetMousePosition();
 
-
-        // ---------------------------------------
-        // Button Hover
-        // ---------------------------------------
-
-        bool startHovered =
-            CheckCollisionPointRec(
-                mousePosition,
-                startButton.rectangle
-            );
-
-        bool loadHovered =
-            CheckCollisionPointRec(
-                mousePosition,
-                loadButton.rectangle
-            );
-
-        bool exitHovered =
-            CheckCollisionPointRec(
-                mousePosition,
-                exitButton.rectangle
-            );
-
-
-        // ---------------------------------------
-        // Button Click
-        // ---------------------------------------
-
-        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+        for (int i = 0; i < buttonCount; i++)
         {
-            if (startHovered)
-            {
-                TraceLog(LOG_INFO, "START GAME clicked");
-            }
+            Rectangle buttonRect = {
+                350,
+                300 + i * 80,
+                300,
+                55
+            };
 
-            if (loadHovered)
+            if (CheckCollisionPointRec(mousePosition, buttonRect))
             {
-                TraceLog(LOG_INFO, "LOAD GAME clicked");
-            }
+                selectedButton = i;
 
-            if (exitHovered)
-            {
-                break;
+                if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+                {
+                    if (i == 0)
+                    {
+                        // START GAME
+                    }
+                    else if (i == 1)
+                    {
+                        // LOAD GAME
+                    }
+                    else if (i == 2)
+                    {
+                        CloseWindow();
+                        return 0;
+                    }
+                }
             }
         }
 
+        // Enter key
+        if (IsKeyPressed(KEY_ENTER))
+        {
+            if (selectedButton == 0)
+            {
+                // START GAME
+            }
+            else if (selectedButton == 1)
+            {
+                // LOAD GAME
+            }
+            else if (selectedButton == 2)
+            {
+                CloseWindow();
+                return 0;
+            }
+        }
 
-        // ---------------------------------------
-        // Drawing
-        // ---------------------------------------
+        // =====================================
+        // DRAW
+        // =====================================
 
         BeginDrawing();
 
-        // Background
-        ClearBackground(Color{20, 24, 35, 255});
+        ClearBackground(Color{20, 20, 30, 255});
 
-
-        // ---------------------------------------
-        // Game Title
-        // ---------------------------------------
+        // -------------------------------------
+        // Game title
+        // -------------------------------------
 
         const char *title = "UNMATCHED";
 
-        int titleFontSize = 70;
+        float titleFontSize = 70;
 
-        int titleWidth =
-            MeasureText(title, titleFontSize);
+        Vector2 titleSize =
+            MeasureTextEx(
+                gameFont,
+                title,
+                titleFontSize,
+                3
+            );
 
-        DrawText(
+        DrawTextEx(
+            gameFont,
             title,
-            (screenWidth - titleWidth) / 2,
-            100,
+            {
+                (screenWidth - titleSize.x) / 2,
+                100
+            },
             titleFontSize,
-            GOLD
-        );
-
-
-        // ---------------------------------------
-        // Subtitle
-        // ---------------------------------------
-
-        const char *subtitle =
-            "BATTLE OF LEGENDS";
-
-        int subtitleFontSize = 20;
-
-        int subtitleWidth =
-            MeasureText(
-                subtitle,
-                subtitleFontSize
-            );
-
-        DrawText(
-            subtitle,
-            (screenWidth - subtitleWidth) / 2,
-            185,
-            subtitleFontSize,
-            LIGHTGRAY
-        );
-
-
-        // ---------------------------------------
-        // Draw START GAME button
-        // ---------------------------------------
-
-        Color startColor =
-            startHovered
-                ? Color{90, 170, 255, 255}
-                : Color{55, 120, 200, 255};
-
-        DrawRectangleRounded(
-            startButton.rectangle,
-            1.0f,
-            32,
-            startColor
-        );
-
-        int startTextWidth =
-            MeasureText(
-                startButton.text,
-                25
-            );
-
-        DrawText(
-            startButton.text,
-            startButton.rectangle.x +
-                (startButton.rectangle.width - startTextWidth) / 2,
-            startButton.rectangle.y + 22,
-            25,
+            3,
             WHITE
         );
 
+        // -------------------------------------
+        // Buttons
+        // -------------------------------------
 
-        // ---------------------------------------
-        // Draw LOAD GAMEbutton
-        // ---------------------------------------
+        for (int i = 0; i < buttonCount; i++)
+        {
+            Rectangle buttonRect = {
+                350,
+                300 + i * 80,
+                300,
+                55
+            };
 
-        Color loadColor =
-            loadHovered
-                ? Color{90, 170, 255, 255}
-                : Color{55, 120, 200, 255};
+            bool selected = (i == selectedButton);
 
-        DrawRectangleRounded(
-            loadButton.rectangle,
-            1.0f,
-            32,
-            loadColor
-        );
+            // Button background
+            if (selected)
+            {
+                DrawRectangleRounded(
+                    buttonRect,
+                    0.5f,
+                    20,
+                    Color{80, 130, 220, 255}
+                );
+            }
+            else
+            {
+                DrawRectangleRounded(
+                    buttonRect,
+                    0.5f,
+                    20,
+                    Color{45, 45, 60, 255}
+                );
+            }
 
-        int loadTextWidth =
-            MeasureText(
-                loadButton.text,
-                25
+            // Button text
+            float fontSize = 25;
+
+            Vector2 textSize =
+                MeasureTextEx(
+                    gameFont,
+                    buttons[i],
+                    fontSize,
+                    2
+                );
+
+            float textX =
+                buttonRect.x +
+                (buttonRect.width - textSize.x) / 2;
+
+            float textY =
+                buttonRect.y +
+                (buttonRect.height - textSize.y) / 2;
+
+            DrawTextEx(
+                gameFont,
+                buttons[i],
+                {textX, textY},
+                fontSize,
+                2,
+                WHITE
             );
-
-        DrawText(
-            loadButton.text,
-            loadButton.rectangle.x +
-                (loadButton.rectangle.width - loadTextWidth) / 2,
-            loadButton.rectangle.y + 22,
-            25,
-            WHITE
-        );
-
-
-        // ---------------------------------------
-        // Draw EXIT button
-        // ---------------------------------------
-
-        Color exitColor =
-            exitHovered
-                ? Color{230, 90, 90, 255}
-                : Color{170, 55, 65, 255};
-
-        DrawRectangleRounded(
-            exitButton.rectangle,
-            1.0f,
-            32,
-            exitColor
-        );
-
-        int exitTextWidth =
-            MeasureText(
-                exitButton.text,
-                25
-            );
-
-        DrawText(
-            exitButton.text,
-            exitButton.rectangle.x +
-                (exitButton.rectangle.width - exitTextWidth) / 2,
-            exitButton.rectangle.y + 22,
-            25,
-            WHITE
-        );
-
+        }
 
         EndDrawing();
     }
 
+    // -----------------------------
+    // Cleanup
+    // -----------------------------
 
-    // ---------------------------------------
-    // Close Window
-    // ---------------------------------------
-
+    UnloadFont(gameFont);
     CloseWindow();
 
     return 0;
