@@ -91,46 +91,46 @@ bool AssetManager::load()
     cardTextures["ThirstForSustenance"] = LoadTexture("Unmatched_Assets/cards/dracula/thirst-for-sustenance.png");
 
 
-    cardTextures["AdministerAid"] = LoadTexture("Unmatched_Assets/cards/dracula/administer-aid.png");
+    cardTextures["AdministerAid"] = LoadTexture("Unmatched_Assets/cards/holms/administer-aid.png");
 
-    cardTextures["CounterPunch"] = LoadTexture("Unmatched_Assets/cards/dracula/counterpunch.png");
+    cardTextures["CounterPunch"] = LoadTexture("Unmatched_Assets/cards/holms/counterpunch.png");
 
-    cardTextures["DeduceStrategy"] = LoadTexture("Unmatched_Assets/cards/dracula/deduce-strategy.png");
+    cardTextures["DeduceStrategy"] = LoadTexture("Unmatched_Assets/cards/holms/deduce-strategy.png");
 
-    cardTextures["EducationNeverEnds"] = LoadTexture("Unmatched_Assets/cards/dracula/education-never-ends.png");
+    cardTextures["EducationNeverEnds"] = LoadTexture("Unmatched_Assets/cards/holms/education-never-ends.png");
 
-    cardTextures["EliminateTheImpossible"] = LoadTexture("Unmatched_Assets/cards/dracula/eliminate-the-impossible.png");
+    cardTextures["EliminateTheImpossible"] = LoadTexture("Unmatched_Assets/cards/holms/eliminate-the-impossible.png");
 
-    cardTextures["FeintSherlock"] = LoadTexture("Unmatched_Assets/cards/dracula/feint (2).png");
+    cardTextures["FeintSherlock"] = LoadTexture("Unmatched_Assets/cards/holms/feint (2).png");
 
-    cardTextures["FixedPoint"] = LoadTexture("Unmatched_Assets/cards/dracula/fixed-point-in-a-changing-aga.png");
+    cardTextures["FixedPoint"] = LoadTexture("Unmatched_Assets/cards/holms/fixed-point-in-a-changing-aga.png");
 
-    cardTextures["MasterOfDisguise"] = LoadTexture("Unmatched_Assets/cards/dracula/master-of-disguise.png");
+    cardTextures["MasterOfDisguise"] = LoadTexture("Unmatched_Assets/cards/holms/master-of-disguise.png");
 
-    cardTextures["StudyMethods"] = LoadTexture("Unmatched_Assets/cards/dracula/study-methods.png");
+    cardTextures["StudyMethods"] = LoadTexture("Unmatched_Assets/cards/holms/study-methods.png");
 
-    cardTextures["TheGameIsAfoot"] = LoadTexture("Unmatched_Assets/cards/dracula/the-game-is-afoot.png");
+    cardTextures["TheGameIsAfoot"] = LoadTexture("Unmatched_Assets/cards/holms/the-game-is-afoot.png");
 
 
-    cardTextures["CodedNotes"] = LoadTexture("Unmatched_Assets/cards/dracula/coded-notes.png");
+    cardTextures["CodedNotes"] = LoadTexture("Unmatched_Assets/cards/invisibleMan/coded-notes.png");
 
-    cardTextures["DreamingOfRevange"] = LoadTexture("Unmatched_Assets/cards/dracula/dreaming-of-revange.png");
+    cardTextures["DreamingOfRevange"] = LoadTexture("Unmatched_Assets/cards/invisibleMan/dreaming-of-revange.png");
 
-    cardTextures["EmergeFromMist"] = LoadTexture("Unmatched_Assets/cards/dracula/emerge-from-mist.png");
+    cardTextures["EmergeFromMist"] = LoadTexture("Unmatched_Assets/cards/invisibleMan/emerge-from-mist.png");
 
-    cardTextures["ImpossibleToSee"] = LoadTexture("Unmatched_Assets/cards/dracula/impossible-to-see.png");
+    cardTextures["ImpossibleToSee"] = LoadTexture("Unmatched_Assets/cards/invisibleMan/impossible-to-see.png");
 
-    cardTextures["IntoThinAir"] = LoadTexture("Unmatched_Assets/cards/dracula/into-thin-air.png");
+    cardTextures["IntoThinAir"] = LoadTexture("Unmatched_Assets/cards/invisibleMan/into-thin-air.png");
 
-    cardTextures["Lurking"] = LoadTexture("Unmatched_Assets/cards/dracula/lurking.png");
+    cardTextures["Lurking"] = LoadTexture("Unmatched_Assets/cards/invisibleMan/lurking.png");
 
-    cardTextures["ReignOfTerror"] = LoadTexture("Unmatched_Assets/cards/dracula/reign-of-terror.png");
+    cardTextures["ReignOfTerror"] = LoadTexture("Unmatched_Assets/cards/invisibleMan/reign-of-terror.png");
 
-    cardTextures["RollingFog"] = LoadTexture("Unmatched_Assets/cards/dracula/rolling-fog.png");
+    cardTextures["RollingFog"] = LoadTexture("Unmatched_Assets/cards/invisibleMan/rolling-fog.png");
 
-    cardTextures["SlipAway"] = LoadTexture("Unmatched_Assets/cards/dracula/slip-away.png");
+    cardTextures["SlipAway"] = LoadTexture("Unmatched_Assets/cards/invisibleMan/slip-away.png");
 
-    cardTextures["StepLightly"] = LoadTexture("Unmatched_Assets/cards/dracula/step-lightly.png");
+    cardTextures["StepLightly"] = LoadTexture("Unmatched_Assets/cards/invisibleMan/step-lightly.png");
 
 
     if (mainMenuBackground.id == 0 || loadingBackground.id == 0 || board.id == 0 || gameFont.texture.id == 0)
