@@ -1,16 +1,28 @@
-#ifndef ASSET_MANAGER_H
-#define ASSET_MANAGER_H
-
-#include "raylib.h"
+#pragma once
+#include <raylib.h>
 
 class AssetManager
 {
-    public:
-        Texture2D mainMenuBackground;
-        Font gameFont;
+public:
+    AssetManager();
+    ~AssetManager();
 
-        void load();
-        void unload();
+    bool load();
+
+    void unload();
+
+    Texture2D getMainMenuBackground() const;
+    Texture2D getLoadingBackground() const;
+    Texture2D getBoard() const;
+
+    Font getGameFont() const;
+
+private:
+    Texture2D mainMenuBackground;
+    Texture2D loadingBackground;
+    Texture2D board;
+
+    Font gameFont;
+
+    bool loaded;
 };
-
-#endif
