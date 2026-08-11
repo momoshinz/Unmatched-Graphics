@@ -100,13 +100,13 @@ void MainMenu::draw()
     // Buttons
     // =========================================
 
-    const float buttonWidth = 360.0f;
+    const float buttonWidth = 300.0f;
     const float buttonHeight = 75.0f;
 
     const float buttonX =
         (GetScreenWidth() - buttonWidth) / 2.0f;
 
-    const float firstButtonY = 500.0f;
+    const float firstButtonY = 450.0f;
     const float buttonGap = 25.0f;
 
     Rectangle newGameButton{

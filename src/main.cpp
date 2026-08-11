@@ -6,8 +6,8 @@
 
 int main()
 {
-    const int screenWidth = 1300;
-    const int screenHeight = 700;
+    const int screenWidth = 1366;
+    const int screenHeight = 768;
 
     InitWindow(
         screenWidth,
@@ -39,7 +39,7 @@ int main()
     // Loading Screen
     // =========================================
 
-    LoadingScreen loadingScreen(assets, 10.0f);  //the time we stay on loading screen
+    LoadingScreen loadingScreen(assets, 5.0f);  //the time we stay on loading screen
 
     while (!WindowShouldClose() &&
            !loadingScreen.isFinished())
