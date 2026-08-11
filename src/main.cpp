@@ -3,22 +3,30 @@
 
 #include "graphics/AssetManager.h"
 #include "graphics/LoadingScreen.h"
-#include "graphics/MainMenu.h"
 
 int main()
 {
-    // -----------------------------
+    // =========================================
     // WINDOW
-    // -----------------------------
+    // =========================================
 
-    InitWindow(1600, 900, "Unmatched");
+    const int screenWidth = 1600;
+    const int screenHeight = 900;
+
+    InitWindow(
+        screenWidth,
+        screenHeight,
+        "Unmatched"
+    );
+
     SetTargetFPS(60);
 
     std::cout << "Window created.\n";
 
-    // -----------------------------
+
+    // =========================================
     // ASSET MANAGER
-    // -----------------------------
+    // =========================================
 
     AssetManager assets;
 
@@ -34,64 +42,43 @@ int main()
 
     std::cout << "ALL ASSETS LOADED!\n";
 
-    // -----------------------------
-    // LOADING SCREEN
-    // -----------------------------
 
-    float loadingTime = 5.0f;
-    float elapsedTime = 0.0f;
+    // =========================================
+    // LOADING SCREEN
+    // =========================================
+
+    LoadingScreen loadingScreen(
+        &assets,
+        5.0f
+    );
 
     while (!WindowShouldClose() &&
-           elapsedTime < loadingTime)
+           !loadingScreen.isFinished())
     {
-        float deltaTime = GetFrameTime();
-        elapsedTime += deltaTime;
+        // -----------------------------
+        // Update
+        // -----------------------------
+
+        loadingScreen.update();
+
+
+        // -----------------------------
+        // Draw
+        // -----------------------------
 
         BeginDrawing();
 
         ClearBackground(BLACK);
 
-        Texture2D loading =
-            assets.getLoadingBackground();
-
-        DrawTexturePro(
-            loading,
-
-            // قسمت مورد استفاده از تصویر
-            Rectangle{
-                0,
-                0,
-                (float)loading.width,
-                (float)loading.height
-            },
-
-            // اندازه‌ای که روی پنجره نمایش داده می‌شود
-            Rectangle{
-                0,
-                0,
-                1600,
-                900
-            },
-
-            Vector2{0, 0},
-            0.0f,
-            WHITE
-        );
-
-        DrawText(
-            "LOADING...",
-            700,
-            450,
-            30,
-            WHITE
-        );
+        loadingScreen.draw();
 
         EndDrawing();
     }
 
-    // -----------------------------
+
+    // =========================================
     // MAIN MENU TEST
-    // -----------------------------
+    // =========================================
 
     while (!WindowShouldClose())
     {
@@ -102,34 +89,45 @@ int main()
         Texture2D mainMenu =
             assets.getMainMenuBackground();
 
-        DrawTexturePro(
-            mainMenu,
+        if (mainMenu.id != 0)
+        {
+            DrawTexturePro(
+                mainMenu,
 
-            Rectangle{
-                0,
-                0,
-                (float)mainMenu.width,
-                (float)mainMenu.height
-            },
+                // Source rectangle
+                Rectangle{
+                    0,
+                    0,
+                    (float)mainMenu.width,
+                    (float)mainMenu.height
+                },
 
-            Rectangle{
-                0,
-                0,
-                1600,
-                900
-            },
+                // Destination rectangle
+                Rectangle{
+                    0,
+                    0,
+                    (float)screenWidth,
+                    (float)screenHeight
+                },
 
-            Vector2{0, 0},
-            0.0f,
-            WHITE
-        );
+                Vector2{
+                    0,
+                    0
+                },
+
+                0.0f,
+
+                WHITE
+            );
+        }
 
         EndDrawing();
     }
 
-    // -----------------------------
+
+    // =========================================
     // CLEANUP
-    // -----------------------------
+    // =========================================
 
     assets.unload();
 

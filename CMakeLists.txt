@@ -111,6 +111,7 @@ set(SOURCES
 
     src/graphics/AssetManager.cpp
     src/graphics/GameRenderer.cpp
+    src/graphics/LoadingScreen.cpp
     src/graphics/MainMenu.cpp
 
     src/ui/TerminalUI.cpp
