@@ -3,26 +3,28 @@
 
 #include <raylib.h>
 
-class AssetManager;
-
 class LoadingScreen
 {
     private:
-        AssetManager *assets;
+        Texture2D background;
+        Font font;
 
         float elapsedTime;
         float duration;
 
     public:
-        LoadingScreen(AssetManager *assets, float duration = 3.0f);
+        LoadingScreen(float duration = 5.0f);
+
+        bool load();
+        void unload();
 
         void update();
-
         void draw();
 
         bool isFinished() const;
-
         void reset();
+
+        ~LoadingScreen();
 };
 
 #endif

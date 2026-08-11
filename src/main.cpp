@@ -6,10 +6,6 @@
 
 int main()
 {
-    // =========================================
-    // WINDOW
-    // =========================================
-
     const int screenWidth = 1600;
     const int screenHeight = 900;
 
@@ -23,14 +19,11 @@ int main()
 
     std::cout << "Window created.\n";
 
-
     // =========================================
-    // ASSET MANAGER
+    // Asset Manager
     // =========================================
 
     AssetManager assets;
-
-    std::cout << "AssetManager created.\n";
 
     if (!assets.load())
     {
@@ -42,29 +35,28 @@ int main()
 
     std::cout << "ALL ASSETS LOADED!\n";
 
+    // =========================================
+    // Loading Screen
+    // =========================================
+
+    LoadingScreen loadingScreen(5.0f);
+
+    if (!loadingScreen.load())
+    {
+        std::cout << "LOADING SCREEN FAILED!\n";
+
+        CloseWindow();
+        return 1;
+    }
 
     // =========================================
-    // LOADING SCREEN
+    // Loading loop
     // =========================================
-
-    LoadingScreen loadingScreen(
-        &assets,
-        5.0f
-    );
 
     while (!WindowShouldClose() &&
            !loadingScreen.isFinished())
     {
-        // -----------------------------
-        // Update
-        // -----------------------------
-
         loadingScreen.update();
-
-
-        // -----------------------------
-        // Draw
-        // -----------------------------
 
         BeginDrawing();
 
@@ -75,9 +67,8 @@ int main()
         EndDrawing();
     }
 
-
     // =========================================
-    // MAIN MENU TEST
+    // Test after loading
     // =========================================
 
     while (!WindowShouldClose())
@@ -86,49 +77,22 @@ int main()
 
         ClearBackground(BLACK);
 
-        Texture2D mainMenu =
-            assets.getMainMenuBackground();
-
-        if (mainMenu.id != 0)
-        {
-            DrawTexturePro(
-                mainMenu,
-
-                // Source rectangle
-                Rectangle{
-                    0,
-                    0,
-                    (float)mainMenu.width,
-                    (float)mainMenu.height
-                },
-
-                // Destination rectangle
-                Rectangle{
-                    0,
-                    0,
-                    (float)screenWidth,
-                    (float)screenHeight
-                },
-
-                Vector2{
-                    0,
-                    0
-                },
-
-                0.0f,
-
-                WHITE
-            );
-        }
+        DrawText(
+            "LOADING FINISHED!",
+            600,
+            430,
+            30,
+            WHITE
+        );
 
         EndDrawing();
     }
 
-
     // =========================================
-    // CLEANUP
+    // Cleanup
     // =========================================
 
+    loadingScreen.unload();
     assets.unload();
 
     CloseWindow();
