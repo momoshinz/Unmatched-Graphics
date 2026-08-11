@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 #include <raylib.h>
 #include <iostream>
 #include "graphics/AssetManager.h"
@@ -102,5 +101,3 @@ int main()
 
     return 0;
 }
-=======
->>>>>>> e2affb412992ff240a85e424135e4b4c55ed43a3
