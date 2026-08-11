@@ -13,6 +13,8 @@ class AssetManager
         Texture2D rangedIcon;
         Texture2D meleeIcon;
         Font gameFont;
+        Font titleFont;
+        Font loading;
 
         bool loaded;
 
@@ -32,6 +34,8 @@ class AssetManager
         Texture2D getLoadingBackground() const;
         Texture2D getBoard() const;
         Font getGameFont() const;
+        Font getTitleFont() const;
+        Font getLoadingFont() const;
 
         Texture2D getCharacter(const std::string &name) const;
 

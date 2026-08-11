@@ -54,12 +54,12 @@ void LoadingScreen::draw()
     // Loading text
     // =========================================
 
-    const char *text = "Loading...";
+    const char *text = "Loading . . .";
 
     Font font =
-        assets.getGameFont();
+        assets.getLoadingFont();
 
-    float fontSize = 50.0f;
+    float fontSize = 60.0f;
     float spacing = 2.0f;
 
     Vector2 textSize =

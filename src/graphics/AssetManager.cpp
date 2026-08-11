@@ -7,6 +7,8 @@ AssetManager::AssetManager()
       loadingBackground{},
       board{},
       gameFont{},
+      titleFont{},
+      loading{},
       loaded(false)
 {
 }
@@ -22,6 +24,8 @@ bool AssetManager::load()
     loadingBackground = LoadTexture("Unmatched_Assets/loading.png");
     board = LoadTexture("Unmatched_Assets/board.png");
     gameFont = LoadFont("Unmatched_Assets/fonts/Sweet Magic.ttf");
+    titleFont = LoadFont("Unmatched_Assets/fonts/black-draft.otf");
+    loading = LoadFont("Unmatched_Assets/fonts/NexaRustSlab.ttf");
 
     characterTextures["dracula"] = LoadTexture("Unmatched_Assets/dracula/dracula.png");
     characterTextures["dracula_art"] = LoadTexture("Unmatched_Assets/dracula/DracArt.png");
@@ -182,6 +186,16 @@ Texture2D AssetManager::getBoard() const
 Font AssetManager::getGameFont() const
 {
     return gameFont;
+}
+
+Font AssetManager::getTitleFont() const
+{
+    return titleFont;
+}
+
+Font AssetManager::getLoadingFont() const
+{
+    return loading;
 }
 
 Texture2D AssetManager::getCharacter(const std::string &name) const

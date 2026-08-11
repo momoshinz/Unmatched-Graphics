@@ -30,6 +30,10 @@ void MainMenu::draw()
     Font font =
         assets->getGameFont();
 
+    Font titleFont = assets->getTitleFont();
+
+    
+
     // =========================================
     // Background
     // =========================================
@@ -64,12 +68,12 @@ void MainMenu::draw()
 
     const char *title = "UNMATCHED";
 
-    const float titleSize = 80.0f;
+    const float titleSize = 60.0f;
     const float titleSpacing = 2.0f;
 
     Vector2 titleTextSize =
         MeasureTextEx(
-            font,
+            titleFont,
             title,
             titleSize,
             titleSpacing);
@@ -80,7 +84,7 @@ void MainMenu::draw()
     const float titleY = 100.0f;
 
     DrawTextEx(
-        font,
+        titleFont,
         title,
 
         Vector2{

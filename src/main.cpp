@@ -39,7 +39,7 @@ int main()
     // Loading Screen
     // =========================================
 
-    LoadingScreen loadingScreen(assets, 5.0f);  //the time we stay on loading screen
+    LoadingScreen loadingScreen(assets, 10.0f);  //the time we stay on loading screen
 
     while (!WindowShouldClose() &&
            !loadingScreen.isFinished())
