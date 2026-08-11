@@ -23,14 +23,24 @@ bool AssetManager::load()
 
     std::cout << "mainMenu ID: "
               << mainMenuBackground.id << "\n";
-/*
+
     std::cout << "Loading loading screen...\n";
     loadingBackground =
-        LoadTexture("Unmatched_Assets/loading.jpg");
+        LoadTexture("Unmatched_Assets/loading.png");
 
     std::cout << "loading ID: "
               << loadingBackground.id << "\n";
 
+    
+    if (mainMenuBackground.id == 0 ||
+        loadingBackground.id == 0)
+    {
+        std::cout << "[ERROR] Basic asset loading failed!\n";
+
+        unload();
+        return false;
+    }
+/*
     std::cout << "Loading board...\n";
     board =
         LoadTexture("Unmatched_Assets/board.jpg");
