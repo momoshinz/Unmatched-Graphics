@@ -1,5 +1,6 @@
 #include "graphics/AssetManager.h"
 #include <iostream>
+using namespace std;
 
 AssetManager::AssetManager()
     : mainMenuBackground{},
@@ -14,7 +15,7 @@ bool AssetManager::isTextureValid(const Texture2D &texture) const
 {
     return texture.id != 0;
 }
-
+/*
 bool AssetManager::load()
 {
     std::cout << "Loading main menu...\n";
@@ -23,7 +24,7 @@ bool AssetManager::load()
 
     std::cout << "mainMenu ID: "
               << mainMenuBackground.id << "\n";
-/*
+
     std::cout << "Loading loading screen...\n";
     loadingBackground =
         LoadTexture("Unmatched_Assets/loading.jpg");
@@ -54,7 +55,7 @@ bool AssetManager::load()
     {
         std::cout << "[ERROR] board FAILED!\n";
         return false;
-    }*/
+    }
 
     loaded = true;
 
@@ -62,33 +63,22 @@ bool AssetManager::load()
 
     return true;
 }
-
-/*
+*/
 bool AssetManager::load()
 {
-    std::cout << "Loading main menu...\n";
+    cout << "Loading main menu...\n";
 
-    mainMenuBackground =
-        LoadTexture("Unmatched_Assets/main_menu.png");
+    mainMenuBackground = LoadTexture("Unmatched_Assets/main_menu.png");
+    cout << "Loading loading screen...\n";
 
-    std::cout << "Loading loading screen...\n";
+    loadingBackground = LoadTexture("Unmatched_Assets/loading.png");
+    cout << "Loading board...\n";
 
-    loadingBackground =
-        LoadTexture("Unmatched_Assets/loading.png");
+    board = LoadTexture("Unmatched_Assets/board.png");
+    cout << "Loading font...\n";
 
-    std::cout << "Loading board...\n";
-
-    board =
-        LoadTexture("Unmatched_Assets/board.png");
-
-    std::cout << "Loading font...\n";
-
-    gameFont =
-        LoadFont("Unmatched_Assets/fonts/game_font.ttf");
-
-    std::cout << "Basic assets loaded.\n";
-
-    // فعلاً بقیه‌ی character و card ها را کامنت کن
+    gameFont = LoadFont("Unmatched_Assets/fonts/Sweet Magic.ttf");
+    cout << "Basic assets loaded.\n";
 
     if (mainMenuBackground.id == 0 ||
         loadingBackground.id == 0 ||
@@ -103,24 +93,26 @@ bool AssetManager::load()
 
     std::cout << "AssetManager::load() SUCCESS!\n";
 
-    return true;
-
-
     mainMenuBackground = LoadTexture("Unmatched_Assets/main_menu.png");
     loadingBackground = LoadTexture("Unmatched_Assets/loading.png");
     board = LoadTexture("Unmatched_Assets/board.png");
-    gameFont = LoadFont("Unmatched_Assets/fonts/game_font.ttf");
+    gameFont = LoadFont("Unmatched_Assets/fonts/Sweet Magic.ttf");
 
     characterTextures["dracula"] = LoadTexture("Unmatched_Assets/dracula/dracula.png");
     characterTextures["dracula_art"] = LoadTexture("Unmatched_Assets/dracula/DracArt.png");
     characterTextures["dracula_art_transparent"] = LoadTexture("Unmatched_Assets/dracula/DracArtTran.png");
     characterTextures["dracula_health"] = LoadTexture("Unmatched_Assets/dracula/draculaHealth.png");
     characterTextures["dracula_backcard"] = LoadTexture("Unmatched_Assets/dracula/draculaBackCard.png");
+    characterTextures["dracula-herocard"] = LoadTexture("Unmatched_Assets/dracula/dracHero.png");
     characterTextures["sisters"] = LoadTexture("Unmatched_Assets/dracula/3sisters.png");
+    characterTextures["sister1"] = LoadTexture("Unmatched_Assets/dracula/sis1.png");
+    characterTextures["sister2"] = LoadTexture("Unmatched_Assets/dracula/sis2.png");
+    characterTextures["sister3"] = LoadTexture("Unmatched_Assets/dracula/sis3.png");
     characterTextures["sherlock"] = LoadTexture("Unmatched_Assets/sherlock/sherlockTran.png");
     characterTextures["sherlock_art"] = LoadTexture("Unmatched_Assets/sherlock/holmsArt.png");
     characterTextures["sherlock_transparent"] = LoadTexture("Unmatched_Assets/sherlock/holmsArtTransparent.png");
     characterTextures["sherlock_health"] = LoadTexture("Unmatched_Assets/sherlock/sherlockHealth.png");
+    characterTextures["sherlock_backcard"] = LoadTexture("Unmatched_Assets/sherlock/holmsBackCard.png");
     characterTextures["sherlock_card"] = LoadTexture("Unmatched_Assets/sherlock/sherlockHerocard.png");
     characterTextures["watson"] = LoadTexture("Unmatched_Assets/sherlock/drwatson.png");
     characterTextures["watson_health"] = LoadTexture("Unmatched_Assets/sherlock/watsonHealth.png");
@@ -163,6 +155,10 @@ bool AssetManager::load()
     cardTextures["SlipAway"] = LoadTexture("Unmatched_Assets/cards/invisibleMan/slip-away.png");
     cardTextures["StepLightly"] = LoadTexture("Unmatched_Assets/cards/invisibleMan/step-lightly.png");
 
+    actionIcons = LoadTexture("Unmatched_Assets/actions.png");
+    rangedIcon = LoadTexture("Unmatched_Assets/ranged.png");
+    meleeIcon = LoadTexture("Unmatched_Assets/melee.png");
+
     if (!isTextureValid(mainMenuBackground) || !isTextureValid(loadingBackground) || !isTextureValid(board) ||
         gameFont.texture.id == 0)
     {
@@ -172,7 +168,7 @@ bool AssetManager::load()
 
     loaded = true;
     return true;
-}*/
+}
 
 void AssetManager::unload()
 {
@@ -198,6 +194,24 @@ void AssetManager::unload()
     {
         UnloadFont(gameFont);
         gameFont = {};
+    }
+
+    if (actionIcons.id != 0)
+    {
+        UnloadTexture(actionIcons);
+        actionIcons = {};
+    }
+
+    if (rangedIcon.id != 0)
+    {
+        UnloadTexture(rangedIcon);
+        rangedIcon = {};
+    }
+
+    if (meleeIcon.id != 0)
+    {
+        UnloadTexture(meleeIcon);
+        meleeIcon = {};
     }
 
     for (auto &[name, texture] : characterTextures)
@@ -264,6 +278,11 @@ Texture2D AssetManager::getCard(const std::string &name) const
         return {};
     }
     return it->second;
+}
+
+Texture2D AssetManager::getActionIcons() const
+{
+    return actionIcons;
 }
 
 bool AssetManager::isLoaded() const

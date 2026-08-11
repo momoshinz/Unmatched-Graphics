@@ -5,35 +5,38 @@
 
 class AssetManager
 {
-private:
-    Texture2D mainMenuBackground;
-    Texture2D loadingBackground;
-    Texture2D board;
+    private:
+        Texture2D mainMenuBackground;
+        Texture2D loadingBackground;
+        Texture2D board;
+        Texture2D actionIcons;
+        Texture2D rangedIcon;
+        Texture2D meleeIcon;
+        Font gameFont;
 
-    Font gameFont;
+        bool loaded;
 
-    bool loaded;
+        std::unordered_map<std::string, Texture2D> characterTextures;
+        std::unordered_map<std::string, Texture2D> cardTextures;
 
-    std::unordered_map<std::string, Texture2D> characterTextures;
-    std::unordered_map<std::string, Texture2D> cardTextures;
+        bool isTextureValid(const Texture2D &texture) const;
 
-    bool isTextureValid(const Texture2D &texture) const;
+    public:
+        AssetManager();
+        ~AssetManager();
 
-public:
-    AssetManager();
-    ~AssetManager();
+        bool load();
+        void unload();
 
-    bool load();
-    void unload();
+        Texture2D getMainMenuBackground() const;
+        Texture2D getLoadingBackground() const;
+        Texture2D getBoard() const;
+        Font getGameFont() const;
 
-    Texture2D getMainMenuBackground() const;
-    Texture2D getLoadingBackground() const;
-    Texture2D getBoard() const;
-    Font getGameFont() const;
+        Texture2D getCharacter(const std::string &name) const;
 
-    Texture2D getCharacter(const std::string &name) const;
+        Texture2D getCard(const std::string &name) const;
+        Texture2D getActionIcons() const;
 
-    Texture2D getCard(const std::string &name) const;
-
-    bool isLoaded() const;
+        bool isLoaded() const;
 };
