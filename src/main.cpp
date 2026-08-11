@@ -2,23 +2,28 @@
 #include <iostream>
 
 #include "graphics/AssetManager.h"
+#include "graphics/LoadingScreen.h"
+#include "graphics/MainMenu.h"
 
 int main()
 {
-    // ساخت پنجره
-    InitWindow(1600, 900, "Unmatched");
+    // -----------------------------
+    // WINDOW
+    // -----------------------------
 
-    // محدود کردن بازی به 60 فریم بر ثانیه
+    InitWindow(1600, 900, "Unmatched");
     SetTargetFPS(60);
 
     std::cout << "Window created.\n";
 
-    // ساخت AssetManager
+    // -----------------------------
+    // ASSET MANAGER
+    // -----------------------------
+
     AssetManager assets;
 
     std::cout << "AssetManager created.\n";
 
-    // لود کردن Assetها
     if (!assets.load())
     {
         std::cout << "ASSET LOADING FAILED!\n";
@@ -33,110 +38,59 @@ int main()
     // LOADING SCREEN
     // -----------------------------
 
-    float loadingTime = 10.0f;
+    float loadingTime = 5.0f;
     float elapsedTime = 0.0f;
 
     while (!WindowShouldClose() &&
-       elapsedTime < loadingTime)
-{
-    float deltaTime = GetFrameTime();
+           elapsedTime < loadingTime)
+    {
+        float deltaTime = GetFrameTime();
+        elapsedTime += deltaTime;
 
-    elapsedTime += deltaTime;
+        BeginDrawing();
 
-    BeginDrawing();
+        ClearBackground(BLACK);
 
-    ClearBackground(BLACK);
+        Texture2D loading =
+            assets.getLoadingBackground();
 
-    Texture2D loading =
-        assets.getLoadingBackground();
+        DrawTexturePro(
+            loading,
 
+            // قسمت مورد استفاده از تصویر
+            Rectangle{
+                0,
+                0,
+                (float)loading.width,
+                (float)loading.height
+            },
 
-    // -----------------------------
-    // Background
-    // -----------------------------
+            // اندازه‌ای که روی پنجره نمایش داده می‌شود
+            Rectangle{
+                0,
+                0,
+                1600,
+                900
+            },
 
-    float scaleX = 1600.0f / loading.width;
-    float scaleY = 900.0f / loading.height;
+            Vector2{0, 0},
+            0.0f,
+            WHITE
+        );
 
-    float scale = (scaleX > scaleY)
-                    ? scaleX
-                    : scaleY;
+        DrawText(
+            "LOADING...",
+            700,
+            450,
+            30,
+            WHITE
+        );
 
-
-    float drawWidth =
-        loading.width * scale;
-
-    float drawHeight =
-        loading.height * scale;
-
-
-    float posX =
-        (1600.0f - drawWidth) / 2.0f;
-
-    float posY =
-        (900.0f - drawHeight) / 2.0f;
-
-
-    DrawTexturePro(
-        loading,
-
-        Rectangle{
-            0,
-            0,
-            (float)loading.width,
-            (float)loading.height
-        },
-
-        Rectangle{
-            posX,
-            posY,
-            drawWidth,
-            drawHeight
-        },
-
-        Vector2{
-            0,
-            0
-        },
-
-        0.0f,
-
-        WHITE
-    );
-
+        EndDrawing();
+    }
 
     // -----------------------------
-    // LOADING TEXT
-    // -----------------------------
-
-    const char *text = "LOADING...";
-
-    int fontSize = 45;
-
-    int textWidth =
-        MeasureText(text, fontSize);
-
-    int textX =
-        (1600 - textWidth) / 2;
-
-    int textY =
-        (900 - fontSize) / 2;
-
-
-    DrawText(
-        text,
-        textX,
-        textY,
-        fontSize,
-        WHITE
-    );
-
-
-    EndDrawing();
-}
-
-    // -----------------------------
-    // TEST MAIN MENU
+    // MAIN MENU TEST
     // -----------------------------
 
     while (!WindowShouldClose())
@@ -145,39 +99,40 @@ int main()
 
         ClearBackground(BLACK);
 
-        Texture2D menu =
+        Texture2D mainMenu =
             assets.getMainMenuBackground();
 
         DrawTexturePro(
-            menu,
+            mainMenu,
 
             Rectangle{
                 0,
                 0,
-                (float)menu.width,
-                (float)menu.height},
+                (float)mainMenu.width,
+                (float)mainMenu.height
+            },
 
             Rectangle{
                 0,
                 0,
-                1280,
-                720},
+                1600,
+                900
+            },
 
-            Vector2{
-                0,
-                0},
-
+            Vector2{0, 0},
             0.0f,
-
-            WHITE);
+            WHITE
+        );
 
         EndDrawing();
     }
 
-    // آزاد کردن Assetها
+    // -----------------------------
+    // CLEANUP
+    // -----------------------------
+
     assets.unload();
 
-    // بستن پنجره
     CloseWindow();
 
     return 0;
