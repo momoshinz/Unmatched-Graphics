@@ -6,8 +6,8 @@
 
 int main()
 {
-    const int screenWidth = 1600;
-    const int screenHeight = 900;
+    const int screenWidth = 1300;
+    const int screenHeight = 700;
 
     InitWindow(
         screenWidth,
