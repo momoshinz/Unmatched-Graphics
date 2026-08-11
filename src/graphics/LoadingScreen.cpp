@@ -59,7 +59,7 @@ void LoadingScreen::draw()
     Font font =
         assets.getGameFont();
 
-    float fontSize = 45.0f;
+    float fontSize = 50.0f;
     float spacing = 2.0f;
 
     Vector2 textSize =
@@ -73,7 +73,7 @@ void LoadingScreen::draw()
         (GetScreenWidth() - textSize.x) / 2.0f;
 
     float textY =
-        (GetScreenHeight() - textSize.y) / 2.0f;
+        (GetScreenHeight() - textSize.y) / 1.5f;
 
     DrawTextEx(
         font,

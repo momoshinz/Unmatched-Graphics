@@ -1,6 +1,5 @@
 #include <raylib.h>
 #include <iostream>
-
 #include "graphics/AssetManager.h"
 #include "graphics/LoadingScreen.h"
 #include "graphics/MainMenu.h"

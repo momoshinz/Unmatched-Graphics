@@ -174,21 +174,21 @@ void MainMenu::draw()
     // کپسول اول
     DrawRectangleRounded(
         newGameButton,
-        0.5f,
+        1.5f,
         32,
         newGameColor);
 
     // کپسول دوم
     DrawRectangleRounded(
         loadGameButton,
-        0.5f,
+        1.5f,
         32,
         loadGameColor);
 
     // کپسول سوم
     DrawRectangleRounded(
         exitButton,
-        0.5f,
+        1.5f,
         32,
         exitColor);
 
