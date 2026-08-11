@@ -1,6 +1,5 @@
 #include <raylib.h>
 #include <iostream>
-
 #include "graphics/AssetManager.h"
 #include "graphics/LoadingScreen.h"
 
@@ -12,18 +11,15 @@ int main()
     InitWindow(
         screenWidth,
         screenHeight,
-        "Unmatched"
-    );
+        "Unmatched");
 
     SetTargetFPS(60);
 
     std::cout << "Window created.\n";
 
-    // =========================================
-    // Asset Manager
-    // =========================================
-
     AssetManager assets;
+
+    std::cout << "AssetManager created.\n";
 
     if (!assets.load())
     {
@@ -35,26 +31,11 @@ int main()
 
     std::cout << "ALL ASSETS LOADED!\n";
 
-    // =========================================
-    // Loading Screen
-    // =========================================
+    LoadingScreen loadingScreen(assets, 15.0f);
 
-    LoadingScreen loadingScreen(5.0f);
-
-    if (!loadingScreen.load())
-    {
-        std::cout << "LOADING SCREEN FAILED!\n";
-
-        CloseWindow();
-        return 1;
-    }
-
-    // =========================================
-    // Loading loop
-    // =========================================
-
-    while (!WindowShouldClose() &&
-           !loadingScreen.isFinished())
+    while (
+        !WindowShouldClose() &&
+        !loadingScreen.isFinished())
     {
         loadingScreen.update();
 
@@ -67,32 +48,6 @@ int main()
         EndDrawing();
     }
 
-    // =========================================
-    // Test after loading
-    // =========================================
-
-    while (!WindowShouldClose())
-    {
-        BeginDrawing();
-
-        ClearBackground(BLACK);
-
-        DrawText(
-            "LOADING FINISHED!",
-            600,
-            430,
-            30,
-            WHITE
-        );
-
-        EndDrawing();
-    }
-
-    // =========================================
-    // Cleanup
-    // =========================================
-
-    loadingScreen.unload();
     assets.unload();
 
     CloseWindow();

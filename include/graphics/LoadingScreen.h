@@ -1,30 +1,24 @@
 #ifndef LOADING_SCREEN_H
 #define LOADING_SCREEN_H
-
 #include <raylib.h>
+#include "graphics/AssetManager.h"
 
 class LoadingScreen
 {
-    private:
-        Texture2D background;
-        Font font;
+private:
+    AssetManager &assets;
 
-        float elapsedTime;
-        float duration;
+    float elapsedTime;
+    float duration;
 
-    public:
-        LoadingScreen(float duration = 5.0f);
+public:
+    LoadingScreen(AssetManager &assets, float duration);
 
-        bool load();
-        void unload();
+    void update();
+    void draw();
 
-        void update();
-        void draw();
-
-        bool isFinished() const;
-        void reset();
-
-        ~LoadingScreen();
+    bool isFinished() const;
+    void reset();
 };
 
 #endif

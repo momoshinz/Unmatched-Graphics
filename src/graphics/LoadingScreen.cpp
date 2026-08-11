@@ -1,73 +1,13 @@
 #include "graphics/LoadingScreen.h"
 #include <iostream>
 
-LoadingScreen::LoadingScreen(float duration)
-    : background{},
-      font{},
+LoadingScreen::LoadingScreen(
+    AssetManager &assets,
+    float duration)
+    : assets(assets),
       elapsedTime(0.0f),
       duration(duration)
 {
-}
-
-bool LoadingScreen::load()
-{
-    std::cout << "Loading loading screen...\n";
-
-    // -----------------------------
-    // Loading background
-    // -----------------------------
-
-    background =
-        LoadTexture("Unmatched_Assets/loading.png");
-
-    // -----------------------------
-    // Sweet Magic font
-    // -----------------------------
-
-    font =
-        LoadFont("Unmatched_Assets/fonts/Sweet Magic.ttf");
-
-    // -----------------------------
-    // Check assets
-    // -----------------------------
-
-    if (background.id == 0)
-    {
-        std::cout
-            << "Failed to load loading.png\n";
-
-        unload();
-        return false;
-    }
-
-    if (font.texture.id == 0)
-    {
-        std::cout
-            << "Failed to load Sweet Magic.ttf\n";
-
-        unload();
-        return false;
-    }
-
-    std::cout
-        << "LoadingScreen assets loaded successfully.\n";
-
-    return true;
-}
-
-void LoadingScreen::unload()
-{
-    if (background.id != 0)
-    {
-        UnloadTexture(background);
-        background = {};
-    }
-
-    if (font.texture.id != 0)
-    {
-        UnloadFont(font);
-        font = {};
-    }
 }
 
 void LoadingScreen::update()
@@ -78,8 +18,11 @@ void LoadingScreen::update()
 void LoadingScreen::draw()
 {
     // =========================================
-    // Background
+    // Loading background
     // =========================================
+
+    Texture2D background =
+        assets.getLoadingBackground();
 
     if (background.id != 0)
     {
@@ -87,35 +30,34 @@ void LoadingScreen::draw()
             background,
 
             Rectangle{
-                0,
-                0,
-                (float)background.width,
-                (float)background.height
-            },
+                0.0f,
+                0.0f,
+                static_cast<float>(background.width),
+                static_cast<float>(background.height)},
 
             Rectangle{
-                0,
-                0,
-                (float)GetScreenWidth(),
-                (float)GetScreenHeight()
-            },
+                0.0f,
+                0.0f,
+                static_cast<float>(GetScreenWidth()),
+                static_cast<float>(GetScreenHeight())},
 
             Vector2{
-                0,
-                0
-            },
+                0.0f,
+                0.0f},
 
             0.0f,
 
-            WHITE
-        );
+            WHITE);
     }
 
     // =========================================
-    // LOADING...
+    // Loading text
     // =========================================
 
     const char *text = "Loading...";
+
+    Font font =
+        assets.getGameFont();
 
     float fontSize = 45.0f;
     float spacing = 2.0f;
@@ -125,8 +67,7 @@ void LoadingScreen::draw()
             font,
             text,
             fontSize,
-            spacing
-        );
+            spacing);
 
     float textX =
         (GetScreenWidth() - textSize.x) / 2.0f;
@@ -140,14 +81,12 @@ void LoadingScreen::draw()
 
         Vector2{
             textX,
-            textY
-        },
+            textY},
 
         fontSize,
         spacing,
 
-        WHITE
-    );
+        WHITE);
 }
 
 bool LoadingScreen::isFinished() const
@@ -158,9 +97,4 @@ bool LoadingScreen::isFinished() const
 void LoadingScreen::reset()
 {
     elapsedTime = 0.0f;
-}
-
-LoadingScreen::~LoadingScreen()
-{
-    unload();
 }

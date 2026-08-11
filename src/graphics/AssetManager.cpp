@@ -15,94 +15,9 @@ bool AssetManager::isTextureValid(const Texture2D &texture) const
 {
     return texture.id != 0;
 }
-/*
+
 bool AssetManager::load()
 {
-    std::cout << "Loading main menu...\n";
-    mainMenuBackground =
-        LoadTexture("Unmatched_Assets/main_menu.png");
-
-    std::cout << "mainMenu ID: "
-              << mainMenuBackground.id << "\n";
-
-    std::cout << "Loading loading screen...\n";
-    loadingBackground =
-        LoadTexture("Unmatched_Assets/loading.png");
-
-    std::cout << "loading ID: "
-              << loadingBackground.id << "\n";
-
-    
-    if (mainMenuBackground.id == 0 ||
-        loadingBackground.id == 0)
-    {
-        std::cout << "[ERROR] Basic asset loading failed!\n";
-
-        unload();
-        return false;
-    }
-/*
-    std::cout << "Loading board...\n";
-    board =
-        LoadTexture("Unmatched_Assets/board.jpg");
-
-    std::cout << "board ID: "
-              << board.id << "\n";
-
-    if (mainMenuBackground.id == 0)
-    {
-        std::cout << "[ERROR] mainMenuBackground FAILED!\n";
-        return false;
-    }*/
-/*
-    if (loadingBackground.id == 0)
-    {
-        std::cout << "[ERROR] loadingBackground FAILED!\n";
-        return false;
-    }
-
-    if (board.id == 0)
-    {
-        std::cout << "[ERROR] board FAILED!\n";
-        return false;
-    }
-
-    loaded = true;
-
-    std::cout << "ALL BASIC ASSETS LOADED SUCCESSFULLY!\n";
-
-    return true;
-}
-*/
-bool AssetManager::load()
-{
-    cout << "Loading main menu...\n";
-
-    mainMenuBackground = LoadTexture("Unmatched_Assets/main_menu.png");
-    cout << "Loading loading screen...\n";
-
-    loadingBackground = LoadTexture("Unmatched_Assets/loading.png");
-    cout << "Loading board...\n";
-
-    board = LoadTexture("Unmatched_Assets/board.png");
-    cout << "Loading font...\n";
-
-    gameFont = LoadFont("Unmatched_Assets/fonts/Sweet Magic.ttf");
-    cout << "Basic assets loaded.\n";
-
-    if (mainMenuBackground.id == 0 ||
-        loadingBackground.id == 0 ||
-        board.id == 0 ||
-        gameFont.texture.id == 0)
-    {
-        std::cout << "One of the basic assets FAILED!\n";
-        return false;
-    }
-
-    loaded = true;
-
-    std::cout << "AssetManager::load() SUCCESS!\n";
-
     mainMenuBackground = LoadTexture("Unmatched_Assets/main_menu.png");
     loadingBackground = LoadTexture("Unmatched_Assets/loading.png");
     board = LoadTexture("Unmatched_Assets/board.png");
@@ -126,7 +41,6 @@ bool AssetManager::load()
     characterTextures["sherlock_card"] = LoadTexture("Unmatched_Assets/sherlock/sherlockHerocard.png");
     characterTextures["watson"] = LoadTexture("Unmatched_Assets/sherlock/drwatson.png");
     characterTextures["watson_health"] = LoadTexture("Unmatched_Assets/sherlock/watsonHealth.png");
-    characterTextures["sherlock_backcard"] = LoadTexture("Unmatched_Assets/sherlock/holmsBackCard.png");
     characterTextures["invisible_man"] = LoadTexture("Unmatched_Assets/invisibleMan/invArt.png");
     characterTextures["invisible_man_transparent"] = LoadTexture("Unmatched_Assets/invisibleMan/tranInv.png");
     characterTextures["fog"] = LoadTexture("Unmatched_Assets/invisibleMan/fog.png");
