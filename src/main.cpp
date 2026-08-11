@@ -1,7 +1,9 @@
 #include <raylib.h>
 #include <iostream>
+
 #include "graphics/AssetManager.h"
 #include "graphics/LoadingScreen.h"
+#include "graphics/MainMenu.h"
 
 int main()
 {
@@ -11,15 +13,18 @@ int main()
     InitWindow(
         screenWidth,
         screenHeight,
-        "Unmatched");
+        "Unmatched"
+    );
 
     SetTargetFPS(60);
 
     std::cout << "Window created.\n";
 
-    AssetManager assets;
+    // =========================================
+    // Asset Manager
+    // =========================================
 
-    std::cout << "AssetManager created.\n";
+    AssetManager assets;
 
     if (!assets.load())
     {
@@ -31,11 +36,14 @@ int main()
 
     std::cout << "ALL ASSETS LOADED!\n";
 
-    LoadingScreen loadingScreen(assets, 15.0f);
+    // =========================================
+    // Loading Screen
+    // =========================================
 
-    while (
-        !WindowShouldClose() &&
-        !loadingScreen.isFinished())
+    LoadingScreen loadingScreen(assets, 5.0f);  //the time we stay on loading screen
+
+    while (!WindowShouldClose() &&
+           !loadingScreen.isFinished())
     {
         loadingScreen.update();
 
@@ -47,6 +55,46 @@ int main()
 
         EndDrawing();
     }
+
+
+    MainMenu mainMenu(&assets);
+
+    while (!WindowShouldClose())
+    {
+        mainMenu.update();
+
+        int result =
+            mainMenu.handleInput();
+
+        if (result == 1)
+        {
+            std::cout << "NEW GAME selected.\n";
+
+            // فعلاً بعداً Game را اینجا اجرا می‌کنیم
+        }
+        else if (result == 2)
+        {
+            std::cout << "LOAD GAME selected.\n";
+
+            // فعلاً بعداً Load Game را اینجا می‌سازیم
+        }
+        else if (result == 3)
+        {
+            break;
+        }
+
+        BeginDrawing();
+
+        ClearBackground(BLACK);
+
+        mainMenu.draw();
+
+        EndDrawing();
+    }
+
+    // =========================================
+    // Cleanup
+    // =========================================
 
     assets.unload();
 
