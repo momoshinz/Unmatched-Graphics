@@ -25,6 +25,8 @@ FetchContent_Declare(
     GIT_TAG 6.0
 )
 
+set(SUPPORT_FILEFORMAT_JPG ON CACHE BOOL "Support JPG textures" FORCE)
+
 FetchContent_MakeAvailable(raylib)
 
 
@@ -107,7 +109,10 @@ set(SOURCES
 
     src/player/Player.cpp
 
-    src/ui/MainMenu.cpp
+    src/graphics/AssetManager.cpp
+    src/graphics/GameRenderer.cpp
+    src/graphics/MainMenu.cpp
+
     src/ui/TerminalUI.cpp
 )
 
@@ -128,4 +133,10 @@ target_link_libraries(
     PRIVATE
     nlohmann_json::nlohmann_json
     raylib
+)
+
+add_custom_command(TARGET Unmatched-Graphics POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+    "${CMAKE_SOURCE_DIR}/Unmatched_Assets"
+    "$<TARGET_FILE_DIR:Unmatched-Graphics>/Unmatched_Assets"
 )
