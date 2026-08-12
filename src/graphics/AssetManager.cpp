@@ -7,6 +7,7 @@ AssetManager::AssetManager()
     : mainMenuBackground{},
       loadingBackground{},
       gameMap{},
+      MainPanelBackground{},
       gameFont{},
       titleFont{},
       loading{},
@@ -35,6 +36,9 @@ bool AssetManager::load()
 
     gameMap =
         LoadTexture("Unmatched_Assets/board.png");
+
+    MainPanelBackground =
+        LoadTexture("Unmatched_Assets/mainPanel.png");
 
     // =========================================
     // Fonts
@@ -319,9 +323,11 @@ void AssetManager::unload()
         gameMap = {};
     }
 
-    // =========================================
-    // Fonts
-    // =========================================
+    if (MainPanelBackground.id != 0)
+    {
+        UnloadTexture(MainPanelBackground);
+        MainPanelBackground = {};
+    }
 
     if (gameFont.texture.id != 0)
     {
@@ -461,4 +467,9 @@ Texture2D AssetManager::getActionIcons() const
 bool AssetManager::isLoaded() const
 {
     return loaded;
+}
+
+Texture2D AssetManager::getMainPanelBackground() const
+{
+    return MainPanelBackground;
 }
