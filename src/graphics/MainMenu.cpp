@@ -1,10 +1,12 @@
 #include "graphics/MainMenu.h"
 #include <cctype>
 #include <fstream>
+#include "fighter/Hero.h"
 using namespace std;
 
 MainMenu::MainMenu(AssetManager *assets)
     : assets(assets),
+      game(game),
       state(State::MAIN_MENU),
       player1Name(""),
       player1Age(""),
@@ -17,7 +19,14 @@ MainMenu::MainMenu(AssetManager *assets)
       player1Hero(""),
       player2Hero(""),
       player1HeroSelected(false),
-      player2HeroSelected(false)
+      player2HeroSelected(false),
+      placement(Placement::YOUNGER_HERO),
+      selectedStartSpace(-1),
+      board(nullptr),
+      placementPlayer(1),
+      placementHeroPlaced(false),
+      placementStartSpace(-1),
+      placementSidekickIndex(0)
 {
 }
 
@@ -1308,7 +1317,7 @@ int MainMenu::handleInput()
                         mousePosition,
                         finishButton))
                 {
-                    // فعلاً هیچ کاری نمی‌کنیم
+                    startPlacement();
                 }
             }
         }
@@ -1837,6 +1846,145 @@ void MainMenu::selectHero(const std::string &hero)
 
 bool MainMenu::bothHeroesSelected() const
 {
-    return player1HeroSelected &&
-           player2HeroSelected;
+    return player1HeroSelected && player2HeroSelected;
+}
+
+void MainMenu::startPlacement()
+{
+    selectedStartSpace = -1;
+    placementStartSpace = -1;
+
+    placementHeroPlaced = false;
+    placementSidekickIndex = 0;
+
+    int age1 = std::stoi(player1Age);
+    int age2 = std::stoi(player2Age);
+
+    if (age1 < age2)
+    {
+        placementPlayer = 1;
+    }
+    else if (age2 < age1)
+    {
+        placementPlayer = 2;
+    }
+    else
+    {
+        if (currentHeroPlayer == HeroSelectionPlayer::PLAYER_1)
+        {
+            placementPlayer = 1;
+        }
+        else
+        {
+            placementPlayer = 2;
+        }
+    }
+
+    placement = Placement::YOUNGER_HERO;
+
+    state = State::PLACEMENT;
+}
+
+bool MainMenu::placeHeroOnSpace(int spaceId)
+{
+    // -----------------------------------------
+    // Check Game
+    // -----------------------------------------
+
+    if (game == nullptr)
+    {
+        return false;
+    }
+
+    // -----------------------------------------
+    // Get Board
+    // -----------------------------------------
+
+    Board &gameBoard = game->getBoard();
+
+    Space *space = gameBoard.getSpace(spaceId);
+
+    if (space == nullptr)
+    {
+        return false;
+    }
+
+    // -----------------------------------------
+    // Space must be empty
+    // -----------------------------------------
+
+    if (space->isOccupied())
+    {
+        return false;
+    }
+
+    // -----------------------------------------
+    // Get Players
+    // -----------------------------------------
+
+    const std::vector<Player *> &players =
+        game->getPlayers();
+
+    if (players.size() < 2)
+    {
+        return false;
+    }
+
+    Player *player = nullptr;
+
+    if (placementPlayer == 1)
+    {
+        player = players[0];
+    }
+    else
+    {
+        player = players[1];
+    }
+
+    if (player == nullptr)
+    {
+        return false;
+    }
+
+    // -----------------------------------------
+    // Get player's Hero
+    // -----------------------------------------
+
+    Hero *hero = player->getHero();
+
+    if (hero == nullptr)
+    {
+        return false;
+    }
+
+    // -----------------------------------------
+    // Place Hero on Space
+    // -----------------------------------------
+
+    space->setFighter(hero);
+
+    // -----------------------------------------
+    // Save placement information
+    // -----------------------------------------
+
+    placementStartSpace = spaceId;
+    selectedStartSpace = spaceId;
+    placementHeroPlaced = true;
+
+    // -----------------------------------------
+    // Go to Sidekicks
+    // -----------------------------------------
+
+    placementSidekickIndex = 0;
+
+    if (placement == Placement::YOUNGER_HERO)
+    {
+        placement = Placement::YOUNGER_SIDEKICKS;
+    }
+    else if (placement == Placement::OLDER_HERO)
+    {
+        placement = Placement::OLDER_SIDEKICKS;
+    }
+
+    return true;
 }
