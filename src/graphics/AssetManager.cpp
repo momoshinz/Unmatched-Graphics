@@ -1,11 +1,12 @@
 #include "graphics/AssetManager.h"
 #include <iostream>
+
 using namespace std;
 
 AssetManager::AssetManager()
     : mainMenuBackground{},
       loadingBackground{},
-      board{},
+      gameMap{},
       gameFont{},
       titleFont{},
       loading{},
@@ -20,86 +21,282 @@ bool AssetManager::isTextureValid(const Texture2D &texture) const
 
 bool AssetManager::load()
 {
-    mainMenuBackground = LoadTexture("Unmatched_Assets/main_menu.png");
-    loadingBackground = LoadTexture("Unmatched_Assets/loading.png");
-    board = LoadTexture("Unmatched_Assets/board.png");
-    gameFont = LoadFont("Unmatched_Assets/fonts/Sweet Magic.ttf");
-    titleFont = LoadFont("Unmatched_Assets/fonts/black-draft.otf");
-    loading = LoadFont("Unmatched_Assets/fonts/NexaRustSlab.ttf");
+    cout << "Loading assets...\n";
 
-    characterTextures["dracula"] = LoadTexture("Unmatched_Assets/dracula/DracArtTran.png");
-    characterTextures["dracula_art"] = LoadTexture("Unmatched_Assets/dracula/DracArt.png");
-    characterTextures["dracula_art_transparent"] = LoadTexture("Unmatched_Assets/dracula/DracArtTran.png");
-    characterTextures["dracula_health"] = LoadTexture("Unmatched_Assets/dracula/draculaHealth.png");
-    characterTextures["dracula_backcard"] = LoadTexture("Unmatched_Assets/dracula/draculaBackCard.png");
-    characterTextures["dracula-herocard"] = LoadTexture("Unmatched_Assets/dracula/dracHero.png");
-    characterTextures["sisters"] = LoadTexture("Unmatched_Assets/dracula/3sisters.png");
-    characterTextures["sister1"] = LoadTexture("Unmatched_Assets/dracula/sis1.png");
-    characterTextures["sister2"] = LoadTexture("Unmatched_Assets/dracula/sis2.png");
-    characterTextures["sister3"] = LoadTexture("Unmatched_Assets/dracula/sis3.png");
-    characterTextures["sherlock"] = LoadTexture("Unmatched_Assets/sherlock/holmsArtTransparent.png");
-    characterTextures["sherlock_art"] = LoadTexture("Unmatched_Assets/sherlock/holmsArt.png");
-    characterTextures["sherlock_transparent"] = LoadTexture("Unmatched_Assets/sherlock/holmsArtTransparent.png");
-    characterTextures["sherlock_health"] = LoadTexture("Unmatched_Assets/sherlock/sherlockHealth.png");
-    characterTextures["sherlock_backcard"] = LoadTexture("Unmatched_Assets/sherlock/holmsBackCard.png");
-    characterTextures["sherlock_card"] = LoadTexture("Unmatched_Assets/sherlock/sherlockHerocard.png");
-    characterTextures["watson"] = LoadTexture("Unmatched_Assets/sherlock/drwatson.png");
-    characterTextures["watson_health"] = LoadTexture("Unmatched_Assets/sherlock/watsonHealth.png");
-    characterTextures["invisible_man"] = LoadTexture("Unmatched_Assets/invisibleMan/invisibleManArT.png");
-    characterTextures["invisible_man_transparent"] = LoadTexture("Unmatched_Assets/invisibleMan/tranInv.png");
-    characterTextures["fog"] = LoadTexture("Unmatched_Assets/invisibleMan/fog.png");
+    // =========================================
+    // Backgrounds
+    // =========================================
 
-    cardTextures["BeastForm"] = LoadTexture("Unmatched_Assets/cards/dracula/Beastform.png");
-    cardTextures["Ambush"] = LoadTexture("Unmatched_Assets/cards/dracula/ambush.png");
-    cardTextures["BaptismOfBlood"] = LoadTexture("Unmatched_Assets/cards/dracula/baptism-of-blood.png");
-    cardTextures["Dash"] = LoadTexture("Unmatched_Assets/cards/dracula/dash.png");
-    cardTextures["Exploit"] = LoadTexture("Unmatched_Assets/cards/dracula/exploit.png");
-    cardTextures["FeedingFrenzy"] = LoadTexture("Unmatched_Assets/cards/dracula/feeding-frenzy.png");
-    cardTextures["FeintDracula"] = LoadTexture("Unmatched_Assets/cards/dracula/feint (1).png");
-    cardTextures["LookIntoMyEyes"] = LoadTexture("Unmatched_Assets/cards/dracula/look-into-my-eyes.png");
-    cardTextures["MistForm"] = LoadTexture("Unmatched_Assets/cards/dracula/mistform.png");
-    cardTextures["PreyUpon"] = LoadTexture("Unmatched_Assets/cards/dracula/prey-upon.png");
-    cardTextures["RaveningSeduction"] = LoadTexture("Unmatched_Assets/cards/dracula/ravening-seduction.png");
-    cardTextures["ThirstForSustenance"] = LoadTexture("Unmatched_Assets/cards/dracula/thirst-for-sustenance.png");
-    cardTextures["AdministerAid"] = LoadTexture("Unmatched_Assets/cards/sherlock/administer-aid.png");
-    cardTextures["CounterPunch"] = LoadTexture("Unmatched_Assets/cards/sherlock/counterpunch.png");
-    cardTextures["DeduceStrategy"] = LoadTexture("Unmatched_Assets/cards/sherlock/deduce-strategy.png");
-    cardTextures["EducationNeverEnds"] = LoadTexture("Unmatched_Assets/cards/sherlock/education-never-ends.png");
-    cardTextures["EliminateTheImpossible"] = LoadTexture("Unmatched_Assets/cards/sherlock/eliminate-the-impossible.png");
-    cardTextures["FeintSherlock"] = LoadTexture("Unmatched_Assets/cards/sherlock/feint (2).png");
-    cardTextures["FixedPoint"] = LoadTexture("Unmatched_Assets/cards/sherlock/fixed-point-in-a-changing-aga.png");
-    cardTextures["MasterOfDisguise"] = LoadTexture("Unmatched_Assets/cards/sherlock/master-of-disguise.png");
-    cardTextures["StudyMethods"] = LoadTexture("Unmatched_Assets/cards/sherlock/study-methods.png");
-    cardTextures["TheGameIsAfoot"] = LoadTexture("Unmatched_Assets/cards/sherlock/the-game-is-afoot.png");
-    cardTextures["ServiceRevolver"] = LoadTexture("Unmatched_Assets/cards/sherlock/service-revolver.png");
-    cardTextures["CodedNotes"] = LoadTexture("Unmatched_Assets/cards/invisibleMan/coded-notes.png");
-    cardTextures["DreamingOfRevange"] = LoadTexture("Unmatched_Assets/cards/invisibleMan/dreaming-of-revange.png");
-    cardTextures["EmergeFromMist"] = LoadTexture("Unmatched_Assets/cards/invisibleMan/emerge-from-mist.png");
-    cardTextures["ImpossibleToSee"] = LoadTexture("Unmatched_Assets/cards/invisibleMan/impossible-to-see.png");
-    cardTextures["IntoThinAir"] = LoadTexture("Unmatched_Assets/cards/invisibleMan/into-thin-air.png");
-    cardTextures["Lurking"] = LoadTexture("Unmatched_Assets/cards/invisibleMan/lurking.png");
-    cardTextures["ReignOfTerror"] = LoadTexture("Unmatched_Assets/cards/invisibleMan/reign-of-terror.png");
-    cardTextures["RollingFog"] = LoadTexture("Unmatched_Assets/cards/invisibleMan/rolling-fog.png");
-    cardTextures["SlipAway"] = LoadTexture("Unmatched_Assets/cards/invisibleMan/slip-away.png");
-    cardTextures["StepLightly"] = LoadTexture("Unmatched_Assets/cards/invisibleMan/step-lightly.png");
+    mainMenuBackground =
+        LoadTexture("Unmatched_Assets/main_menu.png");
 
-    actionIcons = LoadTexture("Unmatched_Assets/actions.png");
-    rangedIcon = LoadTexture("Unmatched_Assets/ranged.png");
-    meleeIcon = LoadTexture("Unmatched_Assets/melee.png");
+    loadingBackground =
+        LoadTexture("Unmatched_Assets/loading.png");
 
-    if (!isTextureValid(mainMenuBackground) || !isTextureValid(loadingBackground) || !isTextureValid(board) ||
-        gameFont.texture.id == 0)
+    gameMap =
+        LoadTexture("Unmatched_Assets/board.png");
+
+    // =========================================
+    // Fonts
+    // =========================================
+
+    gameFont =
+        LoadFont("Unmatched_Assets/fonts/Sweet Magic.ttf");
+
+    titleFont =
+        LoadFont("Unmatched_Assets/fonts/black-draft.otf");
+
+    loading =
+        LoadFont("Unmatched_Assets/fonts/NexaRustSlab.ttf");
+
+    // =========================================
+    // Dracula
+    // =========================================
+
+    characterTextures["dracula"] =
+        LoadTexture("Unmatched_Assets/dracula/DracArtTran.png");
+
+    characterTextures["dracula_art"] =
+        LoadTexture("Unmatched_Assets/dracula/DracArt.png");
+
+    characterTextures["dracula_art_transparent"] =
+        LoadTexture("Unmatched_Assets/dracula/DracArtTran.png");
+
+    characterTextures["dracula_health"] =
+        LoadTexture("Unmatched_Assets/dracula/draculaHealth.png");
+
+    characterTextures["dracula_backcard"] =
+        LoadTexture("Unmatched_Assets/dracula/draculaBackCard.png");
+
+    characterTextures["dracula-herocard"] =
+        LoadTexture("Unmatched_Assets/dracula/dracHero.png");
+
+    characterTextures["sisters"] =
+        LoadTexture("Unmatched_Assets/dracula/3sisters.png");
+
+    characterTextures["sister1"] =
+        LoadTexture("Unmatched_Assets/dracula/sis1.png");
+
+    characterTextures["sister2"] =
+        LoadTexture("Unmatched_Assets/dracula/sis2.png");
+
+    characterTextures["sister3"] =
+        LoadTexture("Unmatched_Assets/dracula/sis3.png");
+
+    // =========================================
+    // Sherlock
+    // =========================================
+
+    characterTextures["sherlock"] =
+        LoadTexture("Unmatched_Assets/sherlock/holmsArtTransparent.png");
+
+    characterTextures["sherlock_art"] =
+        LoadTexture("Unmatched_Assets/sherlock/holmsArt.png");
+
+    characterTextures["sherlock_transparent"] =
+        LoadTexture("Unmatched_Assets/sherlock/holmsArtTransparent.png");
+
+    characterTextures["sherlock_health"] =
+        LoadTexture("Unmatched_Assets/sherlock/sherlockHealth.png");
+
+    characterTextures["sherlock_backcard"] =
+        LoadTexture("Unmatched_Assets/sherlock/holmsBackCard.png");
+
+    characterTextures["sherlock_card"] =
+        LoadTexture("Unmatched_Assets/sherlock/sherlockHerocard.png");
+
+    characterTextures["watson"] =
+        LoadTexture("Unmatched_Assets/sherlock/drwatson.png");
+
+    characterTextures["watson_health"] =
+        LoadTexture("Unmatched_Assets/sherlock/watsonHealth.png");
+
+    // =========================================
+    // Invisible Man
+    // =========================================
+
+    characterTextures["invisible_man"] =
+        LoadTexture("Unmatched_Assets/invisibleMan/invisibleManArT.png");
+
+    characterTextures["invisible_man_transparent"] =
+        LoadTexture("Unmatched_Assets/invisibleMan/tranInv.png");
+
+    characterTextures["fog"] =
+        LoadTexture("Unmatched_Assets/invisibleMan/fog.png");
+
+    // =========================================
+    // Dracula cards
+    // =========================================
+
+    cardTextures["BeastForm"] =
+        LoadTexture("Unmatched_Assets/cards/dracula/Beastform.png");
+
+    cardTextures["Ambush"] =
+        LoadTexture("Unmatched_Assets/cards/dracula/ambush.png");
+
+    cardTextures["BaptismOfBlood"] =
+        LoadTexture("Unmatched_Assets/cards/dracula/baptism-of-blood.png");
+
+    cardTextures["Dash"] =
+        LoadTexture("Unmatched_Assets/cards/dracula/dash.png");
+
+    cardTextures["Exploit"] =
+        LoadTexture("Unmatched_Assets/cards/dracula/exploit.png");
+
+    cardTextures["FeedingFrenzy"] =
+        LoadTexture("Unmatched_Assets/cards/dracula/feeding-frenzy.png");
+
+    cardTextures["FeintDracula"] =
+        LoadTexture("Unmatched_Assets/cards/dracula/feint (1).png");
+
+    cardTextures["LookIntoMyEyes"] =
+        LoadTexture("Unmatched_Assets/cards/dracula/look-into-my-eyes.png");
+
+    cardTextures["MistForm"] =
+        LoadTexture("Unmatched_Assets/cards/dracula/mistform.png");
+
+    cardTextures["PreyUpon"] =
+        LoadTexture("Unmatched_Assets/cards/dracula/prey-upon.png");
+
+    cardTextures["RaveningSeduction"] =
+        LoadTexture("Unmatched_Assets/cards/dracula/ravening-seduction.png");
+
+    cardTextures["ThirstForSustenance"] =
+        LoadTexture("Unmatched_Assets/cards/dracula/thirst-for-sustenance.png");
+
+    // =========================================
+    // Sherlock cards
+    // =========================================
+
+    cardTextures["AdministerAid"] =
+        LoadTexture("Unmatched_Assets/cards/sherlock/administer-aid.png");
+
+    cardTextures["CounterPunch"] =
+        LoadTexture("Unmatched_Assets/cards/sherlock/counterpunch.png");
+
+    cardTextures["DeduceStrategy"] =
+        LoadTexture("Unmatched_Assets/cards/sherlock/deduce-strategy.png");
+
+    cardTextures["EducationNeverEnds"] =
+        LoadTexture("Unmatched_Assets/cards/sherlock/education-never-ends.png");
+
+    cardTextures["EliminateTheImpossible"] =
+        LoadTexture("Unmatched_Assets/cards/sherlock/eliminate-the-impossible.png");
+
+    cardTextures["FeintSherlock"] =
+        LoadTexture("Unmatched_Assets/cards/sherlock/feint (2).png");
+
+    cardTextures["FixedPoint"] =
+        LoadTexture("Unmatched_Assets/cards/sherlock/fixed-point-in-a-changing-aga.png");
+
+    cardTextures["MasterOfDisguise"] =
+        LoadTexture("Unmatched_Assets/cards/sherlock/master-of-disguise.png");
+
+    cardTextures["StudyMethods"] =
+        LoadTexture("Unmatched_Assets/cards/sherlock/study-methods.png");
+
+    cardTextures["TheGameIsAfoot"] =
+        LoadTexture("Unmatched_Assets/cards/sherlock/the-game-is-afoot.png");
+
+    cardTextures["ServiceRevolver"] =
+        LoadTexture("Unmatched_Assets/cards/sherlock/service-revolver.png");
+
+    // =========================================
+    // Invisible Man cards
+    // =========================================
+
+    cardTextures["CodedNotes"] =
+        LoadTexture("Unmatched_Assets/cards/invisibleMan/coded-notes.png");
+
+    cardTextures["DreamingOfRevange"] =
+        LoadTexture("Unmatched_Assets/cards/invisibleMan/dreaming-of-revange.png");
+
+    cardTextures["EmergeFromMist"] =
+        LoadTexture("Unmatched_Assets/cards/invisibleMan/emerge-from-mist.png");
+
+    cardTextures["ImpossibleToSee"] =
+        LoadTexture("Unmatched_Assets/cards/invisibleMan/impossible-to-see.png");
+
+    cardTextures["IntoThinAir"] =
+        LoadTexture("Unmatched_Assets/cards/invisibleMan/into-thin-air.png");
+
+    cardTextures["Lurking"] =
+        LoadTexture("Unmatched_Assets/cards/invisibleMan/lurking.png");
+
+    cardTextures["ReignOfTerror"] =
+        LoadTexture("Unmatched_Assets/cards/invisibleMan/reign-of-terror.png");
+
+    cardTextures["RollingFog"] =
+        LoadTexture("Unmatched_Assets/cards/invisibleMan/rolling-fog.png");
+
+    cardTextures["SlipAway"] =
+        LoadTexture("Unmatched_Assets/cards/invisibleMan/slip-away.png");
+
+    cardTextures["StepLightly"] =
+        LoadTexture("Unmatched_Assets/cards/invisibleMan/step-lightly.png");
+
+    // =========================================
+    // Icons
+    // =========================================
+
+    actionIcons =
+        LoadTexture("Unmatched_Assets/actions.png");
+
+    rangedIcon =
+        LoadTexture("Unmatched_Assets/ranged.png");
+
+    meleeIcon =
+        LoadTexture("Unmatched_Assets/melee.png");
+
+    // =========================================
+    // REQUIRED ASSETS
+    // =========================================
+
+    if (!isTextureValid(mainMenuBackground))
     {
+        cout << "[ERROR] main_menu.png failed to load.\n";
         unload();
         return false;
     }
 
+    if (!isTextureValid(loadingBackground))
+    {
+        cout << "[ERROR] loading.png failed to load.\n";
+        unload();
+        return false;
+    }
+
+    if (!isTextureValid(gameMap))
+    {
+        cout << "[ERROR] board.png failed to load.\n";
+        unload();
+        return false;
+    }
+
+    if (gameFont.texture.id == 0)
+    {
+        cout << "[ERROR] Sweet Magic.ttf failed to load.\n";
+        unload();
+        return false;
+    }
+
+    // =========================================
+    // Success
+    // =========================================
+
     loaded = true;
+
+    cout << "All required assets loaded successfully.\n";
+
     return true;
 }
 
 void AssetManager::unload()
 {
+    // =========================================
+    // Backgrounds
+    // =========================================
+
     if (mainMenuBackground.id != 0)
     {
         UnloadTexture(mainMenuBackground);
@@ -112,17 +309,41 @@ void AssetManager::unload()
         loadingBackground = {};
     }
 
-    if (board.id != 0)
+    // =========================================
+    // Game Map
+    // =========================================
+
+    if (gameMap.id != 0)
     {
-        UnloadTexture(board);
-        board = {};
+        UnloadTexture(gameMap);
+        gameMap = {};
     }
+
+    // =========================================
+    // Fonts
+    // =========================================
 
     if (gameFont.texture.id != 0)
     {
         UnloadFont(gameFont);
         gameFont = {};
     }
+
+    if (titleFont.texture.id != 0)
+    {
+        UnloadFont(titleFont);
+        titleFont = {};
+    }
+
+    if (loading.texture.id != 0)
+    {
+        UnloadFont(loading);
+        loading = {};
+    }
+
+    // =========================================
+    // Icons
+    // =========================================
 
     if (actionIcons.id != 0)
     {
@@ -142,6 +363,10 @@ void AssetManager::unload()
         meleeIcon = {};
     }
 
+    // =========================================
+    // Character textures
+    // =========================================
+
     for (auto &[name, texture] : characterTextures)
     {
         if (texture.id != 0)
@@ -149,7 +374,12 @@ void AssetManager::unload()
             UnloadTexture(texture);
         }
     }
+
     characterTextures.clear();
+
+    // =========================================
+    // Card textures
+    // =========================================
 
     for (auto &[name, texture] : cardTextures)
     {
@@ -158,6 +388,7 @@ void AssetManager::unload()
             UnloadTexture(texture);
         }
     }
+
     cardTextures.clear();
 
     loaded = false;
@@ -178,9 +409,9 @@ Texture2D AssetManager::getLoadingBackground() const
     return loadingBackground;
 }
 
-Texture2D AssetManager::getBoard() const
+Texture2D AssetManager::getGameMap()
 {
-    return board;
+    return gameMap;
 }
 
 Font AssetManager::getGameFont() const
@@ -201,20 +432,24 @@ Font AssetManager::getLoadingFont() const
 Texture2D AssetManager::getCharacter(const std::string &name) const
 {
     auto it = characterTextures.find(name);
+
     if (it == characterTextures.end())
     {
         return {};
     }
+
     return it->second;
 }
 
 Texture2D AssetManager::getCard(const std::string &name) const
 {
     auto it = cardTextures.find(name);
+
     if (it == cardTextures.end())
     {
         return {};
     }
+
     return it->second;
 }
 

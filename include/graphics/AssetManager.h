@@ -8,7 +8,6 @@ class AssetManager
     private:
         Texture2D mainMenuBackground;
         Texture2D loadingBackground;
-        Texture2D board;
         Texture2D actionIcons;
         Texture2D rangedIcon;
         Texture2D meleeIcon;
@@ -20,6 +19,7 @@ class AssetManager
 
         std::unordered_map<std::string, Texture2D> characterTextures;
         std::unordered_map<std::string, Texture2D> cardTextures;
+        Texture2D gameMap;
 
         bool isTextureValid(const Texture2D &texture) const;
 
@@ -32,15 +32,14 @@ class AssetManager
 
         Texture2D getMainMenuBackground() const;
         Texture2D getLoadingBackground() const;
-        Texture2D getBoard() const;
         Font getGameFont() const;
         Font getTitleFont() const;
         Font getLoadingFont() const;
 
         Texture2D getCharacter(const std::string &name) const;
-
         Texture2D getCard(const std::string &name) const;
         Texture2D getActionIcons() const;
+        Texture2D getGameMap();
 
         bool isLoaded() const;
 };

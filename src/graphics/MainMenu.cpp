@@ -1308,7 +1308,7 @@ int MainMenu::handleInput()
                         mousePosition,
                         finishButton))
                 {
-                    // فعلاً هیچ کاری نمی‌کنیم
+                    return 4;
                 }
             }
         }
@@ -1700,8 +1700,7 @@ void MainMenu::drawHeroSelection(Font font)
             mousePosition,
             finishButton))
     {
-        finishColor =
-            Color{60, 60, 60, 235};
+        finishColor = Color{60, 60, 60, 235};
     }
 
     DrawRectangleRounded(
