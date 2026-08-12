@@ -2,6 +2,7 @@
 #include <cctype>
 #include <fstream>
 #include "fighter/Hero.h"
+#include "player/Player.h"
 using namespace std;
 
 MainMenu::MainMenu(AssetManager *assets)
@@ -1887,18 +1888,102 @@ void MainMenu::startPlacement()
 
 bool MainMenu::placeHeroOnSpace(int spaceId)
 {
-    // -----------------------------------------
-    // Check Game
-    // -----------------------------------------
-
     if (game == nullptr)
     {
         return false;
     }
 
-    // -----------------------------------------
-    // Get Board
-    // -----------------------------------------
+    Board &board = game->getBoard();
+
+    Space *space = board.getSpace(spaceId);
+
+    if (space == nullptr)
+    {
+        return false;
+    }
+
+    if (space->isOccupied())
+    {
+        return false;
+    }
+
+    const std::vector<Player *> &players = game->getPlayers();
+
+    if (placementPlayer < 1 || placementPlayer > players.size())
+    {
+        return false;
+    }
+
+    Player *player = players[placementPlayer - 1];
+
+    if (player == nullptr)
+    {
+        return false;
+    }
+
+    Hero *hero = player->getHero();
+
+    if (hero == nullptr)
+    {
+        return false;
+    }
+
+    board.moveFighter(hero, space);
+
+    placementStartSpace = spaceId;
+    selectedStartSpace = spaceId;
+    placementHeroPlaced = true;
+    placementSidekickIndex = 0;
+
+    if (!player->getSideKicks().empty())
+    {
+        if (placementPlayer == 1)
+        {
+            placement = Placement::YOUNGER_SIDEKICKS;
+        }
+        else
+        {
+            placement = Placement::OLDER_SIDEKICKS;
+        }
+
+        return true;
+    }
+    finishPlacement();
+
+    return true;
+}
+
+bool MainMenu::isValidSidekickPlacement(Space *space) const
+{
+    if (space == nullptr)
+    {
+        return false;
+    }
+
+    if (space->isOccupied())
+    {
+        return false;
+    }
+
+    if (placementStartSpace == -1)
+    {
+        return false;
+    }
+    
+    if (!board->sameZone(placementStartSpace, space->getId()))
+    {
+        return false;
+    }
+
+    return true;
+}
+
+bool MainMenu::placeSidekickOnSpace(int spaceId)
+{
+    if (game == nullptr)
+    {
+        return false;
+    }
 
     Board &gameBoard = game->getBoard();
 
@@ -1909,18 +1994,10 @@ bool MainMenu::placeHeroOnSpace(int spaceId)
         return false;
     }
 
-    // -----------------------------------------
-    // Space must be empty
-    // -----------------------------------------
-
-    if (space->isOccupied())
+    if (!isValidSidekickPlacement(space))
     {
         return false;
     }
-
-    // -----------------------------------------
-    // Get Players
-    // -----------------------------------------
 
     const std::vector<Player *> &players =
         game->getPlayers();
@@ -1946,45 +2023,62 @@ bool MainMenu::placeHeroOnSpace(int spaceId)
         return false;
     }
 
-    // -----------------------------------------
-    // Get player's Hero
-    // -----------------------------------------
+    std::vector<Sidekick *> sidekicks = player->getSideKicks();
 
-    Hero *hero = player->getHero();
-
-    if (hero == nullptr)
+    if (placementSidekickIndex < 0 || placementSidekickIndex >= static_cast<int>(sidekicks.size()))
     {
         return false;
     }
 
-    // -----------------------------------------
-    // Place Hero on Space
-    // -----------------------------------------
+    Sidekick *sidekick = sidekicks[placementSidekickIndex];
 
-    space->setFighter(hero);
-
-    // -----------------------------------------
-    // Save placement information
-    // -----------------------------------------
-
-    placementStartSpace = spaceId;
-    selectedStartSpace = spaceId;
-    placementHeroPlaced = true;
-
-    // -----------------------------------------
-    // Go to Sidekicks
-    // -----------------------------------------
-
-    placementSidekickIndex = 0;
-
-    if (placement == Placement::YOUNGER_HERO)
+    if (sidekick == nullptr)
     {
-        placement = Placement::YOUNGER_SIDEKICKS;
+        return false;
     }
-    else if (placement == Placement::OLDER_HERO)
+
+    gameBoard.moveFighter(sidekick, space);
+
+    placementSidekickIndex++;
+
+    if (placementSidekickIndex >= static_cast<int>(sidekicks.size()))
     {
-        placement = Placement::OLDER_SIDEKICKS;
+        finishPlacement();
     }
 
     return true;
 }
+
+void MainMenu::finishPlacement()
+{
+    if (placement == Placement::YOUNGER_SIDEKICKS)
+    {
+        if (placementPlayer == 1)
+        {
+            placementPlayer = 2;
+        }
+        else
+        {
+            placementPlayer = 1;
+        }
+
+        placement = Placement::OLDER_HERO;
+        placementHeroPlaced = false;
+        placementStartSpace = -1;
+        selectedStartSpace = -1;
+        placementSidekickIndex = 0;
+        return;
+    }
+
+    if (placement == Placement::OLDER_SIDEKICKS)
+    {
+        placement = Placement::FINISHED;
+        placementHeroPlaced = false;
+        placementStartSpace = -1;
+        selectedStartSpace = -1;
+        placementSidekickIndex = 0;
+
+        return;
+    }
+}
+
