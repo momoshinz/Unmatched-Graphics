@@ -1,12 +1,7 @@
 #include "graphics/MainMenu.h"
-
 #include <cctype>
 
-// =========================================
-// Constructor
-// =========================================
-
-MainMenu::MainMenu(AssetManager* assets)
+MainMenu::MainMenu(AssetManager *assets)
     : assets(assets),
       state(State::MAIN_MENU),
       player1Name(""),
@@ -18,29 +13,17 @@ MainMenu::MainMenu(AssetManager* assets)
 {
 }
 
-// =========================================
-// Check Player 1
-// =========================================
-
 bool MainMenu::isPlayer1Complete() const
 {
     return !player1Name.empty() &&
            !player1Age.empty();
 }
 
-// =========================================
-// Check Player 2
-// =========================================
-
 bool MainMenu::isPlayer2Complete() const
 {
     return !player2Name.empty() &&
            !player2Age.empty();
 }
-
-// =========================================
-// UPDATE
-// =========================================
 
 void MainMenu::update()
 {
@@ -49,20 +32,12 @@ void MainMenu::update()
         return;
     }
 
-    // =====================================
-    // Player 1 Input
-    // =====================================
-
     if (state == State::PLAYER_1_INPUT)
     {
         int key = GetCharPressed();
 
         while (key > 0)
         {
-            // -----------------------------
-            // Name
-            // -----------------------------
-
             if (enteringName)
             {
                 if (key >= 32 && key <= 125)
@@ -70,10 +45,6 @@ void MainMenu::update()
                     player1Name += static_cast<char>(key);
                 }
             }
-
-            // -----------------------------
-            // Age
-            // -----------------------------
 
             if (enteringAge)
             {
@@ -86,7 +57,6 @@ void MainMenu::update()
             key = GetCharPressed();
         }
 
-        // Backspace
         if (IsKeyPressed(KEY_BACKSPACE))
         {
             if (enteringName && !player1Name.empty())
@@ -100,9 +70,7 @@ void MainMenu::update()
             }
         }
 
-        // Tab / Enter برای رفتن از Name به Age
-        if (IsKeyPressed(KEY_TAB) ||
-            IsKeyPressed(KEY_ENTER))
+        if (IsKeyPressed(KEY_TAB) || IsKeyPressed(KEY_ENTER))
         {
             if (enteringName && !player1Name.empty())
             {
@@ -112,20 +80,12 @@ void MainMenu::update()
         }
     }
 
-    // =====================================
-    // Player 2 Input
-    // =====================================
-
     if (state == State::PLAYER_2_INPUT)
     {
         int key = GetCharPressed();
 
         while (key > 0)
         {
-            // -----------------------------
-            // Name
-            // -----------------------------
-
             if (enteringName)
             {
                 if (key >= 32 && key <= 125)
@@ -133,10 +93,6 @@ void MainMenu::update()
                     player2Name += static_cast<char>(key);
                 }
             }
-
-            // -----------------------------
-            // Age
-            // -----------------------------
 
             if (enteringAge)
             {
@@ -149,7 +105,6 @@ void MainMenu::update()
             key = GetCharPressed();
         }
 
-        // Backspace
         if (IsKeyPressed(KEY_BACKSPACE))
         {
             if (enteringName && !player2Name.empty())
@@ -163,9 +118,7 @@ void MainMenu::update()
             }
         }
 
-        // Tab / Enter
-        if (IsKeyPressed(KEY_TAB) ||
-            IsKeyPressed(KEY_ENTER))
+        if (IsKeyPressed(KEY_TAB) || IsKeyPressed(KEY_ENTER))
         {
             if (enteringName && !player2Name.empty())
             {
@@ -176,10 +129,6 @@ void MainMenu::update()
     }
 }
 
-// =========================================
-// DRAW
-// =========================================
-
 void MainMenu::draw()
 {
     if (assets == nullptr)
@@ -187,86 +136,43 @@ void MainMenu::draw()
         return;
     }
 
-    Texture2D background =
-        assets->getMainMenuBackground();
+    Texture2D background = assets->getMainMenuBackground();
 
-    Font font =
-        assets->getGameFont();
+    Font font = assets->getGameFont();
 
-    Font titleFont =
-        assets->getTitleFont();
-
-    // =====================================
-    // Background
-    // =====================================
+    Font titleFont = assets->getTitleFont();
 
     if (background.id != 0)
     {
         DrawTexturePro(
             background,
-
             Rectangle{
                 0,
                 0,
                 static_cast<float>(background.width),
-                static_cast<float>(background.height)
-            },
-
+                static_cast<float>(background.height)},
             Rectangle{
                 0,
                 0,
                 static_cast<float>(GetScreenWidth()),
-                static_cast<float>(GetScreenHeight())
-            },
-
+                static_cast<float>(GetScreenHeight())},
             Vector2{0, 0},
-
             0.0f,
-
-            WHITE
-        );
+            WHITE);
     }
 
-    // =====================================
-    // Game Title
-    // =====================================
-
-    const char* title = "UNMATCHED";
+    const char *title = "UNMATCHED";
 
     const float titleSize = 60.0f;
     const float titleSpacing = 2.0f;
 
-    Vector2 titleTextSize =
-        MeasureTextEx(
-            titleFont,
-            title,
-            titleSize,
-            titleSpacing
-        );
+    Vector2 titleTextSize = MeasureTextEx(titleFont, title, titleSize, titleSpacing);
 
-    const float titleX =
-        (GetScreenWidth() - titleTextSize.x) / 2.0f;
+    const float titleX = (GetScreenWidth() - titleTextSize.x) / 2.0f;
 
     const float titleY = 100.0f;
 
-    DrawTextEx(
-        titleFont,
-        title,
-
-        Vector2{
-            titleX,
-            titleY
-        },
-
-        titleSize,
-        titleSpacing,
-
-        WHITE
-    );
-
-    // =====================================
-    // MAIN MENU
-    // =====================================
+    DrawTextEx(titleFont, title, Vector2{titleX, titleY}, titleSize, titleSpacing, WHITE);
 
     if (state == State::MAIN_MENU)
     {
@@ -276,52 +182,28 @@ void MainMenu::draw()
         const float buttonX =
             (GetScreenWidth() - buttonWidth) / 2.0f;
 
-        const float firstButtonY = 450.0f;
+        const float firstButtonY = 390.0f;
         const float buttonGap = 25.0f;
 
-        Rectangle newGameButton{
-            buttonX,
-            firstButtonY,
-            buttonWidth,
-            buttonHeight
-        };
+        Rectangle newGameButton{buttonX, firstButtonY, buttonWidth, buttonHeight};
 
-        Rectangle loadGameButton{
-            buttonX,
-            firstButtonY +
-                buttonHeight +
-                buttonGap,
+        Rectangle loadGameButton{buttonX, firstButtonY + buttonHeight + buttonGap,
+                                 buttonWidth,
+                                 buttonHeight};
 
-            buttonWidth,
-            buttonHeight
-        };
+        Rectangle exitButton{buttonX, firstButtonY + 2.0f * (buttonHeight + buttonGap),
+                             buttonWidth,
+                             buttonHeight};
 
-        Rectangle exitButton{
-            buttonX,
-            firstButtonY +
-                2.0f *
-                (buttonHeight + buttonGap),
+        Vector2 mousePosition = GetMousePosition();
 
-            buttonWidth,
-            buttonHeight
-        };
-
-        Vector2 mousePosition =
-            GetMousePosition();
-
-        Color normalColor{
-            30,
-            30,
-            30,
-            220
-        };
+        Color normalColor{30, 30, 30, 220};
 
         Color hoverColor{
             60,
             60,
             60,
-            235
-        };
+            235};
 
         // -----------------------------
         // New Game
@@ -338,8 +220,7 @@ void MainMenu::draw()
             newGameButton,
             1.0f,
             32,
-            newGameColor
-        );
+            newGameColor);
 
         // -----------------------------
         // Load Game
@@ -356,8 +237,7 @@ void MainMenu::draw()
             loadGameButton,
             1.0f,
             32,
-            loadGameColor
-        );
+            loadGameColor);
 
         // -----------------------------
         // Exit
@@ -374,8 +254,7 @@ void MainMenu::draw()
             exitButton,
             1.0f,
             32,
-            exitColor
-        );
+            exitColor);
 
         // -----------------------------
         // Button Text
@@ -384,33 +263,30 @@ void MainMenu::draw()
         const float buttonFontSize = 35.0f;
         const float buttonSpacing = 2.0f;
 
-        const char* newGameText = "NEW GAME";
-        const char* loadGameText = "LOAD GAME";
-        const char* exitText = "EXIT";
+        const char *newGameText = "NEW GAME";
+        const char *loadGameText = "LOAD GAME";
+        const char *exitText = "EXIT";
 
         Vector2 newGameTextSize =
             MeasureTextEx(
                 font,
                 newGameText,
                 buttonFontSize,
-                buttonSpacing
-            );
+                buttonSpacing);
 
         Vector2 loadGameTextSize =
             MeasureTextEx(
                 font,
                 loadGameText,
                 buttonFontSize,
-                buttonSpacing
-            );
+                buttonSpacing);
 
         Vector2 exitTextSize =
             MeasureTextEx(
                 font,
                 exitText,
                 buttonFontSize,
-                buttonSpacing
-            );
+                buttonSpacing);
 
         DrawTextEx(
             font,
@@ -419,17 +295,17 @@ void MainMenu::draw()
             Vector2{
                 newGameButton.x +
                     (newGameButton.width -
-                     newGameTextSize.x) / 2.0f,
+                     newGameTextSize.x) /
+                        2.0f,
 
                 newGameButton.y +
                     (newGameButton.height -
-                     newGameTextSize.y) / 2.0f
-            },
+                     newGameTextSize.y) /
+                        2.0f},
 
             buttonFontSize,
             buttonSpacing,
-            WHITE
-        );
+            WHITE);
 
         DrawTextEx(
             font,
@@ -438,17 +314,17 @@ void MainMenu::draw()
             Vector2{
                 loadGameButton.x +
                     (loadGameButton.width -
-                     loadGameTextSize.x) / 2.0f,
+                     loadGameTextSize.x) /
+                        2.0f,
 
                 loadGameButton.y +
                     (loadGameButton.height -
-                     loadGameTextSize.y) / 2.0f
-            },
+                     loadGameTextSize.y) /
+                        2.0f},
 
             buttonFontSize,
             buttonSpacing,
-            WHITE
-        );
+            WHITE);
 
         DrawTextEx(
             font,
@@ -457,17 +333,17 @@ void MainMenu::draw()
             Vector2{
                 exitButton.x +
                     (exitButton.width -
-                     exitTextSize.x) / 2.0f,
+                     exitTextSize.x) /
+                        2.0f,
 
                 exitButton.y +
                     (exitButton.height -
-                     exitTextSize.y) / 2.0f
-            },
+                     exitTextSize.y) /
+                        2.0f},
 
             buttonFontSize,
             buttonSpacing,
-            WHITE
-        );
+            WHITE);
     }
 
     // =====================================
@@ -483,8 +359,7 @@ void MainMenu::draw()
             player1Age,
             enteringName,
             enteringAge,
-            "NEXT"
-        );
+            "NEXT");
     }
 
     // =====================================
@@ -500,8 +375,7 @@ void MainMenu::draw()
             player2Age,
             enteringName,
             enteringAge,
-            "FINISH"
-        );
+            "FINISH");
     }
 
     // =====================================
@@ -526,13 +400,11 @@ void MainMenu::draw()
 
             Vector2{
                 infoX,
-                player1Y
-            },
+                player1Y},
 
             30.0f,
             2.0f,
-            WHITE
-        );
+            WHITE);
 
         std::string player1Info =
             "Name: " +
@@ -546,13 +418,11 @@ void MainMenu::draw()
 
             Vector2{
                 infoX,
-                player1Y + 45.0f
-            },
+                player1Y + 45.0f},
 
             25.0f,
             2.0f,
-            WHITE
-        );
+            WHITE);
 
         // -----------------------------
         // Player 2 info
@@ -564,13 +434,11 @@ void MainMenu::draw()
 
             Vector2{
                 infoX,
-                player2Y
-            },
+                player2Y},
 
             30.0f,
             2.0f,
-            WHITE
-        );
+            WHITE);
 
         std::string player2Info =
             "Name: " +
@@ -584,13 +452,11 @@ void MainMenu::draw()
 
             Vector2{
                 infoX,
-                player2Y + 45.0f
-            },
+                player2Y + 45.0f},
 
             25.0f,
             2.0f,
-            WHITE
-        );
+            WHITE);
 
         // -----------------------------
         // START BUTTON
@@ -600,25 +466,22 @@ void MainMenu::draw()
             500.0f,
             650.0f,
             300.0f,
-            75.0f
-        };
+            75.0f};
 
         DrawRectangleRounded(
             startButton,
             1.0f,
             32,
-            Color{30, 30, 30, 220}
-        );
+            Color{30, 30, 30, 220});
 
-        const char* startText = "START";
+        const char *startText = "START";
 
         Vector2 startTextSize =
             MeasureTextEx(
                 font,
                 startText,
                 35.0f,
-                2.0f
-            );
+                2.0f);
 
         DrawTextEx(
             font,
@@ -627,17 +490,17 @@ void MainMenu::draw()
             Vector2{
                 startButton.x +
                     (startButton.width -
-                     startTextSize.x) / 2.0f,
+                     startTextSize.x) /
+                        2.0f,
 
                 startButton.y +
                     (startButton.height -
-                     startTextSize.y) / 2.0f
-            },
+                     startTextSize.y) /
+                        2.0f},
 
             35.0f,
             2.0f,
-            WHITE
-        );
+            WHITE);
     }
 }
 
@@ -647,12 +510,12 @@ void MainMenu::draw()
 
 void MainMenu::drawPlayerInput(
     Font font,
-    const char* playerTitle,
-    const std::string& name,
-    const std::string& age,
+    const char *playerTitle,
+    const std::string &name,
+    const std::string &age,
     bool enteringName,
     bool enteringAge,
-    const char* buttonText)
+    const char *buttonText)
 {
     const float boxWidth = 450.0f;
     const float boxHeight = 60.0f;
@@ -664,22 +527,16 @@ void MainMenu::drawPlayerInput(
     const float ageY = 470.0f;
 
     const float buttonWidth = 300.0f;
-<<<<<<< HEAD
     const float buttonHeight = 70.0f;
-=======
-    const float buttonHeight = 60.0f;
->>>>>>> 42af2ee8e4df513e7c40cfd4a5714f33a437bab2
 
     const float buttonX =
         (GetScreenWidth() - buttonWidth) / 2.0f;
 
-<<<<<<< HEAD
     const float buttonY = 600.0f;
 
     // =====================================
     // Player title
     // =====================================
-=======
     const float firstButtonY = 370.0f;
     const float buttonGap = 20.0f;
     Rectangle newGameButton{
@@ -687,15 +544,13 @@ void MainMenu::drawPlayerInput(
         firstButtonY,
         buttonWidth,
         buttonHeight};
->>>>>>> 42af2ee8e4df513e7c40cfd4a5714f33a437bab2
 
     Vector2 playerTitleSize =
         MeasureTextEx(
             font,
             playerTitle,
             35.0f,
-            2.0f
-        );
+            2.0f);
 
     DrawTextEx(
         font,
@@ -703,15 +558,14 @@ void MainMenu::drawPlayerInput(
 
         Vector2{
             (GetScreenWidth() -
-             playerTitleSize.x) / 2.0f,
+             playerTitleSize.x) /
+                2.0f,
 
-            220.0f
-        },
+            220.0f},
 
         35.0f,
         2.0f,
-        WHITE
-    );
+        WHITE);
 
     // =====================================
     // NAME LABEL
@@ -723,13 +577,11 @@ void MainMenu::drawPlayerInput(
 
         Vector2{
             boxX,
-            nameY - 40.0f
-        },
+            nameY - 40.0f},
 
         25.0f,
         2.0f,
-        WHITE
-    );
+        WHITE);
 
     // =====================================
     // NAME BOX
@@ -739,8 +591,7 @@ void MainMenu::drawPlayerInput(
         boxX,
         nameY,
         boxWidth,
-        boxHeight
-    };
+        boxHeight};
 
     Color nameColor =
         enteringName
@@ -751,8 +602,7 @@ void MainMenu::drawPlayerInput(
         nameBox,
         0.35f,
         32,
-        nameColor
-    );
+        nameColor);
 
     DrawTextEx(
         font,
@@ -760,13 +610,11 @@ void MainMenu::drawPlayerInput(
 
         Vector2{
             nameBox.x + 20.0f,
-            nameBox.y + 15.0f
-        },
+            nameBox.y + 15.0f},
 
         25.0f,
         2.0f,
-        WHITE
-    );
+        WHITE);
 
     // =====================================
     // AGE LABEL
@@ -778,13 +626,11 @@ void MainMenu::drawPlayerInput(
 
         Vector2{
             boxX,
-            ageY - 40.0f
-        },
+            ageY - 40.0f},
 
         25.0f,
         2.0f,
-        WHITE
-    );
+        WHITE);
 
     // =====================================
     // AGE BOX
@@ -794,8 +640,7 @@ void MainMenu::drawPlayerInput(
         boxX,
         ageY,
         boxWidth,
-        boxHeight
-    };
+        boxHeight};
 
     Color ageColor =
         enteringAge
@@ -806,8 +651,7 @@ void MainMenu::drawPlayerInput(
         ageBox,
         0.35f,
         32,
-        ageColor
-    );
+        ageColor);
 
     DrawTextEx(
         font,
@@ -815,48 +659,72 @@ void MainMenu::drawPlayerInput(
 
         Vector2{
             ageBox.x + 20.0f,
-            ageBox.y + 15.0f
-        },
+            ageBox.y + 15.0f},
 
         25.0f,
         2.0f,
-        WHITE
-    );
-
-    // =====================================
-    // NEXT / FINISH
-    // =====================================
+        WHITE);
 
     bool complete =
         !name.empty() &&
         !age.empty();
 
-    Color buttonColor =
-        complete
-            ? Color{30, 30, 30, 230}
-            : Color{30, 30, 30, 100};
+    Vector2 mousePosition =
+        GetMousePosition();
+
+    Rectangle actionButton{
+        buttonX,
+        buttonY,
+        buttonWidth,
+        buttonHeight};
+
+    Color normalButtonColor{
+        30,
+        30,
+        30,
+        230};
+
+    Color hoverButtonColor{
+        60,
+        60,
+        60,
+        235};
+
+    Color disabledButtonColor{
+        30,
+        30,
+        30,
+        100};
+
+    Color buttonColor;
+
+    if (!complete)
+    {
+        buttonColor = disabledButtonColor;
+    }
+    else if (CheckCollisionPointRec(
+                 mousePosition,
+                 actionButton))
+    {
+        buttonColor = hoverButtonColor;
+    }
+    else
+    {
+        buttonColor = normalButtonColor;
+    }
 
     DrawRectangleRounded(
-        Rectangle{
-            buttonX,
-            buttonY,
-            buttonWidth,
-            buttonHeight
-        },
-
+        actionButton,
         1.0f,
         32,
-
-        buttonColor
-    );
+        buttonColor);
 
     Vector2 buttonTextSize =
         MeasureTextEx(
             font,
             buttonText,
             35.0f,
-            2.0f
-        );
+            2.0f);
 
     DrawTextEx(
         font,
@@ -865,20 +733,20 @@ void MainMenu::drawPlayerInput(
         Vector2{
             buttonX +
                 (buttonWidth -
-                 buttonTextSize.x) / 2.0f,
+                 buttonTextSize.x) /
+                    2.0f,
 
             buttonY +
                 (buttonHeight -
-                 buttonTextSize.y) / 2.0f
-        },
+                 buttonTextSize.y) /
+                    2.0f},
 
         35.0f,
         2.0f,
 
         complete
             ? WHITE
-            : Color{150, 150, 150, 150}
-    );
+            : Color{150, 150, 150, 150});
 }
 
 // =========================================
@@ -892,15 +760,13 @@ int MainMenu::handleInput()
         return 0;
     }
 
-<<<<<<< HEAD
-=======
     const float buttonWidth = 300.0f;
     const float buttonHeight = 60.0f;
 
     const float buttonX =
         (GetScreenWidth() - buttonWidth) / 2.0f;
 
-    const float firstButtonY = 370.0f;
+    const float firstButtonY = 500.0f;
     const float buttonGap = 20.0f;
 
     // =========================================
@@ -929,7 +795,6 @@ int MainMenu::handleInput()
     // Mouse
     // =========================================
 
->>>>>>> 42af2ee8e4df513e7c40cfd4a5714f33a437bab2
     Vector2 mousePosition =
         GetMousePosition();
 
@@ -945,15 +810,14 @@ int MainMenu::handleInput()
         const float buttonX =
             (GetScreenWidth() - buttonWidth) / 2.0f;
 
-        const float firstButtonY = 450.0f;
+        const float firstButtonY = 390.0f;
         const float buttonGap = 25.0f;
 
         Rectangle newGameButton{
             buttonX,
             firstButtonY,
             buttonWidth,
-            buttonHeight
-        };
+            buttonHeight};
 
         Rectangle loadGameButton{
             buttonX,
@@ -961,17 +825,15 @@ int MainMenu::handleInput()
                 buttonHeight +
                 buttonGap,
             buttonWidth,
-            buttonHeight
-        };
+            buttonHeight};
 
         Rectangle exitButton{
             buttonX,
             firstButtonY +
                 2.0f *
-                (buttonHeight + buttonGap),
+                    (buttonHeight + buttonGap),
             buttonWidth,
-            buttonHeight
-        };
+            buttonHeight};
 
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
         {
@@ -1043,8 +905,7 @@ int MainMenu::handleInput()
             buttonX,
             buttonY,
             buttonWidth,
-            buttonHeight
-        };
+            buttonHeight};
 
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
         {
@@ -1082,8 +943,7 @@ int MainMenu::handleInput()
             buttonX,
             buttonY,
             buttonWidth,
-            buttonHeight
-        };
+            buttonHeight};
 
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
         {
