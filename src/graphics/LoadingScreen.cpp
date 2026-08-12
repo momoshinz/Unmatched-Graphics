@@ -62,6 +62,7 @@ void LoadingScreen::draw()
     float fontSize = 50.0f;
     float spacing = 2.0f;
 
+    
     Vector2 textSize =
         MeasureTextEx(
             font,
