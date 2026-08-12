@@ -113,6 +113,7 @@ set(SOURCES
     src/graphics/GameRenderer.cpp
     src/graphics/LoadingScreen.cpp
     src/graphics/MainMenu.cpp
+    src/graphics/GameScreen.cpp
 
     src/ui/TerminalUI.cpp
 )

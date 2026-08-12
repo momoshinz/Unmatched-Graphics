@@ -3,6 +3,7 @@
 #include "graphics/AssetManager.h"
 #include "graphics/LoadingScreen.h"
 #include "graphics/MainMenu.h"
+#include "graphics/GameScreen.h"
 #include "game/Game.h"
 
 int main()
@@ -10,11 +11,14 @@ int main()
     const int screenWidth = 1338;
     const int screenHeight = 738;
 
+    // =========================================
+    // Window
+    // =========================================
+
     InitWindow(
         screenWidth,
         screenHeight,
-        "Unmatched"
-    );
+        "Unmatched");
 
     SetTargetFPS(60);
 
@@ -31,6 +35,7 @@ int main()
         std::cout << "ASSET LOADING FAILED!\n";
 
         CloseWindow();
+
         return 1;
     }
 
@@ -40,10 +45,13 @@ int main()
     // Loading Screen
     // =========================================
 
-    LoadingScreen loadingScreen(assets, 5.0f);  //the time we stay on loading screen
+    LoadingScreen loadingScreen(
+        assets,
+        5.0f);
 
-    while (!WindowShouldClose() &&
-           !loadingScreen.isFinished())
+    while (
+        !WindowShouldClose() &&
+        !loadingScreen.isFinished())
     {
         loadingScreen.update();
 
@@ -56,52 +64,136 @@ int main()
         EndDrawing();
     }
 
+    // =========================================
+    // Screens
+    // =========================================
 
     MainMenu mainMenu(&assets);
 
+    GameScreen gameScreen(&assets);
+
+    // =========================================
+    // Current Screen
+    // =========================================
+
+    enum class Screen
+    {
+        MAIN_MENU,
+        GAME
+    };
+
+    Screen currentScreen =
+        Screen::MAIN_MENU;
+
+    // =========================================
+    // Main Loop
+    // =========================================
+
     while (!WindowShouldClose())
     {
-        mainMenu.update();
+        // =====================================
+        // MAIN MENU
+        // =====================================
 
-        int result =
-            mainMenu.handleInput();
-
-        if (result == 1)
+        if (currentScreen == Screen::MAIN_MENU)
         {
-            std::cout << "NEW GAME selected.\n";
+            mainMenu.update();
 
-            // فعلاً بعداً Game را اینجا اجرا می‌کنیم
-        }
-        else if (result == 2)
-        {
-            std::cout << "LOAD GAME selected.\n";
+            int result =
+                mainMenu.handleInput();
 
-            Game game;
+            // ---------------------------------
+            // NEW GAME
+            // ---------------------------------
 
-            try
+            if (result == 1)
             {
-                if (game.loadMenu())
-                {
-                    game.run(true);
-                }
+                std::cout
+                    << "NEW GAME selected.\n";
             }
-            catch (const std::exception &e)
+
+            // ---------------------------------
+            // LOAD GAME
+            // ---------------------------------
+
+            else if (result == 2)
             {
-                std::cout << "\n[!] ERROR: "
+                std::cout
+                    << "LOAD GAME selected.\n";
+
+                Game game;
+
+                try
+                {
+                    if (game.loadMenu())
+                    {
+                        game.run(true);
+                    }
+                }
+                catch (const std::exception &e)
+                {
+                    std::cout
+                        << "\n[!] ERROR: "
                         << e.what()
                         << "\n";
+                }
+            }
+
+            // ---------------------------------
+            // EXIT
+            // ---------------------------------
+
+            else if (result == 3)
+            {
+                break;
+            }
+
+            // ---------------------------------
+            // FINISH HERO SELECTION
+            // ---------------------------------
+
+            else if (result == 4)
+            {
+                std::cout
+                    << "Starting game screen...\n";
+
+                currentScreen =
+                    Screen::GAME;
             }
         }
-        else if (result == 3)
+
+        // =====================================
+        // GAME SCREEN
+        // =====================================
+
+        else if (currentScreen == Screen::GAME)
         {
-            break;
+            gameScreen.update();
         }
+
+        // =====================================
+        // DRAW
+        // =====================================
 
         BeginDrawing();
 
-        ClearBackground(BLACK);
+        // -------------------------------------
+        // Main Menu
+        // -------------------------------------
 
-        mainMenu.draw();
+        if (currentScreen == Screen::MAIN_MENU)
+        {
+            mainMenu.draw();
+        }
+
+        // -------------------------------------
+        // Game Screen
+        // -------------------------------------
+
+        else if (currentScreen == Screen::GAME)
+        {
+            gameScreen.draw();
+        }
 
         EndDrawing();
     }
