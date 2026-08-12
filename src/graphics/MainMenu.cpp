@@ -12,7 +12,12 @@ MainMenu::MainMenu(AssetManager *assets)
       player2Age(""),
       enteringName(true),
       enteringAge(false),
-      selectedSave(-1)
+      selectedSave(-1),
+      currentHeroPlayer(HeroSelectionPlayer::PLAYER_1),
+      player1Hero(""),
+      player2Hero(""),
+      player1HeroSelected(false),
+      player2HeroSelected(false)
 {
 }
 
@@ -423,7 +428,7 @@ void MainMenu::draw()
 
             Vector2{
                 (GetScreenWidth() -
-                loadTitleSize.x) /
+                 loadTitleSize.x) /
                     2.0f,
 
                 80.0f},
@@ -499,12 +504,12 @@ void MainMenu::draw()
                 Vector2{
                     saveButton.x +
                         (saveButton.width -
-                        saveTextSize.x) /
+                         saveTextSize.x) /
                             2.0f,
 
                     saveButton.y +
                         (saveButton.height -
-                        saveTextSize.y) /
+                         saveTextSize.y) /
                             2.0f},
 
                 25.0f,
@@ -534,7 +539,7 @@ void MainMenu::draw()
 
                 Vector2{
                     (GetScreenWidth() -
-                    textSize.x) /
+                     textSize.x) /
                         2.0f,
 
                     300.0f},
@@ -583,12 +588,12 @@ void MainMenu::draw()
             Vector2{
                 backButton.x +
                     (backButton.width -
-                    backTextSize.x) /
+                     backTextSize.x) /
                         2.0f,
 
                 backButton.y +
                     (backButton.height -
-                    backTextSize.y) /
+                     backTextSize.y) /
                         2.0f},
 
             22.0f,
@@ -718,6 +723,11 @@ void MainMenu::draw()
             35.0f,
             2.0f,
             WHITE);
+    }
+
+    if (state == State::HERO_SELECTION)
+    {
+        drawHeroSelection(font);
     }
 }
 
@@ -964,7 +974,6 @@ void MainMenu::drawPlayerInput(
         complete
             ? WHITE
             : Color{150, 150, 150, 150});
-
 
     // =====================================
     // ENTER MESSAGE
@@ -1271,13 +1280,147 @@ int MainMenu::handleInput()
         return 0;
     }
 
-    // =====================================
-    // READY
-    // =====================================
-
     if (state == State::READY)
     {
-        // فعلاً START هیچ کاری نمی‌کند.
+        const float startButtonWidth = 300.0f;
+        const float startButtonHeight = 75.0f;
+
+        const float startButtonX =
+            (GetScreenWidth() - startButtonWidth) / 2.0f;
+
+        const float startButtonY = 650.0f;
+
+        Rectangle startButton{
+            startButtonX,
+            startButtonY,
+            startButtonWidth,
+            startButtonHeight};
+
+        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+        {
+            if (CheckCollisionPointRec(
+                    mousePosition,
+                    startButton))
+            {
+                startHeroSelection();
+            }
+        }
+    }
+
+    // =========================================
+    // HERO SELECTION
+    // =========================================
+
+    if (state == State::HERO_SELECTION)
+    {
+        const float boxWidth = 250.0f;
+        const float boxHeight = 300.0f;
+        const float gap = 35.0f;
+
+        const float totalWidth =
+            3.0f * boxWidth +
+            2.0f * gap;
+
+        const float startX =
+            (GetScreenWidth() - totalWidth) / 2.0f;
+
+        const float boxY = 300.0f;
+
+        Rectangle draculaBox{
+            startX,
+            boxY,
+            boxWidth,
+            boxHeight};
+
+        Rectangle sherlockBox{
+            startX + boxWidth + gap,
+            boxY,
+            boxWidth,
+            boxHeight};
+
+        Rectangle invisibleBox{
+            startX +
+                2.0f * (boxWidth + gap),
+
+            boxY,
+            boxWidth,
+            boxHeight};
+
+        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+        {
+            if (CheckCollisionPointRec(
+                    mousePosition,
+                    draculaBox))
+            {
+                selectHero("dracula");
+            }
+
+            if (CheckCollisionPointRec(
+                    mousePosition,
+                    sherlockBox))
+            {
+                selectHero("sherlock");
+            }
+
+            if (CheckCollisionPointRec(
+                    mousePosition,
+                    invisibleBox))
+            {
+                selectHero("invisible_man");
+            }
+        }
+
+        // =====================================
+        // Enter
+        // =====================================
+
+        if (IsKeyPressed(KEY_ENTER))
+        {
+            if (CheckCollisionPointRec(
+                    mousePosition,
+                    draculaBox))
+            {
+                selectHero("dracula");
+            }
+
+            if (CheckCollisionPointRec(
+                    mousePosition,
+                    sherlockBox))
+            {
+                selectHero("sherlock");
+            }
+
+            if (CheckCollisionPointRec(
+                    mousePosition,
+                    invisibleBox))
+            {
+                selectHero("invisible_man");
+            }
+        }
+
+        // =====================================
+        // FINISH
+        // =====================================
+
+        Rectangle finishButton{
+            (GetScreenWidth() - 300.0f) / 2.0f,
+            700.0f,
+            300.0f,
+            70.0f};
+
+        if (bothHeroesSelected())
+        {
+            if (IsMouseButtonPressed(
+                    MOUSE_BUTTON_LEFT))
+            {
+                if (CheckCollisionPointRec(
+                        mousePosition,
+                        finishButton))
+                {
+                    // فعلاً هیچ کاری نمی‌کنیم
+                }
+            }
+        }
     }
 
     return 0;
@@ -1292,4 +1435,428 @@ std::string MainMenu::getSelectedSave() const
     }
 
     return saveFiles[selectedSave];
+}
+
+void MainMenu::startHeroSelection()
+{
+    // انتخاب بازیکنی که اول قهرمان انتخاب می‌کند
+    int age1 = std::stoi(player1Age);
+    int age2 = std::stoi(player2Age);
+
+    if (age1 < age2)
+    {
+        currentHeroPlayer =
+            HeroSelectionPlayer::PLAYER_1;
+    }
+    else if (age2 < age1)
+    {
+        currentHeroPlayer =
+            HeroSelectionPlayer::PLAYER_2;
+    }
+    else
+    {
+        // اگر سن‌ها برابر باشند،
+        // به صورت تصادفی یکی انتخاب می‌شود.
+        if (GetRandomValue(0, 1) == 0)
+        {
+            currentHeroPlayer =
+                HeroSelectionPlayer::PLAYER_1;
+        }
+        else
+        {
+            currentHeroPlayer =
+                HeroSelectionPlayer::PLAYER_2;
+        }
+    }
+
+    player1Hero.clear();
+    player2Hero.clear();
+
+    player1HeroSelected = false;
+    player2HeroSelected = false;
+
+    state = State::HERO_SELECTION;
+}
+void MainMenu::drawHeroSelection(Font font)
+{
+    // =====================================
+    // Player name
+    // =====================================
+
+    std::string playerName;
+
+    if (currentHeroPlayer ==
+        HeroSelectionPlayer::PLAYER_1)
+    {
+        playerName = player1Name;
+    }
+    else
+    {
+        playerName = player2Name;
+    }
+
+    // =====================================
+    // Instruction
+    // =====================================
+
+    std::string instruction =
+        playerName +
+        ", CHOOSE YOUR HERO";
+
+    Vector2 instructionSize =
+        MeasureTextEx(
+            font,
+            instruction.c_str(),
+            35.0f,
+            2.0f);
+
+    DrawTextEx(
+        font,
+        instruction.c_str(),
+
+        Vector2{
+            (GetScreenWidth() -
+             instructionSize.x) /
+                2.0f,
+
+            210.0f},
+
+        35.0f,
+        2.0f,
+        WHITE);
+
+    // =====================================
+    // Hero textures
+    // =====================================
+
+    Texture2D dracula =
+        assets->getCharacter("dracula");
+
+    Texture2D sherlock =
+        assets->getCharacter("sherlock");
+
+    Texture2D invisibleMan =
+        assets->getCharacter("invisible_man");
+
+    // =====================================
+    // Hero boxes
+    // =====================================
+
+    const float boxWidth = 250.0f;
+    const float boxHeight = 300.0f;
+    const float gap = 35.0f;
+
+    const float totalWidth =
+        3.0f * boxWidth +
+        2.0f * gap;
+
+    const float startX =
+        (GetScreenWidth() - totalWidth) / 2.0f;
+
+    const float boxY = 300.0f;
+
+    Rectangle draculaBox{
+        startX,
+        boxY,
+        boxWidth,
+        boxHeight};
+
+    Rectangle sherlockBox{
+        startX + boxWidth + gap,
+        boxY,
+        boxWidth,
+        boxHeight};
+
+    Rectangle invisibleBox{
+        startX +
+            2.0f * (boxWidth + gap),
+
+        boxY,
+        boxWidth,
+        boxHeight};
+
+    Vector2 mousePosition =
+        GetMousePosition();
+
+    // =====================================
+    // Colors
+    // =====================================
+
+    Color normalColor{
+        30,
+        30,
+        30,
+        220};
+
+    Color hoverColor{
+        70,
+        70,
+        70,
+        240};
+
+    Color selectedColor{
+        100,
+        70,
+        30,
+        255};
+
+    // =====================================
+    // Dracula color
+    // =====================================
+
+    Color draculaColor =
+        normalColor;
+
+    if (player1Hero == "dracula" ||
+        player2Hero == "dracula")
+    {
+        draculaColor = selectedColor;
+    }
+    else if (CheckCollisionPointRec(
+                 mousePosition,
+                 draculaBox))
+    {
+        draculaColor = hoverColor;
+    }
+
+    // =====================================
+    // Sherlock color
+    // =====================================
+
+    Color sherlockColor =
+        normalColor;
+
+    if (player1Hero == "sherlock" ||
+        player2Hero == "sherlock")
+    {
+        sherlockColor = selectedColor;
+    }
+    else if (CheckCollisionPointRec(
+                 mousePosition,
+                 sherlockBox))
+    {
+        sherlockColor = hoverColor;
+    }
+
+    // =====================================
+    // Invisible Man color
+    // =====================================
+
+    Color invisibleColor =
+        normalColor;
+
+    if (player1Hero == "invisible_man" ||
+        player2Hero == "invisible_man")
+    {
+        invisibleColor = selectedColor;
+    }
+    else if (CheckCollisionPointRec(
+                 mousePosition,
+                 invisibleBox))
+    {
+        invisibleColor = hoverColor;
+    }
+
+    // =====================================
+    // Draw boxes
+    // =====================================
+
+    DrawRectangleRounded(
+        draculaBox,
+        0.15f,
+        32,
+        draculaColor);
+
+    DrawRectangleRounded(
+        sherlockBox,
+        0.15f,
+        32,
+        sherlockColor);
+
+    DrawRectangleRounded(
+        invisibleBox,
+        0.15f,
+        32,
+        invisibleColor);
+
+    // =====================================
+    // Draw hero images
+    // =====================================
+
+    drawHeroTexture(
+        dracula,
+        draculaBox);
+
+    drawHeroTexture(
+        sherlock,
+        sherlockBox);
+
+    drawHeroTexture(
+        invisibleMan,
+        invisibleBox);
+
+    // =====================================
+    // Hero names
+    // =====================================
+
+    drawCenteredText(
+        font,
+        "DRACULA",
+        draculaBox.x,
+        draculaBox.y + draculaBox.height - 45.0f,
+        draculaBox.width,
+        25.0f);
+
+    drawCenteredText(
+        font,
+        "SHERLOCK HOLMES",
+        sherlockBox.x,
+        sherlockBox.y + sherlockBox.height - 45.0f,
+        sherlockBox.width,
+        25.0f);
+
+    drawCenteredText(
+        font,
+        "INVISIBLE MAN",
+        invisibleBox.x,
+        invisibleBox.y + invisibleBox.height - 45.0f,
+        invisibleBox.width,
+        25.0f);
+    Rectangle finishButton{
+        (GetScreenWidth() - 300.0f) / 2.0f,
+        700.0f,
+        300.0f,
+        70.0f};
+
+    bool bothSelected =
+        player1HeroSelected &&
+        player2HeroSelected;
+
+    Color finishColor =
+        bothSelected
+            ? Color{30, 30, 30, 230}
+            : Color{30, 30, 30, 100};
+
+    if (bothSelected &&
+        CheckCollisionPointRec(
+            mousePosition,
+            finishButton))
+    {
+        finishColor =
+            Color{60, 60, 60, 235};
+    }
+
+    DrawRectangleRounded(
+        finishButton,
+        1.0f,
+        32,
+        finishColor);
+
+    drawCenteredText(
+        font,
+        "FINISH",
+        finishButton.x,
+        finishButton.y + 17.0f,
+        finishButton.width,
+        35.0f);
+}
+
+void MainMenu::drawHeroTexture(
+    Texture2D texture,
+    Rectangle box)
+{
+    if (texture.id == 0)
+    {
+        return;
+    }
+
+    const float padding = 15.0f;
+
+    Rectangle source{
+        0,
+        0,
+        static_cast<float>(texture.width),
+        static_cast<float>(texture.height)};
+
+    Rectangle destination{
+    box.x + padding,
+    box.y + padding,
+    box.width - 2.0f * padding,
+    box.height - 70.0f};
+
+    DrawTexturePro(
+        texture,
+        source,
+        destination,
+        Vector2{0, 0},
+        0.0f,
+        WHITE);
+}
+
+void MainMenu::drawCenteredText(
+    Font font,
+    const char *text,
+    float x,
+    float y,
+    float width,
+    float fontSize)
+{
+    Vector2 textSize =
+        MeasureTextEx(
+            font,
+            text,
+            fontSize,
+            2.0f);
+
+    DrawTextEx(
+        font,
+        text,
+
+        Vector2{
+            x + (width - textSize.x) / 2.0f,
+            y},
+
+        fontSize,
+        2.0f,
+        WHITE);
+}
+
+void MainMenu::selectHero(
+    const std::string &hero)
+{
+    // اگر هیرو قبلاً انتخاب شده
+    if (player1Hero == hero ||
+        player2Hero == hero)
+    {
+        return;
+    }
+
+    // Player 1
+    if (currentHeroPlayer ==
+        HeroSelectionPlayer::PLAYER_1)
+    {
+        player1Hero = hero;
+        player1HeroSelected = true;
+
+        currentHeroPlayer =
+            HeroSelectionPlayer::PLAYER_2;
+
+        return;
+    }
+
+    // Player 2
+    if (currentHeroPlayer ==
+        HeroSelectionPlayer::PLAYER_2)
+    {
+        player2Hero = hero;
+        player2HeroSelected = true;
+
+        return;
+    }
+}
+
+bool MainMenu::bothHeroesSelected() const
+{
+    return player1HeroSelected &&
+           player2HeroSelected;
 }
