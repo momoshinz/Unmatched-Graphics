@@ -192,14 +192,32 @@ void MainMenu::draw()
             WHITE);
     }
 
-    const char *title = "UNMATCHED";
-    const float titleSize = 60.0f;
-    const float titleSpacing = 2.0f;
-    Vector2 titleTextSize = MeasureTextEx(titleFont, title, titleSize, titleSpacing);
-    const float titleX = (GetScreenWidth() - titleTextSize.x) / 2.0f;
-    const float titleY = 100.0f;
+    if (state != State::LOAD_GAME)
+    {
+        const char *title = "UNMATCHED";
+        const float titleSize = 60.0f;
+        const float titleSpacing = 2.0f;
 
-    DrawTextEx(titleFont, title, Vector2{titleX, titleY}, titleSize, titleSpacing, WHITE);
+        Vector2 titleTextSize =
+            MeasureTextEx(
+                titleFont,
+                title,
+                titleSize,
+                titleSpacing);
+
+        const float titleX =
+            (GetScreenWidth() - titleTextSize.x) / 2.0f;
+
+        const float titleY = 100.0f;
+
+        DrawTextEx(
+            titleFont,
+            title,
+            Vector2{titleX, titleY},
+            titleSize,
+            titleSpacing,
+            WHITE);
+    }
 
     if (state == State::MAIN_MENU)
     {
@@ -333,7 +351,7 @@ void MainMenu::draw()
 
     if (state == State::LOAD_GAME)
     {
-        const char *loadTitle = "LOAD GAME";
+        const char *loadTitle = "SAVED GAMES";
 
         Vector2 loadTitleSize = MeasureTextEx(titleFont, loadTitle, 50.0f, 2.0f);
 
@@ -404,13 +422,13 @@ void MainMenu::draw()
 
         if (saveFiles.empty())
         {
-            const char *noSaveText = "No saved games found.";
+            const char *noSaveText = "No Saved Games Found!";
 
             Vector2 textSize =
                 MeasureTextEx(
                     font,
                     noSaveText,
-                    25.0f,
+                    38.0f,
                     2.0f);
 
             DrawTextEx(
@@ -422,9 +440,9 @@ void MainMenu::draw()
                      textSize.x) /
                         2.0f,
 
-                    300.0f},
+                    500.0f},
 
-                25.0f,
+                38.0f,
                 2.0f,
                 WHITE);
         }
@@ -435,9 +453,9 @@ void MainMenu::draw()
 
         Rectangle backButton{
             40.0f,
-            GetScreenHeight() - 80.0f,
-            160.0f,
-            50.0f};
+            GetScreenHeight() - 90.0f,
+            190.0f,
+            60.0f};
 
         Color backColor =
             CheckCollisionPointRec(
@@ -458,7 +476,7 @@ void MainMenu::draw()
             MeasureTextEx(
                 font,
                 backText,
-                22.0f,
+                30.0f,
                 2.0f);
 
         DrawTextEx(
@@ -476,7 +494,7 @@ void MainMenu::draw()
                      backTextSize.y) /
                         2.0f},
 
-            22.0f,
+            30.f,
             2.0f,
             WHITE);
     }

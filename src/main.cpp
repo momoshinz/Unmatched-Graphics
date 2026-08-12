@@ -1,5 +1,6 @@
 #include <raylib.h>
 #include <iostream>
+
 #include "graphics/AssetManager.h"
 #include "graphics/LoadingScreen.h"
 #include "graphics/MainMenu.h"
@@ -18,11 +19,13 @@ int main()
     InitWindow(
         screenWidth,
         screenHeight,
-        "Unmatched");
+        "Unmatched"
+    );
 
     SetTargetFPS(60);
 
-    std::cout << "Window created.\n";
+    std::cout
+        << "Window created.\n";
 
     // =========================================
     // Asset Manager
@@ -32,14 +35,16 @@ int main()
 
     if (!assets.load())
     {
-        std::cout << "ASSET LOADING FAILED!\n";
+        std::cout
+            << "ASSET LOADING FAILED!\n";
 
         CloseWindow();
 
         return 1;
     }
 
-    std::cout << "ALL ASSETS LOADED!\n";
+    std::cout
+        << "ALL ASSETS LOADED!\n";
 
     // =========================================
     // Loading Screen
@@ -47,7 +52,8 @@ int main()
 
     LoadingScreen loadingScreen(
         assets,
-        5.0f);
+        5.0f
+    );
 
     while (
         !WindowShouldClose() &&
@@ -95,7 +101,8 @@ int main()
         // MAIN MENU
         // =====================================
 
-        if (currentScreen == Screen::MAIN_MENU)
+        if (currentScreen ==
+            Screen::MAIN_MENU)
         {
             mainMenu.update();
 
@@ -130,7 +137,8 @@ int main()
                         game.run(true);
                     }
                 }
-                catch (const std::exception &e)
+                catch (
+                    const std::exception &e)
                 {
                     std::cout
                         << "\n[!] ERROR: "
@@ -140,7 +148,7 @@ int main()
             }
 
             // ---------------------------------
-            // EXIT
+            // EXIT APPLICATION
             // ---------------------------------
 
             else if (result == 3)
@@ -166,9 +174,34 @@ int main()
         // GAME SCREEN
         // =====================================
 
-        else if (currentScreen == Screen::GAME)
+        else if (currentScreen ==
+                 Screen::GAME)
         {
-            gameScreen.update();
+            int result =
+                gameScreen.update();
+
+            // ---------------------------------
+            // EXIT GAME SCREEN
+            // ---------------------------------
+
+            if (result == 1)
+            {
+                std::cout
+                    << "Returning to main menu...\n";
+
+                // ---------------------------------
+                // Recreate MainMenu
+                //
+                // This guarantees that the menu
+                // starts from MAIN_MENU state.
+                // ---------------------------------
+
+                mainMenu =
+                    MainMenu(&assets);
+
+                currentScreen =
+                    Screen::MAIN_MENU;
+            }
         }
 
         // =====================================
@@ -181,7 +214,8 @@ int main()
         // Main Menu
         // -------------------------------------
 
-        if (currentScreen == Screen::MAIN_MENU)
+        if (currentScreen ==
+            Screen::MAIN_MENU)
         {
             mainMenu.draw();
         }
@@ -190,7 +224,8 @@ int main()
         // Game Screen
         // -------------------------------------
 
-        else if (currentScreen == Screen::GAME)
+        else if (currentScreen ==
+                 Screen::GAME)
         {
             gameScreen.draw();
         }

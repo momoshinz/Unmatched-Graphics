@@ -1,6 +1,7 @@
-#pragma once
+#ifndef GAMESCREEN_H
+#define GAMESCREEN_H
 
-#include "raylib.h"
+#include <raylib.h>
 #include "graphics/AssetManager.h"
 
 class GameScreen
@@ -8,13 +9,15 @@ class GameScreen
 private:
     AssetManager *assets;
 
+    void drawMap();
+    void drawPlayerPanels();
+    void drawTopButtons();
+
 public:
     GameScreen(AssetManager *assets);
 
-    void update();
+    int update();
     void draw();
-
-private:
-    void drawMap();
-    void drawPlayerPanels();
 };
+
+#endif
