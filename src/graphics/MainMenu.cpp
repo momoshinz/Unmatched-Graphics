@@ -1318,6 +1318,7 @@ int MainMenu::handleInput()
                         finishButton))
                 {
                     startPlacement();
+                    return 4;
                 }
             }
         }
