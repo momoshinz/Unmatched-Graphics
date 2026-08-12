@@ -664,16 +664,30 @@ void MainMenu::drawPlayerInput(
     const float ageY = 470.0f;
 
     const float buttonWidth = 300.0f;
+<<<<<<< HEAD
     const float buttonHeight = 70.0f;
+=======
+    const float buttonHeight = 60.0f;
+>>>>>>> 42af2ee8e4df513e7c40cfd4a5714f33a437bab2
 
     const float buttonX =
         (GetScreenWidth() - buttonWidth) / 2.0f;
 
+<<<<<<< HEAD
     const float buttonY = 600.0f;
 
     // =====================================
     // Player title
     // =====================================
+=======
+    const float firstButtonY = 370.0f;
+    const float buttonGap = 20.0f;
+    Rectangle newGameButton{
+        buttonX,
+        firstButtonY,
+        buttonWidth,
+        buttonHeight};
+>>>>>>> 42af2ee8e4df513e7c40cfd4a5714f33a437bab2
 
     Vector2 playerTitleSize =
         MeasureTextEx(
@@ -878,6 +892,44 @@ int MainMenu::handleInput()
         return 0;
     }
 
+<<<<<<< HEAD
+=======
+    const float buttonWidth = 300.0f;
+    const float buttonHeight = 60.0f;
+
+    const float buttonX =
+        (GetScreenWidth() - buttonWidth) / 2.0f;
+
+    const float firstButtonY = 370.0f;
+    const float buttonGap = 20.0f;
+
+    // =========================================
+    // Button areas
+    // =========================================
+
+    Rectangle newGameButton{
+        buttonX,
+        firstButtonY,
+        buttonWidth,
+        buttonHeight};
+
+    Rectangle loadGameButton{
+        buttonX,
+        firstButtonY + buttonHeight + buttonGap,
+        buttonWidth,
+        buttonHeight};
+
+    Rectangle exitButton{
+        buttonX,
+        firstButtonY + 2.0f * (buttonHeight + buttonGap),
+        buttonWidth,
+        buttonHeight};
+
+    // =========================================
+    // Mouse
+    // =========================================
+
+>>>>>>> 42af2ee8e4df513e7c40cfd4a5714f33a437bab2
     Vector2 mousePosition =
         GetMousePosition();
 
