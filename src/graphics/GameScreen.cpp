@@ -17,7 +17,7 @@ int GameScreen::update()
     }
 
     // =========================================
-    // Top buttons
+    // Button dimensions
     // =========================================
 
     const float buttonWidth = 145.0f;
@@ -55,8 +55,39 @@ int GameScreen::update()
         buttonHeight
     };
 
-    Vector2 mousePosition =
-        GetMousePosition();
+    Vector2 mousePosition = GetMousePosition();
+
+    // =========================================
+    // GUIDE POPUP IS OPEN
+    // =========================================
+
+    if (guideOpen)
+    {
+        // اندازه و محل دکمه Back
+        const float backWidth = 130.0f;
+        const float backHeight = 45.0f;
+
+        Rectangle backButton{
+            (GetScreenWidth() - backWidth) / 2.0f,
+            GetScreenHeight() - 90.0f,
+            backWidth,
+            backHeight
+        };
+
+        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+        {
+            if (CheckCollisionPointRec(
+                    mousePosition,
+                    backButton))
+            {
+                guideOpen = false;
+            }
+        }
+
+        // خیلی مهم:
+        // وقتی Guide باز است، دکمه‌های پشت آن کار نکنند.
+        return 0;
+    }
 
     // =========================================
     // Mouse click
@@ -77,34 +108,29 @@ int GameScreen::update()
 
         // -----------------------------------------
         // SAVE GAME
-        // فعلاً بدون منطق
         // -----------------------------------------
 
         if (CheckCollisionPointRec(
                 mousePosition,
                 saveButton))
         {
-            // Later:
-            // Save game logic
+            // بعداً منطق Save
         }
 
         // -----------------------------------------
         // GUIDE
-        // فعلاً بدون منطق
         // -----------------------------------------
 
         if (CheckCollisionPointRec(
                 mousePosition,
                 guideButton))
         {
-            // Later:
-            // Guide logic
+            guideOpen = true;
         }
     }
 
     return 0;
 }
-
 // =========================================
 // DRAW
 // =========================================
@@ -178,6 +204,11 @@ void GameScreen::draw()
     // =========================================
 
     drawTopButtons();
+
+    if(guideOpen)
+    {
+        drawGuidePopup();
+    }
 }
 
 // =========================================
@@ -629,6 +660,366 @@ void GameScreen::drawTopButtons()
 
         fontSize,
         spacing,
+        WHITE
+    );
+}
+
+void GameScreen::drawGuidePopup()
+{
+    Font font = assets->getGameFont();
+
+    // =========================================
+    // Dark overlay
+    // =========================================
+
+    DrawRectangle(
+        0,
+        0,
+        GetScreenWidth(),
+        GetScreenHeight(),
+        Color{0, 0, 0, 120}
+    );
+
+    // =========================================
+    // Popup size
+    // =========================================
+
+    const float popupWidth = 900.0f;
+    const float popupHeight = 720.0f;
+
+    Rectangle popup{
+        (GetScreenWidth() - popupWidth) / 2.0f,
+        (GetScreenHeight() - popupHeight) / 2.0f,
+        popupWidth,
+        popupHeight
+    };
+
+    // =========================================
+    // Popup background
+    // =========================================
+
+    DrawRectangleRounded(
+        popup,
+        0.04f,
+        20,
+        Color{25, 20, 18, 245}
+    );
+
+    // =========================================
+    // Popup border
+    // =========================================
+
+    DrawRectangleRoundedLines(
+        popup,
+        0.04f,
+        20,
+        Color{180, 160, 130, 255}
+    );
+
+    // =========================================
+    // Title
+    // =========================================
+
+    const char *title = "INSTRUCTIONS";
+
+    const float titleSize = 42.0f;
+
+    Vector2 titleSizeVec =
+        MeasureTextEx(
+            font,
+            title,
+            titleSize,
+            2.0f
+        );
+
+    DrawTextEx(
+        font,
+        title,
+
+        Vector2{
+            popup.x +
+                (popup.width - titleSizeVec.x) / 2.0f,
+
+            popup.y + 25.0f
+        },
+
+        titleSize,
+        2.0f,
+
+        WHITE
+    );
+
+    // =========================================
+    // Guide text
+    // =========================================
+
+    const float textSize = 22.0f;
+    const float spacing = 1.5f;
+
+    float x = popup.x + 45.0f;
+    float y = popup.y + 100.0f;
+
+    const float lineHeight = 29.0f;
+
+    DrawTextEx(
+        font,
+        "Don't You Really Know How to Play :o ? Then Read Carefully ..",
+        Vector2{x, y},
+        textSize,
+        spacing,
+        WHITE
+    );
+
+    y += lineHeight * 1.7f;
+
+    // =========================================
+    // ACTIONS
+    // =========================================
+
+    DrawTextEx(
+        font,
+        "[ ACTIONS ]",
+        Vector2{x, y},
+        textSize,
+        spacing,
+        WHITE
+    );
+
+    y += lineHeight;
+
+    DrawTextEx(
+        font,
+        "Attack   ~>  Attack an enemy fighter.",
+        Vector2{x, y},
+        textSize,
+        spacing,
+        WHITE
+    );
+
+    y += lineHeight;
+
+    DrawTextEx(
+        font,
+        "Maneuver ~>  Move a fighter and draw a card.",
+        Vector2{x, y},
+        textSize,
+        spacing,
+        WHITE
+    );
+
+    y += lineHeight;
+
+    DrawTextEx(
+        font,
+        "Scheme   ~>  Play a Scheme card.",
+        Vector2{x, y},
+        textSize,
+        spacing,
+        WHITE
+    );
+
+    // =========================================
+    // RULES
+    // =========================================
+
+    y += lineHeight * 1.4f;
+
+    DrawTextEx(
+        font,
+        "[ RULES ]",
+        Vector2{x, y},
+        textSize,
+        spacing,
+        WHITE
+    );
+
+    y += lineHeight;
+
+    DrawTextEx(
+        font,
+        "[o] Each turn you have 2 actions.",
+        Vector2{x, y},
+        textSize,
+        spacing,
+        WHITE
+    );
+
+    y += lineHeight;
+
+    DrawTextEx(
+        font,
+        "[o] Every Hero card carries a unique effect,",
+        Vector2{x, y},
+        textSize,
+        spacing,
+        WHITE
+    );
+
+    y += lineHeight;
+
+    DrawTextEx(
+        font,
+        "    and on top of that each Hero possesses a special ability of their own.",
+        Vector2{x, y},
+        textSize,
+        spacing,
+        WHITE
+    );
+
+    y += lineHeight;
+
+    DrawTextEx(
+        font,
+        "[o] Your hand must never exceed 7 cards.",
+        Vector2{x, y},
+        textSize,
+        spacing,
+        WHITE
+    );
+
+    y += lineHeight;
+
+    DrawTextEx(
+        font,"[o] Heroes enter the battlefield alongside their Sidekicks, NEVER ALONE.",
+        Vector2{x, y},
+        textSize,
+        spacing,
+        WHITE
+    );
+
+    y += lineHeight;
+
+    DrawTextEx(
+        font,
+        "[o] Any home marked with a '*' conceals a Secret Passage,",
+        Vector2{x, y},
+        textSize,
+        spacing,
+        WHITE
+    );
+
+    y += lineHeight;
+
+    DrawTextEx(
+        font,
+        "    allowing instant teleportation between them.",
+        Vector2{x, y},
+        textSize,
+        spacing,
+        WHITE
+    );
+
+    y += lineHeight;
+
+    DrawTextEx(
+        font,
+        "[o] Through tactical moves in each turn, your goal is clear:",
+        Vector2{x, y},
+        textSize,
+        spacing,
+        WHITE
+    );
+
+    y += lineHeight;
+
+    DrawTextEx(
+        font,
+        "    defeat the enemy Hero and claim VICTORY.",
+        Vector2{x, y},
+        textSize,
+        spacing,
+        WHITE
+    );
+
+    y += lineHeight;
+
+    DrawTextEx(
+        font,
+        "[o] The younger player chooses the fighter and steps onto the field first.",
+        Vector2{x, y},
+        textSize,
+        spacing,
+        WHITE
+    );
+
+    // =========================================
+    // Good Luck
+    // =========================================
+
+    y += lineHeight * 1.5f;
+
+    DrawTextEx(
+        font,
+        "Good Luck, Fighter. You'll need it :]",
+        Vector2{x, y},
+        textSize,
+        spacing,
+        WHITE
+    );
+
+    // =========================================
+    // BACK BUTTON
+    // =========================================
+
+    const float backWidth = 130.0f;
+    const float backHeight = 45.0f;
+
+    Rectangle backButton{
+        (GetScreenWidth() - backWidth) / 2.0f,
+        popup.y + popup.height - 65.0f,
+        backWidth,
+        backHeight
+    };
+
+    Vector2 mousePosition =
+        GetMousePosition();
+
+    bool hovered =
+        CheckCollisionPointRec(
+            mousePosition,
+            backButton
+        );
+
+    Color backColor =
+        hovered
+            ? Color{75, 75, 75, 255}
+            : Color{40, 40, 40, 255};
+
+    DrawRectangleRounded(
+        backButton,
+        0.25f,
+        20,
+        backColor
+    );
+
+    const char *backText = "BACK";
+
+    const float backTextSize = 24.0f;
+
+    Vector2 backTextMeasure =
+        MeasureTextEx(
+            font,
+            backText,
+            backTextSize,
+            1.5f
+        );
+
+    DrawTextEx(
+        font,
+        backText,
+
+        Vector2{
+            backButton.x +
+                (backButton.width -
+                 backTextMeasure.x) / 2.0f,
+
+            backButton.y +
+                (backButton.height -
+                 backTextMeasure.y) / 2.0f
+        },
+
+        backTextSize,
+        1.5f,
         WHITE
     );
 }

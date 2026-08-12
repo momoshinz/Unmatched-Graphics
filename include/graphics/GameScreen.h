@@ -6,18 +6,20 @@
 
 class GameScreen
 {
-private:
-    AssetManager *assets;
+    private:
+        AssetManager *assets;
+        bool guideOpen = false;
 
-    void drawMap();
-    void drawPlayerPanels();
-    void drawTopButtons();
+        void drawMap();
+        void drawPlayerPanels();
+        void drawTopButtons();
+        void drawGuidePopup();
 
-public:
-    GameScreen(AssetManager *assets);
+    public:
+        GameScreen(AssetManager *assets);
 
-    int update();
-    void draw();
+        int update();
+        void draw();
 };
 
 #endif
