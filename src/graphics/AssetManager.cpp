@@ -27,7 +27,7 @@ bool AssetManager::load()
     titleFont = LoadFont("Unmatched_Assets/fonts/black-draft.otf");
     loading = LoadFont("Unmatched_Assets/fonts/NexaRustSlab.ttf");
 
-    characterTextures["dracula"] = LoadTexture("Unmatched_Assets/dracula/dracula.png");
+    characterTextures["dracula"] = LoadTexture("Unmatched_Assets/dracula/DracArtTran.png");
     characterTextures["dracula_art"] = LoadTexture("Unmatched_Assets/dracula/DracArt.png");
     characterTextures["dracula_art_transparent"] = LoadTexture("Unmatched_Assets/dracula/DracArtTran.png");
     characterTextures["dracula_health"] = LoadTexture("Unmatched_Assets/dracula/draculaHealth.png");
@@ -37,7 +37,7 @@ bool AssetManager::load()
     characterTextures["sister1"] = LoadTexture("Unmatched_Assets/dracula/sis1.png");
     characterTextures["sister2"] = LoadTexture("Unmatched_Assets/dracula/sis2.png");
     characterTextures["sister3"] = LoadTexture("Unmatched_Assets/dracula/sis3.png");
-    characterTextures["sherlock"] = LoadTexture("Unmatched_Assets/sherlock/sherlockTran.png");
+    characterTextures["sherlock"] = LoadTexture("Unmatched_Assets/sherlock/holmsArtTransparent.png");
     characterTextures["sherlock_art"] = LoadTexture("Unmatched_Assets/sherlock/holmsArt.png");
     characterTextures["sherlock_transparent"] = LoadTexture("Unmatched_Assets/sherlock/holmsArtTransparent.png");
     characterTextures["sherlock_health"] = LoadTexture("Unmatched_Assets/sherlock/sherlockHealth.png");
@@ -45,7 +45,7 @@ bool AssetManager::load()
     characterTextures["sherlock_card"] = LoadTexture("Unmatched_Assets/sherlock/sherlockHerocard.png");
     characterTextures["watson"] = LoadTexture("Unmatched_Assets/sherlock/drwatson.png");
     characterTextures["watson_health"] = LoadTexture("Unmatched_Assets/sherlock/watsonHealth.png");
-    characterTextures["invisible_man"] = LoadTexture("Unmatched_Assets/invisibleMan/invArt.png");
+    characterTextures["invisible_man"] = LoadTexture("Unmatched_Assets/invisibleMan/invisibleManArT.png");
     characterTextures["invisible_man_transparent"] = LoadTexture("Unmatched_Assets/invisibleMan/tranInv.png");
     characterTextures["fog"] = LoadTexture("Unmatched_Assets/invisibleMan/fog.png");
 

@@ -59,7 +59,7 @@ void LoadingScreen::draw()
     Font font =
         assets.getLoadingFont();
 
-    float fontSize = 60.0f;
+    float fontSize = 50.0f;
     float spacing = 2.0f;
 
     Vector2 textSize =
