@@ -891,17 +891,6 @@ void GameScreen::drawGuidePopup()
 
     DrawTextEx(
         font,
-        "[o] Any home marked with a '*' conceals a Secret Passage,",
-        Vector2{x, y},
-        textSize,
-        spacing,
-        WHITE
-    );
-
-    y += lineHeight;
-
-    DrawTextEx(
-        font,
         "    allowing instant teleportation between them.",
         Vector2{x, y},
         textSize,
