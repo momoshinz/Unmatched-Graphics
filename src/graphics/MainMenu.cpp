@@ -1,5 +1,7 @@
 #include "graphics/MainMenu.h"
 #include <cctype>
+#include <fstream>
+using namespace std;
 
 MainMenu::MainMenu(AssetManager *assets)
     : assets(assets),
@@ -9,7 +11,8 @@ MainMenu::MainMenu(AssetManager *assets)
       player2Name(""),
       player2Age(""),
       enteringName(true),
-      enteringAge(false)
+      enteringAge(false),
+      selectedSave(-1)
 {
 }
 
@@ -23,6 +26,27 @@ bool MainMenu::isPlayer2Complete() const
 {
     return !player2Name.empty() &&
            !player2Age.empty();
+}
+
+void loadSaveFiles(std::vector<std::string> &saveFiles)
+{
+    saveFiles.clear();
+
+    int slot = 1;
+
+    while (true)
+    {
+        std::string filename = "save" + std::to_string(slot) + ".json";
+
+        std::ifstream file(filename);
+
+        if (!file)
+            break;
+
+        saveFiles.push_back(filename);
+
+        slot++;
+    }
 }
 
 void MainMenu::update()
@@ -378,6 +402,199 @@ void MainMenu::draw()
             "FINISH");
     }
 
+    // =====================================
+    // LOAD GAME
+    // =====================================
+
+    if (state == State::LOAD_GAME)
+    {
+        const char *loadTitle = "LOAD GAME";
+
+        Vector2 loadTitleSize =
+            MeasureTextEx(
+                titleFont,
+                loadTitle,
+                50.0f,
+                2.0f);
+
+        DrawTextEx(
+            titleFont,
+            loadTitle,
+
+            Vector2{
+                (GetScreenWidth() -
+                loadTitleSize.x) /
+                    2.0f,
+
+                80.0f},
+
+            50.0f,
+            2.0f,
+            WHITE);
+
+        // -----------------------------
+        // Save files
+        // -----------------------------
+
+        float startY = 200.0f;
+
+        const float buttonWidth = 400.0f;
+        const float buttonHeight = 60.0f;
+        const float buttonGap = 20.0f;
+
+        const float buttonX =
+            (GetScreenWidth() - buttonWidth) / 2.0f;
+
+        Vector2 mousePosition =
+            GetMousePosition();
+
+        for (int i = 0; i < saveFiles.size(); i++)
+        {
+            Rectangle saveButton{
+                buttonX,
+                startY + i * (buttonHeight + buttonGap),
+                buttonWidth,
+                buttonHeight};
+
+            Color normalColor{
+                30,
+                30,
+                30,
+                220};
+
+            Color hoverColor{
+                60,
+                60,
+                60,
+                235};
+
+            Color buttonColor =
+                CheckCollisionPointRec(
+                    mousePosition,
+                    saveButton)
+                    ? hoverColor
+                    : normalColor;
+
+            DrawRectangleRounded(
+                saveButton,
+                1.0f,
+                32,
+                buttonColor);
+
+            std::string saveText =
+                "SAVE " +
+                std::to_string(i + 1);
+
+            Vector2 saveTextSize =
+                MeasureTextEx(
+                    font,
+                    saveText.c_str(),
+                    25.0f,
+                    2.0f);
+
+            DrawTextEx(
+                font,
+                saveText.c_str(),
+
+                Vector2{
+                    saveButton.x +
+                        (saveButton.width -
+                        saveTextSize.x) /
+                            2.0f,
+
+                    saveButton.y +
+                        (saveButton.height -
+                        saveTextSize.y) /
+                            2.0f},
+
+                25.0f,
+                2.0f,
+                WHITE);
+        }
+
+        // -----------------------------
+        // No saves
+        // -----------------------------
+
+        if (saveFiles.empty())
+        {
+            const char *noSaveText =
+                "No saved games found.";
+
+            Vector2 textSize =
+                MeasureTextEx(
+                    font,
+                    noSaveText,
+                    25.0f,
+                    2.0f);
+
+            DrawTextEx(
+                font,
+                noSaveText,
+
+                Vector2{
+                    (GetScreenWidth() -
+                    textSize.x) /
+                        2.0f,
+
+                    300.0f},
+
+                25.0f,
+                2.0f,
+                WHITE);
+        }
+
+        // -----------------------------
+        // Back
+        // -----------------------------
+
+        Rectangle backButton{
+            40.0f,
+            GetScreenHeight() - 80.0f,
+            160.0f,
+            50.0f};
+
+        Color backColor =
+            CheckCollisionPointRec(
+                mousePosition,
+                backButton)
+                ? Color{60, 60, 60, 235}
+                : Color{30, 30, 30, 220};
+
+        DrawRectangleRounded(
+            backButton,
+            1.0f,
+            32,
+            backColor);
+
+        const char *backText = "BACK";
+
+        Vector2 backTextSize =
+            MeasureTextEx(
+                font,
+                backText,
+                22.0f,
+                2.0f);
+
+        DrawTextEx(
+            font,
+            backText,
+
+            Vector2{
+                backButton.x +
+                    (backButton.width -
+                    backTextSize.x) /
+                        2.0f,
+
+                backButton.y +
+                    (backButton.height -
+                    backTextSize.y) /
+                        2.0f},
+
+            22.0f,
+            2.0f,
+            WHITE);
+    }
     // =====================================
     // READY
     // =====================================
@@ -747,6 +964,33 @@ void MainMenu::drawPlayerInput(
         complete
             ? WHITE
             : Color{150, 150, 150, 150});
+
+
+    // =====================================
+    // ENTER MESSAGE
+    // =====================================
+
+    const char *enterMessage = "Please Enter to continue";
+
+    Vector2 enterMessageSize =
+        MeasureTextEx(
+            font,
+            enterMessage,
+            18.0f,
+            1.0f);
+
+    DrawTextEx(
+        font,
+        enterMessage,
+
+        Vector2{
+            GetScreenWidth() - enterMessageSize.x - 20.0f,
+            GetScreenHeight() - enterMessageSize.y - 15.0f},
+
+        18.0f,
+        1.0f,
+
+        WHITE);
 }
 
 // =========================================
@@ -867,10 +1111,14 @@ int MainMenu::handleInput()
             // فعلاً کاری نمی‌کنیم
             // -----------------------------
 
-            if (CheckCollisionPointRec(
-                    mousePosition,
-                    loadGameButton))
+            if (CheckCollisionPointRec(mousePosition, loadGameButton))
             {
+                loadSaveFiles(saveFiles);
+
+                selectedSave = -1;
+
+                state = State::LOAD_GAME;
+
                 return 2;
             }
 
@@ -962,6 +1210,66 @@ int MainMenu::handleInput()
             }
         }
     }
+    // =====================================
+    // LOAD GAME
+    // =====================================
+
+    if (state == State::LOAD_GAME)
+    {
+        const float buttonWidth = 400.0f;
+        const float buttonHeight = 60.0f;
+        const float buttonGap = 20.0f;
+
+        const float buttonX =
+            (GetScreenWidth() - buttonWidth) / 2.0f;
+
+        const float startY = 200.0f;
+
+        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+        {
+            // -----------------------------
+            // Save buttons
+            // -----------------------------
+
+            for (int i = 0; i < saveFiles.size(); i++)
+            {
+                Rectangle saveButton{
+                    buttonX,
+                    startY + i * (buttonHeight + buttonGap),
+                    buttonWidth,
+                    buttonHeight};
+
+                if (CheckCollisionPointRec(
+                        mousePosition,
+                        saveButton))
+                {
+                    selectedSave = i;
+
+                    return 2;
+                }
+            }
+
+            // -----------------------------
+            // Back
+            // -----------------------------
+
+            Rectangle backButton{
+                40.0f,
+                GetScreenHeight() - 80.0f,
+                160.0f,
+                50.0f};
+
+            if (CheckCollisionPointRec(
+                    mousePosition,
+                    backButton))
+            {
+                state = State::MAIN_MENU;
+                selectedSave = -1;
+            }
+        }
+
+        return 0;
+    }
 
     // =====================================
     // READY
@@ -973,4 +1281,15 @@ int MainMenu::handleInput()
     }
 
     return 0;
+}
+
+std::string MainMenu::getSelectedSave() const
+{
+    if (selectedSave < 0 ||
+        selectedSave >= saveFiles.size())
+    {
+        return "";
+    }
+
+    return saveFiles[selectedSave];
 }

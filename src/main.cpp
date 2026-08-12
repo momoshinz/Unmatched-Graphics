@@ -3,6 +3,7 @@
 #include "graphics/AssetManager.h"
 #include "graphics/LoadingScreen.h"
 #include "graphics/MainMenu.h"
+#include "game/Game.h"
 
 int main()
 {
@@ -75,7 +76,21 @@ int main()
         {
             std::cout << "LOAD GAME selected.\n";
 
-            // فعلاً بعداً Load Game را اینجا می‌سازیم
+            Game game;
+
+            try
+            {
+                if (game.loadMenu())
+                {
+                    game.run(true);
+                }
+            }
+            catch (const std::exception &e)
+            {
+                std::cout << "\n[!] ERROR: "
+                        << e.what()
+                        << "\n";
+            }
         }
         else if (result == 3)
         {
