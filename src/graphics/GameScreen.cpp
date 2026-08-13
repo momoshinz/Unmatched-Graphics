@@ -1,13 +1,26 @@
 #include "graphics/GameScreen.h"
-
+#include <cmath>
+#include <iostream>
+#include "graphics/MapCoordinates.h"
+#include "board/Space.h"
 GameScreen::GameScreen(AssetManager *assets)
     : assets(assets)
 {
 }
-
-// =========================================
-// UPDATE
-// =========================================
+// ============================================================
+// GRAPHICAL POSITION OF EACH SPACE
+//
+// Coordinates are based on the ORIGINAL 1536 x 1024 map image.
+//
+// IMPORTANT:
+// These coordinates are NOT screen coordinates.
+// They are coordinates inside the original map image.
+//
+// Index 0 -> Board Space 1
+// Index 1 -> Board Space 2
+// ...
+// Index 31 -> Board Space 32
+// ============================================================
 
 int GameScreen::update()
 {
@@ -128,6 +141,20 @@ int GameScreen::update()
             guideOpen = true;
         }
     }
+    // =========================================
+    // MAP SPACE CLICK
+    // =========================================
+
+    int clickedSpaceId =
+        getClickedSpaceId();
+
+    if (clickedSpaceId != -1)
+    {
+        std::cout
+            << "Clicked Space: "
+            << clickedSpaceId
+            << std::endl;
+    }
 
     return 0;
 }
@@ -215,6 +242,10 @@ void GameScreen::draw()
 // DRAW MAP
 // =========================================
 
+// ============================================================
+// DRAW MAP
+// ============================================================
+
 void GameScreen::drawMap()
 {
     Texture2D map =
@@ -225,76 +256,19 @@ void GameScreen::drawMap()
         return;
     }
 
-    // =========================================
-    // Map area
-    // =========================================
+    float mapX;
+    float mapY;
+    float scale;
+    float mapWidth;
+    float mapHeight;
 
-    const float panelWidth = 263.0f;
-
-    // فاصله بین پنل و نقشه
-    const float mapPadding = 15.0f;
-
-    // فضای بالای صفحه برای دکمه‌ها
-    const float topSpace = 75.0f;
-
-    const float mapAreaX =
-        panelWidth + mapPadding;
-
-    const float mapAreaWidth =
-        GetScreenWidth() -
-        2.0f * (panelWidth + mapPadding);
-
-    const float mapAreaY =
-        topSpace;
-
-    const float mapAreaHeight =
-        GetScreenHeight() -
-        topSpace;
-
-    // =========================================
-    // Calculate scale
-    // =========================================
-
-    float scaleX =
-        mapAreaWidth /
-        static_cast<float>(map.width);
-
-    float scaleY =
-        mapAreaHeight /
-        static_cast<float>(map.height);
-
-    float scale =
-        (scaleX < scaleY)
-            ? scaleX
-            : scaleY;
-
-    // کمی بزرگ‌تر از حالت قبلی
-    scale *= 0.90f;
-
-    float mapWidth =
-        map.width * scale;
-
-    float mapHeight =
-        map.height * scale;
-
-    // =========================================
-    // Center map horizontally
-    // =========================================
-
-    float mapX =
-        mapAreaX +
-        (mapAreaWidth - mapWidth) / 2.0f;
-
-    // =========================================
-    // Position map
-    // =========================================
-
-    float mapY =
-        mapAreaY +
-        (mapAreaHeight - mapHeight) / 2.0f;
-
-    // کمی بالاتر
-    mapY -= 104.0f;
+    calculateMapTransform(
+        mapX,
+        mapY,
+        scale,
+        mapWidth,
+        mapHeight
+    );
 
     // =========================================
     // Draw map
@@ -1011,4 +985,327 @@ void GameScreen::drawGuidePopup()
         1.5f,
         WHITE
     );
+}
+
+// ============================================================
+// CALCULATE MAP TRANSFORMATION
+// ============================================================
+
+void GameScreen::calculateMapTransform(
+    float &mapX,
+    float &mapY,
+    float &scale,
+    float &mapWidth,
+    float &mapHeight)
+{
+    Texture2D map = assets->getGameMap();
+
+    if (map.id == 0)
+    {
+        mapX = 0.0f;
+        mapY = 0.0f;
+        scale = 1.0f;
+        mapWidth = 0.0f;
+        mapHeight = 0.0f;
+        return;
+    }
+
+    // =========================================
+    // Same values used by drawMap()
+    // =========================================
+
+    const float panelWidth = 263.0f;
+    const float mapPadding = 15.0f;
+    const float topSpace = 75.0f;
+
+    const float mapAreaX =
+        panelWidth + mapPadding;
+
+    const float mapAreaWidth =
+        GetScreenWidth() -
+        2.0f * (panelWidth + mapPadding);
+
+    const float mapAreaY =
+        topSpace;
+
+    const float mapAreaHeight =
+        GetScreenHeight() -
+        topSpace;
+
+    // =========================================
+    // Scale
+    // =========================================
+
+    float scaleX =
+        mapAreaWidth /
+        static_cast<float>(map.width);
+
+    float scaleY =
+        mapAreaHeight /
+        static_cast<float>(map.height);
+
+    scale =
+        (scaleX < scaleY)
+            ? scaleX
+            : scaleY;
+
+    scale *= 0.99f;
+
+    // =========================================
+    // Final map size
+    // =========================================
+
+    mapWidth =
+        static_cast<float>(map.width) * scale;
+
+    mapHeight =
+        static_cast<float>(map.height) * scale;
+
+    // =========================================
+    // Horizontal position
+    // =========================================
+
+    mapX =
+        mapAreaX +
+        (mapAreaWidth - mapWidth) / 2.0f;
+
+    // =========================================
+    // Vertical position
+    // =========================================
+
+    mapY =
+        mapAreaY +
+        (mapAreaHeight - mapHeight) / 2.0f;
+
+    mapY -= 80.0f;
+}
+
+// ============================================================
+// GET CLICKED SPACE
+// ============================================================
+
+int GameScreen::getClickedSpaceId()
+{
+    if (assets == nullptr)
+    {
+        return -1;
+    }
+
+    Texture2D map =
+        assets->getGameMap();
+
+    if (map.id == 0)
+    {
+        return -1;
+    }
+
+    // =========================================
+    // Mouse position on screen
+    // =========================================
+
+    Vector2 mouse =
+        GetMousePosition();
+
+    // =========================================
+    // Get map transformation
+    // =========================================
+
+    float mapX;
+    float mapY;
+    float scale;
+    float mapWidth;
+    float mapHeight;
+
+    calculateMapTransform(
+        mapX,
+        mapY,
+        scale,
+        mapWidth,
+        mapHeight
+    );
+
+    if (scale <= 0.0f)
+    {
+        return -1;
+    }
+
+    // =========================================
+    // Convert screen coordinates
+    // to ORIGINAL IMAGE coordinates
+    // =========================================
+
+    float imageX =
+        (mouse.x - mapX) / scale;
+
+    float imageY =
+        (mouse.y - mapY) / scale;
+
+    // =========================================
+    // Outside original 1536 x 1024 image
+    // =========================================
+
+    if (imageX < 0.0f ||
+        imageY < 0.0f ||
+        imageX > 1536.0f ||
+        imageY > 1024.0f)
+    {
+        return -1;
+    }
+
+    // =========================================
+    // Check all 32 graphical Spaces
+    // =========================================
+
+    for (int i = 0; i < 32; i++)
+    {
+        const SpaceGraphic &space =
+            SPACE_GRAPHICS[i];
+
+        float dx =
+            imageX - space.center.x;
+
+        float dy =
+            imageY - space.center.y;
+
+        float distanceSquared =
+            dx * dx + dy * dy;
+
+        float radiusSquared =
+            space.radius * space.radius;
+
+        if (distanceSquared <= radiusSquared)
+        {
+            return i + 1;
+        }
+    }
+
+    return -1;
+}
+
+float GameScreen::getMapScale() const
+{
+    Texture2D map = assets->getGameMap();
+
+    if (map.id == 0)
+    {
+        return 1.0f;
+    }
+
+    const float panelWidth = 263.0f;
+    const float mapPadding = 15.0f;
+    const float topSpace = 75.0f;
+
+    const float mapAreaX =
+        panelWidth + mapPadding;
+
+    const float mapAreaWidth =
+        GetScreenWidth() -
+        2.0f * (panelWidth + mapPadding);
+
+    const float mapAreaY =
+        topSpace;
+
+    const float mapAreaHeight =
+        GetScreenHeight() -
+        topSpace;
+
+    float scaleX =
+        mapAreaWidth /
+        static_cast<float>(map.width);
+
+    float scaleY =
+        mapAreaHeight /
+        static_cast<float>(map.height);
+
+    float scale =
+        (scaleX < scaleY)
+            ? scaleX
+            : scaleY;
+
+    scale *= 0.99f;
+
+    return scale;
+}
+
+Vector2 GameScreen::getMapPosition() const
+{
+    Texture2D map =
+        assets->getGameMap();
+
+    if (map.id == 0)
+    {
+        return Vector2{0.0f, 0.0f};
+    }
+
+    const float panelWidth = 263.0f;
+    const float mapPadding = 15.0f;
+    const float topSpace = 75.0f;
+
+    const float mapAreaX =
+        panelWidth + mapPadding;
+
+    const float mapAreaWidth =
+        GetScreenWidth() -
+        2.0f * (panelWidth + mapPadding);
+
+    const float mapAreaY =
+        topSpace;
+
+    const float mapAreaHeight =
+        GetScreenHeight() -
+        topSpace;
+
+    float scaleX =
+        mapAreaWidth /
+        static_cast<float>(map.width);
+
+    float scaleY =
+        mapAreaHeight /
+        static_cast<float>(map.height);
+
+    float scale =
+        (scaleX < scaleY)
+            ? scaleX
+            : scaleY;
+
+    scale *= 0.99f;
+
+    float mapWidth =
+        map.width * scale;
+
+    float mapHeight =
+        map.height * scale;
+
+    float mapX =
+        mapAreaX +
+        (mapAreaWidth - mapWidth) / 2.0f;
+
+    float mapY =
+        mapAreaY +
+        (mapAreaHeight - mapHeight) / 2.0f;
+
+    mapY -= 80.0f;
+
+    return Vector2{
+        mapX,
+        mapY
+    };
+}
+
+Vector2 GameScreen::mapImageToScreen(
+    Vector2 imagePosition) const
+{
+    float scale =
+        getMapScale();
+
+    Vector2 mapPosition =
+        getMapPosition();
+
+    return Vector2{
+        mapPosition.x +
+            imagePosition.x * scale,
+
+        mapPosition.y +
+            imagePosition.y * scale
+    };
 }
