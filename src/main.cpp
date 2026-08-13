@@ -9,8 +9,8 @@
 
 int main()
 {
-    const int screenWidth = 1600;
-    const int screenHeight = 900;
+    const int screenWidth = 1338;
+    const int screenHeight = 738;
 
     // =========================================
     // Window
