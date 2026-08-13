@@ -184,8 +184,8 @@ int main()
                 std::cout
                     << "Starting game screen...\n";
 
-               // currentScreen =
-                 //   Screen::GAME;
+               //currentScreen =
+                 //  Screen::GAME;
             }
         }
 

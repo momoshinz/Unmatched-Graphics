@@ -17,22 +17,18 @@ class GameScreen
 
         Vector2 mapImageToScreen(Vector2 imagePosition) const;
 
-        float getMapScale() const;
-
-        Vector2 getMapPosition() const;
-
     public:
         GameScreen(AssetManager *assets);
 
         int update();
         void draw();
 
-        void calculateMapTransform(
+        void calculateMapTransform (
         float &mapX,
         float &mapY,
         float &scale,
         float &mapWidth,
-        float &mapHeight);
+        float &mapHeight) const;
 
         int getClickedSpaceId();
 };

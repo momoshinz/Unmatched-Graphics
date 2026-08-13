@@ -1,6 +1,7 @@
 #include "graphics/GameScreen.h"
 #include <cmath>
 #include <iostream>
+#include <algorithm>
 #include "graphics/MapCoordinates.h"
 #include "board/Space.h"
 GameScreen::GameScreen(AssetManager *assets)
@@ -50,33 +51,29 @@ int GameScreen::update()
         startX,
         buttonY,
         buttonWidth,
-        buttonHeight
-    };
+        buttonHeight};
 
     Rectangle saveButton{
         startX + buttonWidth + buttonGap,
         buttonY,
         buttonWidth,
-        buttonHeight
-    };
+        buttonHeight};
 
     Rectangle guideButton{
         startX +
             2.0f * (buttonWidth + buttonGap),
         buttonY,
         buttonWidth,
-        buttonHeight
-    };
+        buttonHeight};
 
     Vector2 mousePosition = GetMousePosition();
 
     // =========================================
-    // GUIDE POPUP IS OPEN
+    // GUIDE POPUP
     // =========================================
 
     if (guideOpen)
     {
-        // اندازه و محل دکمه Back
         const float backWidth = 130.0f;
         const float backHeight = 45.0f;
 
@@ -84,8 +81,7 @@ int GameScreen::update()
             (GetScreenWidth() - backWidth) / 2.0f,
             GetScreenHeight() - 90.0f,
             backWidth,
-            backHeight
-        };
+            backHeight};
 
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
         {
@@ -97,8 +93,8 @@ int GameScreen::update()
             }
         }
 
-        // خیلی مهم:
-        // وقتی Guide باز است، دکمه‌های پشت آن کار نکنند.
+        // وقتی Guide باز است،
+        // هیچ چیز دیگری نباید کلیک شود.
         return 0;
     }
 
@@ -108,9 +104,9 @@ int GameScreen::update()
 
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
     {
-        // -----------------------------------------
+        // =========================================
         // EXIT
-        // -----------------------------------------
+        // =========================================
 
         if (CheckCollisionPointRec(
                 mousePosition,
@@ -119,48 +115,49 @@ int GameScreen::update()
             return 1;
         }
 
-        // -----------------------------------------
+        // =========================================
         // SAVE GAME
-        // -----------------------------------------
+        // =========================================
 
         if (CheckCollisionPointRec(
                 mousePosition,
                 saveButton))
         {
-            // بعداً منطق Save
+            // TODO:
+            // Save game logic
+            return 0;
         }
 
-        // -----------------------------------------
+        // =========================================
         // GUIDE
-        // -----------------------------------------
+        // =========================================
 
         if (CheckCollisionPointRec(
                 mousePosition,
                 guideButton))
         {
             guideOpen = true;
+            return 0;
         }
-    }
-    // =========================================
-    // MAP SPACE CLICK
-    // =========================================
 
-    int clickedSpaceId =
-        getClickedSpaceId();
+        // =========================================
+        // MAP SPACE CLICK
+        // =========================================
 
-    if (clickedSpaceId != -1)
-    {
-        std::cout
-            << "Clicked Space: "
-            << clickedSpaceId
-            << std::endl;
+        int clickedSpaceId =
+            getClickedSpaceId();
+
+        if (clickedSpaceId != -1)
+        {
+            std::cout
+                << "Clicked Space: "
+                << clickedSpaceId
+                << std::endl;
+        }
     }
 
     return 0;
 }
-// =========================================
-// DRAW
-// =========================================
 
 void GameScreen::draw()
 {
@@ -169,10 +166,6 @@ void GameScreen::draw()
         return;
     }
 
-    // =========================================
-    // 1. Background
-    // =========================================
-
     Texture2D background =
         assets->getMainPanelBackground();
 
@@ -180,27 +173,19 @@ void GameScreen::draw()
     {
         DrawTexturePro(
             background,
-
             Rectangle{
                 0.0f,
                 0.0f,
                 static_cast<float>(background.width),
-                static_cast<float>(background.height)
-            },
-
+                static_cast<float>(background.height)},
             Rectangle{
                 0.0f,
                 0.0f,
                 static_cast<float>(GetScreenWidth()),
-                static_cast<float>(GetScreenHeight())
-            },
-
+                static_cast<float>(GetScreenHeight())},
             Vector2{0.0f, 0.0f},
-
             0.0f,
-
-            WHITE
-        );
+            WHITE);
     }
     else
     {
@@ -209,30 +194,14 @@ void GameScreen::draw()
                 45,
                 30,
                 20,
-                255
-            }
-        );
+                255});
     }
 
-    // =========================================
-    // 2. Map
-    // =========================================
-
     drawMap();
-
-    // =========================================
-    // 3. Player panels
-    // =========================================
-
     drawPlayerPanels();
-
-    // =========================================
-    // 4. Top buttons
-    // =========================================
-
     drawTopButtons();
 
-    if(guideOpen)
+    if (guideOpen)
     {
         drawGuidePopup();
     }
@@ -267,12 +236,7 @@ void GameScreen::drawMap()
         mapY,
         scale,
         mapWidth,
-        mapHeight
-    );
-
-    // =========================================
-    // Draw map
-    // =========================================
+        mapHeight);
 
     DrawTexturePro(
         map,
@@ -281,25 +245,21 @@ void GameScreen::drawMap()
             0.0f,
             0.0f,
             static_cast<float>(map.width),
-            static_cast<float>(map.height)
-        },
+            static_cast<float>(map.height)},
 
         Rectangle{
             mapX,
             mapY,
             mapWidth,
-            mapHeight
-        },
+            mapHeight},
 
         Vector2{
             0.0f,
-            0.0f
-        },
+            0.0f},
 
         0.0f,
 
-        WHITE
-    );
+        WHITE);
 }
 
 // =========================================
@@ -339,8 +299,7 @@ void GameScreen::drawPlayerPanels()
         0,
         0,
         0,
-        180
-    };
+        180};
 
     // =========================================
     // Left panel
@@ -350,15 +309,13 @@ void GameScreen::drawPlayerPanels()
         leftPanelX,
         margin,
         panelWidth,
-        panelHeight
-    };
+        panelHeight};
 
     DrawRectangleRounded(
         leftPanel,
         0.12f,
         30,
-        panelColor
-    );
+        panelColor);
 
     // =========================================
     // Right panel
@@ -368,15 +325,13 @@ void GameScreen::drawPlayerPanels()
         rightPanelX,
         margin,
         panelWidth,
-        panelHeight
-    };
+        panelHeight};
 
     DrawRectangleRounded(
         rightPanel,
         0.12f,
         30,
-        panelColor
-    );
+        panelColor);
 }
 
 // =========================================
@@ -414,8 +369,7 @@ void GameScreen::drawTopButtons()
         startX,
         buttonY,
         buttonWidth,
-        buttonHeight
-    };
+        buttonHeight};
 
     Rectangle saveButton{
         startX +
@@ -425,8 +379,7 @@ void GameScreen::drawTopButtons()
         buttonY,
 
         buttonWidth,
-        buttonHeight
-    };
+        buttonHeight};
 
     Rectangle guideButton{
         startX +
@@ -436,8 +389,7 @@ void GameScreen::drawTopButtons()
         buttonY,
 
         buttonWidth,
-        buttonHeight
-    };
+        buttonHeight};
 
     // =========================================
     // Mouse
@@ -454,15 +406,13 @@ void GameScreen::drawTopButtons()
         25,
         25,
         25,
-        190
-    };
+        190};
 
     Color hoverColor{
         65,
         65,
         65,
-        210
-    };
+        210};
 
     // =========================================
     // EXIT
@@ -479,8 +429,7 @@ void GameScreen::drawTopButtons()
         exitButton,
         1.0f,
         32,
-        exitColor
-    );
+        exitColor);
 
     // =========================================
     // SAVE GAME
@@ -497,8 +446,7 @@ void GameScreen::drawTopButtons()
         saveButton,
         1.0f,
         32,
-        saveColor
-    );
+        saveColor);
 
     // =========================================
     // GUIDE
@@ -515,8 +463,7 @@ void GameScreen::drawTopButtons()
         guideButton,
         1.0,
         32,
-        guideColor
-    );
+        guideColor);
 
     // =========================================
     // Text
@@ -543,24 +490,21 @@ void GameScreen::drawTopButtons()
             font,
             exitText,
             fontSize,
-            spacing
-        );
+            spacing);
 
     Vector2 saveTextSize =
         MeasureTextEx(
             font,
             saveText,
             fontSize,
-            spacing
-        );
+            spacing);
 
     Vector2 guideTextSize =
         MeasureTextEx(
             font,
             guideText,
             fontSize,
-            spacing
-        );
+            spacing);
 
     // =========================================
     // EXIT text
@@ -579,13 +523,11 @@ void GameScreen::drawTopButtons()
             exitButton.y +
                 (exitButton.height -
                  exitTextSize.y) /
-                    2.0f
-        },
+                    2.0f},
 
         fontSize,
         spacing,
-        WHITE
-    );
+        WHITE);
 
     // =========================================
     // SAVE GAME text
@@ -604,13 +546,11 @@ void GameScreen::drawTopButtons()
             saveButton.y +
                 (saveButton.height -
                  saveTextSize.y) /
-                    2.0f
-        },
+                    2.0f},
 
         fontSize,
         spacing,
-        WHITE
-    );
+        WHITE);
 
     // =========================================
     // GUIDE text
@@ -629,13 +569,11 @@ void GameScreen::drawTopButtons()
             guideButton.y +
                 (guideButton.height -
                  guideTextSize.y) /
-                    2.0f
-        },
+                    2.0f},
 
         fontSize,
         spacing,
-        WHITE
-    );
+        WHITE);
 }
 
 void GameScreen::drawGuidePopup()
@@ -651,8 +589,7 @@ void GameScreen::drawGuidePopup()
         0,
         GetScreenWidth(),
         GetScreenHeight(),
-        Color{0, 0, 0, 120}
-    );
+        Color{0, 0, 0, 120});
 
     // =========================================
     // Popup size
@@ -665,8 +602,7 @@ void GameScreen::drawGuidePopup()
         (GetScreenWidth() - popupWidth) / 2.0f,
         (GetScreenHeight() - popupHeight) / 2.0f,
         popupWidth,
-        popupHeight
-    };
+        popupHeight};
 
     // =========================================
     // Popup background
@@ -676,8 +612,7 @@ void GameScreen::drawGuidePopup()
         popup,
         0.04f,
         20,
-        Color{25, 20, 18, 245}
-    );
+        Color{25, 20, 18, 245});
 
     // =========================================
     // Popup border
@@ -687,8 +622,7 @@ void GameScreen::drawGuidePopup()
         popup,
         0.04f,
         20,
-        Color{180, 160, 130, 255}
-    );
+        Color{180, 160, 130, 255});
 
     // =========================================
     // Title
@@ -703,8 +637,7 @@ void GameScreen::drawGuidePopup()
             font,
             title,
             titleSize,
-            2.0f
-        );
+            2.0f);
 
     DrawTextEx(
         font,
@@ -714,14 +647,12 @@ void GameScreen::drawGuidePopup()
             popup.x +
                 (popup.width - titleSizeVec.x) / 2.0f,
 
-            popup.y + 25.0f
-        },
+            popup.y + 25.0f},
 
         titleSize,
         2.0f,
 
-        WHITE
-    );
+        WHITE);
 
     // =========================================
     // Guide text
@@ -741,8 +672,7 @@ void GameScreen::drawGuidePopup()
         Vector2{x, y},
         textSize,
         spacing,
-        WHITE
-    );
+        WHITE);
 
     y += lineHeight * 1.7f;
 
@@ -756,8 +686,7 @@ void GameScreen::drawGuidePopup()
         Vector2{x, y},
         textSize,
         spacing,
-        WHITE
-    );
+        WHITE);
 
     y += lineHeight;
 
@@ -767,8 +696,7 @@ void GameScreen::drawGuidePopup()
         Vector2{x, y},
         textSize,
         spacing,
-        WHITE
-    );
+        WHITE);
 
     y += lineHeight;
 
@@ -778,8 +706,7 @@ void GameScreen::drawGuidePopup()
         Vector2{x, y},
         textSize,
         spacing,
-        WHITE
-    );
+        WHITE);
 
     y += lineHeight;
 
@@ -789,8 +716,7 @@ void GameScreen::drawGuidePopup()
         Vector2{x, y},
         textSize,
         spacing,
-        WHITE
-    );
+        WHITE);
 
     // =========================================
     // RULES
@@ -804,8 +730,7 @@ void GameScreen::drawGuidePopup()
         Vector2{x, y},
         textSize,
         spacing,
-        WHITE
-    );
+        WHITE);
 
     y += lineHeight;
 
@@ -815,8 +740,7 @@ void GameScreen::drawGuidePopup()
         Vector2{x, y},
         textSize,
         spacing,
-        WHITE
-    );
+        WHITE);
 
     y += lineHeight;
 
@@ -826,8 +750,7 @@ void GameScreen::drawGuidePopup()
         Vector2{x, y},
         textSize,
         spacing,
-        WHITE
-    );
+        WHITE);
 
     y += lineHeight;
 
@@ -837,8 +760,7 @@ void GameScreen::drawGuidePopup()
         Vector2{x, y},
         textSize,
         spacing,
-        WHITE
-    );
+        WHITE);
 
     y += lineHeight;
 
@@ -848,18 +770,16 @@ void GameScreen::drawGuidePopup()
         Vector2{x, y},
         textSize,
         spacing,
-        WHITE
-    );
+        WHITE);
 
     y += lineHeight;
 
     DrawTextEx(
-        font,"[o] Heroes enter the battlefield alongside their Sidekicks, NEVER ALONE.",
+        font, "[o] Heroes enter the battlefield alongside their Sidekicks, NEVER ALONE.",
         Vector2{x, y},
         textSize,
         spacing,
-        WHITE
-    );
+        WHITE);
 
     y += lineHeight;
 
@@ -869,8 +789,7 @@ void GameScreen::drawGuidePopup()
         Vector2{x, y},
         textSize,
         spacing,
-        WHITE
-    );
+        WHITE);
 
     y += lineHeight;
 
@@ -880,8 +799,7 @@ void GameScreen::drawGuidePopup()
         Vector2{x, y},
         textSize,
         spacing,
-        WHITE
-    );
+        WHITE);
 
     y += lineHeight;
 
@@ -891,8 +809,7 @@ void GameScreen::drawGuidePopup()
         Vector2{x, y},
         textSize,
         spacing,
-        WHITE
-    );
+        WHITE);
 
     y += lineHeight;
 
@@ -902,8 +819,7 @@ void GameScreen::drawGuidePopup()
         Vector2{x, y},
         textSize,
         spacing,
-        WHITE
-    );
+        WHITE);
 
     // =========================================
     // Good Luck
@@ -917,8 +833,7 @@ void GameScreen::drawGuidePopup()
         Vector2{x, y},
         textSize,
         spacing,
-        WHITE
-    );
+        WHITE);
 
     // =========================================
     // BACK BUTTON
@@ -931,8 +846,7 @@ void GameScreen::drawGuidePopup()
         (GetScreenWidth() - backWidth) / 2.0f,
         popup.y + popup.height - 65.0f,
         backWidth,
-        backHeight
-    };
+        backHeight};
 
     Vector2 mousePosition =
         GetMousePosition();
@@ -940,8 +854,7 @@ void GameScreen::drawGuidePopup()
     bool hovered =
         CheckCollisionPointRec(
             mousePosition,
-            backButton
-        );
+            backButton);
 
     Color backColor =
         hovered
@@ -952,8 +865,7 @@ void GameScreen::drawGuidePopup()
         backButton,
         0.25f,
         20,
-        backColor
-    );
+        backColor);
 
     const char *backText = "BACK";
 
@@ -964,8 +876,7 @@ void GameScreen::drawGuidePopup()
             font,
             backText,
             backTextSize,
-            1.5f
-        );
+            1.5f);
 
     DrawTextEx(
         font,
@@ -974,17 +885,17 @@ void GameScreen::drawGuidePopup()
         Vector2{
             backButton.x +
                 (backButton.width -
-                 backTextMeasure.x) / 2.0f,
+                 backTextMeasure.x) /
+                    2.0f,
 
             backButton.y +
                 (backButton.height -
-                 backTextMeasure.y) / 2.0f
-        },
+                 backTextMeasure.y) /
+                    2.0f},
 
         backTextSize,
         1.5f,
-        WHITE
-    );
+        WHITE);
 }
 
 // ============================================================
@@ -996,9 +907,10 @@ void GameScreen::calculateMapTransform(
     float &mapY,
     float &scale,
     float &mapWidth,
-    float &mapHeight)
+    float &mapHeight) const
 {
-    Texture2D map = assets->getGameMap();
+    Texture2D map =
+        assets->getGameMap();
 
     if (map.id == 0)
     {
@@ -1011,12 +923,16 @@ void GameScreen::calculateMapTransform(
     }
 
     // =========================================
-    // Same values used by drawMap()
+    // Map layout settings
     // =========================================
 
     const float panelWidth = 300.0f;
     const float mapPadding = 15.0f;
     const float topSpace = 75.0f;
+
+    // =========================================
+    // Available map area
+    // =========================================
 
     const float mapAreaX =
         panelWidth + mapPadding;
@@ -1033,36 +949,37 @@ void GameScreen::calculateMapTransform(
         topSpace;
 
     // =========================================
-    // Scale
+    // Calculate scale
     // =========================================
 
-    float scaleX =
+    const float scaleX =
         mapAreaWidth /
         static_cast<float>(map.width);
 
-    float scaleY =
+    const float scaleY =
         mapAreaHeight /
         static_cast<float>(map.height);
 
     scale =
-        (scaleX < scaleY)
-            ? scaleX
-            : scaleY;
+        std::min(scaleX, scaleY);
 
+    // Slight margin around map
     scale *= 0.95f;
 
     // =========================================
-    // Final map size
+    // Final map dimensions
     // =========================================
 
     mapWidth =
-        static_cast<float>(map.width) * scale;
+        static_cast<float>(map.width) *
+        scale;
 
     mapHeight =
-        static_cast<float>(map.height) * scale;
+        static_cast<float>(map.height) *
+        scale;
 
     // =========================================
-    // Horizontal position
+    // Center map horizontally
     // =========================================
 
     mapX =
@@ -1070,19 +987,19 @@ void GameScreen::calculateMapTransform(
         (mapAreaWidth - mapWidth) / 2.0f;
 
     // =========================================
-    // Vertical position
+    // Center map vertically
     // =========================================
 
     mapY =
         mapAreaY +
         (mapAreaHeight - mapHeight) / 2.0f;
 
+    // =========================================
+    // Move map slightly upward
+    // =========================================
+
     mapY -= 100.0f;
 }
-
-// ============================================================
-// GET CLICKED SPACE
-// ============================================================
 
 int GameScreen::getClickedSpaceId()
 {
@@ -1100,14 +1017,14 @@ int GameScreen::getClickedSpaceId()
     }
 
     // =========================================
-    // Mouse position on screen
+    // Mouse position
     // =========================================
 
     Vector2 mouse =
         GetMousePosition();
 
     // =========================================
-    // Get map transformation
+    // Map transformation
     // =========================================
 
     float mapX;
@@ -1121,8 +1038,7 @@ int GameScreen::getClickedSpaceId()
         mapY,
         scale,
         mapWidth,
-        mapHeight
-    );
+        mapHeight);
 
     if (scale <= 0.0f)
     {
@@ -1130,8 +1046,7 @@ int GameScreen::getClickedSpaceId()
     }
 
     // =========================================
-    // Convert screen coordinates
-    // to ORIGINAL IMAGE coordinates
+    // Screen -> Original map image
     // =========================================
 
     float imageX =
@@ -1141,19 +1056,19 @@ int GameScreen::getClickedSpaceId()
         (mouse.y - mapY) / scale;
 
     // =========================================
-    // Outside original 1536 x 1024 image
+    // Outside map
     // =========================================
 
     if (imageX < 0.0f ||
         imageY < 0.0f ||
-        imageX > 1536.0f ||
-        imageY > 1024.0f)
+        imageX > static_cast<float>(map.width) ||
+        imageY > static_cast<float>(map.height))
     {
         return -1;
     }
 
     // =========================================
-    // Check all 32 graphical Spaces
+    // Check all 32 spaces
     // =========================================
 
     for (int i = 0; i < 32; i++)
@@ -1182,130 +1097,26 @@ int GameScreen::getClickedSpaceId()
     return -1;
 }
 
-float GameScreen::getMapScale() const
-{
-    Texture2D map = assets->getGameMap();
-
-    if (map.id == 0)
-    {
-        return 1.0f;
-    }
-
-    const float panelWidth = 263.0f;
-    const float mapPadding = 15.0f;
-    const float topSpace = 75.0f;
-
-    const float mapAreaX =
-        panelWidth + mapPadding;
-
-    const float mapAreaWidth =
-        GetScreenWidth() -
-        2.0f * (panelWidth + mapPadding);
-
-    const float mapAreaY =
-        topSpace;
-
-    const float mapAreaHeight =
-        GetScreenHeight() -
-        topSpace;
-
-    float scaleX =
-        mapAreaWidth /
-        static_cast<float>(map.width);
-
-    float scaleY =
-        mapAreaHeight /
-        static_cast<float>(map.height);
-
-    float scale =
-        (scaleX < scaleY)
-            ? scaleX
-            : scaleY;
-
-    scale *= 0.99f;
-
-    return scale;
-}
-
-Vector2 GameScreen::getMapPosition() const
-{
-    Texture2D map =
-        assets->getGameMap();
-
-    if (map.id == 0)
-    {
-        return Vector2{0.0f, 0.0f};
-    }
-
-    const float panelWidth = 263.0f;
-    const float mapPadding = 15.0f;
-    const float topSpace = 75.0f;
-
-    const float mapAreaX =
-        panelWidth + mapPadding;
-
-    const float mapAreaWidth =
-        GetScreenWidth() -
-        2.0f * (panelWidth + mapPadding);
-
-    const float mapAreaY =
-        topSpace;
-
-    const float mapAreaHeight =
-        GetScreenHeight() -
-        topSpace;
-
-    float scaleX =
-        mapAreaWidth /
-        static_cast<float>(map.width);
-
-    float scaleY =
-        mapAreaHeight /
-        static_cast<float>(map.height);
-
-    float scale =
-        (scaleX < scaleY)
-            ? scaleX
-            : scaleY;
-
-    scale *= 0.99f;
-
-    float mapWidth =
-        map.width * scale;
-
-    float mapHeight =
-        map.height * scale;
-
-    float mapX =
-        mapAreaX +
-        (mapAreaWidth - mapWidth) / 2.0f;
-
-    float mapY =
-        mapAreaY +
-        (mapAreaHeight - mapHeight) / 2.0f;
-
-    mapY -= 80.0f;
-
-    return Vector2{
-        mapX,
-        mapY
-    };
-}
-
 Vector2 GameScreen::mapImageToScreen(
     Vector2 imagePosition) const
 {
-    float scale =
-        getMapScale();
+    float mapX;
+    float mapY;
+    float scale;
+    float mapWidth;
+    float mapHeight;
 
-    Vector2 mapPosition =
-        getMapPosition();
+    calculateMapTransform(
+        mapX,
+        mapY,
+        scale,
+        mapWidth,
+        mapHeight);
 
     return Vector2{
-        mapPosition.x +
+        mapX +
             imagePosition.x * scale,
 
-        mapPosition.y +
-            imagePosition.y * scale
-    };
+        mapY +
+            imagePosition.y * scale};
 }
