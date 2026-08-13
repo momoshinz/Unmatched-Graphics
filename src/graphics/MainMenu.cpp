@@ -3,11 +3,13 @@
 #include <fstream>
 #include "fighter/Hero.h"
 #include "player/Player.h"
+#include "board/Space.h"
+#include "graphics/MapCoordinates.h"
 using namespace std;
 
 MainMenu::MainMenu(AssetManager *assets, Game *game)
     : assets(assets),
-      game(game),
+      game(nullptr),
       state(State::MAIN_MENU),
       player1Name(""),
       player1Age(""),
@@ -646,6 +648,10 @@ void MainMenu::draw()
     if (state == State::HERO_SELECTION)
     {
         drawHeroSelection(font);
+    }
+    if (state == State::PLACEMENT)
+    {
+    drawPlacement(assets->getGameFont());
     }
 }
 
@@ -2122,5 +2128,329 @@ void MainMenu::finishPlacement()
         placementSidekickIndex = 0;
 
         return;
+    }
+}
+
+void MainMenu::drawPlacement(Font font)
+{
+    // =========================================================
+    // عنوان
+    // =========================================================
+
+    const char *title = "";
+
+    if (placement == Placement::YOUNGER_HERO)
+    {
+        title = "YOUNGER PLAYER - PLACE YOUR HERO";
+    }
+    else if (placement == Placement::YOUNGER_SIDEKICKS)
+    {
+        title = "YOUNGER PLAYER - PLACE YOUR SIDEKICKS";
+    }
+    else if (placement == Placement::OLDER_HERO)
+    {
+        title = "OLDER PLAYER - PLACE YOUR HERO";
+    }
+    else if (placement == Placement::OLDER_SIDEKICKS)
+    {
+        title = "OLDER PLAYER - PLACE YOUR SIDEKICKS";
+    }
+    else
+    {
+        return;
+    }
+
+    // =========================================================
+    // عنوان بالای صفحه
+    // =========================================================
+
+    float fontSize = 30.0f;
+
+    Vector2 textSize =
+        MeasureTextEx(
+            font,
+            title,
+            fontSize,
+            2.0f
+        );
+
+    DrawTextEx(
+        font,
+        title,
+        Vector2{
+            (GetScreenWidth() - textSize.x) / 2.0f,
+            20.0f
+        },
+        fontSize,
+        2.0f,
+        WHITE
+    );
+
+    // =========================================================
+    // راهنمای بازیکن
+    // =========================================================
+
+    const char *instruction = "";
+
+    if (placement == Placement::YOUNGER_HERO ||
+        placement == Placement::OLDER_HERO)
+    {
+        instruction =
+            "Choose Space 7 or Space 22 for your Hero";
+    }
+    else
+    {
+        instruction =
+            "Choose a valid Space for your Sidekick";
+    }
+
+    float instructionSize = 22.0f;
+
+    Vector2 instructionTextSize =
+        MeasureTextEx(
+            font,
+            instruction,
+            instructionSize,
+            1.5f
+        );
+
+    DrawTextEx(
+        font,
+        instruction,
+
+        Vector2{
+            (GetScreenWidth() -
+             instructionTextSize.x) / 2.0f,
+
+            55.0f
+        },
+
+        instructionSize,
+        1.5f,
+
+        WHITE
+    );
+}
+
+float MainMenu::getMapScale() const
+{
+    Texture2D map =
+        assets->getGameMap();
+
+    if (map.id == 0)
+    {
+        return 1.0f;
+    }
+
+    const float panelWidth = 263.0f;
+    const float mapPadding = 15.0f;
+    const float topSpace = 75.0f;
+
+    const float mapAreaWidth =
+        GetScreenWidth() -
+        2.0f * (panelWidth + mapPadding);
+
+    const float mapAreaHeight =
+        GetScreenHeight() -
+        topSpace;
+
+    float scaleX =
+        mapAreaWidth /
+        static_cast<float>(map.width);
+
+    float scaleY =
+        mapAreaHeight /
+        static_cast<float>(map.height);
+
+    float scale =
+        (scaleX < scaleY)
+            ? scaleX
+            : scaleY;
+
+    scale *= 0.99f;
+
+    return scale;
+}
+
+Vector2 MainMenu::getMapPosition() const
+{
+    Texture2D map =
+        assets->getGameMap();
+
+    if (map.id == 0)
+    {
+        return Vector2{0.0f, 0.0f};
+    }
+
+    const float panelWidth = 263.0f;
+    const float mapPadding = 15.0f;
+    const float topSpace = 75.0f;
+
+    const float mapAreaX =
+        panelWidth + mapPadding;
+
+    const float mapAreaWidth =
+        GetScreenWidth() -
+        2.0f * (panelWidth + mapPadding);
+
+    const float mapAreaY =
+        topSpace;
+
+    const float mapAreaHeight =
+        GetScreenHeight() -
+        topSpace;
+
+    float scaleX =
+        mapAreaWidth /
+        static_cast<float>(map.width);
+
+    float scaleY =
+        mapAreaHeight /
+        static_cast<float>(map.height);
+
+    float scale =
+        (scaleX < scaleY)
+            ? scaleX
+            : scaleY;
+
+    scale *= 0.99f;
+
+    float mapWidth =
+        map.width * scale;
+
+    float mapHeight =
+        map.height * scale;
+
+    float mapX =
+        mapAreaX +
+        (mapAreaWidth - mapWidth) / 2.0f;
+
+    float mapY =
+        mapAreaY +
+        (mapAreaHeight - mapHeight) / 2.0f;
+
+    mapY -= 80.0f;
+
+    return Vector2{
+        mapX,
+        mapY
+    };
+}
+
+Vector2 MainMenu::mapImageToScreen(
+    Vector2 imagePosition) const
+{
+    float scale =
+        getMapScale();
+
+    Vector2 mapPosition =
+        getMapPosition();
+
+    return Vector2{
+        mapPosition.x +
+            imagePosition.x * scale,
+
+        mapPosition.y +
+            imagePosition.y * scale
+    };
+}
+
+void MainMenu::updatePlacement()
+{
+    if (board == nullptr)
+    {
+        return;
+    }
+    
+
+    if (placement == Placement::FINISHED)
+    {
+        return;
+    }
+
+    if (!IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+    {
+        return;
+    }
+
+    Vector2 mouse =
+        GetMousePosition();
+
+    // =========================================================
+    // HERO
+    // فقط Space 7 و Space 22
+    // =========================================================
+
+    if (placement == Placement::YOUNGER_HERO ||
+        placement == Placement::OLDER_HERO)
+    {
+        // Space 7
+        Vector2 space7 =
+            mapImageToScreen(
+                SPACE_GRAPHICS[6].center
+            );
+
+        float radius7 =
+            SPACE_GRAPHICS[6].radius *
+            getMapScale();
+
+        if (CheckCollisionPointCircle(
+                mouse,
+                space7,
+                radius7))
+        {
+            placeHeroOnSpace(7);
+            return;
+        }
+
+        // Space 22
+        Vector2 space22 =
+            mapImageToScreen(
+                SPACE_GRAPHICS[21].center
+            );
+
+        float radius22 =
+            SPACE_GRAPHICS[21].radius *
+            getMapScale();
+
+        if (CheckCollisionPointCircle(
+                mouse,
+                space22,
+                radius22))
+        {
+            placeHeroOnSpace(22);
+            return;
+        }
+
+        return;
+    }
+
+    // =========================================================
+    // SIDEKICKS
+    // =========================================================
+
+    if (placement == Placement::YOUNGER_SIDEKICKS ||
+        placement == Placement::OLDER_SIDEKICKS)
+    {
+        for (int i = 0; i < 32; i++)
+        {
+            Vector2 center =
+                mapImageToScreen(
+                    SPACE_GRAPHICS[i].center
+                );
+
+            float radius =
+                SPACE_GRAPHICS[i].radius *
+                getMapScale();
+
+            if (CheckCollisionPointCircle(
+                    mouse,
+                    center,
+                    radius))
+            {
+                placeSidekickOnSpace(i + 1);
+                return;
+            }
+        }
     }
 }

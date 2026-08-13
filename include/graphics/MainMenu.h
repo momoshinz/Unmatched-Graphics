@@ -82,6 +82,12 @@ class MainMenu
 
         void drawHeroSelection(Font font);
 
+        float getMapScale() const;
+
+        Vector2 getMapPosition() const;
+
+        Vector2 mapImageToScreen(Vector2 imagePosition) const;
+
     public:
         MainMenu(AssetManager *assets, Game *game);
 
