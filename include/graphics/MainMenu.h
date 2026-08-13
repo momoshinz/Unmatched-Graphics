@@ -127,4 +127,5 @@ class MainMenu
         bool isValidSidekickPlacement(Space *space) const;
 
         void finishPlacement();
+        void drawPlacedFighters(Font font);
 };
