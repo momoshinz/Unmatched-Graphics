@@ -23,8 +23,7 @@ int main()
 
     SetTargetFPS(60);
 
-    std::cout
-        << "Window created.\n";
+    std::cout << "Window created.\n";
 
     // =========================================
     // Asset Manager
@@ -34,16 +33,14 @@ int main()
 
     if (!assets.load())
     {
-        std::cout
-            << "ASSET LOADING FAILED!\n";
+        std::cout << "ASSET LOADING FAILED!\n";
 
         CloseWindow();
 
         return 1;
     }
 
-    std::cout
-        << "ALL ASSETS LOADED!\n";
+    std::cout << "ALL ASSETS LOADED!\n";
 
     // =========================================
     // Loading Screen
@@ -69,13 +66,17 @@ int main()
     }
 
     // =========================================
-    // Screens
+    // Game Objects
     // =========================================
 
     Game game;
-    MainMenu mainMenu(&assets, &game);
 
-    GameScreen gameScreen(&assets);
+    MainMenu mainMenu(
+        &assets,
+        &game);
+
+    GameScreen gameScreen(
+        &assets);
 
     // =========================================
     // Current Screen
@@ -96,21 +97,33 @@ int main()
 
     while (!WindowShouldClose())
     {
-        // =====================================
-        // MAIN MENU
-        // =====================================
+        // =====================================================
+        // UPDATE
+        // =====================================================
 
-        if (currentScreen ==
-            Screen::MAIN_MENU)
+        if (currentScreen == Screen::MAIN_MENU)
         {
+            // -------------------------------------------------
+            // MainMenu update
+            //
+            // This also handles:
+            // Player input
+            // Hero selection
+            // Placement
+            // -------------------------------------------------
+
             mainMenu.update();
 
             int result =
                 mainMenu.handleInput();
 
-            // ---------------------------------
+            // -------------------------------------------------
             // NEW GAME
-            // ---------------------------------
+            //
+            // Do nothing here.
+            // MainMenu itself handles the transition
+            // from player input -> ready -> hero selection.
+            // -------------------------------------------------
 
             if (result == 1)
             {
@@ -118,16 +131,14 @@ int main()
                     << "NEW GAME selected.\n";
             }
 
-            // ---------------------------------
+            // -------------------------------------------------
             // LOAD GAME
-            // ---------------------------------
+            // -------------------------------------------------
 
             else if (result == 2)
             {
                 std::cout
                     << "LOAD GAME selected.\n";
-
-                Game game;
 
                 try
                 {
@@ -136,8 +147,7 @@ int main()
                         game.run(true);
                     }
                 }
-                catch (
-                    const std::exception &e)
+                catch (const std::exception &e)
                 {
                     std::cout
                         << "\n[!] ERROR: "
@@ -146,85 +156,93 @@ int main()
                 }
             }
 
-            // ---------------------------------
+            // -------------------------------------------------
             // EXIT APPLICATION
-            // ---------------------------------
+            // -------------------------------------------------
 
             else if (result == 3)
             {
                 break;
             }
 
-            // ---------------------------------
-            // FINISH HERO SELECTION
-            // ---------------------------------
+            // -------------------------------------------------
+            // GAME START
+            //
+            // IMPORTANT:
+            //
+            // This result should ONLY happen after
+            // the whole placement process is finished.
+            //
+            // Hero selection itself must NOT return 4 anymore.
+            // -------------------------------------------------
 
             else if (result == 4)
             {
                 std::cout
+                    << "Placement finished.\n";
+
+                std::cout
                     << "Starting game screen...\n";
 
-                currentScreen =
-                    Screen::GAME;
+               // currentScreen =
+                 //   Screen::GAME;
             }
         }
 
-        // =====================================
+        // =====================================================
         // GAME SCREEN
-        // =====================================
+        // =====================================================
 
-        else if (currentScreen ==
-                 Screen::GAME)
+        else if (currentScreen == Screen::GAME)
         {
             int result =
                 gameScreen.update();
 
-            // ---------------------------------
-            // EXIT GAME SCREEN
-            // ---------------------------------
+            // -------------------------------------------------
+            // RETURN TO MAIN MENU
+            // -------------------------------------------------
 
             if (result == 1)
             {
                 std::cout
                     << "Returning to main menu...\n";
 
-                // ---------------------------------
-                // Recreate MainMenu
-                //
-                // This guarantees that the menu
-                // starts from MAIN_MENU state.
-                // ---------------------------------
+                // Recreate MainMenu so that:
+                // state = MAIN_MENU
+                // previous player information is cleared
+                // placement state is reset
+                // hero selection state is reset
 
                 mainMenu =
-                    MainMenu(&assets, &game);
+                    MainMenu(
+                        &assets,
+                        &game);
 
                 currentScreen =
                     Screen::MAIN_MENU;
             }
         }
 
-        // =====================================
+        // =====================================================
         // DRAW
-        // =====================================
+        // =====================================================
 
         BeginDrawing();
 
-        // -------------------------------------
-        // Main Menu
-        // -------------------------------------
+        // -----------------------------------------------------
+        // MAIN MENU
+        // -----------------------------------------------------
 
-        if (currentScreen ==
-            Screen::MAIN_MENU)
+        if (currentScreen == Screen::MAIN_MENU)
         {
             mainMenu.draw();
         }
 
-        // -------------------------------------
-        // Game Screen
-        // -------------------------------------
+        // -----------------------------------------------------
+        // GAME SCREEN
+        // -----------------------------------------------------
 
-        else if (currentScreen ==
-                 Screen::GAME)
+        else if (currentScreen == Screen::GAME)
         {
             gameScreen.draw();
         }

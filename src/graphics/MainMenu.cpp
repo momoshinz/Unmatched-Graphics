@@ -169,12 +169,6 @@ void MainMenu::update()
     if (state == State::PLACEMENT)
     {
         updatePlacement();
-
-        if (placement == Placement::FINISHED)
-        {
-            // فعلاً فقط از صفحه placement خارج می‌شویم
-            state = State::READY;
-        }
     }
 }
 
@@ -2222,7 +2216,43 @@ void MainMenu::drawPlacement(Font font)
         2.0f,
         WHITE);
 
-    // ...
+    for (int i = 0; i < 32; i++)
+    {
+        Vector2 center =
+            mapImageToScreen(SPACE_GRAPHICS[i].center);
+
+        float radius =
+            SPACE_GRAPHICS[i].radius * getMapScale();
+
+        DrawCircleV(
+            center,
+            radius,
+            Color{255, 255, 255, 70});
+
+        std::string number =
+            std::to_string(i + 1);
+
+        Vector2 textSize =
+            MeasureTextEx(
+                font,
+                number.c_str(),
+                14.0f,
+                1.0f);
+
+        DrawTextEx(
+            font,
+            number.c_str(),
+
+            Vector2{
+                center.x - textSize.x / 2.0f,
+                center.y - textSize.y / 2.0f},
+
+            14.0f,
+            1.0f,
+            WHITE);
+    }
+
+    drawPlacedFighters(font);
 }
 
 float MainMenu::getMapScale() const
@@ -2433,6 +2463,137 @@ void MainMenu::updatePlacement()
                 placeSidekickOnSpace(i + 1);
                 return;
             }
+        }
+    }
+}
+
+void MainMenu::drawPlacedFighters(Font font)
+{
+    if (game == nullptr)
+    {
+        return;
+    }
+
+    const std::vector<Player *> &players =
+        game->getPlayers();
+
+    for (Player *player : players)
+    {
+        if (player == nullptr)
+        {
+            continue;
+        }
+
+        // =====================================
+        // HERO
+        // =====================================
+
+        Hero *hero = player->getHero();
+
+        if (hero != nullptr)
+        {
+            Space *space = hero->getPosition();
+
+            if (space != nullptr)
+            {
+                int spaceId = space->getId();
+
+                if (spaceId >= 1 && spaceId <= 32)
+                {
+                    Vector2 center =
+                        mapImageToScreen(
+                            SPACE_GRAPHICS[spaceId - 1].center);
+
+                    DrawCircleV(
+                        center,
+                        22.0f,
+                        Color{180, 40, 40, 230});
+
+                    std::string heroName =
+                        hero->getName();
+
+                    Vector2 textSize =
+                        MeasureTextEx(
+                            font,
+                            heroName.c_str(),
+                            16.0f,
+                            1.0f);
+
+                    DrawTextEx(
+                        font,
+                        heroName.c_str(),
+
+                        Vector2{
+                            center.x - textSize.x / 2.0f,
+                            center.y - 35.0f},
+
+                        16.0f,
+                        1.0f,
+                        WHITE);
+                }
+            }
+        }
+
+        // =====================================
+        // SIDEKICKS
+        // =====================================
+
+        std::vector<Sidekick *> sidekicks =
+            player->getSideKicks();
+
+        for (Sidekick *sidekick : sidekicks)
+        {
+            if (sidekick == nullptr)
+            {
+                continue;
+            }
+
+            Space *space =
+                sidekick->getPosition();
+
+            if (space == nullptr)
+            {
+                continue;
+            }
+
+            int spaceId =
+                space->getId();
+
+            if (spaceId < 1 || spaceId > 32)
+            {
+                continue;
+            }
+
+            Vector2 center =
+                mapImageToScreen(
+                    SPACE_GRAPHICS[spaceId - 1].center);
+
+            DrawCircleV(
+                center,
+                15.0f,
+                Color{60, 120, 200, 230});
+
+            std::string sidekickName =
+                sidekick->getName();
+
+            Vector2 textSize =
+                MeasureTextEx(
+                    font,
+                    sidekickName.c_str(),
+                    12.0f,
+                    1.0f);
+
+            DrawTextEx(
+                font,
+                sidekickName.c_str(),
+
+                Vector2{
+                    center.x - textSize.x / 2.0f,
+                    center.y + 18.0f},
+
+                12.0f,
+                1.0f,
+                WHITE);
         }
     }
 }
