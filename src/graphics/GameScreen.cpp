@@ -269,7 +269,7 @@ void GameScreen::drawMap()
             : scaleY;
 
     // کمی بزرگ‌تر از حالت قبلی
-    scale *= 0.99f;
+    scale *= 0.90f;
 
     float mapWidth =
         map.width * scale;
@@ -294,7 +294,7 @@ void GameScreen::drawMap()
         (mapAreaHeight - mapHeight) / 2.0f;
 
     // کمی بالاتر
-    mapY -= 80.0f;
+    mapY -= 104.0f;
 
     // =========================================
     // Draw map
@@ -335,7 +335,7 @@ void GameScreen::drawMap()
 void GameScreen::drawPlayerPanels()
 {
     // عرض پنل‌ها
-    const float panelWidth = 263.0f;
+    const float panelWidth = 320.0f;
 
     // فاصله از لبه پنجره
     const float margin = 12.0f;
