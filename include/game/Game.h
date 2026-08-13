@@ -6,51 +6,59 @@ using namespace std;
 #include "CombatSystem.h"
 #include "TurnManager.h"
 #include "ui/TerminalUI.h"
+#include <string>
 
 class Game
 {
-    private:
-        Board board;
-        vector<Player *> players;
-        CombatSystem combatSystem;
-        TurnManager turnManager;
-        TerminalUI ui;
-        bool isMapSetUp = false;
+private:
+    Board board;
+    vector<Player *> players;
+    Player *youngerPlayer;
+    Player *olderPlayer;
+    CombatSystem combatSystem;
+    TurnManager turnManager;
+    TerminalUI ui;
+    bool isMapSetUp = false;
 
-    public:
-        Game();
-        ~Game() = default;
+public:
+    Game();
+    ~Game() = default;
 
-        void initialize();
-        void addPlayer(Player *player);
-        void run(bool loaded = false);
-        void processTurn();
-        void processPlayerAction();
-        void playSchemeCard();
-        void maneuver();
-        void attack();
-        void discardUntilHandLimit();
+    void initialize(int age1, int age2);
+    void addPlayer(Player *player);
+    void run(bool loaded = false);
+    void processTurn();
+    void processPlayerAction();
+    void playSchemeCard();
+    void maneuver();
+    void attack();
+    void discardUntilHandLimit();
 
-        const vector<Player *> &getPlayers() const;
+    const vector<Player *> &getPlayers() const;
 
-        bool isGameOver() const;
-        void endGame();
+    bool isGameOver() const;
+    void endGame();
 
-        Player* selectOpponent(Player &currentPlayer);
-        Fighter* selectTarget(Player &currentPlayer, Fighter *user);
+    Player *selectOpponent(Player &currentPlayer);
+    Fighter *selectTarget(Player &currentPlayer, Fighter *user);
 
-        Board &getBoard();
-        const Board& getBoard() const;
-        CombatSystem &getCombatSystem();
-        const CombatSystem& getCombatSystem() const;
-        TurnManager &getTurnManager();
-        const TurnManager& getTurnManager() const;
-        TerminalUI &getUI();
-        void placeFog(Fog *fog);
+    Board &getBoard();
+    const Board &getBoard() const;
+    CombatSystem &getCombatSystem();
+    const CombatSystem &getCombatSystem() const;
+    TurnManager &getTurnManager();
+    const TurnManager &getTurnManager() const;
+    TerminalUI &getUI();
+    void placeFog(Fog *fog);
 
-        void saveGame(const string &filename);
-        void loadGame(const string &filename);
-        void saveMenu();
-        bool loadMenu();
+    void saveGame(const string &filename);
+    void loadGame(const string &filename);
+    void saveMenu();
+    bool loadMenu();
+
+    Player *getYoungerPlayer() const;
+    Player *getOlderPlayer() const;
+
+    bool assignHero(int playerIndex, const std::string &heroName);
 };
 #endif

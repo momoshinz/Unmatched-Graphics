@@ -5,7 +5,7 @@
 #include "player/Player.h"
 using namespace std;
 
-MainMenu::MainMenu(AssetManager *assets)
+MainMenu::MainMenu(AssetManager *assets, Game *game)
     : assets(assets),
       game(game),
       state(State::MAIN_MENU),
@@ -23,7 +23,6 @@ MainMenu::MainMenu(AssetManager *assets)
       player2HeroSelected(false),
       placement(Placement::YOUNGER_HERO),
       selectedStartSpace(-1),
-      board(nullptr),
       placementPlayer(1),
       placementHeroPlaced(false),
       placementStartSpace(-1),
@@ -1359,33 +1358,41 @@ std::string MainMenu::getSelectedSave() const
 
 void MainMenu::startHeroSelection()
 {
+    if (game == nullptr)
+    {
+        return;
+    }
+
     int age1 = std::stoi(player1Age);
     int age2 = std::stoi(player2Age);
 
-    if (age1 < age2)
+    game->initialize(age1, age2);
+
+    Player *younger =
+        game->getYoungerPlayer();
+
+    if (younger == nullptr)
+    {
+        return;
+    }
+
+    const std::vector<Player *> &players =
+        game->getPlayers();
+
+    if (players.size() < 2)
+    {
+        return;
+    }
+
+    if (younger == players[0])
     {
         currentHeroPlayer =
             HeroSelectionPlayer::PLAYER_1;
     }
-    else if (age2 < age1)
+    else
     {
         currentHeroPlayer =
             HeroSelectionPlayer::PLAYER_2;
-    }
-    else
-    {
-        // اگر سن‌ها برابر باشند،
-        // به صورت تصادفی یکی انتخاب می‌شود.
-        if (GetRandomValue(0, 1) == 0)
-        {
-            currentHeroPlayer =
-                HeroSelectionPlayer::PLAYER_1;
-        }
-        else
-        {
-            currentHeroPlayer =
-                HeroSelectionPlayer::PLAYER_2;
-        }
     }
 
     player1Hero.clear();
@@ -1809,57 +1816,71 @@ void MainMenu::drawCenteredText(
 
 void MainMenu::selectHero(const std::string &hero)
 {
-    // اگر این هیرو قبلاً توسط یکی از بازیکنان انتخاب شده
-    if (player1Hero == hero ||
-        player2Hero == hero)
-    {
-        return;
-    }
+    // =========================================
+    // DETERMINE CURRENT PLAYER
+    // =========================================
 
-    // =====================================
-    // PLAYER 1
-    // =====================================
+    int playerIndex;
 
     if (currentHeroPlayer ==
         HeroSelectionPlayer::PLAYER_1)
     {
-        // اگر Player 1 قبلاً انتخاب کرده
-        if (player1HeroSelected)
-        {
-            return;
-        }
+        playerIndex = 1;
+    }
+    else
+    {
+        playerIndex = 2;
+    }
 
-        player1Hero = hero;
-        player1HeroSelected = true;
+    // =========================================
+    // ASK GAME TO ASSIGN HERO
+    // =========================================
 
-        // نوبت Player 2
-        currentHeroPlayer =
-            HeroSelectionPlayer::PLAYER_2;
-
+    if (game == nullptr)
+    {
         return;
     }
 
-    // =====================================
-    // PLAYER 2
-    // =====================================
+    bool assigned =
+        game->assignHero(playerIndex, hero);
 
-    if (currentHeroPlayer ==
-        HeroSelectionPlayer::PLAYER_2)
+    if (!assigned)
     {
-        // اگر Player 2 قبلاً انتخاب کرده
-        if (player2HeroSelected)
-        {
-            return;
-        }
+        return;
+    }
 
+    // =========================================
+    // SAVE MENU STATE
+    // =========================================
+
+    if (playerIndex == 1)
+    {
+        player1Hero = hero;
+        player1HeroSelected = true;
+    }
+    else
+    {
         player2Hero = hero;
         player2HeroSelected = true;
+    }
 
-        // نوبت Player 1
-        currentHeroPlayer =
-            HeroSelectionPlayer::PLAYER_1;
+    // =========================================
+    // MOVE TO OTHER PLAYER
+    // =========================================
 
-        return;
+    if (!bothHeroesSelected())
+    {
+        if (currentHeroPlayer ==
+            HeroSelectionPlayer::PLAYER_1)
+        {
+            currentHeroPlayer =
+                HeroSelectionPlayer::PLAYER_2;
+        }
+        else
+        {
+            currentHeroPlayer =
+                HeroSelectionPlayer::PLAYER_1;
+        }
     }
 }
 
@@ -1973,7 +1994,7 @@ bool MainMenu::placeHeroOnSpace(int spaceId)
 
 bool MainMenu::isValidSidekickPlacement(Space *space) const
 {
-    if (space == nullptr)
+    if (game == nullptr || space == nullptr)
     {
         return false;
     }
@@ -1987,8 +2008,12 @@ bool MainMenu::isValidSidekickPlacement(Space *space) const
     {
         return false;
     }
-    
-    if (!board->sameZone(placementStartSpace, space->getId()))
+
+    const Board &gameBoard = game->getBoard();
+
+    if (!gameBoard.sameZone(
+            placementStartSpace,
+            space->getId()))
     {
         return false;
     }
@@ -2099,4 +2124,3 @@ void MainMenu::finishPlacement()
         return;
     }
 }
-

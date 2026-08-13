@@ -15,6 +15,7 @@
 #include <fstream>
 #include <cstdio>
 #include <nlohmann/json.hpp>
+#include <raylib.h>
 using json = nlohmann::json;
 using namespace std;
 
@@ -123,6 +124,8 @@ Card *createCardByName(const string &name)
 }
 
 Game::Game()
+    : youngerPlayer(nullptr),
+      olderPlayer(nullptr)
 {
 }
 
@@ -139,45 +142,27 @@ void Game::addPlayer(Player *player)
     players.push_back(player);
 }
 
-void Game::initialize()
+void Game::initialize(int age1, int age2)
 {
-    int age1, age2;
-    while (true)
+    // =========================================
+    // VALIDATE AGES
+    // =========================================
+
+    if (age1 <= 0 || age2 <= 0)
     {
-        cout << "~> Enter age of Player 1 : ";
-        cin >> age1;
-        if (cin.fail())
-        {
-            cin.clear();
-            cin.ignore(1000, '\n');
-            cout << "Plaese enter a number!\n";
-            continue;
-        }
-
-        cout << "~> Enter age of Player 2 : ";
-        cin >> age2;
-        if (cin.fail())
-        {
-            cin.clear();
-            cin.ignore(1000, '\n');
-            cout << "Plaese enter a number!\n";
-            continue;
-        }
-
-        if (age1 <= 0 || age2 <= 0)
-        {
-            cout << "\nAge, not temperature :> ..\n\n";
-            continue;
-        }
-
-        if (age1 > 100 || age2 > 100)
-        {
-            cout << "\nLooks like we have a real Dracula? ..\n\n";
-            continue;
-        }
-
-        break;
+        throw invalid_argument(
+            "\n[!] ERROR : Age must be greater than 0!\n");
     }
+
+    if (age1 > 100 || age2 > 100)
+    {
+        throw invalid_argument(
+            "\n[!] ERROR : Age cannot be greater than 100!\n");
+    }
+
+    // =========================================
+    // CREATE PLAYERS
+    // =========================================
 
     Player *player1 = new Player(age1);
     Player *player2 = new Player(age2);
@@ -185,356 +170,78 @@ void Game::initialize()
     addPlayer(player1);
     addPlayer(player2);
 
+    // =========================================
+    // SETUP BOARD
+    // =========================================
+
     board.setupMap();
+    isMapSetUp = true;
 
-    Player *younger;
-    Player *older;
+    // =========================================
+    // DETERMINE PLAYER ORDER
+    // =========================================
 
-    if (age1 == age2)
+    if (age1 < age2)
     {
-        srand(time(0));
-
-        if (rand() % 2 == 0)
-        {
-            younger = player1;
-            older = player2;
-            cout << "\nBoth players have the same age.\n";
-            cout << "Player 1 was randomly chosen to play first.\n\n";
-        }
-        else
-        {
-            younger = player2;
-            older = player1;
-            cout << "\nBoth players have the same age.\n";
-            cout << "Player 2 was randomly chosen to play first.\n\n";
-        }
+        youngerPlayer = player1;
+        olderPlayer = player2;
     }
-    else if (player1->isYounger(*player2))
+    else if (age2 < age1)
     {
-        younger = player1;
-        older = player2;
+        youngerPlayer = player2;
+        olderPlayer = player1;
     }
     else
     {
-        younger = player2;
-        older = player1;
-    }
-    cout << "\n\n   **  Younger Player - Hero Selection  **\n";
-    cout << "1. Dracula\n";
-    cout << "2. Sherlock\n";
-    cout << "3. Invisible Man";
-
-    int youngerHeroChoice;
-
-    while (true)
-    {
-        cout << "\n\n> Younger player, choose your hero : ";
-        cin >> youngerHeroChoice;
-
-        if (cin.fail())
+        // Same age -> random first player
+        if (GetRandomValue(0, 1) == 0)
         {
-            cin.clear();
-            cin.ignore(1000, '\n');
-            cout << "[!] Please enter a number!\n";
-            continue;
+            youngerPlayer = player1;
+            olderPlayer = player2;
         }
-
-        if (youngerHeroChoice >= 1 && youngerHeroChoice <= 3)
+        else
         {
-            break;
-        }
-
-        cout << "[!] Choose between 1 and 3!\n";
-    }
-
-    cout << "\n\n    **  Older Player - Hero Selection  **\n";
-    cout << "1. Dracula\n";
-    cout << "2. Sherlock\n";
-    cout << "3. Invisible Man\n";
-
-    int olderHeroChoice;
-
-    while (true)
-    {
-        cout << "\n> Older player, choose your hero : ";
-        cin >> olderHeroChoice;
-
-        if (cin.fail())
-        {
-            cin.clear();
-            cin.ignore(1000, '\n');
-            cout << "[!] Please enter a number!\n";
-            continue;
-        }
-
-        if (olderHeroChoice < 1 || olderHeroChoice > 3)
-        {
-            cout << "[!] Choose between 1 and 3!\n";
-            continue;
-        }
-
-        if (olderHeroChoice == youngerHeroChoice)
-        {
-            cout << "\n[!] This hero has already been selected!\n";
-            cout << "    Please choose another hero.\n";
-            continue;
-        }
-
-        break;
-    }
-
-    if (youngerHeroChoice == 1)
-    {
-        younger->setHero(new Dracula());
-
-        younger->addSideKick(new Sisters(1));
-        younger->addSideKick(new Sisters(2));
-        younger->addSideKick(new Sisters(3));
-    }
-    else if (youngerHeroChoice == 2)
-    {
-        younger->setHero(new Sherlock());
-
-        younger->addSideKick(new Watson());
-    }
-    else if (youngerHeroChoice == 3)
-    {
-        younger->setHero(new InvisibleMan());
-
-        younger->addFog(new Fog(1));
-        younger->addFog(new Fog(2));
-        younger->addFog(new Fog(3));
-    }
-
-    if (olderHeroChoice == 1)
-    {
-        older->setHero(new Dracula());
-
-        older->addSideKick(new Sisters(1));
-        older->addSideKick(new Sisters(2));
-        older->addSideKick(new Sisters(3));
-    }
-    else if (olderHeroChoice == 2)
-    {
-        older->setHero(new Sherlock());
-
-        older->addSideKick(new Watson());
-    }
-    else if (olderHeroChoice == 3)
-    {
-        older->setHero(new InvisibleMan());
-
-        older->addFog(new Fog(1));
-        older->addFog(new Fog(2));
-        older->addFog(new Fog(3));
-    }
-
-    int heroSpace;
-
-    ui.renderBoardOnly(*this);
-
-    cout << "\n> " << younger->getHero()->getName()
-         << ", choose your starting home { 7 or 22 } : ";
-
-    cin >> heroSpace;
-
-    while (heroSpace != 7 && heroSpace != 22)
-    {
-        cout << "[!] Choose only home 7 or 22 : ";
-        cin >> heroSpace;
-    }
-
-    board.moveFighter(younger->getHero(), board.getSpace(heroSpace));
-
-    int otherHeroSpace = (heroSpace == 7 ? 22 : 7);
-
-    board.moveFighter(older->getHero(), board.getSpace(otherHeroSpace));
-
-    vector<ZoneType> heroZones = board.getSpace(heroSpace)->getZones();
-
-    for (Sidekick *sidekick : younger->getSideKicks())
-    {
-        while (true)
-        {
-            ui.renderBoardOnly(*this);
-            vector<Space *> validSpaces;
-
-            cout << "\nPlace " << sidekick->getName() << endl;
-            cout << "Available homes :\n";
-            cout << "======================================\n";
-
-            for (Space *space : board.getSpaces())
-            {
-                if (space->isOccupied())
-                {
-                    continue;
-                }
-
-                bool valid = false;
-                for (ZoneType heroZone : heroZones)
-                {
-                    for (ZoneType zone : space->getZones())
-                    {
-                        if (heroZone == zone)
-                        {
-                            valid = true;
-                            break;
-                        }
-                    }
-
-                    if (valid)
-                    {
-                        break;
-                    }
-                }
-                if (valid)
-                {
-                    validSpaces.push_back(space);
-                    cout << validSpaces.size() << ". home " << space->getId() << endl;
-                }
-            }
-            cout << "\n> Choose a home : ";
-            int choice;
-            cin >> choice;
-
-            if (choice < 1 || choice > validSpaces.size())
-            {
-                cout << "\n[!] Invalid choice! :(\n";
-                continue;
-            }
-
-            board.moveFighter(sidekick, validSpaces[choice - 1]);
-            break;
+            youngerPlayer = player2;
+            olderPlayer = player1;
         }
     }
 
-    for (Fog *fog : younger->getFogs())
+    // =========================================
+    // INFORMATION
+    // =========================================
+
+    cout << "\n========================================\n";
+    cout << "         GAME INITIALIZED\n";
+    cout << "========================================\n";
+
+    cout << "Player 1 age : "
+         << player1->getAge()
+         << '\n';
+
+    cout << "Player 2 age : "
+         << player2->getAge()
+         << '\n';
+
+    if (age1 == age2)
     {
-        placeFog(fog);
+        cout << "\nBoth players have the same age.\n";
+        cout << youngerPlayer->getAge()
+             << " years old was randomly selected to play first.\n";
     }
 
-    vector<ZoneType> opponentHeroZones = board.getSpace(otherHeroSpace)->getZones();
-    for (Sidekick *sidekick : older->getSideKicks())
-    {
-        while (true)
-        {
+    cout << "\nFirst player : "
+         << (youngerPlayer == player1
+                 ? "Player 1"
+                 : "Player 2")
+         << '\n';
 
-            ui.renderBoardOnly(*this);
-            vector<Space *> validSpaces;
+    cout << "Second player : "
+         << (olderPlayer == player1
+                 ? "Player 1"
+                 : "Player 2")
+         << '\n';
 
-            cout << "\nPlace " << sidekick->getName() << endl;
-            cout << "Available homes :\n";
-            cout << "======================================\n";
-
-            for (Space *space : board.getSpaces())
-            {
-                if (space->isOccupied())
-                    continue;
-
-                bool valid = false;
-
-                for (ZoneType heroZone : opponentHeroZones)
-                {
-                    for (ZoneType zone : space->getZones())
-                    {
-                        if (heroZone == zone)
-                        {
-                            valid = true;
-                            break;
-                        }
-                    }
-
-                    if (valid)
-                        break;
-                }
-
-                if (valid)
-                {
-                    validSpaces.push_back(space);
-
-                    cout << validSpaces.size()
-                         << ". Home "
-                         << space->getId()
-                         << endl;
-                }
-            }
-
-            cout << "\n> Choose a home : ";
-
-            int choice;
-            cin >> choice;
-
-            if (choice < 1 || choice > validSpaces.size())
-            {
-                cout << "\n[!] Invalid choice!\n";
-                continue;
-            }
-
-            board.moveFighter(sidekick, validSpaces[choice - 1]);
-
-            break;
-        }
-    }
-
-    for (Fog *fog : older->getFogs())
-    {
-        placeFog(fog);
-    }
-
-    cout << "\n==========<  Drawing Cards To Hands  >==========\n";
-
-    Player *draculaPlayer = nullptr;
-    Player *sherlockPlayer = nullptr;
-    Player *invisibleManPlayer = nullptr;
-
-    for (Player *player : players)
-    {
-        if (dynamic_cast<Dracula *>(player->getHero()) != nullptr)
-        {
-            draculaPlayer = player;
-        }
-        else if (dynamic_cast<Sherlock *>(player->getHero()) != nullptr)
-        {
-            sherlockPlayer = player;
-        }
-        else if (dynamic_cast<InvisibleMan *>(player->getHero()) != nullptr)
-        {
-            invisibleManPlayer = player;
-        }
-    }
-
-    if (draculaPlayer != nullptr)
-    {
-        Deck::DraculaDeck(draculaPlayer->getDeck());
-    }
-
-    if (sherlockPlayer != nullptr)
-    {
-        Deck::SherlockDeck(sherlockPlayer->getDeck());
-    }
-
-    if (invisibleManPlayer != nullptr)
-    {
-        Deck::InvisibleManDeck(invisibleManPlayer->getDeck());
-    }
-
-    for (Player *player : players)
-    {
-        cout << "\n"
-             << player->getHero()->getName()
-             << " draws 5 cards...\n";
-
-        for (int i = 0; i < 5; i++)
-        {
-            player->drawCardToHand();
-        }
-
-        cout << "[+] Done.\n";
-    }
-
-    turnManager.startGame(younger, older);
-
-    cout << "\n===============< ** GAME STARTED ** >===============\n";
+    cout << "========================================\n";
 }
 
 const vector<Player *> &Game::getPlayers() const
@@ -1985,6 +1692,104 @@ bool Game::loadMenu()
     }
 
     loadGame(saves[choice - 1]);
+
+    return true;
+}
+
+Player *Game::getYoungerPlayer() const
+{
+    return youngerPlayer;
+}
+
+Player *Game::getOlderPlayer() const
+{
+    return olderPlayer;
+}
+
+bool Game::assignHero(int playerIndex, const std::string &heroName)
+{
+    // =========================================
+    // VALIDATE PLAYER INDEX
+    // =========================================
+
+    if (playerIndex < 1 ||
+        playerIndex > static_cast<int>(players.size()))
+    {
+        return false;
+    }
+
+    Player *player = players[playerIndex - 1];
+
+    if (player == nullptr)
+    {
+        return false;
+    }
+
+    // =========================================
+    // PLAYER MUST NOT ALREADY HAVE A HERO
+    // =========================================
+
+    if (player->hasHero())
+    {
+        return false;
+    }
+
+    // =========================================
+    // CHECK THAT HERO IS NOT ALREADY SELECTED
+    // BY THE OTHER PLAYER
+    // =========================================
+
+    for (Player *otherPlayer : players)
+    {
+        if (otherPlayer == nullptr ||
+            otherPlayer == player)
+        {
+            continue;
+        }
+
+        Hero *otherHero = otherPlayer->getHero();
+
+        if (otherHero == nullptr)
+        {
+            continue;
+        }
+
+        if (otherHero->getName() == heroName)
+        {
+            return false;
+        }
+    }
+
+    // =========================================
+    // CREATE HERO
+    // =========================================
+
+    if (heroName == "dracula")
+    {
+        player->setHero(new Dracula());
+
+        player->addSideKick(new Sisters(1));
+        player->addSideKick(new Sisters(2));
+        player->addSideKick(new Sisters(3));
+    }
+    else if (heroName == "sherlock")
+    {
+        player->setHero(new Sherlock());
+
+        player->addSideKick(new Watson());
+    }
+    else if (heroName == "invisible_man")
+    {
+        player->setHero(new InvisibleMan());
+
+        player->addFog(new Fog(1));
+        player->addFog(new Fog(2));
+        player->addFog(new Fog(3));
+    }
+    else
+    {
+        return false;
+    }
 
     return true;
 }

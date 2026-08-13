@@ -44,8 +44,6 @@ class MainMenu
         Placement placement;
         int selectedStartSpace;
 
-        Board *board;
-
         int placementPlayer;
         bool placementHeroPlaced;
         int placementStartSpace;
@@ -85,7 +83,7 @@ class MainMenu
         void drawHeroSelection(Font font);
 
     public:
-        MainMenu(AssetManager *assets);
+        MainMenu(AssetManager *assets, Game *game);
 
         void update();
         void draw();

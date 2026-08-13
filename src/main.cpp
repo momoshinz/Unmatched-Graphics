@@ -19,8 +19,7 @@ int main()
     InitWindow(
         screenWidth,
         screenHeight,
-        "Unmatched"
-    );
+        "Unmatched");
 
     SetTargetFPS(60);
 
@@ -52,8 +51,7 @@ int main()
 
     LoadingScreen loadingScreen(
         assets,
-        5.0f
-    );
+        5.0f);
 
     while (
         !WindowShouldClose() &&
@@ -74,7 +72,8 @@ int main()
     // Screens
     // =========================================
 
-    MainMenu mainMenu(&assets);
+    Game game;
+    MainMenu mainMenu(&assets, &game);
 
     GameScreen gameScreen(&assets);
 
@@ -197,7 +196,7 @@ int main()
                 // ---------------------------------
 
                 mainMenu =
-                    MainMenu(&assets);
+                    MainMenu(&assets, &game);
 
                 currentScreen =
                     Screen::MAIN_MENU;
