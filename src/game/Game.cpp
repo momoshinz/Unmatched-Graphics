@@ -1088,7 +1088,7 @@ void Game::run(bool loaded)
     {
         if (!loaded)
         {
-            initialize();
+           // initialize();
         }
 
         while (!isGameOver())

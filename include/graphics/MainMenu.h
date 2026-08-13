@@ -11,6 +11,7 @@ class MainMenu
     private:
         AssetManager *assets;
         Game *game;
+        Board *board;
 
         void drawPlayerInput(
             Font font,

@@ -1014,7 +1014,7 @@ void GameScreen::calculateMapTransform(
     // Same values used by drawMap()
     // =========================================
 
-    const float panelWidth = 263.0f;
+    const float panelWidth = 300.0f;
     const float mapPadding = 15.0f;
     const float topSpace = 75.0f;
 
@@ -1049,7 +1049,7 @@ void GameScreen::calculateMapTransform(
             ? scaleX
             : scaleY;
 
-    scale *= 0.99f;
+    scale *= 0.95f;
 
     // =========================================
     // Final map size
@@ -1077,7 +1077,7 @@ void GameScreen::calculateMapTransform(
         mapAreaY +
         (mapAreaHeight - mapHeight) / 2.0f;
 
-    mapY -= 80.0f;
+    mapY -= 100.0f;
 }
 
 // ============================================================

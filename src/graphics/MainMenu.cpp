@@ -9,7 +9,7 @@ using namespace std;
 
 MainMenu::MainMenu(AssetManager *assets, Game *game)
     : assets(assets),
-      game(nullptr),
+      game(game),
       state(State::MAIN_MENU),
       player1Name(""),
       player1Age(""),
@@ -163,6 +163,17 @@ void MainMenu::update()
                 enteringName = false;
                 enteringAge = true;
             }
+        }
+    }
+
+    if (state == State::PLACEMENT)
+    {
+        updatePlacement();
+
+        if (placement == Placement::FINISHED)
+        {
+            // فعلاً فقط از صفحه placement خارج می‌شویم
+            state = State::READY;
         }
     }
 }
@@ -651,7 +662,7 @@ void MainMenu::draw()
     }
     if (state == State::PLACEMENT)
     {
-    drawPlacement(assets->getGameFont());
+        drawPlacement(assets->getGameFont());
     }
 }
 
@@ -2133,10 +2144,6 @@ void MainMenu::finishPlacement()
 
 void MainMenu::drawPlacement(Font font)
 {
-    // =========================================================
-    // عنوان
-    // =========================================================
-
     const char *title = "";
 
     if (placement == Placement::YOUNGER_HERO)
@@ -2160,9 +2167,41 @@ void MainMenu::drawPlacement(Font font)
         return;
     }
 
-    // =========================================================
-    // عنوان بالای صفحه
-    // =========================================================
+    // =====================================
+    // MAP
+    // =====================================
+
+    Texture2D map = assets->getGameMap();
+
+    if (map.id != 0)
+    {
+        float scale = getMapScale();
+        Vector2 mapPosition = getMapPosition();
+
+        Rectangle source{
+            0.0f,
+            0.0f,
+            static_cast<float>(map.width),
+            static_cast<float>(map.height)};
+
+        Rectangle destination{
+            mapPosition.x,
+            mapPosition.y,
+            map.width * scale,
+            map.height * scale};
+
+        DrawTexturePro(
+            map,
+            source,
+            destination,
+            Vector2{0.0f, 0.0f},
+            0.0f,
+            WHITE);
+    }
+
+    // =====================================
+    // TITLE
+    // =====================================
 
     float fontSize = 30.0f;
 
@@ -2171,65 +2210,19 @@ void MainMenu::drawPlacement(Font font)
             font,
             title,
             fontSize,
-            2.0f
-        );
+            2.0f);
 
     DrawTextEx(
         font,
         title,
         Vector2{
             (GetScreenWidth() - textSize.x) / 2.0f,
-            20.0f
-        },
+            20.0f},
         fontSize,
         2.0f,
-        WHITE
-    );
+        WHITE);
 
-    // =========================================================
-    // راهنمای بازیکن
-    // =========================================================
-
-    const char *instruction = "";
-
-    if (placement == Placement::YOUNGER_HERO ||
-        placement == Placement::OLDER_HERO)
-    {
-        instruction =
-            "Choose Space 7 or Space 22 for your Hero";
-    }
-    else
-    {
-        instruction =
-            "Choose a valid Space for your Sidekick";
-    }
-
-    float instructionSize = 22.0f;
-
-    Vector2 instructionTextSize =
-        MeasureTextEx(
-            font,
-            instruction,
-            instructionSize,
-            1.5f
-        );
-
-    DrawTextEx(
-        font,
-        instruction,
-
-        Vector2{
-            (GetScreenWidth() -
-             instructionTextSize.x) / 2.0f,
-
-            55.0f
-        },
-
-        instructionSize,
-        1.5f,
-
-        WHITE
-    );
+    // ...
 }
 
 float MainMenu::getMapScale() const
@@ -2333,8 +2326,7 @@ Vector2 MainMenu::getMapPosition() const
 
     return Vector2{
         mapX,
-        mapY
-    };
+        mapY};
 }
 
 Vector2 MainMenu::mapImageToScreen(
@@ -2351,18 +2343,11 @@ Vector2 MainMenu::mapImageToScreen(
             imagePosition.x * scale,
 
         mapPosition.y +
-            imagePosition.y * scale
-    };
+            imagePosition.y * scale};
 }
 
 void MainMenu::updatePlacement()
 {
-    if (board == nullptr)
-    {
-        return;
-    }
-    
-
     if (placement == Placement::FINISHED)
     {
         return;
@@ -2387,8 +2372,7 @@ void MainMenu::updatePlacement()
         // Space 7
         Vector2 space7 =
             mapImageToScreen(
-                SPACE_GRAPHICS[6].center
-            );
+                SPACE_GRAPHICS[6].center);
 
         float radius7 =
             SPACE_GRAPHICS[6].radius *
@@ -2406,8 +2390,7 @@ void MainMenu::updatePlacement()
         // Space 22
         Vector2 space22 =
             mapImageToScreen(
-                SPACE_GRAPHICS[21].center
-            );
+                SPACE_GRAPHICS[21].center);
 
         float radius22 =
             SPACE_GRAPHICS[21].radius *
@@ -2436,8 +2419,7 @@ void MainMenu::updatePlacement()
         {
             Vector2 center =
                 mapImageToScreen(
-                    SPACE_GRAPHICS[i].center
-                );
+                    SPACE_GRAPHICS[i].center);
 
             float radius =
                 SPACE_GRAPHICS[i].radius *
