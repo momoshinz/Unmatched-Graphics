@@ -1,36 +1,42 @@
 #ifndef GAMESCREEN_H
 #define GAMESCREEN_H
-
 #include <raylib.h>
 #include "graphics/AssetManager.h"
+#include "game/Game.h"
 
 class GameScreen
 {
-    private:
-        AssetManager *assets;
-        bool guideOpen = false;
+private:
+    AssetManager *assets;
+    Game *game;
 
-        void drawMap();
-        void drawPlayerPanels();
-        void drawTopButtons();
-        void drawGuidePopup();
+    bool guideOpen = false;
 
-        Vector2 mapImageToScreen(Vector2 imagePosition) const;
+    void drawMap();
+    void drawPlayerPanels();
+    void drawTopButtons();
+    void drawGuidePopup();
+    void drawSpaces();
+    void drawPlacedFighters();
 
-    public:
-        GameScreen(AssetManager *assets);
+    Vector2 mapImageToScreen(Vector2 imagePosition) const;
 
-        int update();
-        void draw();
+public:
+    GameScreen(
+        AssetManager *assets,
+        Game *game);
 
-        void calculateMapTransform (
+    int update();
+    void draw();
+
+    void calculateMapTransform(
         float &mapX,
         float &mapY,
         float &scale,
         float &mapWidth,
         float &mapHeight) const;
 
-        int getClickedSpaceId();
+    int getClickedSpaceId();
 };
 
 #endif

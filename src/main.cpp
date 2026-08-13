@@ -9,8 +9,8 @@
 
 int main()
 {
-    const int screenWidth = 1338;
-    const int screenHeight = 738;
+    const int screenWidth = 1600;
+    const int screenHeight = 900;
 
     // =========================================
     // Window
@@ -75,8 +75,7 @@ int main()
         &assets,
         &game);
 
-    GameScreen gameScreen(
-        &assets);
+    GameScreen gameScreen(&assets, &game);
 
     // =========================================
     // Current Screen
@@ -184,8 +183,7 @@ int main()
                 std::cout
                     << "Starting game screen...\n";
 
-               //currentScreen =
-                 //  Screen::GAME;
+               currentScreen = Screen::GAME;
             }
         }
 
