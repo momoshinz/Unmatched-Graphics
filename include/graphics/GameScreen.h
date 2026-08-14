@@ -37,6 +37,7 @@ public:
         float &mapHeight) const;
 
     int getClickedSpaceId();
+    void drawFogs();
 };
 
 #endif

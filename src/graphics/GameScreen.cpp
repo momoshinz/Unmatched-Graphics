@@ -5,6 +5,7 @@
 #include "graphics/MapCoordinates.h"
 #include "board/Space.h"
 #include "fighter/Hero.h"
+#include "fighter/Fog.h"
 
 GameScreen::GameScreen(
     AssetManager *assets,
@@ -79,12 +80,21 @@ int GameScreen::update()
 
     if (guideOpen)
     {
+        const float popupWidth = 900.0f;
+        const float popupHeight = 720.0f;
+
+        const float popupX =
+            (GetScreenWidth() - popupWidth) / 2.0f;
+
+        const float popupY =
+            (GetScreenHeight() - popupHeight) / 2.0f;
+
         const float backWidth = 130.0f;
         const float backHeight = 45.0f;
 
         Rectangle backButton{
             (GetScreenWidth() - backWidth) / 2.0f,
-            GetScreenHeight() - 90.0f,
+            popupY + popupHeight - 65.0f,
             backWidth,
             backHeight};
 
@@ -98,8 +108,6 @@ int GameScreen::update()
             }
         }
 
-        // وقتی Guide باز است،
-        // هیچ چیز دیگری نباید کلیک شود.
         return 0;
     }
 
@@ -278,6 +286,8 @@ void GameScreen::drawMap()
     // =====================================
 
     drawPlacedFighters();
+
+    drawFogs();
 }
 
 // =========================================
@@ -487,7 +497,7 @@ void GameScreen::drawTopButtons()
     // Text
     // =========================================
 
-    const float fontSize = 28.0f;
+    const float fontSize = 26.0f;
     const float spacing = 2.0f;
 
     const char *exitText =
@@ -596,7 +606,7 @@ void GameScreen::drawTopButtons()
 
 void GameScreen::drawGuidePopup()
 {
-    Font font = assets->getGameFont();
+    Font font = assets->getGuideFont();
 
     // =========================================
     // Dark overlay
@@ -614,7 +624,7 @@ void GameScreen::drawGuidePopup()
     // =========================================
 
     const float popupWidth = 900.0f;
-    const float popupHeight = 720.0f;
+    const float popupHeight = 730.0f;
 
     Rectangle popup{
         (GetScreenWidth() - popupWidth) / 2.0f,
@@ -648,7 +658,7 @@ void GameScreen::drawGuidePopup()
 
     const char *title = "INSTRUCTIONS";
 
-    const float titleSize = 42.0f;
+    const float titleSize = 38.0f;
 
     Vector2 titleSizeVec =
         MeasureTextEx(
@@ -676,23 +686,13 @@ void GameScreen::drawGuidePopup()
     // Guide text
     // =========================================
 
-    const float textSize = 22.0f;
+    const float textSize = 25.0f;
     const float spacing = 1.5f;
 
     float x = popup.x + 45.0f;
     float y = popup.y + 100.0f;
 
-    const float lineHeight = 29.0f;
-
-    DrawTextEx(
-        font,
-        "Don't You Really Know How to Play :o ? Then Read Carefully ..",
-        Vector2{x, y},
-        textSize,
-        spacing,
-        WHITE);
-
-    y += lineHeight * 1.7f;
+    const float lineHeight = 32.0f;
 
     // =========================================
     // ACTIONS
@@ -710,7 +710,7 @@ void GameScreen::drawGuidePopup()
 
     DrawTextEx(
         font,
-        "Attack   ~>  Attack an enemy fighter.",
+        "Attack   ->  Attack an enemy fighter.",
         Vector2{x, y},
         textSize,
         spacing,
@@ -720,7 +720,7 @@ void GameScreen::drawGuidePopup()
 
     DrawTextEx(
         font,
-        "Maneuver ~>  Move a fighter and draw a card.",
+        "Maneuver ->  Move a fighter and draw a card.",
         Vector2{x, y},
         textSize,
         spacing,
@@ -730,7 +730,7 @@ void GameScreen::drawGuidePopup()
 
     DrawTextEx(
         font,
-        "Scheme   ~>  Play a Scheme card.",
+        "Scheme   ->  Play a Scheme card.",
         Vector2{x, y},
         textSize,
         spacing,
@@ -774,7 +774,17 @@ void GameScreen::drawGuidePopup()
 
     DrawTextEx(
         font,
-        "    and on top of that each Hero possesses a special ability of their own.",
+        "    and on top of that each Hero possesses a special",
+        Vector2{x, y},
+        textSize,
+        spacing,
+        WHITE);
+
+    y += lineHeight;
+
+    DrawTextEx(
+        font,
+        "    ability of their own.",
         Vector2{x, y},
         textSize,
         spacing,
@@ -793,7 +803,16 @@ void GameScreen::drawGuidePopup()
     y += lineHeight;
 
     DrawTextEx(
-        font, "[o] Heroes enter the battlefield alongside their Sidekicks, NEVER ALONE.",
+        font, "[o] Heroes enter the battlefield alongside their",
+        Vector2{x, y},
+        textSize,
+        spacing,
+        WHITE);
+
+    y += lineHeight;
+
+    DrawTextEx(
+        font, "    Sidekicks, NEVER ALONE.",
         Vector2{x, y},
         textSize,
         spacing,
@@ -803,7 +822,7 @@ void GameScreen::drawGuidePopup()
 
     DrawTextEx(
         font,
-        "    allowing instant teleportation between them.",
+        "[o] Through tactical moves in each turn, your goal",
         Vector2{x, y},
         textSize,
         spacing,
@@ -813,7 +832,7 @@ void GameScreen::drawGuidePopup()
 
     DrawTextEx(
         font,
-        "[o] Through tactical moves in each turn, your goal is clear:",
+        "    is clear : defeat the enemy Hero and claim VICTORY.",
         Vector2{x, y},
         textSize,
         spacing,
@@ -823,17 +842,17 @@ void GameScreen::drawGuidePopup()
 
     DrawTextEx(
         font,
-        "    defeat the enemy Hero and claim VICTORY.",
+        "[o] The younger player chooses the fighter and steps",
         Vector2{x, y},
         textSize,
         spacing,
         WHITE);
 
-    y += lineHeight;
+        y += lineHeight;
 
     DrawTextEx(
         font,
-        "[o] The younger player chooses the fighter and steps onto the field first.",
+        "    onto the field first.",
         Vector2{x, y},
         textSize,
         spacing,
@@ -881,7 +900,7 @@ void GameScreen::drawGuidePopup()
 
     DrawRectangleRounded(
         backButton,
-        0.25f,
+        1.0,
         20,
         backColor);
 
@@ -1182,7 +1201,7 @@ void GameScreen::drawSpaces()
             MeasureTextEx(
                 font,
                 number.c_str(),
-                14.0f,
+                30.0f,
                 1.0f);
 
         DrawTextEx(
@@ -1193,7 +1212,7 @@ void GameScreen::drawSpaces()
                 center.x - textSize.x / 2.0f,
                 center.y - textSize.y / 2.0f},
 
-            14.0f,
+            30.0f,
             1.0f,
             WHITE);
     }
@@ -1348,6 +1367,114 @@ void GameScreen::drawPlacedFighters()
 
                 12.0f,
                 1.0f,
+                WHITE);
+        }
+    }
+}
+
+void GameScreen::drawFogs()
+{
+    if (game == nullptr ||
+        assets == nullptr)
+    {
+        return;
+    }
+
+    Texture2D fogTexture =
+        assets->getFogTexture();
+
+    if (fogTexture.id == 0)
+    {
+        return;
+    }
+
+    float mapX;
+    float mapY;
+    float scale;
+    float mapWidth;
+    float mapHeight;
+
+    calculateMapTransform(
+        mapX,
+        mapY,
+        scale,
+        mapWidth,
+        mapHeight);
+
+    const std::vector<Player *> &players =
+        game->getPlayers();
+
+    for (Player *player : players)
+    {
+        if (player == nullptr)
+        {
+            continue;
+        }
+
+        const std::vector<Fog *> &fogs =
+            player->getFogs();
+
+        for (Fog *fog : fogs)
+        {
+            if (fog == nullptr)
+            {
+                continue;
+            }
+
+            Space *space =
+                fog->getPosition();
+
+            if (space == nullptr)
+            {
+                continue;
+            }
+
+            int spaceId =
+                space->getId();
+
+            if (spaceId < 1 ||
+                spaceId > 32)
+            {
+                continue;
+            }
+
+            // =====================================
+            // SPACE CENTER
+            // =====================================
+
+            Vector2 center =
+                mapImageToScreen(
+                    SPACE_GRAPHICS[spaceId - 1].center);
+
+            // =====================================
+            // FOG SIZE
+            // =====================================
+
+            const float fogImageSize = 150.0f;
+
+            const float fogSize =
+                fogImageSize * scale;
+
+            Rectangle source{
+                0.0f,
+                0.0f,
+                static_cast<float>(
+                    fogTexture.width),
+                static_cast<float>(
+                    fogTexture.height)};
+
+            Rectangle destination{
+                center.x - fogSize / 2.0f,
+                center.y + 20.0f - fogSize / 2.0f,
+                fogSize,
+                fogSize};
+
+            DrawTexturePro(
+                fogTexture,
+                source,
+                destination,
+                Vector2{0.0f, 0.0f},
+                0.0f,
                 WHITE);
         }
     }

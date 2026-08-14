@@ -48,10 +48,12 @@ bool AssetManager::load()
         LoadFont("Unmatched_Assets/fonts/Sweet Magic.ttf");
 
     titleFont =
-        LoadFont("Unmatched_Assets/fonts/black-draft.otf");
+        LoadFont("Unmatched_Assets/fonts/title.ttf");
 
     loading =
         LoadFont("Unmatched_Assets/fonts/NexaRustSlab.ttf");
+
+    guideFont = LoadFont("Unmatched_Assets/fonts/guide.TTF");
 
     // =========================================
     // Dracula
@@ -125,8 +127,7 @@ bool AssetManager::load()
     characterTextures["invisible_man_transparent"] =
         LoadTexture("Unmatched_Assets/invisibleMan/tranInv.png");
 
-    characterTextures["fog"] =
-        LoadTexture("Unmatched_Assets/invisibleMan/fog.png");
+    fogTexture = LoadTexture("Unmatched_Assets/invisibleMan/fog.png");
 
     // =========================================
     // Dracula cards
@@ -347,6 +348,12 @@ void AssetManager::unload()
         loading = {};
     }
 
+    if (fogTexture.id != 0)
+    {
+        UnloadTexture(fogTexture);
+        fogTexture = {};
+    }
+
     // =========================================
     // Icons
     // =========================================
@@ -435,6 +442,11 @@ Font AssetManager::getLoadingFont() const
     return loading;
 }
 
+Font AssetManager::getGuideFont() const
+{
+    return guideFont;
+}
+
 Texture2D AssetManager::getCharacter(const std::string &name) const
 {
     auto it = characterTextures.find(name);
@@ -472,4 +484,9 @@ bool AssetManager::isLoaded() const
 Texture2D AssetManager::getMainPanelBackground() const
 {
     return MainPanelBackground;
+}
+
+Texture2D AssetManager::getFogTexture() const
+{
+    return fogTexture;
 }

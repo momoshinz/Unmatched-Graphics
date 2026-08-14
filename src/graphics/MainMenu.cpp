@@ -5,6 +5,7 @@
 #include "player/Player.h"
 #include "board/Space.h"
 #include "graphics/MapCoordinates.h"
+#include "graphics/GameScreen.h"
 #include <iostream>
 using namespace std;
 
@@ -29,7 +30,8 @@ MainMenu::MainMenu(AssetManager *assets, Game *game)
       placementPlayer(1),
       placementHeroPlaced(false),
       placementStartSpace(-1),
-      placementSidekickIndex(0)
+      placementSidekickIndex(0),
+      currentFogIndex(0)
 {
 }
 
@@ -303,7 +305,7 @@ void MainMenu::draw()
         DrawTextEx(font, loadGameText,
                    Vector2{loadGameButton.x + (loadGameButton.width - loadGameTextSize.x) / 2.0f,
                            loadGameButton.y + (loadGameButton.height - loadGameTextSize.y) / 2.0f},
-                   buttonFontSize,buttonSpacing,
+                   buttonFontSize, buttonSpacing,
                    WHITE);
 
         DrawTextEx(font, exitText,
@@ -866,7 +868,7 @@ void MainMenu::drawPlayerInput(
 
     DrawRectangleRounded(
         actionButton,
-        1.0f,32,
+        1.0f, 32,
         buttonColor);
 
     Vector2 buttonTextSize =
@@ -1045,7 +1047,8 @@ int MainMenu::handleInput()
                 player1Name.clear();
                 player1Age.clear();
 
-                player2Name.clear();player2Age.clear();
+                player2Name.clear();
+                player2Age.clear();
 
                 enteringName = true;
                 enteringAge = false;
@@ -1204,7 +1207,7 @@ int MainMenu::handleInput()
             // -----------------------------
 
             Rectangle backButton{
-                40.0f,GetScreenHeight() - 80.0f,
+                40.0f, GetScreenHeight() - 80.0f,
                 160.0f,
                 50.0f};
 
@@ -1372,7 +1375,7 @@ int MainMenu::handleInput()
 
 std::string MainMenu::getSelectedSave() const
 {
-    if (selectedSave < 0||
+    if (selectedSave < 0 ||
         selectedSave >= saveFiles.size())
     {
         return "";
@@ -1741,7 +1744,7 @@ void MainMenu::drawHeroSelection(Font font)
         invisibleBox.y + invisibleBox.height - 45.0f,
         invisibleBox.width,
         25.0f);
-        
+
     Rectangle finishButton{
         (GetScreenWidth() - 300.0f) / 2.0f,
         650.0f,
@@ -1922,28 +1925,40 @@ void MainMenu::startPlacement()
 
     placementHeroPlaced = false;
     placementSidekickIndex = 0;
+    currentFogIndex = 0;
 
-    int age1 = std::stoi(player1Age);
-    int age2 = std::stoi(player2Age);
+    if (game == nullptr)
+    {
+        return;
+    }
 
-    if (age1 < age2)
+    Player *younger =
+        game->getYoungerPlayer();
+
+    if (younger == nullptr)
+    {
+        return;
+    }
+
+    const std::vector<Player *> &players =
+        game->getPlayers();
+
+    if (players.size() < 2)
+    {
+        return;
+    }
+
+    if (younger == players[0])
     {
         placementPlayer = 1;
     }
-    else if (age2 < age1)
+    else if (younger == players[1])
     {
         placementPlayer = 2;
     }
     else
     {
-        if (currentHeroPlayer == HeroSelectionPlayer::PLAYER_1)
-        {
-            placementPlayer = 1;
-        }
-        else
-        {
-            placementPlayer = 2;
-        }
+        return;
     }
 
     placement = Placement::YOUNGER_HERO;
@@ -2038,6 +2053,7 @@ bool MainMenu::placeHeroOnSpace(int spaceId)
         return true;
     }
     finishPlacement();
+    return true;
 }
 
 bool MainMenu::isValidSidekickPlacement(Space *space) const
@@ -2116,7 +2132,7 @@ bool MainMenu::placeSidekickOnSpace(int spaceId)
 
     std::vector<Sidekick *> sidekicks = player->getSideKicks();
 
-    if (placementSidekickIndex < 0 || 
+    if (placementSidekickIndex < 0 ||
         placementSidekickIndex >= static_cast<int>(sidekicks.size()))
     {
         return false;
@@ -2143,10 +2159,12 @@ bool MainMenu::placeSidekickOnSpace(int spaceId)
 
 void MainMenu::finishPlacement()
 {
-    // ===== بعد از اتمام جایگذاری یاران بازیکن جوان‌تر =====
+    // =========================================
+    // YOUNGER SIDEKICKS FINISHED
+    // =========================================
+
     if (placement == Placement::YOUNGER_SIDEKICKS)
     {
-        // ===== تغییر به بازیکن مسن‌تر =====
         if (placementPlayer == 1)
         {
             placementPlayer = 2;
@@ -2157,23 +2175,90 @@ void MainMenu::finishPlacement()
         }
 
         placement = Placement::OLDER_HERO;
+
         placementHeroPlaced = false;
         placementStartSpace = -1;
         selectedStartSpace = -1;
         placementSidekickIndex = 0;
-       
+
+        return;
     }
 
-    // ===== بعد از اتمام جایگذاری یاران بازیکن مسن‌تر =====
+    // =========================================
+    // OLDER SIDEKICKS FINISHED
+    // =========================================
+
     if (placement == Placement::OLDER_SIDEKICKS)
     {
+        const std::vector<Player *> &players =
+            game->getPlayers();
+
+        bool hasFog = false;
+
+        for (Player *player : players)
+        {
+            if (player != nullptr &&
+                !player->getFogs().empty())
+            {
+                hasFog = true;
+                break;
+            }
+        }
+
+        // اگر بازیکنی Fog دارد،
+        // وارد مرحله Fog شو
+        if (hasFog)
+        {
+            placement = Placement::FOG;
+
+            // پیدا کردن بازیکنی که Fog دارد
+            for (int i = 0; i < static_cast<int>(players.size()); i++)
+            {
+                if (players[i] != nullptr &&
+                    !players[i]->getFogs().empty())
+                {
+                    placementPlayer = i + 1;
+                    break;
+                }
+            }
+
+            currentFogIndex = 0;
+
+            placementHeroPlaced = false;
+            placementStartSpace = -1;
+            selectedStartSpace = -1;
+            placementSidekickIndex = 0;
+
+            return;
+        }
+
+        // هیچ Fogای وجود ندارد
         placement = Placement::FINISHED;
+
         placementHeroPlaced = false;
         placementStartSpace = -1;
         selectedStartSpace = -1;
         placementSidekickIndex = 0;
-        
+        currentFogIndex = 0;
 
+        return;
+    }
+
+    // =========================================
+    // FOG FINISHED
+    // =========================================
+
+    if (placement == Placement::FOG)
+    {
+        placement = Placement::FINISHED;
+
+        placementHeroPlaced = false;
+        placementStartSpace = -1;
+        selectedStartSpace = -1;
+        placementSidekickIndex = 0;
+        currentFogIndex = 0;
+
+        return;
     }
 }
 
@@ -2195,15 +2280,13 @@ void MainMenu::drawPlacement(Font font)
         0.0f,
         0.0f,
         static_cast<float>(map.width),
-        static_cast<float>(map.height)
-    };
+        static_cast<float>(map.height)};
 
     Rectangle destination{
         mapPosition.x,
         mapPosition.y,
         map.width * scale,
-        map.height * scale
-    };
+        map.height * scale};
 
     DrawTexturePro(
         map,
@@ -2211,8 +2294,7 @@ void MainMenu::drawPlacement(Font font)
         destination,
         Vector2{0, 0},
         0.0f,
-        WHITE
-    );
+        WHITE);
 
     // =========================================
     // HIGHLIGHT VALID SPACES (هایلایت کردن خانه‌های معتبر)
@@ -2221,10 +2303,10 @@ void MainMenu::drawPlacement(Font font)
     Vector2 mouse = GetMousePosition();
 
     // ===== رنگ‌های هایلایت =====
-    Color hoverColor = Color{255, 255, 0, 100};     // زرد شفاف (ماوس روی خانه)
-    Color selectedColor = Color{0, 255, 0, 150};    // سبز (خانه انتخاب شده)
-    Color heroColor = Color{255, 0, 0, 150};        // قرمز (خانه قهرمان)
-    Color sidekickColor = Color{0, 0, 255, 150};    // آبی (خانه یاران)
+    Color hoverColor = Color{255, 255, 0, 100};  // زرد شفاف (ماوس روی خانه)
+    Color selectedColor = Color{0, 255, 0, 150}; // سبز (خانه انتخاب شده)
+    Color heroColor = Color{255, 0, 0, 150};     // قرمز (خانه قهرمان)
+    Color sidekickColor = Color{0, 0, 255, 150}; // آبی (خانه یاران)
 
     // ===== بررسی اینکه آیا خانه‌ای زیر ماوس است =====
     int hoveredSpace = -1;
@@ -2262,6 +2344,70 @@ void MainMenu::drawPlacement(Font font)
             }
         }
 
+        // =========================================
+        // FOG VALID SPACES
+        // =========================================
+
+        if (placement == Placement::FOG)
+        {
+            Space *space =
+                game->getBoard().getSpace(i + 1);
+
+            if (space != nullptr &&
+                !space->isOccupied())
+            {
+                DrawCircleV(
+                    center,
+                    radius,
+                    Color{180, 220, 255, 80});
+            }
+        }
+
+        const std::vector<Player *> &players =
+            game->getPlayers();
+
+        for (Player *player : players)
+        {
+            if (player == nullptr)
+            {
+                continue;
+            }
+
+            const std::vector<Fog *> &fogs =
+                player->getFogs();
+
+            for (Fog *fog : fogs)
+            {
+                if (fog == nullptr ||
+                    fog->getPosition() == nullptr)
+                {
+                    continue;
+                }
+
+                int fogSpaceId =
+                    fog->getPosition()->getId();
+
+                if (fogSpaceId < 1 ||
+                    fogSpaceId > 32)
+                {
+                    continue;
+                }
+
+                Vector2 fogCenter =
+                    mapImageToScreen(
+                        SPACE_GRAPHICS[fogSpaceId - 1].center);
+
+                float fogRadius =
+                    SPACE_GRAPHICS[fogSpaceId - 1].radius *
+                    getMapScale();
+
+                DrawCircleV(
+                    fogCenter,
+                    fogRadius,
+                    Color{180, 220, 255, 120});
+            }
+        }
+
         // ===== اگر خانه انتخاب شده باشد (قرمز یا آبی) =====
         if (i + 1 == placementStartSpace)
         {
@@ -2294,6 +2440,9 @@ void MainMenu::drawPlacement(Font font)
     else if (placement == Placement::OLDER_SIDEKICKS)
         title = "OLDER PLAYER - PLACE YOUR SIDEKICKS";
 
+    else if (placement == Placement::FOG)
+        title = "INVISIBLE MAN - PLACE YOUR FOG";
+
     else
         return;
 
@@ -2304,20 +2453,17 @@ void MainMenu::drawPlacement(Font font)
             font,
             title,
             fontSize,
-            2.0f
-        );
+            2.0f);
 
     DrawTextEx(
         font,
         title,
         Vector2{
             (GetScreenWidth() - titleSize.x) / 2.0f,
-            20.0f
-        },
+            20.0f},
         fontSize,
         2.0f,
-        WHITE
-    );
+        WHITE);
 
     // =========================================
     // INSTRUCTION
@@ -2330,6 +2476,11 @@ void MainMenu::drawPlacement(Font font)
     {
         instruction =
             "Choose Space 7 or Space 22 for your Hero";
+    }
+    else if (placement == Placement::FOG)
+    {
+        instruction =
+            "Choose a valid Space for your Fog";
     }
     else
     {
@@ -2344,8 +2495,7 @@ void MainMenu::drawPlacement(Font font)
             font,
             instruction,
             instructionSize,
-            1.5f
-        );
+            1.5f);
 
     DrawTextEx(
         font,
@@ -2353,15 +2503,14 @@ void MainMenu::drawPlacement(Font font)
 
         Vector2{
             (GetScreenWidth() -
-             instructionTextSize.x) / 2.0f,
+             instructionTextSize.x) /
+                2.0f,
 
-            55.0f
-        },
+            55.0f},
 
         instructionSize,
         1.5f,
-        WHITE
-    );
+        WHITE);
 }
 
 float MainMenu::getMapScale() const
@@ -2465,8 +2614,7 @@ Vector2 MainMenu::getMapPosition() const
 
     return Vector2{
         mapX,
-        mapY
-    };
+        mapY};
 }
 
 Vector2 MainMenu::mapImageToScreen(
@@ -2483,8 +2631,7 @@ Vector2 MainMenu::mapImageToScreen(
             imagePosition.x * scale,
 
         mapPosition.y +
-            imagePosition.y * scale
-    };
+            imagePosition.y * scale};
 }
 
 void MainMenu::updatePlacement()
@@ -2514,8 +2661,7 @@ void MainMenu::updatePlacement()
 
         Vector2 space7 =
             mapImageToScreen(
-                SPACE_GRAPHICS[6].center
-            );
+                SPACE_GRAPHICS[6].center);
 
         float radius7 =
             SPACE_GRAPHICS[6].radius *
@@ -2541,8 +2687,7 @@ void MainMenu::updatePlacement()
 
         Vector2 space22 =
             mapImageToScreen(
-                SPACE_GRAPHICS[21].center
-            );
+                SPACE_GRAPHICS[21].center);
 
         float radius22 =
             SPACE_GRAPHICS[21].radius *
@@ -2576,8 +2721,7 @@ void MainMenu::updatePlacement()
         {
             Vector2 center =
                 mapImageToScreen(
-                    SPACE_GRAPHICS[i].center
-                );
+                    SPACE_GRAPHICS[i].center);
 
             float radius =
                 SPACE_GRAPHICS[i].radius *
@@ -2591,6 +2735,40 @@ void MainMenu::updatePlacement()
                 if (placeSidekickOnSpace(i + 1))
                 {
                     std::cout << "Sidekick placed on Space "
+                              << i + 1
+                              << std::endl;
+                }
+
+                return;
+            }
+        }
+    }
+
+    // =========================================================
+    // FOG PLACEMENT
+    // =========================================================
+
+    if (placement == Placement::FOG)
+    {
+        for (int i = 0; i < 32; i++)
+        {
+            Vector2 center =
+                mapImageToScreen(
+                    SPACE_GRAPHICS[i].center);
+
+            float radius =
+                SPACE_GRAPHICS[i].radius *
+                getMapScale();
+
+            if (CheckCollisionPointCircle(
+                    mouse,
+                    center,
+                    radius))
+            {
+                if (placeFogOnSpace(i + 1))
+                {
+                    std::cout
+                        << "Fog placed on Space "
                         << i + 1
                         << std::endl;
                 }
@@ -2599,4 +2777,127 @@ void MainMenu::updatePlacement()
             }
         }
     }
+}
+
+bool MainMenu::placeFogOnSpace(int spaceId)
+{
+    if (game == nullptr)
+    {
+        return false;
+    }
+
+    if (placement != Placement::FOG)
+    {
+        return false;
+    }
+
+    Board &board = game->getBoard();
+
+    Space *space =
+        board.getSpace(spaceId);
+
+    if (space == nullptr)
+    {
+        return false;
+    }
+
+    // Fog نباید روی فضای اشغال‌شده قرار بگیرد
+    if (space->isOccupied())
+    {
+        return false;
+    }
+
+    Fog *fog =
+        getCurrentFog();
+
+    if (fog == nullptr)
+    {
+        return false;
+    }
+
+    // اگر Fog قبلاً روی این Space قرار گرفته،
+    // دوباره همان Space انتخاب نشود.
+    const std::vector<Player *> &players =
+        game->getPlayers();
+
+    if (placementPlayer < 1 ||
+        placementPlayer > static_cast<int>(players.size()))
+    {
+        return false;
+    }
+
+    Player *player =
+        players[placementPlayer - 1];
+
+    if (player == nullptr)
+    {
+        return false;
+    }
+
+    const std::vector<Fog *> &fogs =
+        player->getFogs();
+
+    for (Fog *existingFog : fogs)
+    {
+        if (existingFog != nullptr &&
+            existingFog->getPosition() == space)
+        {
+            return false;
+        }
+    }
+
+    fog->setPosition(space);
+
+    currentFogIndex++;
+
+    // همه Fogهای این بازیکن قرار گرفتند
+    if (currentFogIndex >=
+        static_cast<int>(fogs.size()))
+    {
+        placement = Placement::FINISHED;
+        currentFogIndex = 0;
+
+        placementHeroPlaced = false;
+        placementStartSpace = -1;
+        selectedStartSpace = -1;
+        placementSidekickIndex = 0;
+    }
+
+    return true;
+}
+
+Fog *MainMenu::getCurrentFog()
+{
+    if (game == nullptr)
+    {
+        return nullptr;
+    }
+
+    const std::vector<Player *> &players =
+        game->getPlayers();
+
+    if (placementPlayer < 1 ||
+        placementPlayer > static_cast<int>(players.size()))
+    {
+        return nullptr;
+    }
+
+    Player *player =
+        players[placementPlayer - 1];
+
+    if (player == nullptr)
+    {
+        return nullptr;
+    }
+
+    const std::vector<Fog *> &fogs =
+        player->getFogs();
+
+    if (currentFogIndex < 0 ||
+        currentFogIndex >= static_cast<int>(fogs.size()))
+    {
+        return nullptr;
+    }
+
+    return fogs[currentFogIndex];
 }
