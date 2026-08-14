@@ -166,12 +166,6 @@ void MainMenu::update()
             }
         }
     }
-    
-    if (state == State::PLACEMENT)
-    {
-        updatePlacement();
-        return;
-    }
 }
 
 void MainMenu::draw()
@@ -2008,21 +2002,42 @@ bool MainMenu::placeHeroOnSpace(int spaceId)
 
     if (!player->getSideKicks().empty())
     {
-        if (placementPlayer == 1)
+        if (placement == Placement::YOUNGER_HERO)
         {
             placement = Placement::YOUNGER_SIDEKICKS;
         }
-        else
+        else if (placement == Placement::OLDER_HERO)
         {
             placement = Placement::OLDER_SIDEKICKS;
         }
 
         return true;
     }
-    
-    finishPlacement();
 
-    return true;
+    if (placement == Placement::YOUNGER_HERO)
+    {
+        // Younger hero تمام شد، برو سراغ Older hero
+        if (placementPlayer == 1)
+            placementPlayer = 2;
+        else
+            placementPlayer = 1;
+
+        placement = Placement::OLDER_HERO;
+
+        placementHeroPlaced = false;
+        placementStartSpace = -1;
+        selectedStartSpace = -1;
+        placementSidekickIndex = 0;
+
+        return true;
+    }
+
+    if (placement == Placement::OLDER_HERO)
+    {
+        placement = Placement::FINISHED;
+        return true;
+    }
+    finishPlacement();
 }
 
 bool MainMenu::isValidSidekickPlacement(Space *space) const
