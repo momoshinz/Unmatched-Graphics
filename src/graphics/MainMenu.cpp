@@ -5,6 +5,7 @@
 #include "player/Player.h"
 #include "board/Space.h"
 #include "graphics/MapCoordinates.h"
+#include <iostream>
 using namespace std;
 
 MainMenu::MainMenu(AssetManager *assets, Game *game)
@@ -165,10 +166,11 @@ void MainMenu::update()
             }
         }
     }
-
+    
     if (state == State::PLACEMENT)
     {
         updatePlacement();
+        return;
     }
 }
 
@@ -307,8 +309,7 @@ void MainMenu::draw()
         DrawTextEx(font, loadGameText,
                    Vector2{loadGameButton.x + (loadGameButton.width - loadGameTextSize.x) / 2.0f,
                            loadGameButton.y + (loadGameButton.height - loadGameTextSize.y) / 2.0f},
-                   buttonFontSize,
-                   buttonSpacing,
+                   buttonFontSize,buttonSpacing,
                    WHITE);
 
         DrawTextEx(font, exitText,
@@ -871,8 +872,7 @@ void MainMenu::drawPlayerInput(
 
     DrawRectangleRounded(
         actionButton,
-        1.0f,
-        32,
+        1.0f,32,
         buttonColor);
 
     Vector2 buttonTextSize =
@@ -939,6 +939,25 @@ int MainMenu::handleInput()
 {
     if (assets == nullptr)
     {
+        return 0;
+    }
+    // =========================================
+    // PLACEMENT
+    // =========================================
+
+    if (state == State::PLACEMENT)
+    {
+        updatePlacement();
+
+        if (placement == Placement::FINISHED)
+        {
+            std::cout << "=== PLACEMENT FINISHED ===" << std::endl;
+
+            state = State::MAIN_MENU;
+
+            return 4;
+        }
+
         return 0;
     }
 
@@ -1032,8 +1051,7 @@ int MainMenu::handleInput()
                 player1Name.clear();
                 player1Age.clear();
 
-                player2Name.clear();
-                player2Age.clear();
+                player2Name.clear();player2Age.clear();
 
                 enteringName = true;
                 enteringAge = false;
@@ -1192,8 +1210,7 @@ int MainMenu::handleInput()
             // -----------------------------
 
             Rectangle backButton{
-                40.0f,
-                GetScreenHeight() - 80.0f,
+                40.0f,GetScreenHeight() - 80.0f,
                 160.0f,
                 50.0f};
 
@@ -1347,7 +1364,10 @@ int MainMenu::handleInput()
                         finishButton))
                 {
                     startPlacement();
-                    return 4;
+                    if (state == State::PLACEMENT && placement == Placement::FINISHED)
+                    {
+                        return 4;
+                    }
                 }
             }
         }
@@ -1358,7 +1378,7 @@ int MainMenu::handleInput()
 
 std::string MainMenu::getSelectedSave() const
 {
-    if (selectedSave < 0 ||
+    if (selectedSave < 0||
         selectedSave >= saveFiles.size())
     {
         return "";
@@ -1727,6 +1747,7 @@ void MainMenu::drawHeroSelection(Font font)
         invisibleBox.y + invisibleBox.height - 45.0f,
         invisibleBox.width,
         25.0f);
+        
     Rectangle finishButton{
         (GetScreenWidth() - 300.0f) / 2.0f,
         650.0f,
@@ -1998,6 +2019,7 @@ bool MainMenu::placeHeroOnSpace(int spaceId)
 
         return true;
     }
+    
     finishPlacement();
 
     return true;
@@ -2079,7 +2101,8 @@ bool MainMenu::placeSidekickOnSpace(int spaceId)
 
     std::vector<Sidekick *> sidekicks = player->getSideKicks();
 
-    if (placementSidekickIndex < 0 || placementSidekickIndex >= static_cast<int>(sidekicks.size()))
+    if (placementSidekickIndex < 0 || 
+        placementSidekickIndex >= static_cast<int>(sidekicks.size()))
     {
         return false;
     }
@@ -2105,8 +2128,10 @@ bool MainMenu::placeSidekickOnSpace(int spaceId)
 
 void MainMenu::finishPlacement()
 {
+    // ===== بعد از اتمام جایگذاری یاران بازیکن جوان‌تر =====
     if (placement == Placement::YOUNGER_SIDEKICKS)
     {
+        // ===== تغییر به بازیکن مسن‌تر =====
         if (placementPlayer == 1)
         {
             placementPlayer = 2;
@@ -2121,9 +2146,13 @@ void MainMenu::finishPlacement()
         placementStartSpace = -1;
         selectedStartSpace = -1;
         placementSidekickIndex = 0;
+        
+        std::cout << "[DEBUG] Moving to OLDER_HERO (Player " 
+                  << placementPlayer << ")" << std::endl;
         return;
     }
 
+    // ===== بعد از اتمام جایگذاری یاران بازیکن مسن‌تر =====
     if (placement == Placement::OLDER_SIDEKICKS)
     {
         placement = Placement::FINISHED;
@@ -2131,128 +2160,135 @@ void MainMenu::finishPlacement()
         placementStartSpace = -1;
         selectedStartSpace = -1;
         placementSidekickIndex = 0;
-
+        
+        std::cout << "[DEBUG] PLACEMENT FINISHED!" << std::endl;
         return;
     }
 }
 
 void MainMenu::drawPlacement(Font font)
 {
+    Texture2D map = assets->getGameMap();
+
+    if (map.id == 0)
+        return;
+
+    // =========================================
+    // MAP
+    // =========================================
+
+    float scale = getMapScale();
+    Vector2 mapPosition = getMapPosition();
+
+    Rectangle source{
+        0.0f,
+        0.0f,
+        static_cast<float>(map.width),
+        static_cast<float>(map.height)
+    };
+
+    Rectangle destination{
+        mapPosition.x,
+        mapPosition.y,
+        map.width * scale,
+        map.height * scale
+    };
+
+    DrawTexturePro(
+        map,
+        source,
+        destination,
+        Vector2{0, 0},
+        0.0f,
+        WHITE
+    );
+
+    // =========================================
+    // TITLE
+    // =========================================
+
     const char *title = "";
 
     if (placement == Placement::YOUNGER_HERO)
-    {
         title = "YOUNGER PLAYER - PLACE YOUR HERO";
-    }
+
     else if (placement == Placement::YOUNGER_SIDEKICKS)
-    {
         title = "YOUNGER PLAYER - PLACE YOUR SIDEKICKS";
-    }
+
     else if (placement == Placement::OLDER_HERO)
-    {
         title = "OLDER PLAYER - PLACE YOUR HERO";
-    }
+
     else if (placement == Placement::OLDER_SIDEKICKS)
-    {
         title = "OLDER PLAYER - PLACE YOUR SIDEKICKS";
-    }
+
     else
-    {
         return;
-    }
-
-    // =====================================
-    // MAP
-    // =====================================
-
-    Texture2D map = assets->getGameMap();
-
-    if (map.id != 0)
-    {
-        float scale = getMapScale();
-        Vector2 mapPosition = getMapPosition();
-
-        Rectangle source{
-            0.0f,
-            0.0f,
-            static_cast<float>(map.width),
-            static_cast<float>(map.height)};
-
-        Rectangle destination{
-            mapPosition.x,
-            mapPosition.y,
-            map.width * scale,
-            map.height * scale};
-
-        DrawTexturePro(
-            map,
-            source,
-            destination,
-            Vector2{0.0f, 0.0f},
-            0.0f,
-            WHITE);
-    }
-
-    // =====================================
-    // TITLE
-    // =====================================
 
     float fontSize = 30.0f;
 
-    Vector2 textSize =
+    Vector2 titleSize =
         MeasureTextEx(
             font,
             title,
             fontSize,
-            2.0f);
+            2.0f
+        );
 
     DrawTextEx(
         font,
         title,
         Vector2{
-            (GetScreenWidth() - textSize.x) / 2.0f,
-            20.0f},
+            (GetScreenWidth() - titleSize.x) / 2.0f,
+            20.0f
+        },
         fontSize,
         2.0f,
-        WHITE);
+        WHITE
+    );
 
-    for (int i = 0; i < 32; i++)
+    // =========================================
+    // INSTRUCTION
+    // =========================================
+
+    const char *instruction = "";
+
+    if (placement == Placement::YOUNGER_HERO ||
+        placement == Placement::OLDER_HERO)
     {
-        Vector2 center =
-            mapImageToScreen(SPACE_GRAPHICS[i].center);
-
-        float radius =
-            SPACE_GRAPHICS[i].radius * getMapScale();
-
-        DrawCircleV(
-            center,
-            radius,
-            Color{255, 255, 255, 70});
-
-        std::string number =
-            std::to_string(i + 1);
-
-        Vector2 textSize =
-            MeasureTextEx(
-                font,
-                number.c_str(),
-                14.0f,
-                1.0f);
-
-        DrawTextEx(
-            font,
-            number.c_str(),
-
-            Vector2{
-                center.x - textSize.x / 2.0f,
-                center.y - textSize.y / 2.0f},
-
-            14.0f,
-            1.0f,
-            WHITE);
+        instruction =
+            "Choose Space 7 or Space 22 for your Hero";
+    }
+    else
+    {
+        instruction =
+            "Choose a valid Space for your Sidekick";
     }
 
-    drawPlacedFighters(font);
+    float instructionSize = 22.0f;
+
+    Vector2 instructionTextSize =
+        MeasureTextEx(
+            font,
+            instruction,
+            instructionSize,
+            1.5f
+        );
+
+    DrawTextEx(
+        font,
+        instruction,
+
+        Vector2{
+            (GetScreenWidth() -
+             instructionTextSize.x) / 2.0f,
+
+            55.0f
+        },
+
+        instructionSize,
+        1.5f,
+        WHITE
+    );
 }
 
 float MainMenu::getMapScale() const
@@ -2356,7 +2392,8 @@ Vector2 MainMenu::getMapPosition() const
 
     return Vector2{
         mapX,
-        mapY};
+        mapY
+    };
 }
 
 Vector2 MainMenu::mapImageToScreen(
@@ -2373,7 +2410,8 @@ Vector2 MainMenu::mapImageToScreen(
             imagePosition.x * scale,
 
         mapPosition.y +
-            imagePosition.y * scale};
+            imagePosition.y * scale
+    };
 }
 
 void MainMenu::updatePlacement()
@@ -2388,21 +2426,23 @@ void MainMenu::updatePlacement()
         return;
     }
 
-    Vector2 mouse =
-        GetMousePosition();
+    Vector2 mouse = GetMousePosition();
 
     // =========================================================
-    // HERO
-    // فقط Space 7 و Space 22
+    // HERO PLACEMENT
     // =========================================================
 
     if (placement == Placement::YOUNGER_HERO ||
         placement == Placement::OLDER_HERO)
     {
+        // -------------------------
         // Space 7
+        // -------------------------
+
         Vector2 space7 =
             mapImageToScreen(
-                SPACE_GRAPHICS[6].center);
+                SPACE_GRAPHICS[6].center
+            );
 
         float radius7 =
             SPACE_GRAPHICS[6].radius *
@@ -2413,14 +2453,23 @@ void MainMenu::updatePlacement()
                 space7,
                 radius7))
         {
-            placeHeroOnSpace(7);
+            if (placeHeroOnSpace(7))
+            {
+                std::cout << "Hero placed on Space 7"
+                          << std::endl;
+            }
+
             return;
         }
 
+        // -------------------------
         // Space 22
+        // -------------------------
+
         Vector2 space22 =
             mapImageToScreen(
-                SPACE_GRAPHICS[21].center);
+                SPACE_GRAPHICS[21].center
+            );
 
         float radius22 =
             SPACE_GRAPHICS[21].radius *
@@ -2431,7 +2480,12 @@ void MainMenu::updatePlacement()
                 space22,
                 radius22))
         {
-            placeHeroOnSpace(22);
+            if (placeHeroOnSpace(22))
+            {
+                std::cout << "Hero placed on Space 22"
+                          << std::endl;
+            }
+
             return;
         }
 
@@ -2439,7 +2493,7 @@ void MainMenu::updatePlacement()
     }
 
     // =========================================================
-    // SIDEKICKS
+    // SIDEKICK PLACEMENT
     // =========================================================
 
     if (placement == Placement::YOUNGER_SIDEKICKS ||
@@ -2449,7 +2503,8 @@ void MainMenu::updatePlacement()
         {
             Vector2 center =
                 mapImageToScreen(
-                    SPACE_GRAPHICS[i].center);
+                    SPACE_GRAPHICS[i].center
+                );
 
             float radius =
                 SPACE_GRAPHICS[i].radius *
@@ -2460,140 +2515,15 @@ void MainMenu::updatePlacement()
                     center,
                     radius))
             {
-                placeSidekickOnSpace(i + 1);
+                if (placeSidekickOnSpace(i + 1))
+                {
+                    std::cout << "Sidekick placed on Space "
+                        << i + 1
+                        << std::endl;
+                }
+
                 return;
             }
-        }
-    }
-}
-
-void MainMenu::drawPlacedFighters(Font font)
-{
-    if (game == nullptr)
-    {
-        return;
-    }
-
-    const std::vector<Player *> &players =
-        game->getPlayers();
-
-    for (Player *player : players)
-    {
-        if (player == nullptr)
-        {
-            continue;
-        }
-
-        // =====================================
-        // HERO
-        // =====================================
-
-        Hero *hero = player->getHero();
-
-        if (hero != nullptr)
-        {
-            Space *space = hero->getPosition();
-
-            if (space != nullptr)
-            {
-                int spaceId = space->getId();
-
-                if (spaceId >= 1 && spaceId <= 32)
-                {
-                    Vector2 center =
-                        mapImageToScreen(
-                            SPACE_GRAPHICS[spaceId - 1].center);
-
-                    DrawCircleV(
-                        center,
-                        22.0f,
-                        Color{180, 40, 40, 230});
-
-                    std::string heroName =
-                        hero->getName();
-
-                    Vector2 textSize =
-                        MeasureTextEx(
-                            font,
-                            heroName.c_str(),
-                            16.0f,
-                            1.0f);
-
-                    DrawTextEx(
-                        font,
-                        heroName.c_str(),
-
-                        Vector2{
-                            center.x - textSize.x / 2.0f,
-                            center.y - 35.0f},
-
-                        16.0f,
-                        1.0f,
-                        WHITE);
-                }
-            }
-        }
-
-        // =====================================
-        // SIDEKICKS
-        // =====================================
-
-        std::vector<Sidekick *> sidekicks =
-            player->getSideKicks();
-
-        for (Sidekick *sidekick : sidekicks)
-        {
-            if (sidekick == nullptr)
-            {
-                continue;
-            }
-
-            Space *space =
-                sidekick->getPosition();
-
-            if (space == nullptr)
-            {
-                continue;
-            }
-
-            int spaceId =
-                space->getId();
-
-            if (spaceId < 1 || spaceId > 32)
-            {
-                continue;
-            }
-
-            Vector2 center =
-                mapImageToScreen(
-                    SPACE_GRAPHICS[spaceId - 1].center);
-
-            DrawCircleV(
-                center,
-                15.0f,
-                Color{60, 120, 200, 230});
-
-            std::string sidekickName =
-                sidekick->getName();
-
-            Vector2 textSize =
-                MeasureTextEx(
-                    font,
-                    sidekickName.c_str(),
-                    12.0f,
-                    1.0f);
-
-            DrawTextEx(
-                font,
-                sidekickName.c_str(),
-
-                Vector2{
-                    center.x - textSize.x / 2.0f,
-                    center.y + 18.0f},
-
-                12.0f,
-                1.0f,
-                WHITE);
         }
     }
 }
