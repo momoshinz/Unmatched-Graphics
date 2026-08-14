@@ -153,6 +153,49 @@ int GameScreen::update()
             return 0;
         }
 
+        // ACTION BUTTONS
+        if (CheckCollisionPointRec(
+                mousePosition,
+                attackButton))
+        {
+            selectedAction =
+                ActionChoice::ATTACK;
+
+            std::cout
+                << "Selected Action: ATTACK"
+                << std::endl;
+
+            return 0;
+        }
+
+        if (CheckCollisionPointRec(
+                mousePosition,
+                maneuverButton))
+        {
+            selectedAction =
+                ActionChoice::MANEUVER;
+
+            std::cout
+                << "Selected Action: MANEUVER"
+                << std::endl;
+
+            return 0;
+        }
+
+        if (CheckCollisionPointRec(
+                mousePosition,
+                schemeButton))
+        {
+            selectedAction =
+                ActionChoice::SCHEME;
+
+            std::cout
+                << "Selected Action: SCHEME"
+                << std::endl;
+
+            return 0;
+        }
+
         // =========================================
         // MAP SPACE CLICK
         // =========================================
@@ -213,6 +256,7 @@ void GameScreen::draw()
     drawMap();
     drawPlayerPanels();
     drawTopButtons();
+    drawActionButtons();
 
     if (guideOpen)
     {
@@ -1478,4 +1522,281 @@ void GameScreen::drawFogs()
                 WHITE);
         }
     }
+}
+
+void GameScreen::drawActionButtons()
+{
+    if (assets == nullptr)
+    {
+        return;
+    }
+
+    Font font =
+        assets->getGameFont();
+
+    // =========================================
+    // BUTTON SIZE
+    // =========================================
+
+    const float buttonWidth = 180.0f;
+    const float buttonHeight = 55.0f;
+    const float gap = 15.0f;
+
+    // =========================================
+    // POSITION
+    // =========================================
+
+    const float totalWidth =
+        3.0f * buttonWidth +
+        2.0f * gap;
+
+    const float startX =
+        (GetScreenWidth() - totalWidth) / 2.0f;
+
+    const float buttonY =
+        GetScreenHeight() - 75.0f;
+
+    // =========================================
+    // BUTTON RECTANGLES
+    // =========================================
+
+    attackButton = Rectangle{
+        startX,
+        buttonY,
+        buttonWidth,
+        buttonHeight};
+
+    maneuverButton = Rectangle{
+        startX +
+            buttonWidth +
+            gap,
+        buttonY,
+        buttonWidth,
+        buttonHeight};
+
+    schemeButton = Rectangle{
+        startX +
+            2.0f *
+                (buttonWidth + gap),
+        buttonY,
+        buttonWidth,
+        buttonHeight};
+
+    // =========================================
+    // MOUSE
+    // =========================================
+
+    Vector2 mousePosition =
+        GetMousePosition();
+
+    // =========================================
+    // COLORS
+    // =========================================
+
+    Color normalColor{
+        25,
+        25,
+        25,
+        220};
+
+    Color hoverColor{
+        70,
+        70,
+        70,
+        230};
+
+    Color selectedColor{
+        120,
+        85,
+        40,
+        240};
+
+    // =========================================
+    // ATTACK COLOR
+    // =========================================
+
+    Color attackColor;
+
+    if (selectedAction == ActionChoice::ATTACK)
+    {
+        attackColor = selectedColor;
+    }
+    else if (CheckCollisionPointRec(
+                 mousePosition,
+                 attackButton))
+    {
+        attackColor = hoverColor;
+    }
+    else
+    {
+        attackColor = normalColor;
+    }
+
+    // =========================================
+    // MANEUVER COLOR
+    // =========================================
+
+    Color maneuverColor;
+
+    if (selectedAction == ActionChoice::MANEUVER)
+    {
+        maneuverColor = selectedColor;
+    }
+    else if (CheckCollisionPointRec(
+                 mousePosition,
+                 maneuverButton))
+    {
+        maneuverColor = hoverColor;
+    }
+    else
+    {
+        maneuverColor = normalColor;
+    }
+
+    // =========================================
+    // SCHEME COLOR
+    // =========================================
+
+    Color schemeColor;
+
+    if (selectedAction == ActionChoice::SCHEME)
+    {
+        schemeColor = selectedColor;
+    }
+    else if (CheckCollisionPointRec(
+                 mousePosition,
+                 schemeButton))
+    {
+        schemeColor = hoverColor;
+    }
+    else
+    {
+        schemeColor = normalColor;
+    }
+
+    // =========================================
+    // DRAW BUTTONS
+    // =========================================
+
+    DrawRectangleRounded(
+        attackButton,
+        0.2f,
+        20,
+        attackColor);
+
+    DrawRectangleRounded(
+        maneuverButton,
+        0.2f,
+        20,
+        maneuverColor);
+
+    DrawRectangleRounded(
+        schemeButton,
+        0.2f,
+        20,
+        schemeColor);
+
+    // =========================================
+    // TEXT
+    // =========================================
+
+    const float fontSize = 25.0f;
+    const float spacing = 1.5f;
+
+    const char *attackText =
+        "ATTACK";
+
+    const char *maneuverText =
+        "MANEUVER";
+
+    const char *schemeText =
+        "SCHEME";
+
+    // =========================================
+    // ATTACK TEXT
+    // =========================================
+
+    Vector2 attackTextSize =
+        MeasureTextEx(
+            font,
+            attackText,
+            fontSize,
+            spacing);DrawTextEx(
+        font,
+        attackText,
+
+        Vector2{
+            attackButton.x +
+                (attackButton.width -
+                 attackTextSize.x) /
+                    2.0f,
+
+            attackButton.y +
+                (attackButton.height -
+                 attackTextSize.y) /
+                    2.0f},
+
+        fontSize,
+        spacing,
+        WHITE);
+
+    // =========================================
+    // MANEUVER TEXT
+    // =========================================
+
+    Vector2 maneuverTextSize =
+        MeasureTextEx(
+            font,
+            maneuverText,
+            fontSize,
+            spacing);
+
+    DrawTextEx(
+        font,
+        maneuverText,
+
+        Vector2{
+            maneuverButton.x +
+                (maneuverButton.width -
+                 maneuverTextSize.x) /
+                    2.0f,
+
+            maneuverButton.y +
+                (maneuverButton.height -
+                 maneuverTextSize.y) /
+                    2.0f},
+
+        fontSize,
+        spacing,
+        WHITE);
+
+    // =========================================
+    // SCHEME TEXT
+    // =========================================
+
+    Vector2 schemeTextSize =
+        MeasureTextEx(
+            font,
+            schemeText,
+            fontSize,
+            spacing);
+
+    DrawTextEx(
+        font,
+        schemeText,
+
+        Vector2{
+            schemeButton.x +
+                (schemeButton.width -
+                 schemeTextSize.x) /
+                    2.0f,
+
+            schemeButton.y +
+                (schemeButton.height -
+                 schemeTextSize.y) /
+                    2.0f},
+
+        fontSize,
+        spacing,
+        WHITE);
 }

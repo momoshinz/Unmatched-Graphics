@@ -6,38 +6,53 @@
 
 class GameScreen
 {
-private:
-    AssetManager *assets;
-    Game *game;
+    private:
+        AssetManager *assets;
+        Game *game;
 
-    bool guideOpen = false;
+        bool guideOpen = false;
 
-    void drawMap();
-    void drawPlayerPanels();
-    void drawTopButtons();
-    void drawGuidePopup();
-    void drawSpaces();
-    void drawPlacedFighters();
+        void drawMap();
+        void drawPlayerPanels();
+        void drawTopButtons();
+        void drawGuidePopup();
+        void drawSpaces();
+        void drawPlacedFighters();
 
-    Vector2 mapImageToScreen(Vector2 imagePosition) const;
+        Vector2 mapImageToScreen(Vector2 imagePosition) const;
 
-public:
-    GameScreen(
-        AssetManager *assets,
-        Game *game);
+         enum class ActionChoice
+        {
+            NONE,
+            ATTACK,
+            MANEUVER,
+            SCHEME
+        };
 
-    int update();
-    void draw();
+        ActionChoice selectedAction;
 
-    void calculateMapTransform(
-        float &mapX,
-        float &mapY,
-        float &scale,
-        float &mapWidth,
-        float &mapHeight) const;
+        Rectangle attackButton;
+        Rectangle maneuverButton;
+        Rectangle schemeButton;
 
-    int getClickedSpaceId();
-    void drawFogs();
+    public:
+        GameScreen(
+            AssetManager *assets,
+            Game *game);
+
+        int update();
+        void draw();
+
+        void calculateMapTransform(
+            float &mapX,
+            float &mapY,
+            float &scale,
+            float &mapWidth,
+            float &mapHeight) const;
+
+        int getClickedSpaceId();
+        void drawFogs();
+        void drawActionButtons();
 };
 
 #endif
