@@ -2146,10 +2146,7 @@ void MainMenu::finishPlacement()
         placementStartSpace = -1;
         selectedStartSpace = -1;
         placementSidekickIndex = 0;
-        
-        std::cout << "[DEBUG] Moving to OLDER_HERO (Player " 
-                  << placementPlayer << ")" << std::endl;
-        return;
+       
     }
 
     // ===== بعد از اتمام جایگذاری یاران بازیکن مسن‌تر =====
@@ -2161,8 +2158,7 @@ void MainMenu::finishPlacement()
         selectedStartSpace = -1;
         placementSidekickIndex = 0;
         
-        std::cout << "[DEBUG] PLACEMENT FINISHED!" << std::endl;
-        return;
+
     }
 }
 
@@ -2202,6 +2198,68 @@ void MainMenu::drawPlacement(Font font)
         0.0f,
         WHITE
     );
+
+    // =========================================
+    // HIGHLIGHT VALID SPACES (هایلایت کردن خانه‌های معتبر)
+    // =========================================
+
+    Vector2 mouse = GetMousePosition();
+
+    // ===== رنگ‌های هایلایت =====
+    Color hoverColor = Color{255, 255, 0, 100};     // زرد شفاف (ماوس روی خانه)
+    Color selectedColor = Color{0, 255, 0, 150};    // سبز (خانه انتخاب شده)
+    Color heroColor = Color{255, 0, 0, 150};        // قرمز (خانه قهرمان)
+    Color sidekickColor = Color{0, 0, 255, 150};    // آبی (خانه یاران)
+
+    // ===== بررسی اینکه آیا خانه‌ای زیر ماوس است =====
+    int hoveredSpace = -1;
+
+    for (int i = 0; i < 32; i++)
+    {
+        Vector2 center = mapImageToScreen(SPACE_GRAPHICS[i].center);
+        float radius = SPACE_GRAPHICS[i].radius * scale;
+
+        // ===== اگر ماوس روی خانه است =====
+        if (CheckCollisionPointCircle(mouse, center, radius))
+        {
+            hoveredSpace = i + 1;
+        }
+
+        // ===== هایلایت خانه‌های معتبر (برای Sidekickها) =====
+        if (placement == Placement::YOUNGER_SIDEKICKS ||
+            placement == Placement::OLDER_SIDEKICKS)
+        {
+            Space *space = game->getBoard().getSpace(i + 1);
+            if (space != nullptr && isValidSidekickPlacement(space))
+            {
+                // خانه معتبر برای Sidekick
+                DrawCircleV(center, radius, Color{0, 255, 0, 80});
+            }
+        }
+
+        // ===== هایلایت خانه‌های ۷ و ۲۲ برای قهرمان =====
+        if (placement == Placement::YOUNGER_HERO ||
+            placement == Placement::OLDER_HERO)
+        {
+            if (i + 1 == 7 || i + 1 == 22)
+            {
+                DrawCircleV(center, radius, Color{255, 255, 0, 80});
+            }
+        }
+
+        // ===== اگر خانه انتخاب شده باشد (قرمز یا آبی) =====
+        if (i + 1 == placementStartSpace)
+        {
+            DrawCircleV(center, radius, heroColor);
+        }
+
+        // ===== اگر ماوس روی خانه است =====
+        if (i + 1 == hoveredSpace)
+        {
+            DrawCircleV(center, radius, hoverColor);
+            DrawCircleLinesV(center, radius, Color{255, 255, 255, 200});
+        }
+    }
 
     // =========================================
     // TITLE
