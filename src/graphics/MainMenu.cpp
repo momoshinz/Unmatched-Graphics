@@ -2047,13 +2047,53 @@ bool MainMenu::placeHeroOnSpace(int spaceId)
         return true;
     }
 
-    if (placement == Placement::OLDER_HERO)
+   if (placement == Placement::OLDER_HERO)
     {
+        const std::vector<Player *> &players =
+            game->getPlayers();
+
+        bool hasFog = false;
+        int fogPlayer = -1;
+
+        // پیدا کردن بازیکنی که Fog دارد
+        for (int i = 0; i < static_cast<int>(players.size()); i++)
+        {
+            if (players[i] != nullptr &&
+                !players[i]->getFogs().empty())
+            {
+                hasFog = true;
+                fogPlayer = i + 1;
+                break;
+            }
+        }
+
+        // اگر Fog وجود دارد، وارد مرحله Fog شو
+        if (hasFog)
+        {
+            placement = Placement::FOG;
+            placementPlayer = fogPlayer;
+
+            currentFogIndex = 0;
+
+            placementHeroPlaced = false;
+            placementStartSpace = -1;
+            selectedStartSpace = -1;
+            placementSidekickIndex = 0;
+
+            return true;
+        }
+
+        // اگر Fog وجود ندارد، تمام
         placement = Placement::FINISHED;
+
+        placementHeroPlaced = false;
+        placementStartSpace = -1;
+        selectedStartSpace = -1;
+        placementSidekickIndex = 0;
+        currentFogIndex = 0;
+
         return true;
     }
-    finishPlacement();
-    return true;
 }
 
 bool MainMenu::isValidSidekickPlacement(Space *space) const
@@ -2797,12 +2837,6 @@ bool MainMenu::placeFogOnSpace(int spaceId)
         board.getSpace(spaceId);
 
     if (space == nullptr)
-    {
-        return false;
-    }
-
-    // Fog نباید روی فضای اشغال‌شده قرار بگیرد
-    if (space->isOccupied())
     {
         return false;
     }
