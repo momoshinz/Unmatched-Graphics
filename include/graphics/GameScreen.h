@@ -3,6 +3,7 @@
 #include <raylib.h>
 #include "graphics/AssetManager.h"
 #include "game/Game.h"
+#include "graphics/PlayerPanel.h"
 
 class GameScreen
 {
