@@ -165,6 +165,17 @@ int GameScreen::update()
                 << "Selected Action: ATTACK"
                 << std::endl;
 
+            selectedAction = ActionChoice::ATTACK;
+
+            attackPhase = AttackPhase::CHOOSE_ATTACKER;
+
+            attackFighter = nullptr;
+            attackTarget = nullptr;
+            selectedAttackCard = nullptr;
+
+            std::cout << "selectedAction : ATTACK" << std::endl;
+            std::cout << "Choose attacker by clicking on a fighter." << std::endl;
+
             return 0;
         }
 
@@ -194,6 +205,43 @@ int GameScreen::update()
                 << std::endl;
 
             return 0;
+        }
+
+        // =========================================
+        // ATTACK - CHOOSE ATTACKER
+        // =========================================
+
+        if (selectedAction == ActionChoice::ATTACK &&
+            attackPhase == AttackPhase::CHOOSE_ATTACKER)
+        {
+            Fighter *clickedFighter =
+                getClickedFighter();
+
+            if (clickedFighter != nullptr)
+            {
+                Player *currentPlayer =
+                    game->getTurnManager().getCurrentPlayer();
+
+                if (currentPlayer != nullptr &&
+                    clickedFighter->getOwner() == currentPlayer)
+                {
+                    attackFighter = clickedFighter;
+
+                    std::cout
+                        << "Attacker selected : "
+                        << attackFighter->getName()
+                        << std::endl;
+
+                    attackPhase =
+                        AttackPhase::CHOOSE_TARGET;
+                }
+                else
+                {
+                    std::cout
+                        << "[!] You can only select your own fighter."
+                        << std::endl;
+                }
+            }
         }
 
         // =========================================
@@ -1799,4 +1847,105 @@ void GameScreen::drawActionButtons()
         fontSize,
         spacing,
         WHITE);
+}
+
+Fighter *GameScreen::getClickedFighter()
+{
+    if (game == nullptr)
+    {
+        return nullptr;
+    }
+
+    Vector2 mouse = GetMousePosition();
+
+    const std::vector<Player *> &players =
+        game->getPlayers();
+
+    for (Player *player : players)
+    {
+        if (player == nullptr)
+        {
+            continue;
+        }
+
+        // =====================================
+        // HERO
+        // =====================================
+
+        Hero *hero = player->getHero();
+
+        if (hero != nullptr && hero->isAlive())
+        {
+            Space *space = hero->getPosition();
+
+            if (space != nullptr)
+            {
+                int spaceId = space->getId();
+
+                if (spaceId >= 1 && spaceId <= 32)
+                {
+                    Vector2 center =
+                        mapImageToScreen(
+                            SPACE_GRAPHICS[spaceId - 1].center);
+
+                    float distance =
+                        std::sqrt(
+                            (mouse.x - center.x) *
+                                (mouse.x - center.x) +
+                            (mouse.y - center.y) *
+                                (mouse.y - center.y));
+
+                    if (distance <= 25.0f)
+                    {
+                        return hero;
+                    }
+                }
+            }
+        }
+
+        // =====================================
+        // SIDEKICKS
+        // =====================================
+
+        for (Sidekick *sidekick : player->getSideKicks())
+        {
+            if (sidekick == nullptr ||
+                !sidekick->isAlive())
+            {
+                continue;
+            }
+
+            Space *space = sidekick->getPosition();
+
+            if (space == nullptr)
+            {
+                continue;
+            }
+
+            int spaceId = space->getId();
+
+            if (spaceId < 1 || spaceId > 32)
+            {
+                continue;
+            }
+
+            Vector2 center =
+                mapImageToScreen(
+                    SPACE_GRAPHICS[spaceId - 1].center);
+
+            float distance =
+                std::sqrt(
+                    (mouse.x - center.x) *
+                        (mouse.x - center.x) +
+                    (mouse.y - center.y) *
+                        (mouse.y - center.y));
+
+            if (distance <= 20.0f)
+            {
+                return sidekick;
+            }
+        }
+    }
+
+    return nullptr;
 }

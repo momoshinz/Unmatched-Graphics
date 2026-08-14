@@ -20,26 +20,41 @@ class GameScreen
         void drawPlacedFighters();
 
         Vector2 mapImageToScreen(Vector2 imagePosition) const;
-
-         enum class ActionChoice
+        enum class ActionChoice
         {
             NONE,
             ATTACK,
             MANEUVER,
             SCHEME
         };
-
         ActionChoice selectedAction;
-
         Rectangle attackButton;
         Rectangle maneuverButton;
         Rectangle schemeButton;
+
+        enum class AttackPhase
+        {
+            NONE,
+            CHOOSE_ATTACKER,
+            CHOOSE_TARGET,
+            CHOOSE_ATTACK_CARD,
+            CHOOSE_DEFENSE,
+            RESOLVE
+        };
+
+        AttackPhase attackPhase = AttackPhase::NONE;
+
+        Fighter *attackFighter = nullptr;
+        Fighter *attackTarget = nullptr;
+        Card *selectedAttackCard = nullptr;
+
 
     public:
         GameScreen(
             AssetManager *assets,
             Game *game);
-
+            
+            
         int update();
         void draw();
 
@@ -53,6 +68,7 @@ class GameScreen
         int getClickedSpaceId();
         void drawFogs();
         void drawActionButtons();
+        Fighter* getClickedFighter();
 };
 
 #endif
