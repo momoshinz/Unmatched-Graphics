@@ -49,6 +49,9 @@ class GameScreen
         Fighter *attackTarget = nullptr;
         Card *selectedAttackCard = nullptr;
 
+        PlayerPanel rightPlayerPanel;
+        PlayerPanel leftPlayerPanel;
+
 
     public:
         GameScreen(
