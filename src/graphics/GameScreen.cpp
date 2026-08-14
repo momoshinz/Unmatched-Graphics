@@ -1362,8 +1362,8 @@ void GameScreen::drawPlacedFighters()
                     center.x -
                         textSize.x / 2.0f,
 
-                    center.y +
-                        18.0f},
+                    center.y -
+                        28.0f},
 
                 12.0f,
                 1.0f,
