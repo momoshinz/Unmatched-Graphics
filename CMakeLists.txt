@@ -115,6 +115,7 @@ set(SOURCES
     src/graphics/MainMenu.cpp
     src/graphics/GameScreen.cpp
     src/graphics/MapCoordinates.cpp
+    src/graphics/PlayerPanel.cpp
 
     src/ui/TerminalUI.cpp
 )

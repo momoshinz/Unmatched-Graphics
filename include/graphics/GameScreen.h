@@ -3,56 +3,60 @@
 #include <raylib.h>
 #include "graphics/AssetManager.h"
 #include "game/Game.h"
+#include "graphics/PlayerPanel.h"
 
 class GameScreen
 {
-    private:
-        AssetManager *assets;
-        Game *game;
+private:
+    AssetManager *assets;
+    Game *game;
 
-        bool guideOpen = false;
+    bool guideOpen = false;
 
-        void drawMap();
-        void drawPlayerPanels();
-        void drawTopButtons();
-        void drawGuidePopup();
-        void drawSpaces();
-        void drawPlacedFighters();
+    void drawMap();
+    void drawPlayerPanels();
+    void drawTopButtons();
+    void drawGuidePopup();
+    void drawSpaces();
+    void drawPlacedFighters();
 
-        Vector2 mapImageToScreen(Vector2 imagePosition) const;
+    Vector2 mapImageToScreen(Vector2 imagePosition) const;
 
-         enum class ActionChoice
-        {
-            NONE,
-            ATTACK,
-            MANEUVER,
-            SCHEME
-        };
+    enum class ActionChoice
+    {
+        NONE,
+        ATTACK,
+        MANEUVER,
+        SCHEME
+    };
 
-        ActionChoice selectedAction;
+    ActionChoice selectedAction;
 
-        Rectangle attackButton;
-        Rectangle maneuverButton;
-        Rectangle schemeButton;
+    Rectangle attackButton;
+    Rectangle maneuverButton;
+    Rectangle schemeButton;
 
-    public:
-        GameScreen(
-            AssetManager *assets,
-            Game *game);
+    PlayerPanel leftPlayerPanel;
+    PlayerPanel rightPlayerPanel;
 
-        int update();
-        void draw();
+public:
+    GameScreen(
+        AssetManager *assets,
+        Game *game);
 
-        void calculateMapTransform(
-            float &mapX,
-            float &mapY,
-            float &scale,
-            float &mapWidth,
-            float &mapHeight) const;
+    int update();
+    void draw();
 
-        int getClickedSpaceId();
-        void drawFogs();
-        void drawActionButtons();
+    void calculateMapTransform(
+        float &mapX,
+        float &mapY,
+        float &scale,
+        float &mapWidth,
+        float &mapHeight) const;
+
+    int getClickedSpaceId();
+    void drawFogs();
+    void drawActionButtons();
 };
 
 #endif

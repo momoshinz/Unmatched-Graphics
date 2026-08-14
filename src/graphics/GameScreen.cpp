@@ -11,7 +11,9 @@ GameScreen::GameScreen(
     AssetManager *assets,
     Game *game)
     : assets(assets),
-      game(game)
+      game(game),
+      leftPlayerPanel(assets),
+      rightPlayerPanel(assets)
 {
 }
 // ============================================================
@@ -340,70 +342,47 @@ void GameScreen::drawMap()
 
 void GameScreen::drawPlayerPanels()
 {
-    // عرض پنل‌ها
-    const float panelWidth = 320.0f;
+    if (game == nullptr)
+    {
+        return;
+    }
 
-    // فاصله از لبه پنجره
+    const float panelWidth = 320.0f;
     const float margin = 12.0f;
 
-    // ارتفاع پنل
     const float panelHeight =
         GetScreenHeight() -
         2.0f * margin;
 
-    // =========================================
-    // Panel positions
-    // =========================================
+    leftPlayerPanel.setBounds(
+        Rectangle{
+            margin,
+            margin,
+            panelWidth,
+            panelHeight});
 
-    const float leftPanelX =
-        margin;
+    rightPlayerPanel.setBounds(
+        Rectangle{
+            GetScreenWidth() -
+                panelWidth -
+                margin,
 
-    const float rightPanelX =
-        GetScreenWidth() -
-        panelWidth -
-        margin;
+            margin,
+            panelWidth,
+            panelHeight});
 
-    // =========================================
-    // Panel color
-    // =========================================
+    const auto &players =
+        game->getPlayers();
 
-    Color panelColor{
-        0,
-        0,
-        0,
-        180};
+    if (players.size() > 0)
+    {
+        leftPlayerPanel.draw(players[0]);
+    }
 
-    // =========================================
-    // Left panel
-    // =========================================
-
-    Rectangle leftPanel{
-        leftPanelX,
-        margin,
-        panelWidth,
-        panelHeight};
-
-    DrawRectangleRounded(
-        leftPanel,
-        0.12f,
-        30,
-        panelColor);
-
-    // =========================================
-    // Right panel
-    // =========================================
-
-    Rectangle rightPanel{
-        rightPanelX,
-        margin,
-        panelWidth,
-        panelHeight};
-
-    DrawRectangleRounded(
-        rightPanel,
-        0.12f,
-        30,
-        panelColor);
+    if (players.size() > 1)
+    {
+        rightPlayerPanel.draw(players[1]);
+    }
 }
 
 // =========================================
@@ -892,7 +871,7 @@ void GameScreen::drawGuidePopup()
         spacing,
         WHITE);
 
-        y += lineHeight;
+    y += lineHeight;
 
     DrawTextEx(
         font,
@@ -921,7 +900,7 @@ void GameScreen::drawGuidePopup()
     // =========================================
 
     const float backWidth = 130.0f;
-    const float backHeight = 45.0f;
+    const float backHeight = 42.0f;
 
     Rectangle backButton{
         (GetScreenWidth() - backWidth) / 2.0f,
@@ -1721,7 +1700,8 @@ void GameScreen::drawActionButtons()
             font,
             attackText,
             fontSize,
-            spacing);DrawTextEx(
+            spacing);
+    DrawTextEx(
         font,
         attackText,
 
