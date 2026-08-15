@@ -7,6 +7,7 @@
 #include "fighter/Hero.h"
 #include "fighter/Fog.h"
 #include "card/Card.h"
+#include "card/Hand.h"
 
 GameScreen::GameScreen(
     AssetManager *assets,
@@ -268,21 +269,41 @@ int GameScreen::update()
 
         if (playedCard != nullptr)
         {
-            std::cout
-                << "[.] Scheme card confirmed: "
-                << playedCard->getName()
-                << std::endl;
+            Player *currentPlayer =
+                game->getTurnManager().getCurrentPlayer();
 
-            // TODO (بعداً):
-            // - Effect *effect = playedCard->getEffect(); effect->apply(...)
-            // - currentPlayer->getHand().removeCard(...) + discardPile.addCard(...)
-            // - game->getTurnManager().useAction();
+            if (currentPlayer != nullptr)
+            {
+                Hand &hand = currentPlayer->getHand();
+                const std::vector<Card *> &cards = hand.getCards();
+
+                for (int i = 0; i < static_cast<int>(cards.size()); i++)
+                {
+                    if (cards[i] == playedCard)
+                    {
+                        Card *removed = hand.removeCard(i);
+
+                        currentPlayer->getDiscardPile().addCard(removed);
+
+                        std::cout
+                            << "[.] Scheme card discarded: "
+                            << removed->getName()
+                            << std::endl;
+
+                        break;
+                    }
+                }
+
+                // TODO (بعداً):
+                // - Effect *effect = playedCard->getEffect(); effect->apply(...)
+                // - game->getTurnManager().useAction();
+            }
+
+            schemeUI.resetConfirmed();
         }
 
-        schemeUI.resetConfirmed();
+        return 0;
     }
-
-    return 0;
 }
 
 void GameScreen::draw()
