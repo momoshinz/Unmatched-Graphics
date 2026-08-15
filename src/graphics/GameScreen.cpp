@@ -978,21 +978,7 @@ void GameScreen::drawGuidePopup()
         textSize,
         spacing,
         WHITE);
-
-    // =========================================
-    // Good Luck
-    // =========================================
-
-    y += lineHeight * 1.5f;
-
-    DrawTextEx(
-        font,
-        "Good Luck, Fighter. You'll need it :]",
-        Vector2{x, y},
-        textSize,
-        spacing,
-        WHITE);
-
+        
     // =========================================
     // BACK BUTTON
     // =========================================

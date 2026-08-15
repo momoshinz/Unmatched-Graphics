@@ -148,9 +148,9 @@ static Texture2D getFighterTexture(
 
     if (name == "* Dr. Watson")
     {
-        return assets->getCharacter("watson");
+        return assets->getCharacter("drwatson");
     }
-
+    
     // -----------------------------
     // Invisible Man
     // -----------------------------

@@ -114,6 +114,9 @@ bool AssetManager::load()
     characterTextures["watson"] =
         LoadTexture("Unmatched_Assets/sherlock/drwatson.png");
 
+    characterTextures["drwatson"] =
+        LoadTexture("Unmatched_Assets/sherlock/watson.png");
+
     characterTextures["watson_health"] =
         LoadTexture("Unmatched_Assets/sherlock/watsonHealth.png");
 
@@ -175,7 +178,6 @@ bool AssetManager::load()
     // =========================================
     // Sherlock cards
     // =========================================
-
     cardTextures["AdministerAid"] =
         LoadTexture("Unmatched_Assets/cards/sherlock/administer-aid.png");
 

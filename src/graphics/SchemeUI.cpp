@@ -4,6 +4,7 @@
 #include "card/Card.h"
 #include <iostream>
 #include <unordered_map>
+#include <algorithm>
 
 SchemeUI::SchemeUI(AssetManager *assets)
     : assets(assets)
@@ -84,43 +85,63 @@ void SchemeUI::openScheme(const Hand &hand)
     }
 
     // ========================================================
-    // چیدمان باکس‌های کارت (یک ردیف، حداکثر ۷ تا)
+    // چیدمان Grid: حداکثر ۳ کارت در هر ردیف
     // ========================================================
 
-    const float boxWidth = 130.0f;
-    const float boxHeight = 190.0f;
-    const float gap = 15.0f;
+    const int maxPerRow = 3;
 
-    const float totalWidth =
-        selectableCards.size() * boxWidth +
-        (selectableCards.size() - 1) * gap;
+    const float boxWidth = 220.0f;
+    const float boxHeight = 320.0f;
+    const float gapX = 25.0f;
+    const float gapY = 25.0f;
 
-    const float startX =
-        (GetScreenWidth() - totalWidth) / 2.0f;
+    const float startY = 130.0f;
 
-    const float startY = 160.0f;
+    int totalCards = static_cast<int>(selectableCards.size());
+    int rowCount = (totalCards + maxPerRow - 1) / maxPerRow;
 
-    for (size_t i = 0; i < selectableCards.size(); i++)
+    int cardIndex = 0;
+
+    for (int row = 0; row < rowCount; row++)
     {
-        Rectangle box{
-            startX + i * (boxWidth + gap),
-            startY,
-            boxWidth,
-            boxHeight};
+        int cardsInRow = std::min(maxPerRow, totalCards - cardIndex);
 
-        cardBoxes.push_back(box);
+        float rowWidth =
+            cardsInRow * boxWidth +
+            (cardsInRow - 1) * gapX;
+
+        float rowStartX =
+            (GetScreenWidth() - rowWidth) / 2.0f;
+
+        float rowY =
+            startY + row * (boxHeight + gapY);
+
+        for (int col = 0; col < cardsInRow; col++)
+        {
+            Rectangle box{
+                rowStartX + col * (boxWidth + gapX),
+                rowY,
+                boxWidth,
+                boxHeight};
+
+            cardBoxes.push_back(box);
+            cardIndex++;
+        }
     }
 
     // ========================================================
-    // دکمه‌ی Play
+    // دکمه‌ی Play (زیر آخرین ردیف)
     // ========================================================
 
-    const float playWidth = 200.0f;
-    const float playHeight = 55.0f;
+    const float playWidth = 220.0f;
+    const float playHeight = 60.0f;
+
+    float lastRowBottom =
+        startY + rowCount * (boxHeight + gapY);
 
     playButton = Rectangle{
         (GetScreenWidth() - playWidth) / 2.0f,
-        startY + boxHeight + 70.0f,
+        lastRowBottom + 15.0f,
         playWidth,
         playHeight};
 
@@ -230,6 +251,7 @@ void SchemeUI::draw()
             (hovered || selected) ? WHITE : Color{150, 150, 150, 255});
 
         // تصویر کارت
+        // تصویر کارت
         std::string textureKey = getCardTextureKey(card);
 
         if (!textureKey.empty())
@@ -238,7 +260,7 @@ void SchemeUI::draw()
 
             if (texture.id != 0)
             {
-                const float padding = 8.0f;
+                const float padding = 14.0f;
 
                 Rectangle source{
                     0.0f, 0.0f,
@@ -249,7 +271,7 @@ void SchemeUI::draw()
                     box.x + padding,
                     box.y + padding,
                     box.width - 2.0f * padding,
-                    box.height - 45.0f};
+                    box.height - 65.0f}; // بزرگ‌تر، جا برای اسم زیرش
 
                 DrawTexturePro(
                     texture, source, destination,
@@ -257,18 +279,20 @@ void SchemeUI::draw()
             }
         }
 
-        // اسم کارت زیر عکس
+        // اسم کارت زیر عکس (فونت بزرگ‌تر)
         std::string name = card->getName();
 
+        const float nameFontSize = 20.0f;
+
         Vector2 nameSize =
-            MeasureTextEx(font, name.c_str(), 14.0f, 1.0f);
+            MeasureTextEx(font, name.c_str(), nameFontSize, 1.0f);
 
         DrawTextEx(
             font, name.c_str(),
             Vector2{
                 box.x + (box.width - nameSize.x) / 2.0f,
-                box.y + box.height - 30.0f},
-            14.0f, 1.0f, WHITE);
+                box.y + box.height - 40.0f},
+            nameFontSize, 1.0f, WHITE);
     }
 
     // دکمه‌ی Play
