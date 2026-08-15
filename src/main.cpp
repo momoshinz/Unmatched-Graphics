@@ -180,10 +180,12 @@ int main()
                 std::cout
                     << "Placement finished.\n";
 
+                game.beginTurns();
+
                 std::cout
                     << "Starting game screen...\n";
 
-               currentScreen = Screen::GAME;
+                currentScreen = Screen::GAME;
             }
         }
 

@@ -1,0 +1,332 @@
+#include "graphics/SchemeUI.h"
+#include "graphics/AssetManager.h"
+#include "card/Hand.h"
+#include "card/Card.h"
+#include <iostream>
+#include <unordered_map>
+
+SchemeUI::SchemeUI(AssetManager *assets)
+    : assets(assets)
+{
+}
+
+// ============================================================
+// اسم نمایشی کارت -> کلید تکسچر در AssetManager
+// (فقط کارت‌های Scheme، چون این پنجره فقط اونا رو نشون می‌ده)
+// ============================================================
+
+std::string SchemeUI::getCardTextureKey(const Card *card)
+{
+    static const std::unordered_map<std::string, std::string> nameToKey = {
+        {"Mistform", "MistForm"},
+        {"Baptism Of Blood", "BaptismOfBlood"},
+        {"Prey Upon", "PreyUpon"},
+        {"Ravening Seduction", "RaveningSeduction"},
+        {"Administer Aid", "AdministerAid"},
+        {"Eliminate The Impossible", "EliminateTheImpossible"},
+        {"Master Of Disguise", "MasterOfDisguise"},
+        {"Reign Of Terror", "ReignOfTerror"},
+        {"Rolling Fog", "RollingFog"},
+        {"Step Lightly", "StepLightly"}};
+
+    if (card == nullptr)
+    {
+        return "";
+    }
+
+    auto it = nameToKey.find(card->getName());
+
+    if (it == nameToKey.end())
+    {
+        return "";
+    }
+
+    return it->second;
+}
+
+// ============================================================
+// OPEN SCHEME
+// ============================================================
+
+void SchemeUI::openScheme(const Hand &hand)
+{
+    selectableCards.clear();
+    cardBoxes.clear();
+
+    selectedIndex = -1;
+    confirmed = false;
+
+    for (Card *card : hand.getCards())
+    {
+        if (card == nullptr)
+        {
+            continue;
+        }
+
+        if (!card->isScheme())
+        {
+            continue;
+        }
+
+        selectableCards.push_back(card);
+
+        if (selectableCards.size() >= 7)
+        {
+            break;
+        }
+    }
+
+    if (selectableCards.empty())
+    {
+        open = false;
+        std::cout << "[!] No Scheme card in hand." << std::endl;
+        return;
+    }
+
+    // ========================================================
+    // چیدمان باکس‌های کارت (یک ردیف، حداکثر ۷ تا)
+    // ========================================================
+
+    const float boxWidth = 130.0f;
+    const float boxHeight = 190.0f;
+    const float gap = 15.0f;
+
+    const float totalWidth =
+        selectableCards.size() * boxWidth +
+        (selectableCards.size() - 1) * gap;
+
+    const float startX =
+        (GetScreenWidth() - totalWidth) / 2.0f;
+
+    const float startY = 160.0f;
+
+    for (size_t i = 0; i < selectableCards.size(); i++)
+    {
+        Rectangle box{
+            startX + i * (boxWidth + gap),
+            startY,
+            boxWidth,
+            boxHeight};
+
+        cardBoxes.push_back(box);
+    }
+
+    // ========================================================
+    // دکمه‌ی Play
+    // ========================================================
+
+    const float playWidth = 200.0f;
+    const float playHeight = 55.0f;
+
+    playButton = Rectangle{
+        (GetScreenWidth() - playWidth) / 2.0f,
+        startY + boxHeight + 70.0f,
+        playWidth,
+        playHeight};
+
+    open = true;
+
+    std::cout << "Scheme UI opened." << std::endl;
+}
+
+// ============================================================
+// UPDATE
+// ============================================================
+
+void SchemeUI::update()
+{
+    if (!open)
+    {
+        return;
+    }
+
+    if (!IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+    {
+        return;
+    }
+
+    Vector2 mouse = GetMousePosition();
+
+    // انتخاب / تعویض کارت
+    for (size_t i = 0; i < cardBoxes.size(); i++)
+    {
+        if (CheckCollisionPointRec(mouse, cardBoxes[i]))
+        {
+            selectedIndex = static_cast<int>(i);
+
+            std::cout << "Scheme card selected: "
+                      << selectableCards[i]->getName()
+                      << std::endl;
+
+            return;
+        }
+    }
+
+    // دکمه‌ی Play (فقط وقتی کارتی انتخاب شده)
+    if (selectedIndex != -1 &&
+        CheckCollisionPointRec(mouse, playButton))
+    {
+        confirmed = true;
+        open = false;
+    }
+}
+
+// ============================================================
+// DRAW
+// ============================================================
+
+void SchemeUI::draw()
+{
+    if (!open || assets == nullptr)
+    {
+        return;
+    }
+
+    Font font = assets->getGameFont();
+
+    // Overlay تیره
+    DrawRectangle(
+        0, 0,
+        GetScreenWidth(), GetScreenHeight(),
+        Color{0, 0, 0, 190});
+
+    // Title
+    const char *title = "CHOOSE YOUR SCHEME CARD";
+    const float titleSize = 38.0f;
+
+    Vector2 titleMeasure =
+        MeasureTextEx(font, title, titleSize, 2.0f);
+
+    DrawTextEx(
+        font, title,
+        Vector2{
+            (GetScreenWidth() - titleMeasure.x) / 2.0f,
+            70.0f},
+        titleSize, 2.0f, WHITE);
+
+    Vector2 mouse = GetMousePosition();
+
+    // کارت‌ها
+    for (size_t i = 0; i < selectableCards.size(); i++)
+    {
+        Card *card = selectableCards[i];
+        Rectangle box = cardBoxes[i];
+
+        bool hovered = CheckCollisionPointRec(mouse, box);
+        bool selected = (static_cast<int>(i) == selectedIndex);
+
+        Color boxColor;
+        if (selected)
+            boxColor = Color{120, 85, 40, 245};
+        else if (hovered)
+            boxColor = Color{75, 75, 75, 245};
+        else
+            boxColor = Color{35, 35, 35, 235};
+
+        DrawRectangleRounded(box, 0.08f, 20, boxColor);
+
+        DrawRectangleRoundedLines(
+            box, 0.08f, 20,
+            (hovered || selected) ? WHITE : Color{150, 150, 150, 255});
+
+        // تصویر کارت
+        std::string textureKey = getCardTextureKey(card);
+
+        if (!textureKey.empty())
+        {
+            Texture2D texture = assets->getCard(textureKey);
+
+            if (texture.id != 0)
+            {
+                const float padding = 8.0f;
+
+                Rectangle source{
+                    0.0f, 0.0f,
+                    static_cast<float>(texture.width),
+                    static_cast<float>(texture.height)};
+
+                Rectangle destination{
+                    box.x + padding,
+                    box.y + padding,
+                    box.width - 2.0f * padding,
+                    box.height - 45.0f};
+
+                DrawTexturePro(
+                    texture, source, destination,
+                    Vector2{0.0f, 0.0f}, 0.0f, WHITE);
+            }
+        }
+
+        // اسم کارت زیر عکس
+        std::string name = card->getName();
+
+        Vector2 nameSize =
+            MeasureTextEx(font, name.c_str(), 14.0f, 1.0f);
+
+        DrawTextEx(
+            font, name.c_str(),
+            Vector2{
+                box.x + (box.width - nameSize.x) / 2.0f,
+                box.y + box.height - 30.0f},
+            14.0f, 1.0f, WHITE);
+    }
+
+    // دکمه‌ی Play
+    bool playEnabled = (selectedIndex != -1);
+    bool playHovered = CheckCollisionPointRec(mouse, playButton);
+
+    Color playColor;
+    if (!playEnabled)
+        playColor = Color{30, 30, 30, 120};
+    else if (playHovered)
+        playColor = Color{75, 75, 75, 245};
+    else
+        playColor = Color{35, 35, 35, 235};
+
+    DrawRectangleRounded(playButton, 1.0f, 20, playColor);
+
+    const char *playText = "PLAY";
+    const float playFontSize = 26.0f;
+
+    Vector2 playTextSize =
+        MeasureTextEx(font, playText, playFontSize, 1.5f);
+
+    DrawTextEx(
+        font, playText,
+        Vector2{
+            playButton.x + (playButton.width - playTextSize.x) / 2.0f,
+            playButton.y + (playButton.height - playTextSize.y) / 2.0f},
+        playFontSize, 1.5f,
+        playEnabled ? WHITE : Color{150, 150, 150, 150});
+}
+
+// ============================================================
+// GETTERS
+// ============================================================
+
+bool SchemeUI::isOpen() const
+{
+    return open;
+}
+
+bool SchemeUI::isConfirmed() const
+{
+    return confirmed;
+}
+
+void SchemeUI::resetConfirmed()
+{
+    confirmed = false;
+    selectedIndex = -1;
+}
+
+Card *SchemeUI::getSelectedCard() const
+{
+    if (selectedIndex < 0 ||
+        selectedIndex >= static_cast<int>(selectableCards.size()))
+    {
+        return nullptr;
+    }
+
+    return selectableCards[selectedIndex];
+}

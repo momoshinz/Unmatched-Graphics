@@ -5,6 +5,7 @@
 #include "game/Game.h"
 #include "graphics/PlayerPanel.h"
 #include "graphics/AttackUI.h"
+#include "graphics/SchemeUI.h"
 
 class GameScreen
 {
@@ -12,6 +13,7 @@ class GameScreen
         AssetManager *assets;
         Game *game;
         AttackUI attackUI;
+        SchemeUI schemeUI;
 
         bool guideOpen = false;
 

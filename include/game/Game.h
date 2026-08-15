@@ -62,5 +62,6 @@ public:
     bool assignHero(int playerIndex, const std::string &heroName);
     void drawInitialCards();
     void startGame();
+    void beginTurns();
 };
 #endif

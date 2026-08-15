@@ -1814,59 +1814,6 @@ bool Game::assignHero(int playerIndex, const std::string &heroName)
     return true;
 }
 
-void Game::drawInitialCards()
-{
-    for (Player *player : players)
-    {
-        if (player == nullptr)
-        {
-            continue;
-        }
-
-        if (player->getHero() == nullptr)
-        {
-            continue;
-        }
-
-        Deck &deck = player->getDeck();
-        Hand &hand = player->getHand();
-
-        cout << "\nPlayer: "
-             << player->getHero()->getName()
-             << " | Deck before draw: "
-             << deck.getSize()
-             << " | Hand before draw: "
-             << hand.getSize()
-             << endl;
-
-        deck.shuffle();
-
-        const int initialHandSize = 5;
-
-        int cardsToDraw = std::min(
-            initialHandSize,
-            deck.getSize());
-
-        for (int i = 0; i < cardsToDraw; ++i)
-        {
-            Card *card = deck.drawCard();
-
-            if (card == nullptr)
-            {
-                break;
-            }
-
-            hand.addCard(card);
-        }
-
-        cout << "[+] "
-             << player->getHero()->getName()
-             << " drew "
-             << cardsToDraw
-             << " cards.\n";
-    }
-}
-
 void Game::startGame()
 {
     if (players.size() != 2)
@@ -1930,4 +1877,19 @@ void Game::startGame()
              << player->getHand().getSize()
              << '\n';
     }
+}
+
+void Game::beginTurns()
+{
+    if (youngerPlayer == nullptr || olderPlayer == nullptr)
+    {
+        throw std::runtime_error(
+            "\n[!] ERROR : Players not determined yet! Call initialize() first.\n");
+    }
+
+    turnManager.startGame(youngerPlayer, olderPlayer);
+
+    std::cout << "\n[+] Turn manager started. First player: "
+              << youngerPlayer->getHero()->getName()
+              << std::endl;
 }

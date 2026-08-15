@@ -6,6 +6,7 @@
 #include "board/Space.h"
 #include "fighter/Hero.h"
 #include "fighter/Fog.h"
+#include "card/Card.h"
 
 GameScreen::GameScreen(
     AssetManager *assets,
@@ -14,7 +15,8 @@ GameScreen::GameScreen(
       game(game),
       leftPlayerPanel(assets),
       rightPlayerPanel(assets),
-      attackUI(assets)
+      attackUI(assets),
+      schemeUI(assets)
 {
 }
 
@@ -188,7 +190,7 @@ int GameScreen::update()
 
                     selectedAction =
                         ActionChoice::NONE;
-                        return 0;
+                    return 0;
                 }
             }
             return 0;
@@ -219,13 +221,22 @@ int GameScreen::update()
                 << "Selected Action: SCHEME"
                 << std::endl;
 
+            Player *currentPlayer =
+                game->getTurnManager().getCurrentPlayer();
+
+            if (currentPlayer != nullptr)
+            {
+                schemeUI.openScheme(currentPlayer->getHand());
+            }
+
+            selectedAction = ActionChoice::NONE;
             return 0;
         }
 
         // =========================================
         // ATTACK - CHOOSE ATTACKER
         // =========================================
-       
+
         // =========================================
         // MAP SPACE CLICK
         // =========================================
@@ -241,10 +252,36 @@ int GameScreen::update()
                 << std::endl;
         }
     }
-    if(attackUI.isOpen())
+    if (attackUI.isOpen())
     {
         attackUI.update();
     }
+
+    if (schemeUI.isOpen())
+    {
+        schemeUI.update();
+    }
+
+    if (schemeUI.isConfirmed())
+    {
+        Card *playedCard = schemeUI.getSelectedCard();
+
+        if (playedCard != nullptr)
+        {
+            std::cout
+                << "[.] Scheme card confirmed: "
+                << playedCard->getName()
+                << std::endl;
+
+            // TODO (بعداً):
+            // - Effect *effect = playedCard->getEffect(); effect->apply(...)
+            // - currentPlayer->getHand().removeCard(...) + discardPile.addCard(...)
+            // - game->getTurnManager().useAction();
+        }
+
+        schemeUI.resetConfirmed();
+    }
+
     return 0;
 }
 
@@ -290,14 +327,19 @@ void GameScreen::draw()
     drawPlayerPanels();
     drawTopButtons();
     drawActionButtons();
-   
+
     if (guideOpen)
     {
         drawGuidePopup();
     }
-    if(attackUI.isOpen())
+    if (attackUI.isOpen())
     {
         attackUI.draw();
+    }
+
+    if (schemeUI.isOpen())
+    {
+        schemeUI.draw();
     }
 }
 
