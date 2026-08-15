@@ -17,20 +17,6 @@ GameScreen::GameScreen(
       attackUI(assets)
 {
 }
-// ============================================================
-// GRAPHICAL POSITION OF EACH SPACE
-//
-// Coordinates are based on the ORIGINAL 1536 x 1024 map image.
-//
-// IMPORTANT:
-// These coordinates are NOT screen coordinates.
-// They are coordinates inside the original map image.
-//
-// Index 0 -> Board Space 1
-// Index 1 -> Board Space 2
-// ...
-// Index 31 -> Board Space 32
-// ============================================================
 
 int GameScreen::update()
 {
@@ -168,6 +154,44 @@ int GameScreen::update()
                 << std::endl;
 
             selectedAction = ActionChoice::ATTACK;
+            if (selectedAction == ActionChoice::ATTACK)
+            {
+                Player *currentPlayer =
+                    game->getTurnManager().getCurrentPlayer();
+
+                if (currentPlayer != nullptr)
+                {
+                    std::vector<Fighter *> fighters;
+
+                    Hero *hero =
+                        currentPlayer->getHero();
+
+                    if (hero != nullptr &&
+                        hero->isAlive())
+                    {
+                        fighters.push_back(hero);
+                    }
+
+                    std::vector<Sidekick *> sidekicks =
+                        currentPlayer->getSideKicks();
+
+                    for (Sidekick *sidekick : sidekicks)
+                    {
+                        if (sidekick != nullptr &&
+                            sidekick->isAlive())
+                        {
+                            fighters.push_back(sidekick);
+                        }
+                    }
+
+                    attackUI.openAttack(fighters);
+
+                    selectedAction =
+                        ActionChoice::NONE;
+                        return 0;
+                }
+            }
+            return 0;
         }
 
         if (CheckCollisionPointRec(
@@ -201,43 +225,7 @@ int GameScreen::update()
         // =========================================
         // ATTACK - CHOOSE ATTACKER
         // =========================================
-        if (selectedAction == ActionChoice::ATTACK)
-        {
-            Player *currentPlayer =
-                game->getTurnManager().getCurrentPlayer();
-
-            if (currentPlayer != nullptr)
-            {
-                std::vector<Fighter *> fighters;
-
-                Hero *hero =
-                    currentPlayer->getHero();
-
-                if (hero != nullptr &&
-                    hero->isAlive())
-                {
-                    fighters.push_back(hero);
-                }
-
-                std::vector<Sidekick *> sidekicks =
-                    currentPlayer->getSideKicks();
-
-                for (Sidekick *sidekick : sidekicks)
-                {
-                    if (sidekick != nullptr &&
-                        sidekick->isAlive())
-                    {
-                        fighters.push_back(sidekick);
-                    }
-                }
-
-                attackUI.openAttack(fighters);
-
-                selectedAction =
-                    ActionChoice::NONE;
-                    return 0;
-            }
-        }
+       
         // =========================================
         // MAP SPACE CLICK
         // =========================================
