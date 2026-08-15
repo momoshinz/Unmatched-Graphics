@@ -111,7 +111,7 @@ static Texture2D getFighterTexture(
 
     if (name == "DRACULA")
     {
-        return assets->getCharacter("dracula_art");
+        return assets->getCharacter("dracula");
     }
 
     // -----------------------------
