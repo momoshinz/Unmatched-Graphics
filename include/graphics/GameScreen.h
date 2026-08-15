@@ -4,12 +4,14 @@
 #include "graphics/AssetManager.h"
 #include "game/Game.h"
 #include "graphics/PlayerPanel.h"
+#include "graphics/AttackUI.h"
 
 class GameScreen
 {
     private:
         AssetManager *assets;
         Game *game;
+        AttackUI attackUI;
 
         bool guideOpen = false;
 

@@ -24,16 +24,149 @@ void AttackUI::openAttack(
     selectedAttacker = nullptr;
     selectedTarget = nullptr;
 
+    // فقط فایترهای زنده را وارد لیست می‌کنیم
     for (Fighter *fighter : fighters)
     {
-        if (fighter != nullptr &&
-            fighter->isAlive())
+        if (fighter == nullptr)
         {
-            selectableFighters.push_back(fighter);
+            continue;
         }
+
+        if (!fighter->isAlive())
+        {
+            continue;
+        }
+
+        selectableFighters.push_back(fighter);
+    }
+
+    // اگر هیچ فایتر زنده‌ای وجود ندارد
+    if (selectableFighters.empty())
+    {
+        open = false;
+        return;
+    }
+
+    // ========================================================
+    // محاسبه جای کارت‌های فایتر
+    // ========================================================
+
+    const float boxWidth = 220.0f;
+    const float boxHeight = 300.0f;
+
+    const float gap = 25.0f;
+
+    const float totalWidth =
+        selectableFighters.size() * boxWidth +
+        (selectableFighters.size() - 1) * gap;
+
+    const float startX =
+        (GetScreenWidth() - totalWidth) / 2.0f;
+
+    const float startY = 170.0f;
+
+    for (size_t i = 0;
+         i < selectableFighters.size();
+         i++)
+    {
+        Rectangle box{
+            startX +
+                i * (boxWidth + gap),
+
+            startY,
+
+            boxWidth,
+            boxHeight};
+
+        fighterBoxes.push_back(box);
     }
 
     open = true;
+
+    std::cout
+        << "Attack UI opened."
+        << std::endl;
+}
+
+// ============================================================
+// GET CHARACTER TEXTURE
+// ============================================================
+
+static Texture2D getFighterTexture(
+    AssetManager *assets,
+    Fighter *fighter)
+{
+    if (assets == nullptr ||
+        fighter == nullptr)
+    {
+        return {};
+    }
+
+    std::string name =
+        fighter->getName();
+
+    // -----------------------------
+    // Dracula
+    // -----------------------------
+
+    if (name == "Dracula")
+    {
+        return assets->getCharacter("dracula_art");
+    }
+
+    // -----------------------------
+    // Dracula Sisters
+    // -----------------------------
+
+    if (name == "Sister 1" ||
+        name == "Sister1")
+    {
+        return assets->getCharacter("sister1");
+    }
+
+    if (name == "Sister 2" ||
+        name == "Sister2")
+    {
+        return assets->getCharacter("sister2");
+    }
+
+    if (name == "Sister 3" ||
+        name == "Sister3")
+    {
+        return assets->getCharacter("sister3");
+    }
+
+    // -----------------------------
+    // Sherlock
+    // -----------------------------
+
+    if (name == "Sherlock Holmes" ||
+        name == "Sherlock")
+    {
+        return assets->getCharacter("sherlock_art");
+    }
+
+    // -----------------------------
+    // Doctor Watson
+    // -----------------------------
+
+    if (name == "Doctor Watson" ||
+        name == "Dr. Watson" ||
+        name == "Watson")
+    {
+        return assets->getCharacter("watson");
+    }
+
+    // -----------------------------
+    // Invisible Man
+    // -----------------------------
+
+    if (name == "Invisible Man")
+    {
+        return assets->getCharacter("invisible_man");
+    }
+
+    return {};
 }
 
 // ============================================================
@@ -47,31 +180,33 @@ void AttackUI::update()
         return;
     }
 
-    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+    if (!IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
     {
-        Vector2 mouse =
-            GetMousePosition();
+        return;
+    }
 
-        for (size_t i = 0;
-             i < fighterBoxes.size();
-             ++i)
+    Vector2 mouse =
+        GetMousePosition();
+
+    for (size_t i = 0;
+         i < fighterBoxes.size();
+         i++)
+    {
+        if (CheckCollisionPointRec(
+                mouse,
+                fighterBoxes[i]))
         {
-            if (CheckCollisionPointRec(
-                    mouse,
-                    fighterBoxes[i]))
-            {
-                selectedAttacker =
-                    selectableFighters[i];
+            selectedAttacker =
+                selectableFighters[i];
 
-                std::cout
-                    << "Attacker selected : "
-                    << selectedAttacker->getName()
-                    << std::endl;
+            std::cout
+                << "Attacker selected : "
+                << selectedAttacker->getName()
+                << std::endl;
 
-                open = false;
+            open = false;
 
-                return;
-            }
+            return;
         }
     }
 }
@@ -88,8 +223,11 @@ void AttackUI::draw()
         return;
     }
 
+    Font font =
+        assets->getGameFont();
+
     // ========================================================
-    // DARK OVERLAY
+    // Dark overlay
     // ========================================================
 
     DrawRectangle(
@@ -97,44 +235,21 @@ void AttackUI::draw()
         0,
         GetScreenWidth(),
         GetScreenHeight(),
-        Color{0, 0, 0, 180});
+        Color{
+            0,
+            0,
+            0,
+            190});
 
     // ========================================================
-    // POPUP
+    // Title
     // ========================================================
-
-    const float popupWidth = 900.0f;
-    const float popupHeight = 600.0f;
-
-    Rectangle popup{
-        (GetScreenWidth() - popupWidth) / 2.0f,
-        (GetScreenHeight() - popupHeight) / 2.0f,
-        popupWidth,
-        popupHeight};
-
-    DrawRectangleRounded(
-        popup,
-        0.04f,
-        20,
-        Color{25, 20, 18, 250});
-
-    DrawRectangleRoundedLines(
-        popup,
-        0.04f,
-        20,
-        Color{180, 160, 130, 255});
-
-    // ========================================================
-    // TITLE
-    // ========================================================
-
-    Font font =
-        assets->getGameFont();
 
     const char *title =
         "CHOOSE YOUR ATTACKER";
 
-    const float titleSize = 32.0f;
+    const float titleSize =
+        38.0f;
 
     Vector2 titleMeasure =
         MeasureTextEx(
@@ -146,112 +261,48 @@ void AttackUI::draw()
     DrawTextEx(
         font,
         title,
-        Vector2{
-            popup.x +
-                (popup.width -
-                 titleMeasure.x) / 2.0f,
 
-            popup.y + 25.0f},
+        Vector2{
+            (GetScreenWidth() -
+             titleMeasure.x) /
+                2.0f,
+
+            70.0f},
 
         titleSize,
         2.0f,
         WHITE);
 
     // ========================================================
-    // FIGHTER BOXES
+    // Fighter boxes
     // ========================================================
 
-    fighterBoxes.clear();
+    Vector2 mouse =
+        GetMousePosition();
 
-    const float boxWidth = 180.0f;
-    const float boxHeight = 260.0f;
-
-    const float gap = 25.0f;
-
-    const int fighterCount =
-        static_cast<int>(
-            selectableFighters.size());
-
-    if (fighterCount == 0)
-    {
-        const char *text =
-            "No living fighters.";
-
-        Vector2 textSize =
-            MeasureTextEx(
-                font,
-                text,
-                24.0f,
-                1.0f);
-
-        DrawTextEx(
-            font,
-            text,
-
-            Vector2{
-                popup.x +(popup.width -
-                     textSize.x) / 2.0f,
-
-                popup.y +
-                    popup.height / 2.0f},
-
-            24.0f,
-            1.0f,
-            WHITE);
-
-        return;
-    }
-
-    const float totalWidth =
-        fighterCount * boxWidth +
-        (fighterCount - 1) * gap;
-
-    float startX =
-        popup.x +
-        (popup.width - totalWidth) / 2.0f;
-
-    const float boxY =
-        popup.y + 130.0f;
-
-    for (int i = 0;
-         i < fighterCount;
-         ++i)
+    for (size_t i = 0;
+         i < selectableFighters.size();
+         i++)
     {
         Fighter *fighter =
             selectableFighters[i];
 
-        if (fighter == nullptr)
-        {
-            continue;
-        }
-
-        Rectangle box{
-            startX +
-                i * (boxWidth + gap),
-
-            boxY,
-
-            boxWidth,
-            boxHeight};
-
-        fighterBoxes.push_back(box);
-
-        // ====================================================
-        // BOX
-        // ====================================================
-
-        Vector2 mouse =
-            GetMousePosition();
+        Rectangle box =
+            fighterBoxes[i];
 
         bool hovered =
             CheckCollisionPointRec(
                 mouse,
                 box);
 
+        // ----------------------------------------------------
+        // Box
+        // ----------------------------------------------------
+
         Color boxColor =
             hovered
-                ? Color{75, 75, 75, 255}
-                : Color{45, 40, 38, 255};
+                ? Color{75, 75, 75, 245}
+                : Color{35, 35, 35, 235};
 
         DrawRectangleRounded(
             box,
@@ -259,15 +310,61 @@ void AttackUI::draw()
             20,
             boxColor);
 
+        // ----------------------------------------------------
+        // Border
+        // ----------------------------------------------------
+
         DrawRectangleRoundedLines(
             box,
             0.08f,
             20,
-            Color{150, 130, 110, 255});
+            hovered
+                ? WHITE
+                : Color{150, 150, 150, 255});
 
-        // ====================================================
-        // FIGHTER NAME
-        // ====================================================
+        // ----------------------------------------------------
+        // Fighter image
+        // ----------------------------------------------------
+
+        Texture2D texture =
+            getFighterTexture(
+                assets,
+                fighter);
+
+        if (texture.id != 0)
+        {
+            const float imagePadding =
+                15.0f;
+
+            Rectangle source{
+                0.0f,
+                0.0f,
+                static_cast<float>(
+                    texture.width),
+                static_cast<float>(
+                    texture.height)};
+
+            Rectangle destination{
+                box.x + imagePadding,
+                box.y + imagePadding,
+
+                box.width -
+                    2.0f * imagePadding,
+
+                220.0f};
+
+            DrawTexturePro(
+                texture,
+                source,
+                destination,
+                Vector2{0.0f, 0.0f},
+                0.0f,
+                WHITE);
+        }
+
+        // ----------------------------------------------------
+        // Fighter name
+        // ----------------------------------------------------
 
         std::string name =
             fighter->getName();
@@ -276,7 +373,7 @@ void AttackUI::draw()
             MeasureTextEx(
                 font,
                 name.c_str(),
-                20.0f,
+                22.0f,
                 1.0f);
 
         DrawTextEx(
@@ -286,63 +383,53 @@ void AttackUI::draw()
             Vector2{
                 box.x +
                     (box.width -
-                     nameSize.x) / 2.0f,
+                     nameSize.x) /
+                        2.0f,
 
-                box.y + 15.0f},
+                box.y +
+                    245.0f},
 
-            20.0f,
+            22.0f,
             1.0f,
             WHITE);
 
-        // ====================================================
-        // IMAGE
-        // ====================================================
+        // ----------------------------------------------------
+        // Health
+        // ----------------------------------------------------
 
-        // فعلاً این قسمت را خالی گذاشته‌ایم تا
-        // AssetManager را با ساختار واقعی پروژه‌ات
-        // وصل کنیم.
-        //
-        // بعد از اینکه getterهای Texture2D مربوط به
-        // Dracula / Sisters / Sherlock / Watson /
-        // Invisible Man را ببینیم، دقیقاً همینجا
-        // عکس هر Fighter قرار می‌گیرد.
+        std::string healthText =
+            "HP: " +
+            std::to_string(
+                fighter->getHealth());
 
-        DrawRectangle(
-            static_cast<int>(box.x + 20),
-            static_cast<int>(box.y + 55),
-            static_cast<int>(box.width - 40),
-            150,
-            Color{30, 30, 30, 255});
-
-        const char *selectText =
-            "CLICK TO SELECT";
-
-        Vector2 selectSize =
+        Vector2 healthSize =
             MeasureTextEx(
                 font,
-                selectText,
-                14.0f,
+                healthText.c_str(),
+                18.0f,
                 1.0f);
 
         DrawTextEx(
             font,
-            selectText,
+            healthText.c_str(),
 
             Vector2{
                 box.x +
                     (box.width -
-                     selectSize.x) / 2.0f,
+                     healthSize.x) /
+                        2.0f,
 
-                box.y + 220.0f},
+                box.y +
+                    270.0f},
 
-            14.0f,
+            18.0f,
             1.0f,
             WHITE);
     }
 }
 
 // ============================================================
-// IS OPEN
+// GETTERS
 // ============================================================
 
 bool AttackUI::isOpen() const
@@ -350,18 +437,10 @@ bool AttackUI::isOpen() const
     return open;
 }
 
-// ============================================================
-// GET SELECTED ATTACKER
-// ============================================================
-
 Fighter *AttackUI::getSelectedAttacker() const
 {
     return selectedAttacker;
 }
-
-// ============================================================
-// GET SELECTED TARGET
-// ============================================================
 
 Fighter *AttackUI::getSelectedTarget() const
 {

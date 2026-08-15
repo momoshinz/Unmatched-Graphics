@@ -13,7 +13,8 @@ GameScreen::GameScreen(
     : assets(assets),
       game(game),
       leftPlayerPanel(assets),
-      rightPlayerPanel(assets)
+      rightPlayerPanel(assets),
+      attackUI(assets)
 {
 }
 // ============================================================
@@ -112,6 +113,7 @@ int GameScreen::update()
 
         return 0;
     }
+    attackUI.update();
 
     // =========================================
     // Mouse click
@@ -168,16 +170,6 @@ int GameScreen::update()
                 << std::endl;
 
             selectedAction = ActionChoice::ATTACK;
-
-            attackPhase = AttackPhase::CHOOSE_ATTACKER;
-
-            attackFighter = nullptr;
-            attackTarget = nullptr;
-            selectedAttackCard = nullptr;
-
-            std::cout << "selectedAction : ATTACK" << std::endl;
-            std::cout << "Choose attacker by clicking on a fighter." << std::endl;
-
             return 0;
         }
 
@@ -212,37 +204,41 @@ int GameScreen::update()
         // =========================================
         // ATTACK - CHOOSE ATTACKER
         // =========================================
-
-        if (selectedAction == ActionChoice::ATTACK &&
-            attackPhase == AttackPhase::CHOOSE_ATTACKER)
+        if (selectedAction == ActionChoice::ATTACK)
         {
-            Fighter *clickedFighter =
-                getClickedFighter();
+            Player *currentPlayer =
+                game->getTurnManager().getCurrentPlayer();
 
-            if (clickedFighter != nullptr)
+            if (currentPlayer != nullptr)
             {
-                Player *currentPlayer =
-                    game->getTurnManager().getCurrentPlayer();
+                std::vector<Fighter *> fighters;
 
-                if (currentPlayer != nullptr &&
-                    clickedFighter->getOwner() == currentPlayer)
+                Hero *hero =
+                    currentPlayer->getHero();
+
+                if (hero != nullptr &&
+                    hero->isAlive())
                 {
-                    attackFighter = clickedFighter;
-
-                    std::cout
-                        << "Attacker selected : "
-                        << attackFighter->getName()
-                        << std::endl;
-
-                    attackPhase =
-                        AttackPhase::CHOOSE_TARGET;
+                    fighters.push_back(hero);
                 }
-                else
+
+                std::vector<Sidekick *> sidekicks =
+                    currentPlayer->getSideKicks();
+
+                for (Sidekick *sidekick : sidekicks)
                 {
-                    std::cout
-                        << "[!] You can only select your own fighter."
-                        << std::endl;
+                    if (sidekick != nullptr &&
+                        sidekick->isAlive())
+                    {
+                        fighters.push_back(sidekick);
+                    }
                 }
+
+                attackUI.openAttack(fighters);
+
+                selectedAction =
+                    ActionChoice::NONE;
+                    return 0;
             }
         }
 
@@ -307,10 +303,14 @@ void GameScreen::draw()
     drawPlayerPanels();
     drawTopButtons();
     drawActionButtons();
-
+   
     if (guideOpen)
     {
         drawGuidePopup();
+    }
+    if(attackUI.isOpen())
+    {
+        attackUI.draw();
     }
 }
 
