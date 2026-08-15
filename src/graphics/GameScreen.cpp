@@ -113,8 +113,6 @@ int GameScreen::update()
 
         return 0;
     }
-    attackUI.update();
-
     // =========================================
     // Mouse click
     // =========================================
@@ -170,7 +168,6 @@ int GameScreen::update()
                 << std::endl;
 
             selectedAction = ActionChoice::ATTACK;
-            return 0;
         }
 
         if (CheckCollisionPointRec(
@@ -241,7 +238,6 @@ int GameScreen::update()
                     return 0;
             }
         }
-
         // =========================================
         // MAP SPACE CLICK
         // =========================================
@@ -257,7 +253,10 @@ int GameScreen::update()
                 << std::endl;
         }
     }
-
+    if(attackUI.isOpen())
+    {
+        attackUI.update();
+    }
     return 0;
 }
 
