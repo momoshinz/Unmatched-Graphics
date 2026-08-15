@@ -109,7 +109,7 @@ static Texture2D getFighterTexture(
     // Dracula
     // -----------------------------
 
-    if (name == "Dracula")
+    if (name == "DRACULA")
     {
         return assets->getCharacter("dracula_art");
     }
@@ -118,20 +118,17 @@ static Texture2D getFighterTexture(
     // Dracula Sisters
     // -----------------------------
 
-    if (name == "Sister 1" ||
-        name == "Sister1")
+    if (name == "* Sister 1")
     {
         return assets->getCharacter("sister1");
     }
 
-    if (name == "Sister 2" ||
-        name == "Sister2")
+    if (name == "* Sister 2")
     {
         return assets->getCharacter("sister2");
     }
 
-    if (name == "Sister 3" ||
-        name == "Sister3")
+    if (name == "* Sister 3")
     {
         return assets->getCharacter("sister3");
     }
@@ -140,8 +137,7 @@ static Texture2D getFighterTexture(
     // Sherlock
     // -----------------------------
 
-    if (name == "Sherlock Holmes" ||
-        name == "Sherlock")
+    if (name == "SHERLOCK HOLMES")
     {
         return assets->getCharacter("sherlock_art");
     }
@@ -150,9 +146,7 @@ static Texture2D getFighterTexture(
     // Doctor Watson
     // -----------------------------
 
-    if (name == "Doctor Watson" ||
-        name == "Dr. Watson" ||
-        name == "Watson")
+    if (name == "* Dr. Watson")
     {
         return assets->getCharacter("watson");
     }
@@ -161,7 +155,7 @@ static Texture2D getFighterTexture(
     // Invisible Man
     // -----------------------------
 
-    if (name == "Invisible Man")
+    if (name == "INVISIBLE MAN")
     {
         return assets->getCharacter("invisible_man");
     }
