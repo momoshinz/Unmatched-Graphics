@@ -1360,6 +1360,7 @@ int MainMenu::handleInput()
                         mousePosition,
                         finishButton))
                 {
+                    game->startGame();
                     startPlacement();
                     if (state == State::PLACEMENT && placement == Placement::FINISHED)
                     {
@@ -2047,7 +2048,7 @@ bool MainMenu::placeHeroOnSpace(int spaceId)
         return true;
     }
 
-   if (placement == Placement::OLDER_HERO)
+    if (placement == Placement::OLDER_HERO)
     {
         const std::vector<Player *> &players =
             game->getPlayers();

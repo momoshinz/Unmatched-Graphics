@@ -60,5 +60,7 @@ public:
     Player *getOlderPlayer() const;
 
     bool assignHero(int playerIndex, const std::string &heroName);
+    void drawInitialCards();
+    void startGame();
 };
 #endif

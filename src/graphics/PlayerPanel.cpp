@@ -59,15 +59,15 @@ void PlayerPanel::draw(const Player *player) const
     const float heroInfoSize = 23.0f;
 
     // Special ability - bigger
-    const float abilityTitleSize = 24.0f;
-    const float abilityTextSize = 22.0f;
+    const float abilityTitleSize = 25.0f;
+    const float abilityTextSize = 24.0f;
 
     // Sidekicks - bigger
     const float sidekickTitleSize = 24.0f;
     const float sidekickNameSize = 22.0f;
     const float sidekickInfoSize = 20.0f;
 
-    const float spacing = 0.8f;
+    const float spacing = 1.2f;
 
     // ========================================================
     // GENERAL PANEL SETTINGS
@@ -115,36 +115,36 @@ void PlayerPanel::draw(const Player *player) const
     if (hero != nullptr)
     {
         // ====================================================
-        // HERO IMAGE
+        // HERO AND SIDEKICK IMAGE
         // ====================================================
 
-        std::string heroTextureKey =
-            getHeroTextureKey(hero);
+        std::string sidekickTextureKey =
+            getSidekickTextureKey(player);
 
-        Texture2D heroTexture =
+        Texture2D sidekickTexture =
             assets->getCharacter(
-                heroTextureKey);
+                sidekickTextureKey);
 
-        if (heroTexture.id != 0)
+        if (sidekickTexture.id != 0)
         {
-            const float heroImageHeight = 165.0f;
+            const float sidekickImageHeight = 190.0f;
 
             Rectangle source{
                 0.0f,
                 0.0f,
                 static_cast<float>(
-                    heroTexture.width),
+                    sidekickTexture.width),
                 static_cast<float>(
-                    heroTexture.height)};
+                    sidekickTexture.height)};
 
             Rectangle destination{
-                bounds.x + 65.0f,
+                bounds.x + 45.0f,
                 currentY,
-                bounds.width - 130.0f,
-                heroImageHeight};
+                bounds.width - 90.0f,
+                sidekickImageHeight};
 
             DrawTexturePro(
-                heroTexture,
+                sidekickTexture,
                 source,
                 destination,
                 Vector2{
@@ -154,7 +154,7 @@ void PlayerPanel::draw(const Player *player) const
                 WHITE);
 
             currentY +=
-                heroImageHeight + 7.0f;
+                sidekickImageHeight + 7.0f;
         }
 
         // ====================================================
@@ -189,6 +189,30 @@ void PlayerPanel::draw(const Player *player) const
 
         currentY +=
             heroNameSize + 10.0f;
+
+        // ====================================================
+        // HERO HAND
+        // ====================================================
+
+        std::string heroHandText =
+            "CARDS: " +
+            std::to_string(
+                player->getHand().getSize());
+
+        DrawTextEx(
+            font,
+            heroHandText.c_str(),
+
+            Vector2{
+                contentX,
+                currentY},
+
+            heroInfoSize,
+            spacing,
+            WHITE);
+
+        currentY +=
+            heroInfoSize + 8.0f;
 
         // ====================================================
         // HERO HP
@@ -264,7 +288,7 @@ void PlayerPanel::draw(const Player *player) const
         // Extra space between MOVEMENT
         // and SPECIAL ABILITY
         currentY +=
-            heroInfoSize + 15.0f;
+            heroInfoSize + 20.0f;
 
         // ====================================================
         // SPECIAL ABILITY TITLE
@@ -408,7 +432,7 @@ void PlayerPanel::draw(const Player *player) const
 
         // Extra space between
         // SPECIAL ABILITY and SIDEKICKS
-        currentY += 15.0f;
+        currentY += 20.0f;
     }
 
     // ========================================================
@@ -462,49 +486,6 @@ void PlayerPanel::draw(const Player *player) const
     }
 
     // ========================================================
-    // SIDEKICK IMAGE
-    // ========================================================
-
-    std::string sidekickTextureKey =
-        getSidekickTextureKey(player);
-
-    Texture2D sidekickTexture =
-        assets->getCharacter(
-            sidekickTextureKey);
-
-    if (sidekickTexture.id != 0)
-    {
-        const float sidekickImageHeight = 85.0f;
-
-        Rectangle source{
-            0.0f,
-            0.0f,
-            static_cast<float>(
-                sidekickTexture.width),
-            static_cast<float>(
-                sidekickTexture.height)};
-
-        Rectangle destination{
-            bounds.x + 55.0f,
-            currentY,
-            bounds.width - 110.0f,
-            sidekickImageHeight};
-
-        DrawTexturePro(
-            sidekickTexture,
-            source,
-            destination,
-            Vector2{
-                0.0f,
-                0.0f},
-            0.0f,
-            WHITE);
-
-        currentY +=
-            sidekickImageHeight + 8.0f;
-    }
-
-    // ========================================================
     // SIDEKICK INFORMATION
     // ========================================================
 
@@ -545,7 +526,7 @@ void PlayerPanel::draw(const Player *player) const
         // ====================================================
 
         std::string sidekickName =
-            sidekick-> getName();
+            sidekick->getName();
 
         DrawTextEx(
             font,
@@ -560,7 +541,7 @@ void PlayerPanel::draw(const Player *player) const
             WHITE);
 
         currentY +=
-            sidekickNameSize + 5.0f;
+            sidekickNameSize + 10.0f;
 
         // ====================================================
         // SIDEKICK HP
@@ -695,6 +676,11 @@ std::string PlayerPanel::getSidekickTextureKey(
     if (heroName == "SHERLOCK HOLMES")
     {
         return "watson";
+    }
+
+    if (heroName == "INVISIBLE MAN")
+    {
+        return "foggy";
     }
 
     return "";

@@ -6,9 +6,9 @@
 
 using namespace std;
 
-InvisibleMan::InvisibleMan() : Hero("INVISIBLE MAN", 15, 2, AttackType::Melee, "> If Invisible Man is on a Fog token while defending, "
+InvisibleMan::InvisibleMan() : Hero("INVISIBLE MAN", 15, 2, AttackType::Melee, "> If Invisible Man is on a Fog while defending, "
                                                                                "his defense value gains +1. "
-                                                                               "He may also move directly between Fog tokens.")
+                                                                               "He can also move directly between Fogs.")
 {
 }
 

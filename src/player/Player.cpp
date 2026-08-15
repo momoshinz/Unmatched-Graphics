@@ -165,6 +165,12 @@ bool Player::drawCardToHand()
         return false;
     }
 
+    cout << "[DRAW] "
+         << hero->getName()
+         << " drew: "
+         << card->getName()
+         << endl;
+
     hand.addCard(card);
     return true;
 }

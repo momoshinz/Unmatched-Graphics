@@ -127,6 +127,9 @@ bool AssetManager::load()
     characterTextures["invisible_man_transparent"] =
         LoadTexture("Unmatched_Assets/invisibleMan/tranInv.png");
 
+    characterTextures["foggy"] =
+        LoadTexture("Unmatched_Assets/invisibleMan/Fogs.png");
+
     fogTexture = LoadTexture("Unmatched_Assets/invisibleMan/fog.png");
 
     // =========================================

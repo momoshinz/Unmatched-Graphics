@@ -1,11 +1,15 @@
-#include "game/Game.h" //kjhkjkffhuhiu
+#include "game/Game.h"
+#include "player/Player.h"
+#include "fighter/Hero.h"
 #include "fighter/Dracula.h"
 #include "fighter/Sherlock.h"
 #include "fighter/InvisibleMan.h"
 #include "fighter/Sisters.h"
 #include "fighter/DrWatson.h"
 #include "fighter/Sidekick.h"
+#include "fighter/Fog.h"
 #include "card/Card.h"
+#include "card/Deck.h"
 #include <iostream>
 #include <stdexcept>
 #include <unordered_map>
@@ -16,6 +20,7 @@
 #include <cstdio>
 #include <nlohmann/json.hpp>
 #include <raylib.h>
+#include <algorithm>
 using json = nlohmann::json;
 using namespace std;
 
@@ -194,6 +199,7 @@ void Game::initialize(int age1, int age2)
     else
     {
         // Same age -> random first player
+
         if (GetRandomValue(0, 1) == 0)
         {
             youngerPlayer = player1;
@@ -225,8 +231,10 @@ void Game::initialize(int age1, int age2)
     if (age1 == age2)
     {
         cout << "\nBoth players have the same age.\n";
-        cout << youngerPlayer->getAge()
-             << " years old was randomly selected to play first.\n";
+
+        cout << "Player "
+             << (youngerPlayer == player1 ? "1" : "2")
+             << " was randomly selected to play first.\n";
     }
 
     cout << "\nFirst player : "
@@ -242,6 +250,18 @@ void Game::initialize(int age1, int age2)
          << '\n';
 
     cout << "========================================\n";
+
+    // =========================================
+    // IMPORTANT
+    // =========================================
+    // DO NOT:
+    // - ask for hero choice here
+    // - use cin here
+    // - create hero decks here
+    // - draw cards here
+    //
+    // Hero selection is handled by MainMenu
+    // through the graphical interface.
 }
 
 const vector<Player *> &Game::getPlayers() const
@@ -1088,7 +1108,7 @@ void Game::run(bool loaded)
     {
         if (!loaded)
         {
-           // initialize();
+            // initialize();
         }
 
         while (!isGameOver())
@@ -1792,4 +1812,122 @@ bool Game::assignHero(int playerIndex, const std::string &heroName)
     }
 
     return true;
+}
+
+void Game::drawInitialCards()
+{
+    for (Player *player : players)
+    {
+        if (player == nullptr)
+        {
+            continue;
+        }
+
+        if (player->getHero() == nullptr)
+        {
+            continue;
+        }
+
+        Deck &deck = player->getDeck();
+        Hand &hand = player->getHand();
+
+        cout << "\nPlayer: "
+             << player->getHero()->getName()
+             << " | Deck before draw: "
+             << deck.getSize()
+             << " | Hand before draw: "
+             << hand.getSize()
+             << endl;
+
+        deck.shuffle();
+
+        const int initialHandSize = 5;
+
+        int cardsToDraw = std::min(
+            initialHandSize,
+            deck.getSize());
+
+        for (int i = 0; i < cardsToDraw; ++i)
+        {
+            Card *card = deck.drawCard();
+
+            if (card == nullptr)
+            {
+                break;
+            }
+
+            hand.addCard(card);
+        }
+
+        cout << "[+] "
+             << player->getHero()->getName()
+             << " drew "
+             << cardsToDraw
+             << " cards.\n";
+    }
+}
+
+void Game::startGame()
+{
+    if (players.size() != 2)
+    {
+        return;
+    }
+
+    for (Player *player : players)
+    {
+        if (player == nullptr || !player->hasHero())
+        {
+            return;
+        }
+    }
+
+    // =========================================
+    // CREATE DECKS
+    // =========================================
+
+    for (Player *player : players)
+    {
+        Hero *hero = player->getHero();
+
+        if (hero == nullptr)
+        {
+            continue;
+        }
+
+        if (hero->getName() == "SHERLOCK HOLMES")
+        {
+            Deck::SherlockDeck(player->getDeck());
+        }
+        else if (hero->getName() == "DRACULA")
+        {
+            Deck::DraculaDeck(player->getDeck());
+        }
+        else if (hero->getName() == "INVISIBLE MAN")
+        {
+            Deck::InvisibleManDeck(player->getDeck());
+        }
+    }
+
+    // =========================================
+    // DRAW INITIAL HAND
+    // =========================================
+
+    for (Player *player : players)
+    {
+        if (player == nullptr)
+        {
+            continue;
+        }
+
+        int drawn = player->drawCards(5);
+
+        cout << "\nPlayer: "
+             << player->getHero()->getName()
+             << " | Cards drawn: "
+             << drawn
+             << " | Hand size: "
+             << player->getHand().getSize()
+             << '\n';
+    }
 }

@@ -9,7 +9,7 @@
 using namespace std;
 
 Dracula::Dracula() : Hero("DRACULA", 13, 2, AttackType::Melee, 
-"> At the start of your turn, you may deal 1 damage to a fighter adjacent to Dracula (even your sisters). if you do draw a card.")
+"> At the start of your turn, deal 1 damage to a fighter adjacent to Dracula (even sisters). then draw a card.")
 {
 }
 
