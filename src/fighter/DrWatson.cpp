@@ -5,7 +5,7 @@
 using namespace std;
 
 Watson::Watson()
-    : Sidekick("Dr. Watson", 8, 2, AttackType::Ranged)
+    : Sidekick("* Dr. Watson", 8, 2, AttackType::Ranged)
 {
 }
 

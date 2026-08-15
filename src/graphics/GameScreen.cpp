@@ -1707,19 +1707,19 @@ void GameScreen::drawActionButtons()
 
     DrawRectangleRounded(
         attackButton,
-        0.2f,
+        1.0f,
         20,
         attackColor);
 
     DrawRectangleRounded(
         maneuverButton,
-        0.2f,
+        1.0f,
         20,
         maneuverColor);
 
     DrawRectangleRounded(
         schemeButton,
-        0.2f,
+        1.0f,
         20,
         schemeColor);
 

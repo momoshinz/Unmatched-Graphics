@@ -4,7 +4,7 @@
 using namespace std;
 
 Sisters::Sisters(int id)
-    : Sidekick("Sister " + to_string(id), 1, 2, AttackType::Melee), id(id)
+    : Sidekick("* Sister " + to_string(id), 1, 2, AttackType::Melee), id(id)
 {
 }
 
