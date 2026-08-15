@@ -298,12 +298,12 @@ int GameScreen::update()
                 // - Effect *effect = playedCard->getEffect(); effect->apply(...)
                 // - game->getTurnManager().useAction();
             }
-
-            schemeUI.resetConfirmed();
         }
 
-        return 0;
+        schemeUI.resetConfirmed(); // <-- بیرون از if، همیشه صدا زده بشه
     }
+
+    return 0; // <-- بی‌قید و شرط، انتهای تابع
 }
 
 void GameScreen::draw()
