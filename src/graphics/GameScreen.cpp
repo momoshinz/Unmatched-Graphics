@@ -187,7 +187,7 @@ int GameScreen::update()
                         }
                     }
 
-                    attackUI.openAttack(fighters);
+                    attackUI.openAttack(currentPlayer, fighters);
 
                     selectedAction =
                         ActionChoice::NONE;

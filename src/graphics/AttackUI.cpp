@@ -2,7 +2,7 @@
 
 #include "graphics/AssetManager.h"
 #include "fighter/Fighter.h"
-
+#include "player/Player.h"
 #include <iostream>
 #include <string>
 
@@ -15,50 +15,54 @@ AttackUI::AttackUI(AssetManager *assets)
 // OPEN ATTACK
 // ============================================================
 
-void AttackUI::openAttack(
-    const std::vector<Fighter *> &fighters)
+void AttackUI::openAttack(Player *player, const std::vector<Fighter *> &fighters)
 {
     selectableFighters.clear();
     fighterBoxes.clear();
 
+    selectableAttackCards.clear();
+    attackCardBoxes.clear();
+
     selectedAttacker = nullptr;
     selectedTarget = nullptr;
+    selectedAttackCard = nullptr;
+    attackPlayer = player;
 
-    // فقط فایترهای زنده را وارد لیست می‌کنیم
+    int selectedAttackCardIndex = -1;
+    bool confirmedAttackCard = false;
+
+    phase = AttackPhase::SelectAttacker;
+
+    if (player == nullptr)
+    {
+        open = false;
+        return;
+    }
+
     for (Fighter *fighter : fighters)
     {
         if (fighter == nullptr)
-        {
             continue;
-        }
 
         if (!fighter->isAlive())
-        {
             continue;
-        }
 
         selectableFighters.push_back(fighter);
     }
 
-    // اگر هیچ فایتر زنده‌ای وجود ندارد
     if (selectableFighters.empty())
     {
         open = false;
         return;
     }
 
-    // ========================================================
-    // محاسبه جای کارت‌های فایتر
-    // ========================================================
-
     const float boxWidth = 220.0f;
-    const float boxHeight = 300.0f;
+    const float boxHeight = 320.0f;
+    const float gapX = 25.0f;
+    const float gapY = 25.0f;
 
-    const float gap = 25.0f;
-
-    const float totalWidth =
-        selectableFighters.size() * boxWidth +
-        (selectableFighters.size() - 1) * gap;
+    const float totalWidth = selectableFighters.size() * boxWidth +
+    (selectableFighters.size() - 1) * gapX;
 
     const float startX =
         (GetScreenWidth() - totalWidth) / 2.0f;
@@ -66,26 +70,22 @@ void AttackUI::openAttack(
     const float startY = 170.0f;
 
     for (size_t i = 0;
-         i < selectableFighters.size();
-         i++)
+        i < selectableFighters.size();
+        i++)
     {
         Rectangle box{
-            startX +
-                i * (boxWidth + gap),
-
+            startX + i * (boxWidth + gapX),
             startY,
-
             boxWidth,
-            boxHeight};
+            boxHeight
+        };
 
         fighterBoxes.push_back(box);
     }
-
     open = true;
 
-    std::cout
-        << "Attack UI opened."
-        << std::endl;
+    std::cout << "Attack UI opened."
+              << std::endl;
 }
 
 // ============================================================
@@ -179,28 +179,147 @@ void AttackUI::update()
         return;
     }
 
-    Vector2 mouse =
-        GetMousePosition();
+    Vector2 mouse = GetMousePosition();
 
-    for (size_t i = 0;
-         i < fighterBoxes.size();
-         i++)
+    // ========================================================
+    // SELECT ATTACKER
+    // ========================================================
+
+    if (phase == AttackPhase::SelectAttacker)
     {
-        if (CheckCollisionPointRec(
-                mouse,
-                fighterBoxes[i]))
+        for (size_t i = 0;
+             i < fighterBoxes.size();
+             i++)
         {
-            selectedAttacker =
-                selectableFighters[i];
+            if (CheckCollisionPointRec(
+                    mouse,
+                    fighterBoxes[i]))
+            {
+                selectedAttacker =
+                    selectableFighters[i];
 
-            std::cout
-                << "Attacker selected : "
-                << selectedAttacker->getName()
-                << std::endl;
+                std::cout
+                    << "Attacker selected : "
+                    << selectedAttacker->getName()
+                    << std::endl;
 
-            open = false;
+                // --------------------------------------------
+                // پیدا کردن کارت‌های قابل استفاده
+                // --------------------------------------------
 
-            return;
+                selectableAttackCards.clear();
+                attackCardBoxes.clear();
+
+                // این Player باید از openAttack ذخیره شده باشد
+                // پس player را به عنوان member در AttackUI نگه می‌داریم.
+
+                for (Card *card : attackPlayer->getHand().getCards())
+                {
+                    if (card == nullptr)
+                        continue;
+
+                    bool isAttackCard =
+                        card->isAttack();
+
+                    bool isVersatileCard =
+                        card->isVersatile();
+
+                    if (!isAttackCard &&
+                        !isVersatileCard)
+                    {
+                        continue;
+                    }
+
+                    if (!card->canBePlayedBy(
+                            *selectedAttacker,
+                            CardType::Attack))
+                    {
+                        continue;
+                    }
+
+                    selectableAttackCards.push_back(card);
+                }
+
+                // --------------------------------------------
+                // اگر کارت مناسبی نداریم
+                // --------------------------------------------
+
+                if (selectableAttackCards.empty())
+                {
+                    std::cout
+                        << "[!] No playable attack cards."
+                        << std::endl;
+
+                    return;
+                }
+
+                // --------------------------------------------
+                // محاسبه کارت‌ها
+                // --------------------------------------------
+
+                const float cardWidth = 260.0f;
+                const float cardHeight = 330.0f;
+                const float cardGap = 25.0f;
+
+                const float totalWidth =
+                    selectableAttackCards.size() * cardWidth +
+                    (selectableAttackCards.size() - 1) * cardGap;
+
+                const float startX =
+                    (GetScreenWidth() - totalWidth) / 2.0f;
+
+                const float startY = 160.0f;
+
+                for (size_t j = 0;
+                     j < selectableAttackCards.size();
+                     j++)
+                {
+                    Rectangle box{
+                        startX +
+                            j * (cardWidth + cardGap),
+
+                        startY,
+
+                        cardWidth,
+                        cardHeight
+                    };
+
+                    attackCardBoxes.push_back(box);
+                }
+
+                phase = AttackPhase::SelectAttackCard;
+
+                return;
+            }
+        }
+    }
+
+    // ========================================================
+    // SELECT ATTACK CARD
+    // ========================================================
+
+    if (phase == AttackPhase::SelectAttackCard)
+    {
+        for (size_t i = 0;
+             i < attackCardBoxes.size();
+             i++)
+        {
+            if (CheckCollisionPointRec(
+                    mouse,
+                    attackCardBoxes[i]))
+            {
+                selectedAttackCard =
+                    selectableAttackCards[i];
+
+                std::cout
+                    << "Attack card selected : "
+                    << selectedAttackCard->getName()
+                    << std::endl;
+
+                open = false;
+
+                return;
+            }
         }
     }
 }
@@ -211,14 +330,12 @@ void AttackUI::update()
 
 void AttackUI::draw()
 {
-    if (!open ||
-        assets == nullptr)
+    if (!open || assets == nullptr)
     {
         return;
     }
 
-    Font font =
-        assets->getGameFont();
+    Font font = assets->getGameFont();
 
     // ========================================================
     // Dark overlay
@@ -229,14 +346,151 @@ void AttackUI::draw()
         0,
         GetScreenWidth(),
         GetScreenHeight(),
-        Color{
-            0,
-            0,
-            0,
-            190});
+        Color{0, 0, 0, 190});
 
     // ========================================================
-    // Title
+    // SELECT ATTACK CARD
+    // ========================================================
+
+    if (phase == AttackPhase::SelectAttackCard)
+    {
+        const char *title =
+            "CHOOSE ATTACK CARD";
+
+        const float titleSize = 38.0f;
+
+        Vector2 titleMeasure =
+            MeasureTextEx(
+                font,
+                title,
+                titleSize,
+                2.0f);
+
+        DrawTextEx(
+            font,
+            title,
+
+            Vector2{
+                (GetScreenWidth() -
+                 titleMeasure.x) / 2.0f,
+                60.0f},
+
+            titleSize,
+            2.0f,
+            WHITE);
+
+        Vector2 mouse = GetMousePosition();
+
+        for (size_t i = 0; i < selectableAttackCards.size(); i++)
+        {
+            Card *card = selectableAttackCards[i];
+
+            Rectangle box = attackCardBoxes[i];
+
+            bool hovered =
+                CheckCollisionPointRec(mouse, box);
+
+            bool selected =
+                (static_cast<int>(i) == selectedAttackCardIndex);
+
+            // ------------------------------------------------
+            // Card box
+            // ------------------------------------------------
+
+            Color boxColor;
+
+            if (selected)
+                boxColor = Color{120, 85, 40, 245};
+            else if (hovered)
+                boxColor = Color{75, 75, 75, 245};
+            else
+                boxColor = Color{35, 35, 35, 235};
+
+            DrawRectangleRounded(
+                box,
+                0.08f,
+                20,
+                boxColor);
+            // ------------------------------------------------
+            // Border
+            // ------------------------------------------------
+
+            DrawRectangleRoundedLines(
+            box,
+            0.08f,
+            20,
+            (hovered || selected)
+                ? WHITE
+                : Color{150, 150, 150, 255});
+
+
+            Texture2D texture = getCardTexture(assets, card);
+
+            if (texture.id != 0)
+            {
+                const float padding = 14.0f;
+
+                Rectangle source{
+                    0.0f,
+                    0.0f,
+                    static_cast<float>(texture.width),
+                    static_cast<float>(texture.height)
+                };
+
+                Rectangle destination{
+                    box.x + padding,
+                    box.y + padding,
+                    box.width - 2.0f * padding,
+                    box.height - 65.0f
+                };
+
+                DrawTexturePro(
+                    texture,
+                    source,
+                    destination,
+                    Vector2{0.0f, 0.0f},
+                    0.0f,
+                    WHITE
+                );
+            }
+
+            // ------------------------------------------------
+            // Card name
+            // ------------------------------------------------
+
+            std::string name = card->getName();
+
+            const float nameFontSize = 20.0f;
+
+            Vector2 nameSize =
+                MeasureTextEx(
+                    font,
+                    name.c_str(),
+                    nameFontSize,
+                    1.0f);
+
+            DrawTextEx(
+                font,
+                name.c_str(),
+
+                Vector2{
+                    box.x +
+                        (box.width - nameSize.x) / 2.0f,
+
+                    box.y +
+                        box.height -
+                        40.0f
+                },
+
+                nameFontSize,
+                1.0f,
+                WHITE);
+        }
+        return;
+    }
+
+    // ========================================================
+    // SELECT ATTACKER
     // ========================================================
 
     const char *title =
@@ -258,8 +512,7 @@ void AttackUI::draw()
 
         Vector2{
             (GetScreenWidth() -
-             titleMeasure.x) /
-                2.0f,
+             titleMeasure.x) / 2.0f,
 
             70.0f},
 
@@ -280,6 +533,11 @@ void AttackUI::draw()
     {
         Fighter *fighter =
             selectableFighters[i];
+
+        if (fighter == nullptr)
+        {
+            continue;
+        }
 
         Rectangle box =
             fighterBoxes[i];
@@ -377,11 +635,9 @@ void AttackUI::draw()
             Vector2{
                 box.x +
                     (box.width -
-                     nameSize.x) /
-                        2.0f,
+                     nameSize.x) / 2.0f,
 
-                box.y +
-                    245.0f},
+                box.y + 245.0f},
 
             22.0f,
             1.0f,
@@ -410,18 +666,15 @@ void AttackUI::draw()
             Vector2{
                 box.x +
                     (box.width -
-                     healthSize.x) /
-                        2.0f,
+                     healthSize.x) / 2.0f,
 
-                box.y +
-                    270.0f},
+                box.y + 270.0f},
 
             18.0f,
             1.0f,
             WHITE);
     }
 }
-
 // ============================================================
 // GETTERS
 // ============================================================
@@ -439,4 +692,121 @@ Fighter *AttackUI::getSelectedAttacker() const
 Fighter *AttackUI::getSelectedTarget() const
 {
     return selectedTarget;
+}
+
+Card *AttackUI::getSelectedAttackCard() const
+{
+    return selectedAttackCard;
+}
+
+
+Texture2D AttackUI::getCardTexture(AssetManager *assets, Card *card)
+{
+    if (assets == nullptr || card == nullptr)
+    {
+        return {};
+    }
+
+    std::string name = card->getName();
+
+    // Dracula
+    if (name == "Beast Form")
+        return assets->getCard("BeastForm");
+
+    if (name == "Ambush")
+        return assets->getCard("Ambush");
+
+    if (name == "Baptism of Blood")
+        return assets->getCard("BaptismOfBlood");
+
+    if (name == "Dash")
+        return assets->getCard("Dash");
+
+    if (name == "Exploit")
+        return assets->getCard("Exploit");
+
+    if (name == "Feeding Frenzy")
+        return assets->getCard("FeedingFrenzy");
+
+    if (name == "Feint")
+        return assets->getCard("FeintDracula");
+
+    if (name == "Look Into My Eyes")
+        return assets->getCard("LookIntoMyEyes");
+
+    if (name == "Mist Form")
+        return assets->getCard("MistForm");
+
+    if (name == "Prey Upon")
+        return assets->getCard("PreyUpon");
+
+    if (name == "Ravening Seduction")
+        return assets->getCard("RaveningSeduction");
+
+    if (name == "Thirst for Sustenance")
+        return assets->getCard("ThirstForSustenance");
+
+    // Sherlock
+    if (name == "Administer Aid")
+        return assets->getCard("AdministerAid");
+
+    if (name == "Counter Punch")
+        return assets->getCard("CounterPunch");
+
+    if (name == "Deduce Strategy")
+        return assets->getCard("DeduceStrategy");
+
+    if (name == "Education Never Ends")
+        return assets->getCard("EducationNeverEnds");
+
+    if (name == "Eliminate the Impossible")
+        return assets->getCard("EliminateTheImpossible");
+
+    if (name == "Fixed Point")
+        return assets->getCard("FixedPoint");
+
+    if (name == "Master of Disguise")
+        return assets->getCard("MasterOfDisguise");
+
+    if (name == "Study Methods")
+        return assets->getCard("StudyMethods");
+
+    if (name == "The Game Is Afoot")
+        return assets->getCard("TheGameIsAfoot");
+
+    if (name == "Service Revolver")
+        return assets->getCard("ServiceRevolver");
+
+    // Invisible Man
+    if (name == "Coded Notes")
+        return assets->getCard("CodedNotes");
+
+    if (name == "Dreaming of Revenge")
+        return assets->getCard("DreamingOfRevange");
+
+    if (name == "Emerge from Mist")
+        return assets->getCard("EmergeFromMist");
+
+    if (name == "Impossible to See")
+        return assets->getCard("ImpossibleToSee");
+
+    if (name == "Into Thin Air")
+        return assets->getCard("IntoThinAir");
+
+    if (name == "Lurking")
+        return assets->getCard("Lurking");
+
+    if (name == "Reign of Terror")
+        return assets->getCard("ReignOfTerror");
+
+    if (name == "Rolling Fog")
+        return assets->getCard("RollingFog");
+
+    if (name == "Slip Away")
+        return assets->getCard("SlipAway");
+
+    if (name == "Step Lightly")
+        return assets->getCard("StepLightly");
+
+    return {};
 }
