@@ -24,7 +24,10 @@ class AttackUI
         enum class AttackPhase
         {
             SelectAttacker,
-            SelectAttackCard
+            SelectAttackCard,
+            AskDefenseCard,
+            SelectTarget,
+            SelectDefenseCard
         };
 
         AttackPhase phase = AttackPhase::SelectAttacker;
@@ -38,6 +41,18 @@ class AttackUI
         int selectedAttackCardIndex = -1;
         bool confirmedAttackCard = false;
 
+        std::vector<Fighter *> selectableTargets;
+        std::vector<Rectangle> targetBoxes;
+
+        Card *selectedDefenseCard = nullptr;
+
+        std::vector<Card *> selectableDefenseCards;
+        std::vector<Rectangle> defenseCardBoxes;
+
+        bool defenseChoiceMade = false;
+        bool wantsDefenseCard = false;
+        Rectangle playButton;
+        
     public:
         AttackUI(AssetManager *assets);
 
@@ -56,6 +71,10 @@ class AttackUI
         Card *getSelectedAttackCard() const;
 
         static Texture2D getCardTexture(AssetManager *assets, Card *card);
+
+        Card *getSelectedDefenseCard() const;
+
+        bool isAttackCardConfirmed() const;
 };
 
 #endif
