@@ -17,7 +17,8 @@ GameScreen::GameScreen(
       leftPlayerPanel(assets),
       rightPlayerPanel(assets),
       attackUI(assets),
-      schemeUI(assets)
+      schemeUI(assets),
+      maneuverUI(assets)
 {
 }
 
@@ -306,6 +307,46 @@ int GameScreen::update()
         }
 
         schemeUI.resetConfirmed();
+    }
+
+    if (maneuverUI.isOpen())
+    {
+        maneuverUI.update();
+    }
+
+    if (maneuverUI.needsAvailableMoves())
+    {
+        Fighter *fighter = maneuverUI.getFighterNeedingMoves();
+
+        if (fighter != nullptr)
+        {
+            int budget = maneuverUI.getMovementBudget();
+
+            std::vector<std::pair<Space *, int>> moves =
+                game->getBoard().getAvailableMovesWithDistance(fighter, budget);
+
+            maneuverUI.beginSpaceSelection(moves);
+        }
+    }
+
+    if (maneuverUI.consumeReadyToFinalize())
+    {
+        Player *currentPlayer = game->getTurnManager().getCurrentPlayer();
+
+        if (currentPlayer != nullptr)
+        {
+            currentPlayer->drawCardToHand();
+
+            std::cout << "[+] Drew one card from maneuver." << std::endl;
+
+            game->getTurnManager().useAction();
+
+            std::cout << "[.] Actions remaining: "
+                      << game->getTurnManager().getRemainingActions()
+                      << std::endl;
+
+            checkAndEndTurnIfNeeded();
+        }
     }
 
     return 0;

@@ -6,6 +6,7 @@
 #include "graphics/PlayerPanel.h"
 #include "graphics/AttackUI.h"
 #include "graphics/SchemeUI.h"
+#include "graphics/ManeuverUI.h"
 
 class GameScreen
 {
@@ -14,6 +15,7 @@ private:
     Game *game;
     AttackUI attackUI;
     SchemeUI schemeUI;
+    ManeuverUI maneuverUI;
 
     bool guideOpen = false;
 
@@ -77,6 +79,7 @@ public:
     Fighter *getClickedFighter();
     void drawTurnIndicator();
     void checkAndEndTurnIfNeeded();
+    void drawManeuverMovableSpaces();
 };
 
 #endif
