@@ -133,7 +133,6 @@ bool AssetManager::load()
         unload();
         return false;
     }
-
     loaded = true;
     cout << "all assets loaded.\n";
     return true;
