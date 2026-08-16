@@ -294,16 +294,21 @@ int GameScreen::update()
                     }
                 }
 
-                // TODO (بعداً):
-                // - Effect *effect = playedCard->getEffect(); effect->apply(...)
-                // - game->getTurnManager().useAction();
+                game->getTurnManager().useAction();
+
+                std::cout
+                    << "[.] Actions remaining: "
+                    << game->getTurnManager().getRemainingActions()
+                    << std::endl;
+
+                checkAndEndTurnIfNeeded(); // <-- تابع کمکی جدید
             }
         }
 
-        schemeUI.resetConfirmed(); // <-- بیرون از if، همیشه صدا زده بشه
+        schemeUI.resetConfirmed();
     }
 
-    return 0; // <-- بی‌قید و شرط، انتهای تابع
+    return 0;
 }
 
 void GameScreen::draw()
@@ -347,6 +352,7 @@ void GameScreen::draw()
     drawMap();
     drawPlayerPanels();
     drawTopButtons();
+    drawTurnIndicator();
     drawActionButtons();
 
     if (guideOpen)
@@ -978,7 +984,7 @@ void GameScreen::drawGuidePopup()
         textSize,
         spacing,
         WHITE);
-        
+
     // =========================================
     // BACK BUTTON
     // =========================================
@@ -1964,4 +1970,109 @@ Fighter *GameScreen::getClickedFighter()
     }
 
     return nullptr;
+}
+
+void GameScreen::drawTurnIndicator()
+{
+    if (assets == nullptr || game == nullptr)
+    {
+        return;
+    }
+
+    Player *currentPlayer =
+        game->getTurnManager().getCurrentPlayer();
+
+    if (currentPlayer == nullptr)
+    {
+        return;
+    }
+
+    Hero *hero = currentPlayer->getHero();
+
+    if (hero == nullptr)
+    {
+        return;
+    }
+
+    Font font = assets->getGameFont();
+
+    // =========================================
+    // لبه‌ی پایین نقشه
+    // =========================================
+
+    float mapX;
+    float mapY;
+    float scale;
+    float mapWidth;
+    float mapHeight;
+
+    calculateMapTransform(
+        mapX,
+        mapY,
+        scale,
+        mapWidth,
+        mapHeight);
+
+    std::string text = "Turn : " + hero->getName();
+
+    const float fontSize = 28.0f;
+    const float spacing = 2.0f;
+
+    Vector2 textSize =
+        MeasureTextEx(font, text.c_str(), fontSize, spacing);
+
+    float textX =
+        (GetScreenWidth() - textSize.x) / 2.0f;
+
+    float textY =
+        mapY + mapHeight + 12.0f; // فاصله‌ی کم از لبه‌ی نقشه
+
+    // پس‌زمینه‌ی کوچیک برای خوانایی بهتر
+    Rectangle background{
+        textX - 15.0f,
+        textY - 6.0f,
+        textSize.x + 30.0f,
+        textSize.y + 12.0f};
+
+    DrawRectangleRounded(
+        background,
+        0.3f,
+        16,
+        Color{20, 20, 20, 190});
+
+    DrawTextEx(
+        font,
+        text.c_str(),
+        Vector2{textX, textY},
+        fontSize,
+        spacing,
+        WHITE);
+}
+
+void GameScreen::checkAndEndTurnIfNeeded()
+{
+    if (game == nullptr)
+    {
+        return;
+    }
+
+    TurnManager &turnManager = game->getTurnManager();
+
+    if (turnManager.hasActions())
+    {
+        return;
+    }
+
+    turnManager.endTurn();
+
+    Player *newCurrentPlayer = turnManager.getCurrentPlayer();
+
+    if (newCurrentPlayer != nullptr &&
+        newCurrentPlayer->getHero() != nullptr)
+    {
+        std::cout
+            << "[.] Turn ended. Next turn: "
+            << newCurrentPlayer->getHero()->getName()
+            << std::endl;
+    }
 }

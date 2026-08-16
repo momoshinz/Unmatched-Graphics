@@ -9,18 +9,6 @@ class Card;
 
 class SchemeUI
 {
-public:
-    explicit SchemeUI(AssetManager *assets);
-
-    void openScheme(const Hand &hand);
-    void update();
-    void draw();
-
-    bool isOpen() const;
-    bool isConfirmed() const;
-    void resetConfirmed();
-    Card *getSelectedCard() const;
-
 private:
     AssetManager *assets;
 
@@ -35,4 +23,18 @@ private:
     Rectangle playButton{};
 
     static std::string getCardTextureKey(const Card *card);
+    Rectangle backButton{};
+    bool emptyMessage = false;
+
+public:
+    explicit SchemeUI(AssetManager *assets);
+
+    void openScheme(const Hand &hand);
+    void update();
+    void draw();
+
+    bool isOpen() const;
+    bool isConfirmed() const;
+    void resetConfirmed();
+    Card *getSelectedCard() const;
 };

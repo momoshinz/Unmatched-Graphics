@@ -56,6 +56,7 @@ void SchemeUI::openScheme(const Hand &hand)
 
     selectedIndex = -1;
     confirmed = false;
+    emptyMessage = false;
 
     for (Card *card : hand.getCards())
     {
@@ -79,7 +80,17 @@ void SchemeUI::openScheme(const Hand &hand)
 
     if (selectableCards.empty())
     {
-        open = false;
+        open = true;
+        emptyMessage = true;
+        const float backWidth = 180.0f;
+        const float backHeight = 55.0f;
+
+        backButton = Rectangle{
+            (GetScreenWidth() - backWidth) / 2.0f,
+            (GetScreenHeight() / 2.0f) + 60.0f,
+            backWidth,
+            backHeight};
+
         std::cout << "[!] No Scheme card in hand." << std::endl;
         return;
     }
@@ -168,6 +179,16 @@ void SchemeUI::update()
 
     Vector2 mouse = GetMousePosition();
 
+    if (emptyMessage)
+    {
+        if (CheckCollisionPointRec(mouse, backButton))
+        {
+            open = false;
+            emptyMessage = false;
+        }
+        return;
+    }
+
     // انتخاب / تعویض کارت
     for (size_t i = 0; i < cardBoxes.size(); i++)
     {
@@ -210,6 +231,52 @@ void SchemeUI::draw()
         0, 0,
         GetScreenWidth(), GetScreenHeight(),
         Color{0, 0, 0, 190});
+
+    if (emptyMessage)
+    {
+        const char *message = "HERO HAS NO SCHEME CARD IN HAND!";
+        const float messageSize = 36.0f;
+
+        Vector2 messageTextSize =
+            MeasureTextEx(font, message, messageSize, 2.0f);
+
+        DrawTextEx(
+            font, message,
+            Vector2{
+                (GetScreenWidth() - messageTextSize.x) / 2.0f,
+                (GetScreenHeight() - messageTextSize.y) / 2.0f - 40.0f},
+            messageSize, 2.0f, WHITE);
+
+        // دکمه‌ی Back کپسولی
+        Vector2 mouse = GetMousePosition();
+        bool hovered = CheckCollisionPointRec(mouse, backButton);
+
+        Color backColor =
+            hovered
+                ? Color{75, 75, 75, 245}
+                : Color{35, 35, 35, 235};
+
+        DrawRectangleRounded(backButton, 1.0f, 20, backColor);
+
+        DrawRectangleRoundedLines(
+            backButton, 1.0f, 20,
+            hovered ? WHITE : Color{150, 150, 150, 255});
+
+        const char *backText = "BACK";
+        const float backFontSize = 24.0f;
+
+        Vector2 backTextSize =
+            MeasureTextEx(font, backText, backFontSize, 1.5f);
+
+        DrawTextEx(
+            font, backText,
+            Vector2{
+                backButton.x + (backButton.width - backTextSize.x) / 2.0f,
+                backButton.y + (backButton.height - backTextSize.y) / 2.0f},
+            backFontSize, 1.5f, WHITE);
+
+        return;
+    }
 
     // Title
     const char *title = "CHOOSE YOUR SCHEME CARD";

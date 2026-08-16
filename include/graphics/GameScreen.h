@@ -9,74 +9,74 @@
 
 class GameScreen
 {
-    private:
-        AssetManager *assets;
-        Game *game;
-        AttackUI attackUI;
-        SchemeUI schemeUI;
+private:
+    AssetManager *assets;
+    Game *game;
+    AttackUI attackUI;
+    SchemeUI schemeUI;
 
-        bool guideOpen = false;
+    bool guideOpen = false;
 
-        void drawMap();
-        void drawPlayerPanels();
-        void drawTopButtons();
-        void drawGuidePopup();
-        void drawSpaces();
-        void drawPlacedFighters();
+    void drawMap();
+    void drawPlayerPanels();
+    void drawTopButtons();
+    void drawGuidePopup();
+    void drawSpaces();
+    void drawPlacedFighters();
 
-        Vector2 mapImageToScreen(Vector2 imagePosition) const;
-        enum class ActionChoice
-        {
-            NONE,
-            ATTACK,
-            MANEUVER,
-            SCHEME
-        };
-        ActionChoice selectedAction;
-        Rectangle attackButton;
-        Rectangle maneuverButton;
-        Rectangle schemeButton;
+    Vector2 mapImageToScreen(Vector2 imagePosition) const;
+    enum class ActionChoice
+    {
+        NONE,
+        ATTACK,
+        MANEUVER,
+        SCHEME
+    };
+    ActionChoice selectedAction;
+    Rectangle attackButton;
+    Rectangle maneuverButton;
+    Rectangle schemeButton;
 
-        enum class AttackPhase
-        {
-            NONE,
-            CHOOSE_ATTACKER,
-            CHOOSE_TARGET,
-            CHOOSE_ATTACK_CARD,
-            CHOOSE_DEFENSE,
-            RESOLVE
-        };
+    enum class AttackPhase
+    {
+        NONE,
+        CHOOSE_ATTACKER,
+        CHOOSE_TARGET,
+        CHOOSE_ATTACK_CARD,
+        CHOOSE_DEFENSE,
+        RESOLVE
+    };
 
-        AttackPhase attackPhase = AttackPhase::NONE;
+    AttackPhase attackPhase = AttackPhase::NONE;
 
-        Fighter *attackFighter = nullptr;
-        Fighter *attackTarget = nullptr;
-        Card *selectedAttackCard = nullptr;
+    Fighter *attackFighter = nullptr;
+    Fighter *attackTarget = nullptr;
+    Card *selectedAttackCard = nullptr;
 
-        PlayerPanel rightPlayerPanel;
-        PlayerPanel leftPlayerPanel;
+    PlayerPanel rightPlayerPanel;
+    PlayerPanel leftPlayerPanel;
 
+public:
+    GameScreen(
+        AssetManager *assets,
+        Game *game);
 
-    public:
-        GameScreen(
-            AssetManager *assets,
-            Game *game);
-            
-            
-        int update();
-        void draw();
+    int update();
+    void draw();
 
-        void calculateMapTransform(
-            float &mapX,
-            float &mapY,
-            float &scale,
-            float &mapWidth,
-            float &mapHeight) const;
+    void calculateMapTransform(
+        float &mapX,
+        float &mapY,
+        float &scale,
+        float &mapWidth,
+        float &mapHeight) const;
 
-        int getClickedSpaceId();
-        void drawFogs();
-        void drawActionButtons();
-        Fighter* getClickedFighter();
+    int getClickedSpaceId();
+    void drawFogs();
+    void drawActionButtons();
+    Fighter *getClickedFighter();
+    void drawTurnIndicator();
+    void checkAndEndTurnIfNeeded();
 };
 
 #endif
