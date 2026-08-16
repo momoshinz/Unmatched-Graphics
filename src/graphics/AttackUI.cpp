@@ -23,13 +23,24 @@ void AttackUI::openAttack(Player *player, const std::vector<Fighter *> &fighters
     selectableAttackCards.clear();
     attackCardBoxes.clear();
 
+    selectableTargets.clear();
+    targetBoxes.clear();
+
     selectedAttacker = nullptr;
     selectedTarget = nullptr;
     selectedAttackCard = nullptr;
     attackPlayer = player;
 
-    int selectedAttackCardIndex = -1;
-    bool confirmedAttackCard = false;
+    selectedAttackCardIndex = -1;
+    confirmedAttackCard = false;
+
+    selectableDefenseCards.clear();
+    defenseCardBoxes.clear();
+
+    selectedDefenseCard = nullptr;
+
+    defenseChoiceMade = false;
+    wantsDefenseCard = false;
 
     phase = AttackPhase::SelectAttacker;
 
@@ -257,8 +268,8 @@ void AttackUI::update()
                 // محاسبه کارت‌ها
                 // --------------------------------------------
 
-                const float cardWidth = 260.0f;
-                const float cardHeight = 330.0f;
+                const float cardWidth = 220.0f;
+                const float cardHeight = 320.0f;
                 const float cardGap = 25.0f;
 
                 const float totalWidth =
@@ -287,6 +298,20 @@ void AttackUI::update()
                     attackCardBoxes.push_back(box);
                 }
 
+                // ========================================================
+                // PLAY BUTTON
+                // ========================================================
+
+                const float playWidth = 220.0f;
+                const float playHeight = 60.0f;
+
+                playButton = Rectangle{
+                    (GetScreenWidth() - playWidth) / 2.0f,
+                    startY + cardHeight + 25.0f,
+                    playWidth,
+                    playHeight
+                };
+
                 phase = AttackPhase::SelectAttackCard;
 
                 return;
@@ -300,20 +325,358 @@ void AttackUI::update()
 
     if (phase == AttackPhase::SelectAttackCard)
     {
+        // --------------------------------------------
+        // انتخاب کارت
+        // --------------------------------------------
+
         for (size_t i = 0;
-             i < attackCardBoxes.size();
-             i++)
+            i < attackCardBoxes.size();
+            i++)
         {
             if (CheckCollisionPointRec(
                     mouse,
                     attackCardBoxes[i]))
             {
-                selectedAttackCard =
-                    selectableAttackCards[i];
+                selectedAttackCardIndex =
+                    static_cast<int>(i);
 
                 std::cout
-                    << "Attack card selected : "
-                    << selectedAttackCard->getName()
+                    << "Attack card selected: "
+                    << selectableAttackCards[i]->getName()
+                    << std::endl;
+
+                return;
+            }
+        }
+
+        // --------------------------------------------
+        // دکمه PLAY
+        // --------------------------------------------
+
+        if (selectedAttackCardIndex != -1 &&
+            CheckCollisionPointRec(mouse, playButton))
+        {
+            selectedAttackCard =
+                selectableAttackCards[
+                    selectedAttackCardIndex];
+
+            confirmedAttackCard = true;
+
+            std::cout
+                << "Attack card confirmed: "
+                << selectedAttackCard->getName()
+                << std::endl;
+
+            // ========================================
+            // حالا Targetها را آماده می‌کنیم
+            // ========================================
+
+            selectableTargets.clear();
+            targetBoxes.clear();
+
+            for (Fighter *fighter : selectableFighters)
+            {
+                if (fighter == nullptr)
+                    continue;
+
+                if (!fighter->isAlive())
+                    continue;
+
+                // خود Attacker
+                if (fighter == selectedAttacker)
+                    continue;
+
+                // هم‌تیمی
+                if (fighter->getOwner() ==
+                    selectedAttacker->getOwner())
+                    continue;
+
+                selectableTargets.push_back(fighter);
+            }
+
+            if (selectableTargets.empty())
+            {
+                std::cout
+                    << "[!] No valid target."
+                    << std::endl;
+
+                return;
+            }
+
+            // ========================================
+            // Target boxes
+            // ========================================
+
+            const float boxWidth = 220.0f;
+            const float boxHeight = 320.0f;
+            const float gapX = 25.0f;
+
+            const float totalWidth =
+                selectableTargets.size() * boxWidth +
+                (selectableTargets.size() - 1) * gapX;
+
+            const float startX =
+                (GetScreenWidth() - totalWidth) / 2.0f;
+
+            const float startY = 170.0f;
+
+            for (size_t j = 0;
+                j < selectableTargets.size();
+                j++)
+            {
+                Rectangle box{
+                    startX +
+                        j * (boxWidth + gapX),
+
+                    startY,
+
+                    boxWidth,
+                    boxHeight
+                };
+
+                targetBoxes.push_back(box);
+            }
+
+            phase = AttackPhase::SelectTarget;
+
+            return;
+        }
+    }
+
+    // ========================================================
+    // SELECT TARGET
+    // ========================================================
+
+    if (phase == AttackPhase::SelectTarget)
+    {
+        for (size_t i = 0;
+            i < targetBoxes.size();
+            i++)
+        {
+            if (CheckCollisionPointRec(
+                    mouse,
+                    targetBoxes[i]))
+            {
+                selectedTarget =
+                    selectableTargets[i];
+
+                std::cout
+                    << "Target selected : "
+                    << selectedTarget->getName()
+                    << std::endl;
+
+                // ========================================================
+                // بعد از انتخاب Target → پرسیدن از Defender
+                // ========================================================
+
+                phase = AttackPhase::AskDefenseCard;
+
+                return;
+            }
+        }
+    }
+    // ========================================================
+    // ASK DEFENDER
+    // ========================================================
+
+    if (phase == AttackPhase::AskDefenseCard)
+    {
+        // YES
+        Rectangle yesButton{
+            GetScreenWidth() / 2.0f - 230.0f,
+            430.0f,
+            200.0f,
+            70.0f
+        };
+
+        // NO
+        Rectangle noButton{
+            GetScreenWidth() / 2.0f + 30.0f,
+            430.0f,
+            200.0f,
+            70.0f
+        };
+
+        if (CheckCollisionPointRec(mouse, yesButton))
+        {
+            wantsDefenseCard = true;
+            defenseChoiceMade = true;
+
+            selectableDefenseCards.clear();
+            defenseCardBoxes.clear();
+
+            // --------------------------------------------
+            // پیدا کردن کارت‌های دفاعی مدافع
+            // --------------------------------------------
+
+            if (selectedTarget == nullptr)
+            {
+                std::cout
+                    << "[!] No defender selected."
+                    << std::endl;
+
+                open = false;
+                return;
+            }
+
+            Player *defenderPlayer =
+                selectedTarget->getOwner();
+
+            if (defenderPlayer == nullptr)
+            {
+                std::cout
+                    << "[!] Defender has no owner."
+                    << std::endl;
+
+                open = false;
+                return;
+            }
+
+            for (Card *card :
+                defenderPlayer->getHand().getCards())
+            {
+                if (card == nullptr)
+                    continue;
+
+                bool isDefense =
+                    card->isDefense();
+
+                bool isVersatile =
+                    card->isVersatile();
+
+                if (!isDefense && !isVersatile)
+                    continue;
+
+                if (!card->canBePlayedBy(
+                        *selectedTarget,
+                        CardType::Defense))
+                {
+                    continue;
+                }
+
+                selectableDefenseCards.push_back(card);
+            }
+
+            // اگر مدافع کارت دفاعی قابل استفاده ندارد
+            if (selectableDefenseCards.empty())
+            {
+                std::cout
+                    << "[!] Defender has no playable defense cards."
+                    << std::endl;
+
+                open = false;
+                return;
+            }
+
+            // --------------------------------------------
+            // چیدمان کارت‌ها
+            // --------------------------------------------
+
+            const float cardWidth = 220.0f;
+            const float cardHeight = 320.0f;
+            const float cardGap = 25.0f;
+
+            const float totalWidth =
+                selectableDefenseCards.size() * cardWidth +
+                (selectableDefenseCards.size() - 1) * cardGap;
+
+            const float startX =
+                (GetScreenWidth() - totalWidth) / 2.0f;
+
+            const float startY = 170.0f;
+
+            for (size_t i = 0;
+                i < selectableDefenseCards.size();
+                i++)
+            {
+                Rectangle box{
+                    startX +
+                        i * (cardWidth + cardGap),
+
+                    startY,
+
+                    cardWidth,
+                    cardHeight
+                };
+
+                defenseCardBoxes.push_back(box);
+            }
+
+            phase = AttackPhase::SelectDefenseCard;
+
+            return;
+        }
+
+        // --------------------------------------------
+        // NO
+        // --------------------------------------------
+
+        if (CheckCollisionPointRec(mouse, noButton))
+        {
+            wantsDefenseCard = false;
+            defenseChoiceMade = true;
+
+            selectedDefenseCard = nullptr;
+
+            std::cout
+                << "Defender chose NOT to play a defense card."
+                << std::endl;
+
+            open = false;
+
+            return;
+        }
+    }
+
+    // ========================================================
+    // SELECT DEFENSE CARD
+    // ========================================================
+
+    if (phase == AttackPhase::SelectDefenseCard)
+    {
+        for (size_t i = 0;
+            i < defenseCardBoxes.size();
+            i++)
+        {
+            if (CheckCollisionPointRec(
+                    mouse,
+                    defenseCardBoxes[i]))
+            {
+                selectedDefenseCard =
+                    selectableDefenseCards[i];
+
+                std::cout
+                    << "Defense card selected : "
+                    << selectedDefenseCard->getName()
+                    << std::endl;
+
+                open = false;
+
+                return;
+            }
+        }
+    }
+
+    // ========================================================
+    // SELECT DEFENSE CARD
+    // ========================================================
+
+    if (phase == AttackPhase::SelectDefenseCard)
+    {
+        for (size_t i = 0;
+            i < defenseCardBoxes.size();
+            i++)
+        {
+            if (CheckCollisionPointRec(
+                    mouse,
+                    defenseCardBoxes[i]))
+            {
+                selectedDefenseCard =
+                    selectableDefenseCards[i];
+
+                std::cout
+                    << "Defense card selected : "
+                    << selectedDefenseCard->getName()
                     << std::endl;
 
                 open = false;
@@ -486,6 +849,80 @@ void AttackUI::draw()
                 1.0f,
                 WHITE);
         }
+
+        // ========================================================
+        // PLAY BUTTON
+        // ========================================================
+
+        bool playEnabled =
+            (selectedAttackCardIndex != -1);
+
+        bool playHovered =
+            CheckCollisionPointRec(
+                mouse,
+                playButton);
+
+        Color playColor;
+
+        if (!playEnabled)
+        {
+            playColor = Color{30, 30, 30, 120};
+        }
+        else if (playHovered)
+        {
+            playColor = Color{75, 75, 75, 245};
+        }
+        else
+        {
+            playColor = Color{35, 35, 35, 235};
+        }
+
+        DrawRectangleRounded(
+            playButton,
+            1.0f,
+            20,
+            playColor);
+
+        DrawRectangleRoundedLines(
+            playButton,
+            1.0f,
+            20,
+            playHovered
+                ? WHITE
+                : Color{150, 150, 150, 255});
+
+        const char *playText = "PLAY";
+
+        const float playFontSize = 26.0f;
+
+        Vector2 playTextSize =
+            MeasureTextEx(
+                font,
+                playText,
+                playFontSize,
+                1.5f);
+
+        DrawTextEx(
+            font,
+            playText,
+
+            Vector2{
+                playButton.x +
+                    (playButton.width -
+                    playTextSize.x) / 2.0f,
+
+                playButton.y +
+                    (playButton.height -
+                    playTextSize.y) / 2.0f
+            },
+
+            playFontSize,
+            1.5f,
+
+            playEnabled
+                ? WHITE
+                : Color{150, 150, 150, 150});
+
         return;
     }
 
@@ -674,7 +1111,501 @@ void AttackUI::draw()
             1.0f,
             WHITE);
     }
+
+    // ========================================================
+    // SELECT TARGET
+    // ========================================================
+
+    if (phase == AttackPhase::SelectTarget)
+    {
+        const char *title =
+            "CHOOSE YOUR TARGET";
+
+        const float titleSize = 38.0f;
+
+        Vector2 titleMeasure =
+            MeasureTextEx(
+                font,
+                title,
+                titleSize,
+                2.0f);
+
+        DrawTextEx(
+            font,
+            title,
+
+            Vector2{
+                (GetScreenWidth() -
+                titleMeasure.x) / 2.0f,
+                70.0f},
+
+            titleSize,
+            2.0f,
+            WHITE);
+
+        Vector2 mouse =
+            GetMousePosition();
+
+        for (size_t i = 0;
+            i < selectableTargets.size();
+            i++)
+        {
+            Fighter *fighter =
+                selectableTargets[i];
+
+            Rectangle box =
+                targetBoxes[i];
+
+            bool hovered =
+                CheckCollisionPointRec(
+                    mouse,
+                    box);
+
+            Color boxColor =
+                hovered
+                    ? Color{75, 75, 75, 245}
+                    : Color{35, 35, 35, 235};
+
+            DrawRectangleRounded(
+                box,
+                0.08f,
+                20,
+                boxColor);
+
+            DrawRectangleRoundedLines(
+                box,
+                0.08f,
+                20,
+                hovered
+                    ? WHITE
+                    : Color{150, 150, 150, 255});
+
+            // -------------------------------
+            // Fighter image
+            // -------------------------------
+
+            Texture2D texture =
+                getFighterTexture(
+                    assets,
+                    fighter);
+
+            if (texture.id != 0)
+            {
+                const float imagePadding = 15.0f;
+
+                Rectangle source{
+                    0.0f,
+                    0.0f,
+                    static_cast<float>(texture.width),
+                    static_cast<float>(texture.height)
+                };
+
+                Rectangle destination{
+                    box.x + imagePadding,
+                    box.y + imagePadding,
+                    box.width - 2.0f * imagePadding,
+                    220.0f
+                };
+
+                DrawTexturePro(
+                    texture,
+                    source,
+                    destination,
+                    Vector2{0.0f, 0.0f},
+                    0.0f,
+                    WHITE);
+            }
+
+            // -------------------------------
+            // Name
+            // -------------------------------
+
+            std::string name =
+                fighter->getName();
+
+            Vector2 nameSize =
+                MeasureTextEx(
+                    font,
+                    name.c_str(),
+                    22.0f,
+                    1.0f);
+
+            DrawTextEx(
+                font,
+                name.c_str(),
+
+                Vector2{
+                    box.x +
+                        (box.width -
+                        nameSize.x) / 2.0f,
+
+                    box.y + 245.0f
+                },
+
+                22.0f,
+                1.0f,
+                WHITE);
+
+            // -------------------------------
+            // HP
+            // -------------------------------
+
+            std::string healthText =
+                "HP: " +
+                std::to_string(
+                    fighter->getHealth());
+
+            Vector2 healthSize =
+                MeasureTextEx(
+                    font,
+                    healthText.c_str(),
+                    18.0f,
+                    1.0f);
+
+            DrawTextEx(
+                font,
+                healthText.c_str(),
+
+                Vector2{
+                    box.x +
+                        (box.width -
+                        healthSize.x) / 2.0f,
+
+                    box.y + 270.0f
+                },
+
+                18.0f,
+                1.0f,
+                WHITE);
+        }
+
+        return;
+    }
+
+    // ========================================================
+    // ASK DEFENDER
+    // ========================================================
+
+    if (phase == AttackPhase::AskDefenseCard)
+    {
+        const char *title =
+            "DO YOU WANT TO PLAY A DEFENSE CARD?";
+
+        const float titleSize = 32.0f;
+
+        Vector2 titleMeasure =
+            MeasureTextEx(
+                font,
+                title,
+                titleSize,
+                2.0f);
+
+        DrawTextEx(
+            font,
+            title,
+
+            Vector2{
+                (GetScreenWidth() -
+                titleMeasure.x) / 2.0f,
+
+                180.0f
+            },
+
+            titleSize,
+            2.0f,
+            WHITE
+        );
+
+        // ----------------------------------------------------
+        // YES
+        // ----------------------------------------------------
+
+        Rectangle yesButton{
+            GetScreenWidth() / 2.0f - 230.0f,
+            430.0f,
+            200.0f,
+            70.0f
+        };
+
+        // ----------------------------------------------------
+        // NO
+        // ----------------------------------------------------
+
+        Rectangle noButton{
+            GetScreenWidth() / 2.0f + 30.0f,
+            430.0f,
+            200.0f,
+            70.0f
+        };
+
+        Vector2 mouse =
+            GetMousePosition();
+
+        bool yesHovered =
+            CheckCollisionPointRec(
+                mouse,
+                yesButton);
+
+        bool noHovered =
+            CheckCollisionPointRec(
+                mouse,
+                noButton);
+
+        DrawRectangleRounded(
+            yesButton,
+            0.15f,
+            20,
+            yesHovered
+                ? Color{75, 75, 75, 245}
+                : Color{35, 35, 35, 235}
+        );
+
+        DrawRectangleRoundedLines(
+            yesButton,
+            0.15f,
+            20,
+            yesHovered
+                ? WHITE
+                : Color{150, 150, 150, 255}
+        );
+
+        DrawRectangleRounded(
+            noButton,
+            0.15f,
+            20,
+            noHovered
+                ? Color{75, 75, 75, 245}
+                : Color{35, 35, 35, 235}
+        );
+
+        DrawRectangleRoundedLines(
+            noButton,
+            0.15f,
+            20,
+            noHovered
+                ? WHITE
+                : Color{150, 150, 150, 255}
+        );
+
+        // ----------------------------------------------------
+        // YES TEXT
+        // ----------------------------------------------------
+
+        const char *yesText = "YES";
+
+        Vector2 yesSize =
+            MeasureTextEx(
+                font,
+                yesText,
+                26.0f,
+                1.0f);
+
+        DrawTextEx(
+            font,
+            yesText,
+
+            Vector2{
+                yesButton.x +
+                    (yesButton.width - yesSize.x) / 2.0f,
+
+                yesButton.y +
+                    (yesButton.height - yesSize.y) / 2.0f
+            },
+
+            26.0f,
+            1.0f,
+            WHITE
+        );
+
+        // ----------------------------------------------------
+        // NO TEXT
+        // ----------------------------------------------------
+
+        const char *noText = "NO";
+
+        Vector2 noSize =
+            MeasureTextEx(
+                font,
+                noText,
+                26.0f,
+                1.0f);
+
+        DrawTextEx(
+            font,
+            noText,
+
+            Vector2{
+                noButton.x +
+                    (noButton.width - noSize.x) / 2.0f,
+
+                noButton.y +
+                    (noButton.height - noSize.y) / 2.0f
+            },
+
+            26.0f,
+            1.0f,
+            WHITE
+        );
+
+        return;
+    }
+
+    // ========================================================
+    // SELECT DEFENSE CARD
+    // ========================================================
+
+    if (phase == AttackPhase::SelectDefenseCard)
+    {
+        const char *title =
+            "CHOOSE DEFENSE CARD";
+
+        const float titleSize = 38.0f;
+
+        Vector2 titleMeasure =
+            MeasureTextEx(
+                font,
+                title,
+                titleSize,
+                2.0f);
+
+        DrawTextEx(
+            font,
+            title,
+
+            Vector2{
+                (GetScreenWidth() -
+                titleMeasure.x) / 2.0f,
+                60.0f
+            },
+
+            titleSize,
+            2.0f,
+            WHITE
+        );
+
+        Vector2 mouse =
+            GetMousePosition();
+
+        for (size_t i = 0;
+            i < selectableDefenseCards.size();
+            i++)
+        {
+            Card *card =
+                selectableDefenseCards[i];
+
+            Rectangle box =
+                defenseCardBoxes[i];
+
+            bool hovered =
+                CheckCollisionPointRec(
+                    mouse,
+                    box);
+
+            Color boxColor =
+                hovered
+                    ? Color{75, 75, 75, 245}
+                    : Color{35, 35, 35, 235};
+
+            DrawRectangleRounded(
+                box,
+                0.08f,
+                20,
+                boxColor);
+
+            DrawRectangleRoundedLines(
+                box,
+                0.08f,
+                20,
+                hovered
+                    ? WHITE
+                    : Color{150, 150, 150, 255}
+            );
+
+            // -----------------------------
+            // Card image
+            // -----------------------------
+
+            Texture2D texture =
+                getCardTexture(
+                    assets,
+                    card);
+
+            if (texture.id != 0)
+            {
+                const float padding = 14.0f;
+
+                Rectangle source{
+                    0.0f,
+                    0.0f,
+                    static_cast<float>(
+                        texture.width),
+                    static_cast<float>(
+                        texture.height)
+                };
+
+                Rectangle destination{
+                    box.x + padding,
+                    box.y + padding,
+
+                    box.width -
+                        2.0f * padding,
+
+                    box.height -
+                        65.0f
+                };
+
+                DrawTexturePro(
+                    texture,
+                    source,
+                    destination,
+                    Vector2{0.0f, 0.0f},
+                    0.0f,
+                    WHITE
+                );
+            }
+
+            // -----------------------------
+            // Card name BELOW image
+            // -----------------------------
+
+            std::string name =
+                card->getName();
+
+            const float nameFontSize =
+                20.0f;
+
+            Vector2 nameSize =
+                MeasureTextEx(
+                    font,
+                    name.c_str(),
+                    nameFontSize,
+                    1.0f
+                );
+
+            DrawTextEx(
+                font,
+                name.c_str(),
+
+                Vector2{
+                    box.x +
+                        (box.width -
+                        nameSize.x) / 2.0f,
+
+                    box.y +
+                        box.height -
+                        40.0f
+                },
+
+                nameFontSize,
+                1.0f,
+                WHITE
+            );
+        }
+
+        return;
+    }
 }
+
 // ============================================================
 // GETTERS
 // ============================================================
@@ -710,7 +1641,7 @@ Texture2D AttackUI::getCardTexture(AssetManager *assets, Card *card)
     std::string name = card->getName();
 
     // Dracula
-    if (name == "Beast Form")
+    if (name == "Beastform")
         return assets->getCard("BeastForm");
 
     if (name == "Ambush")
@@ -743,7 +1674,7 @@ Texture2D AttackUI::getCardTexture(AssetManager *assets, Card *card)
     if (name == "Ravening Seduction")
         return assets->getCard("RaveningSeduction");
 
-    if (name == "Thirst for Sustenance")
+    if (name == "Thirst For Sustenance")
         return assets->getCard("ThirstForSustenance");
 
     // Sherlock
@@ -759,13 +1690,13 @@ Texture2D AttackUI::getCardTexture(AssetManager *assets, Card *card)
     if (name == "Education Never Ends")
         return assets->getCard("EducationNeverEnds");
 
-    if (name == "Eliminate the Impossible")
+    if (name == "Eliminate The Impossible")
         return assets->getCard("EliminateTheImpossible");
 
     if (name == "Fixed Point")
         return assets->getCard("FixedPoint");
 
-    if (name == "Master of Disguise")
+    if (name == "Master Of Disguise")
         return assets->getCard("MasterOfDisguise");
 
     if (name == "Study Methods")
@@ -781,13 +1712,13 @@ Texture2D AttackUI::getCardTexture(AssetManager *assets, Card *card)
     if (name == "Coded Notes")
         return assets->getCard("CodedNotes");
 
-    if (name == "Dreaming of Revenge")
+    if (name == "Dreaming Of Revenge")
         return assets->getCard("DreamingOfRevange");
 
-    if (name == "Emerge from Mist")
+    if (name == "Emerge rom Mist")
         return assets->getCard("EmergeFromMist");
 
-    if (name == "Impossible to See")
+    if (name == "Impossible To See")
         return assets->getCard("ImpossibleToSee");
 
     if (name == "Into Thin Air")
@@ -796,7 +1727,7 @@ Texture2D AttackUI::getCardTexture(AssetManager *assets, Card *card)
     if (name == "Lurking")
         return assets->getCard("Lurking");
 
-    if (name == "Reign of Terror")
+    if (name == "Reign Of Terror")
         return assets->getCard("ReignOfTerror");
 
     if (name == "Rolling Fog")
@@ -809,4 +1740,9 @@ Texture2D AttackUI::getCardTexture(AssetManager *assets, Card *card)
         return assets->getCard("StepLightly");
 
     return {};
+}
+
+Card *AttackUI::getSelectedDefenseCard() const
+{
+    return selectedDefenseCard;
 }
