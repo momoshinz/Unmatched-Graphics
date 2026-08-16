@@ -710,7 +710,7 @@ Texture2D AttackUI::getCardTexture(AssetManager *assets, Card *card)
     std::string name = card->getName();
 
     // Dracula
-    if (name == "Beast Form")
+    if (name == "Beastform")
         return assets->getCard("BeastForm");
 
     if (name == "Ambush")
@@ -743,7 +743,7 @@ Texture2D AttackUI::getCardTexture(AssetManager *assets, Card *card)
     if (name == "Ravening Seduction")
         return assets->getCard("RaveningSeduction");
 
-    if (name == "Thirst for Sustenance")
+    if (name == "Thirst For Sustenance")
         return assets->getCard("ThirstForSustenance");
 
     // Sherlock
@@ -759,13 +759,13 @@ Texture2D AttackUI::getCardTexture(AssetManager *assets, Card *card)
     if (name == "Education Never Ends")
         return assets->getCard("EducationNeverEnds");
 
-    if (name == "Eliminate the Impossible")
+    if (name == "Eliminate The Impossible")
         return assets->getCard("EliminateTheImpossible");
 
     if (name == "Fixed Point")
         return assets->getCard("FixedPoint");
 
-    if (name == "Master of Disguise")
+    if (name == "Master Of Disguise")
         return assets->getCard("MasterOfDisguise");
 
     if (name == "Study Methods")
@@ -781,13 +781,13 @@ Texture2D AttackUI::getCardTexture(AssetManager *assets, Card *card)
     if (name == "Coded Notes")
         return assets->getCard("CodedNotes");
 
-    if (name == "Dreaming of Revenge")
+    if (name == "Dreaming Of Revenge")
         return assets->getCard("DreamingOfRevange");
 
-    if (name == "Emerge from Mist")
+    if (name == "Emerge rom Mist")
         return assets->getCard("EmergeFromMist");
 
-    if (name == "Impossible to See")
+    if (name == "Impossible To See")
         return assets->getCard("ImpossibleToSee");
 
     if (name == "Into Thin Air")
@@ -796,7 +796,7 @@ Texture2D AttackUI::getCardTexture(AssetManager *assets, Card *card)
     if (name == "Lurking")
         return assets->getCard("Lurking");
 
-    if (name == "Reign of Terror")
+    if (name == "Reign Of Terror")
         return assets->getCard("ReignOfTerror");
 
     if (name == "Rolling Fog")
