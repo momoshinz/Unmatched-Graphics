@@ -198,9 +198,7 @@ int GameScreen::update()
             return 0;
         }
 
-        if (CheckCollisionPointRec(
-                mousePosition,
-                maneuverButton))
+        if (CheckCollisionPointRec(mousePosition, maneuverButton))
         {
             selectedAction =
                 ActionChoice::MANEUVER;
@@ -209,6 +207,15 @@ int GameScreen::update()
                 << "Selected Action: MANEUVER"
                 << std::endl;
 
+            Player *currentPlayer =
+                game->getTurnManager().getCurrentPlayer();
+
+            if (currentPlayer != nullptr)
+            {
+                maneuverUI.open(currentPlayer);
+            }
+
+            selectedAction = ActionChoice::NONE;
             return 0;
         }
 
@@ -252,6 +259,22 @@ int GameScreen::update()
                 << "Clicked Space: "
                 << clickedSpaceId
                 << std::endl;
+
+            if (maneuverUI.isSelectingSpace())
+            {
+                for (const auto &movePair : maneuverUI.getAvailableMoves())
+                {
+                    if (movePair.first->getId() == clickedSpaceId)
+                    {
+                        game->getBoard().moveFighter(
+                            maneuverUI.getSelectedFighter(),
+                            movePair.first);
+
+                        maneuverUI.finishAfterMove();
+                        break;
+                    }
+                }
+            }
         }
     }
     if (attackUI.isOpen())
@@ -394,7 +417,11 @@ void GameScreen::draw()
     drawPlayerPanels();
     drawTopButtons();
     drawTurnIndicator();
-    drawActionButtons();
+
+    if (!maneuverUI.isOpen())
+    {
+        drawActionButtons();
+    }
 
     if (guideOpen)
     {
@@ -408,6 +435,11 @@ void GameScreen::draw()
     if (schemeUI.isOpen())
     {
         schemeUI.draw();
+    }
+
+    if (maneuverUI.isOpen())
+    {
+        maneuverUI.draw();
     }
 }
 
@@ -471,14 +503,9 @@ void GameScreen::drawMap()
     // =====================================
 
     drawSpaces();
-
-    // =====================================
-    // DRAW HEROES + SIDEKICKS
-    // =====================================
-
     drawPlacedFighters();
-
     drawFogs();
+    drawManeuverMovableSpaces();
 }
 
 // =========================================
@@ -1604,7 +1631,7 @@ void GameScreen::drawFogs()
             // FOG SIZE
             // =====================================
 
-            const float fogImageSize = 150.0f;
+            const float fogImageSize = 140.0f;
 
             const float fogSize =
                 fogImageSize * scale;
@@ -1619,7 +1646,7 @@ void GameScreen::drawFogs()
 
             Rectangle destination{
                 center.x - fogSize / 2.0f,
-                center.y + 20.0f - fogSize / 2.0f,
+                center.y + 30.0f - fogSize / 2.0f,
                 fogSize,
                 fogSize};
 
@@ -2054,7 +2081,7 @@ void GameScreen::drawTurnIndicator()
         mapWidth,
         mapHeight);
 
-    std::string text = "Turn : " + hero->getName();
+    std::string text = "> Turn : " + hero->getName();
 
     const float fontSize = 28.0f;
     const float spacing = 2.0f;
@@ -2077,7 +2104,7 @@ void GameScreen::drawTurnIndicator()
 
     DrawRectangleRounded(
         background,
-        0.3f,
+        1.0f,
         16,
         Color{20, 20, 20, 190});
 
@@ -2115,5 +2142,37 @@ void GameScreen::checkAndEndTurnIfNeeded()
             << "[.] Turn ended. Next turn: "
             << newCurrentPlayer->getHero()->getName()
             << std::endl;
+    }
+}
+
+void GameScreen::drawManeuverMovableSpaces()
+{
+    if (!maneuverUI.isSelectingSpace())
+    {
+        return;
+    }
+
+    float mapX;
+    float mapY;
+    float scale;
+    float mapWidth;
+    float mapHeight;
+
+    calculateMapTransform(mapX, mapY, scale, mapWidth, mapHeight);
+
+    for (const auto &movePair : maneuverUI.getAvailableMoves())
+    {
+        int spaceId = movePair.first->getId();
+
+        if (spaceId < 1 || spaceId > 32)
+        {
+            continue;
+        }
+
+        Vector2 center = mapImageToScreen(SPACE_GRAPHICS[spaceId - 1].center);
+        float radius = SPACE_GRAPHICS[spaceId - 1].radius * scale;
+
+        DrawCircleV(center, radius, Color{80, 220, 100, 130});
+        DrawCircleLinesV(center, radius, Color{120, 255, 150, 220});
     }
 }

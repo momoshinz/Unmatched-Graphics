@@ -120,7 +120,7 @@ void ManeuverUI::layoutAskButtons()
 
     const float totalWidth = 2.0f * buttonWidth + gap;
     const float startX = (GetScreenWidth() - totalWidth) / 2.0f;
-    const float buttonY = GetScreenHeight() - 130.0f;
+    const float buttonY = GetScreenHeight() - 90.0f;
 
     yesButton = Rectangle{startX, buttonY, buttonWidth, buttonHeight};
     noButton = Rectangle{startX + buttonWidth + gap, buttonY, buttonWidth, buttonHeight};
@@ -161,7 +161,7 @@ void ManeuverUI::layoutFighterSelection()
         count * boxWidth + (count > 0 ? (count - 1) : 0) * gap;
 
     const float startX = (GetScreenWidth() - totalWidth) / 2.0f;
-    const float boxY = GetScreenHeight() - 160.0f;
+    const float boxY = GetScreenHeight() - 110.0f;
 
     for (int i = 0; i < count; i++)
     {
@@ -490,7 +490,7 @@ void ManeuverUI::draw()
             font, question,
             Vector2{
                 (GetScreenWidth() - questionTextSize.x) / 2.0f,
-                GetScreenHeight() - 185.0f},
+                GetScreenHeight() - 145.0f},
             questionSize, 1.5f, WHITE);
 
         bool yesHovered = CheckCollisionPointRec(mouse, yesButton);
@@ -529,7 +529,7 @@ void ManeuverUI::draw()
             font, title,
             Vector2{
                 (GetScreenWidth() - titleTextSize.x) / 2.0f,
-                GetScreenHeight() - 200.0f},
+                GetScreenHeight() - 150.0f},
             titleSize, 1.5f, WHITE);
 
         for (size_t i = 0; i < selectableFighters.size(); i++)
@@ -537,10 +537,10 @@ void ManeuverUI::draw()
             Rectangle box = fighterBoxes[i];
             bool hovered = CheckCollisionPointRec(mouse, box);
 
-            DrawRectangleRounded(box, 0.2f, 20,
+            DrawRectangleRounded(box, 1.0f, 20,
                                  hovered ? Color{75, 75, 75, 245} : Color{35, 35, 35, 235});
 
-            DrawRectangleRoundedLines(box, 0.2f, 20,
+            DrawRectangleRoundedLines(box, 1.0f, 20,
                                       hovered ? WHITE : Color{150, 150, 150, 255});
 
             std::string name = selectableFighters[i]->getName();
