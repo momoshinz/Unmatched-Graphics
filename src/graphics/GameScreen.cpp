@@ -103,6 +103,7 @@ int GameScreen::update()
 
         return 0;
     }
+
     // =========================================
     // Mouse click
     // =========================================
@@ -145,21 +146,23 @@ int GameScreen::update()
             return 0;
         }
 
-        // ACTION BUTTONS
-        if (CheckCollisionPointRec(
-                mousePosition,
-                attackButton))
+        // =========================================
+        // ACTION BUTTONS (فقط وقتی مانور باز نیست)
+        // =========================================
+
+        if (!maneuverUI.isOpen())
         {
-            selectedAction =
-                ActionChoice::ATTACK;
-
-            std::cout
-                << "Selected Action: ATTACK"
-                << std::endl;
-
-            selectedAction = ActionChoice::ATTACK;
-            if (selectedAction == ActionChoice::ATTACK)
+            if (CheckCollisionPointRec(
+                    mousePosition,
+                    attackButton))
             {
+                selectedAction =
+                    ActionChoice::ATTACK;
+
+                std::cout
+                    << "Selected Action: ATTACK"
+                    << std::endl;
+
                 Player *currentPlayer =
                     game->getTurnManager().getCurrentPlayer();
 
@@ -189,62 +192,56 @@ int GameScreen::update()
                     }
 
                     attackUI.openAttack(currentPlayer, fighters);
-
-                    selectedAction =
-                        ActionChoice::NONE;
-                    return 0;
                 }
+
+                selectedAction = ActionChoice::NONE;
+                return 0;
             }
-            return 0;
-        }
 
-        if (CheckCollisionPointRec(mousePosition, maneuverButton))
-        {
-            selectedAction =
-                ActionChoice::MANEUVER;
-
-            std::cout
-                << "Selected Action: MANEUVER"
-                << std::endl;
-
-            Player *currentPlayer =
-                game->getTurnManager().getCurrentPlayer();
-
-            if (currentPlayer != nullptr)
+            if (CheckCollisionPointRec(mousePosition, maneuverButton))
             {
-                maneuverUI.open(currentPlayer);
+                selectedAction =
+                    ActionChoice::MANEUVER;
+
+                std::cout
+                    << "Selected Action: MANEUVER"
+                    << std::endl;
+
+                Player *currentPlayer =
+                    game->getTurnManager().getCurrentPlayer();
+
+                if (currentPlayer != nullptr)
+                {
+                    maneuverUI.open(currentPlayer);
+                }
+
+                selectedAction = ActionChoice::NONE;
+                return 0;
             }
 
-            selectedAction = ActionChoice::NONE;
-            return 0;
-        }
-
-        if (CheckCollisionPointRec(
-                mousePosition,
-                schemeButton))
-        {
-            selectedAction =
-                ActionChoice::SCHEME;
-
-            std::cout
-                << "Selected Action: SCHEME"
-                << std::endl;
-
-            Player *currentPlayer =
-                game->getTurnManager().getCurrentPlayer();
-
-            if (currentPlayer != nullptr)
+            if (CheckCollisionPointRec(
+                    mousePosition,
+                    schemeButton))
             {
-                schemeUI.openScheme(currentPlayer->getHand());
+                selectedAction =
+                    ActionChoice::SCHEME;
+
+                std::cout
+                    << "Selected Action: SCHEME"
+                    << std::endl;
+
+                Player *currentPlayer =
+                    game->getTurnManager().getCurrentPlayer();
+
+                if (currentPlayer != nullptr)
+                {
+                    schemeUI.openScheme(currentPlayer->getHand());
+                }
+
+                selectedAction = ActionChoice::NONE;
+                return 0;
             }
-
-            selectedAction = ActionChoice::NONE;
-            return 0;
         }
-
-        // =========================================
-        // ATTACK - CHOOSE ATTACKER
-        // =========================================
 
         // =========================================
         // MAP SPACE CLICK
@@ -276,7 +273,8 @@ int GameScreen::update()
                 }
             }
         }
-    }
+    } // <-- پایان if (IsMouseButtonPressed(...))
+
     if (attackUI.isOpen())
     {
         attackUI.update();
@@ -325,7 +323,7 @@ int GameScreen::update()
                     << game->getTurnManager().getRemainingActions()
                     << std::endl;
 
-                checkAndEndTurnIfNeeded(); // <-- تابع کمکی جدید
+                checkAndEndTurnIfNeeded();
             }
         }
 
