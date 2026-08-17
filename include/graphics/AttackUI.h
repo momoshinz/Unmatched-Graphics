@@ -12,7 +12,7 @@ class AttackUI
 {
     private:
         AssetManager *assets;
-
+        Game* game = nullptr;
         bool open = false;
 
         Fighter *selectedAttacker = nullptr;
@@ -56,7 +56,7 @@ class AttackUI
     public:
         AttackUI(AssetManager *assets);
 
-        void openAttack(Player *player,const std::vector<Fighter *> &fighters);
+        void openAttack(Player *player,const std::vector<Fighter *> &fighters, Game *game);
 
         void update();
 

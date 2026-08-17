@@ -1,7 +1,9 @@
 #include "graphics/AttackUI.h"
-
+#include "game/Game.h"
+#include "board/Board.h"
 #include "graphics/AssetManager.h"
 #include "fighter/Fighter.h"
+#include "fighter/Hero.h"
 #include "player/Player.h"
 #include <iostream>
 #include <string>
@@ -15,8 +17,9 @@ AttackUI::AttackUI(AssetManager *assets)
 // OPEN ATTACK
 // ============================================================
 
-void AttackUI::openAttack(Player *player, const std::vector<Fighter *> &fighters)
+void AttackUI::openAttack(Player *player, const std::vector<Fighter *> &fighters, Game *game)
 {
+    this->game = game;
     selectableFighters.clear();
     fighterBoxes.clear();
 
@@ -374,33 +377,34 @@ void AttackUI::update()
             selectableTargets.clear();
             targetBoxes.clear();
 
-            for (Fighter *fighter : selectableFighters)
+            for (Player *other : game->getPlayers())
             {
-                if (fighter == nullptr)
+                if (other == nullptr || other == attackPlayer)  // فقط حریف‌ها
                     continue;
 
-                if (!fighter->isAlive())
-                    continue;
+                Hero *enemyHero = other->getHero();
+                if (enemyHero != nullptr && enemyHero->isAlive())
+                {
+                    bool inRange = selectedAttacker->isAdjacent(enemyHero, game->getBoard());
+                    if (!inRange && selectedAttacker->isRanged())
+                        inRange = selectedAttacker->isInSameZone(enemyHero, game->getBoard());
 
-                // خود Attacker
-                if (fighter == selectedAttacker)
-                    continue;
+                    if (inRange)
+                        selectableTargets.push_back(enemyHero);
+                }
 
-                // هم‌تیمی
-                if (fighter->getOwner() ==
-                    selectedAttacker->getOwner())
-                    continue;
+                for (Sidekick *enemySidekick : other->getSideKicks())
+                {
+                    if (enemySidekick == nullptr || !enemySidekick->isAlive())
+                        continue;
 
-                selectableTargets.push_back(fighter);
-            }
+                    bool inRange = selectedAttacker->isAdjacent(enemySidekick, game->getBoard());
+                    if (!inRange && selectedAttacker->isRanged())
+                        inRange = selectedAttacker->isInSameZone(enemySidekick, game->getBoard());
 
-            if (selectableTargets.empty())
-            {
-                std::cout
-                    << "[!] No valid target."
-                    << std::endl;
-
-                return;
+                    if (inRange)
+                        selectableTargets.push_back(enemySidekick);
+                }
             }
 
             // ========================================
@@ -929,33 +933,35 @@ void AttackUI::draw()
     // ========================================================
     // SELECT ATTACKER
     // ========================================================
+    if(phase == AttackPhase::SelectAttacker)
+    {
+        const char *title = "CHOOSE YOUR ATTACKER";
 
-    const char *title =
-        "CHOOSE YOUR ATTACKER";
+        const float titleSize =
+            38.0f;
 
-    const float titleSize =
-        38.0f;
+        Vector2 titleMeasure =
+            MeasureTextEx(
+                font,
+                title,
+                titleSize,
+                2.0f);
 
-    Vector2 titleMeasure =
-        MeasureTextEx(
+        DrawTextEx(
             font,
             title,
+
+            Vector2{
+                (GetScreenWidth() -
+                titleMeasure.x) / 2.0f,
+
+                70.0f},
+
             titleSize,
-            2.0f);
-
-    DrawTextEx(
-        font,
-        title,
-
-        Vector2{
-            (GetScreenWidth() -
-             titleMeasure.x) / 2.0f,
-
-            70.0f},
-
-        titleSize,
-        2.0f,
-        WHITE);
+            2.0f,
+            WHITE);
+    }
+    
 
     // ========================================================
     // Fighter boxes
