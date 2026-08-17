@@ -9,7 +9,9 @@
 
 using namespace std;
 
-void MasterOfDisguise::apply(Game &game, Fighter &fighter, Fighter &target, const Card &self, Card *opponentCard, bool didUserWin)
+void MasterOfDisguise::apply(Game &game, Fighter &fighter, Fighter &target,
+                             const Card &self, Card *opponentCard, bool didUserWin,
+                             const EffectChoice &choice)
 {
     if (!fighter.isHero())
     {
@@ -23,45 +25,12 @@ void MasterOfDisguise::apply(Game &game, Fighter &fighter, Fighter &target, cons
         throw runtime_error("\n[!] ERROR : Fighter has NO owner!\n");
     }
 
-    Player *enemyPlayer = game.selectOpponent(*myPlayer);
-
-    if (enemyPlayer == nullptr)
+    if (choice.selectedFighter == nullptr)
     {
-        throw runtime_error("\n[!] ERROR : NO opponent selected!\n");
+        throw runtime_error("\n[!] ERROR : No opponent fighter selected!\n");
     }
 
-    vector<Fighter *> enemyFighters;
-
-    if (enemyPlayer->getHero()->isAlive())
-    {
-        enemyFighters.push_back(enemyPlayer->getHero());
-    }
-
-    for (Sidekick *sidekick : enemyPlayer->getSideKicks())
-    {
-        if (sidekick->isAlive())
-        {
-            enemyFighters.push_back(sidekick);
-        }
-    }
-
-    cout << "\nChoose opponent :\n";
-
-    for (int i = 0; i < enemyFighters.size(); i++)
-    {
-        cout << i + 1 << ". " << enemyFighters[i]->getName() << endl;
-    }
-    cout << "~~> ";
-    int choice;
-    cin >> choice;
-
-    while (choice < 1 || choice > enemyFighters.size())
-    {
-        cout << "Invalid choice. Try again : ";
-        cin >> choice;
-    }
-
-    Fighter *selectedEnemy = enemyFighters[choice - 1];
+    Fighter *selectedEnemy = choice.selectedFighter;
 
     Player *enemyOwner = selectedEnemy->getOwner();
 
@@ -87,6 +56,11 @@ void MasterOfDisguise::apply(Game &game, Fighter &fighter, Fighter &target, cons
     cout << enemyHero->getName() << "'s Health : " << enemyHero->getHealth() << "/" << enemyHero->getMaxHealth() << endl;
 
     cout << "========================================\n";
+}
+
+EffectInputKind MasterOfDisguise::getInputKind() const
+{
+    return EffectInputKind::ChooseEnemyFighter;
 }
 
 string MasterOfDisguise::getDescription() const

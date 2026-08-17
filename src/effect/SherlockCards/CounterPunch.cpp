@@ -8,9 +8,10 @@
 
 using namespace std;
 
-void CounterPunch::apply(Game &game, Fighter &fighter, Fighter &target, const Card &self, Card *opponentCard, bool didUserWin)
+void CounterPunch::apply(Game &game, Fighter &fighter, Fighter &target,
+                         const Card &self, Card *opponentCard, bool didUserWin,
+                         const EffectChoice &choice)
 {
-
     if (!fighter.isHero())
     {
         throw runtime_error("\n[!] ERROR : Counter Punch can only be used by Sherlock Holmes!\n");

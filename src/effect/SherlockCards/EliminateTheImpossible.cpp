@@ -3,12 +3,15 @@
 #include "player/Player.h"
 #include "fighter/Fighter.h"
 #include "card/Card.h"
+#include "card/Hand.h"
 #include <iostream>
 #include <stdexcept>
 
 using namespace std;
 
-void EliminateTheImpossible::apply(Game &game, Fighter &fighter, Fighter &target, const Card &self, Card *opponentCard, bool didUserWin)
+void EliminateTheImpossible::apply(Game &game, Fighter &fighter, Fighter &target,
+                                   const Card &self, Card *opponentCard, bool didUserWin,
+                                   const EffectChoice &choice)
 {
     if (!fighter.isHero())
     {
@@ -37,23 +40,16 @@ void EliminateTheImpossible::apply(Game &game, Fighter &fighter, Fighter &target
         return;
     }
 
+    if (choice.selectedCardIndex < 0 ||
+        choice.selectedCardIndex >= opponentHand.getSize())
+    {
+        throw out_of_range("\n[!] ERROR : Invalid card selection!\n");
+    }
+
     cout << "\n========================================\n";
     cout << "-< Eliminate The Impossible >- ACTIVATED!\n";
 
-    cout << "\nOpponent's hand :\n";
-    opponentHand.display();
-
-    cout << "\nChoose a card to burn : ";
-
-    int choice;
-    cin >> choice;
-
-    if (choice < 1 || choice > opponentHand.getSize())
-    {
-        throw out_of_range("\n[!] ERROR : Invalid card!\n");
-    }
-
-    Card *burnedCard = opponentHand.removeCard(choice - 1);
+    Card *burnedCard = opponentHand.removeCard(choice.selectedCardIndex);
 
     cout << "\n[-] " << burnedCard->getName() << " GOT BURNED!\n";
 
@@ -61,6 +57,11 @@ void EliminateTheImpossible::apply(Game &game, Fighter &fighter, Fighter &target
 
     cout << "[+] Card removed successfully.\n";
     cout << "========================================\n";
+}
+
+EffectInputKind EliminateTheImpossible::getInputKind() const
+{
+    return EffectInputKind::ChooseOpponentCardToBurn;
 }
 
 string EliminateTheImpossible::getDescription() const

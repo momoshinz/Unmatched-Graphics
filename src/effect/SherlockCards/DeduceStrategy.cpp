@@ -7,7 +7,9 @@
 
 using namespace std;
 
-void DeduceStrategy::apply(Game &game, Fighter &fighter, Fighter &target, const Card &self, Card *opponentCard, bool didUserWin)
+void DeduceStrategy::apply(Game &game, Fighter &fighter, Fighter &target,
+                           const Card &self, Card *opponentCard, bool didUserWin,
+                           const EffectChoice &choice)
 {
     if (!fighter.isHero())
     {

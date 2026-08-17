@@ -7,7 +7,9 @@
 #include <stdexcept>
 using namespace std;
 
-void FeintSherlock::apply(Game &game, Fighter &fighter, Fighter &target, const Card &self, Card *opponentCard, bool didUserWin)
+void FeintSherlock::apply(Game &game, Fighter &fighter, Fighter &target,
+                          const Card &self, Card *opponentCard, bool didUserWin,
+                          const EffectChoice &choice)
 {
     Player *player = fighter.getOwner();
     if (player == nullptr)

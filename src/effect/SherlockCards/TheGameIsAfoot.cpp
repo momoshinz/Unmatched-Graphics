@@ -5,12 +5,12 @@
 #include "board/Board.h"
 #include "fighter/Fighter.h"
 #include <iostream>
-#include <vector>
-#include <queue>
 #include <stdexcept>
 using namespace std;
 
-void TheGameIsAfoot::apply(Game &game, Fighter &fighter, Fighter &target, const Card &self, Card *opponentCard, bool didUserWin)
+void TheGameIsAfoot::apply(Game &game, Fighter &fighter, Fighter &target,
+                           const Card &self, Card *opponentCard, bool didUserWin,
+                           const EffectChoice &choice)
 {
     if (!fighter.isHero())
     {
@@ -29,30 +29,13 @@ void TheGameIsAfoot::apply(Game &game, Fighter &fighter, Fighter &target, const 
         throw runtime_error("\n[!] ERROR : Sherlock has NO position on the map!\n");
     }
 
-    vector<Space *> reachableSpaces = game.getBoard().getAvailableMoves(&fighter, 3);
-    if (reachableSpaces.empty())
+    if (choice.selectedSpace == nullptr)
     {
-        cerr << "\n[!] NO reachable empty home.\n";
-        return;
-    }
-    cout << "\n==============================================";
-    cout << "\n[o] Choose a destination { up to 3 homes away } :\n";
-    cout << "===============================================\n";
-
-    for (int i = 0; i < reachableSpaces.size(); i++)
-    {
-        cout << "\n> " << i + 1 << ". home" << reachableSpaces[i]->getId() << endl;
+        throw runtime_error("\n[!] ERROR : No destination selected!\n");
     }
 
-    cout << "\n> Enter your choice (1 to " << reachableSpaces.size() << ") : ";
-    int choice;
-    cin >> choice;
-    if (choice < 1 || choice > reachableSpaces.size())
-    {
-        throw out_of_range("\n[!] ERROR : Invalid choice!\n");
-    }
+    Space *destination = choice.selectedSpace;
 
-    Space *destination = reachableSpaces[choice - 1];
     if (game.getBoard().moveFighter(&fighter, destination))
     {
         cout << "\n========================================\n";
@@ -65,6 +48,16 @@ void TheGameIsAfoot::apply(Game &game, Fighter &fighter, Fighter &target, const 
     {
         cout << "\n[!] ERROR : FAILED to move Sherlock Holmes!\n";
     }
+}
+
+EffectInputKind TheGameIsAfoot::getInputKind() const
+{
+    return EffectInputKind::ChooseReachableSpace;
+}
+
+int TheGameIsAfoot::getMoveRange() const
+{
+    return 3;
 }
 
 string TheGameIsAfoot::getDescription() const

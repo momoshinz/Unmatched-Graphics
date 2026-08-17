@@ -18,7 +18,8 @@ GameScreen::GameScreen(
       rightPlayerPanel(assets),
       attackUI(assets),
       schemeUI(assets),
-      maneuverUI(assets)
+      maneuverUI(assets),
+      effectUI(assets)
 {
 }
 
@@ -272,6 +273,12 @@ int GameScreen::update()
                     }
                 }
             }
+
+            if (effectUI.isChoosingSpace())
+            {
+                Space *clickedSpace = game->getBoard().getSpace(clickedSpaceId);
+                effectUI.selectSpace(clickedSpace);
+            }
         }
     } // <-- پایان if (IsMouseButtonPressed(...))
 
@@ -296,80 +303,79 @@ int GameScreen::update()
 
             if (currentPlayer != nullptr)
             {
-                Hand &hand = currentPlayer->getHand();
-                const std::vector<Card *> &cards = hand.getCards();
+                Effect *effect = playedCard->getEffect();
 
-                for (int i = 0; i < static_cast<int>(cards.size()); i++)
+                if (effect == nullptr || effect->getInputKind() == EffectInputKind::None)
                 {
-                    if (cards[i] == playedCard)
+                    // خودکار: مستقیم اجرا کن
+                    if (effect != nullptr)
                     {
-                        Card *removed = hand.removeCard(i);
-
-                        currentPlayer->getDiscardPile().addCard(removed);
-
-                        std::cout
-                            << "[.] Scheme card discarded: "
-                            << removed->getName()
-                            << std::endl;
-
-                        break;
+                        EffectChoice emptyChoice;
+                        effect->apply(*game, *currentPlayer->getHero(),
+                                      *currentPlayer->getHero(), *playedCard,
+                                      nullptr, false, emptyChoice);
                     }
+
+                    finalizeSchemeCard(playedCard);
                 }
+                else
+                {
+                    // تعاملی: EffectUI رو باز کن، فعلاً کارت رو نگه دار
+                    pendingSchemeCard = playedCard;
 
-                game->getTurnManager().useAction();
+                    Fighter *actingFighter = currentPlayer->getHero();
 
-                std::cout
-                    << "[.] Actions remaining: "
-                    << game->getTurnManager().getRemainingActions()
-                    << std::endl;
+                    if (playedCard->getOwnerType() == OwnerType::Sidekick)
+                    {
+                        actingFighter = currentPlayer->getWatson();
 
-                checkAndEndTurnIfNeeded();
+                        if (actingFighter == nullptr && !currentPlayer->getSideKicks().empty())
+                        {
+                            actingFighter = currentPlayer->getSideKicks()[0];
+                        }
+                    }
+
+                    effectUI.open(game, effect, actingFighter, actingFighter);
+                }
             }
         }
 
         schemeUI.resetConfirmed();
     }
 
-    if (maneuverUI.isOpen())
+    if (effectUI.isOpen())
     {
-        maneuverUI.update();
+        effectUI.update();
     }
 
-    if (maneuverUI.needsAvailableMoves())
-    {
-        Fighter *fighter = maneuverUI.getFighterNeedingMoves();
-
-        if (fighter != nullptr)
-        {
-            int budget = maneuverUI.getMovementBudget();
-
-            std::vector<std::pair<Space *, int>> moves =
-                game->getBoard().getAvailableMovesWithDistance(fighter, budget);
-
-            maneuverUI.beginSpaceSelection(moves);
-        }
-    }
-
-    if (maneuverUI.consumeReadyToFinalize())
+    if (effectUI.isReady() && pendingSchemeCard != nullptr)
     {
         Player *currentPlayer = game->getTurnManager().getCurrentPlayer();
 
         if (currentPlayer != nullptr)
         {
-            currentPlayer->drawCardToHand();
+            Effect *effect = pendingSchemeCard->getEffect();
 
-            std::cout << "[+] Drew one card from maneuver." << std::endl;
+            Fighter *actingFighter = currentPlayer->getHero();
 
-            game->getTurnManager().useAction();
+            if (pendingSchemeCard->getOwnerType() == OwnerType::Sidekick)
+            {
+                actingFighter = currentPlayer->getWatson();
+            }
 
-            std::cout << "[.] Actions remaining: "
-                      << game->getTurnManager().getRemainingActions()
-                      << std::endl;
+            if (effect != nullptr && actingFighter != nullptr)
+            {
+                effect->apply(*game, *actingFighter, *actingFighter,
+                              *pendingSchemeCard, nullptr, false,
+                              effectUI.getChoice());
+            }
 
-            checkAndEndTurnIfNeeded();
+            finalizeSchemeCard(pendingSchemeCard);
         }
-    }
 
+        pendingSchemeCard = nullptr;
+        effectUI.reset();
+    }
     return 0;
 }
 
@@ -439,6 +445,11 @@ void GameScreen::draw()
     {
         maneuverUI.draw();
     }
+
+    if (effectUI.isOpen())
+    {
+        effectUI.draw();
+    }
 }
 
 // =========================================
@@ -504,6 +515,7 @@ void GameScreen::drawMap()
     drawPlacedFighters();
     drawFogs();
     drawManeuverMovableSpaces();
+    drawEffectSelectableSpaces();
 }
 
 // =========================================
@@ -2172,5 +2184,58 @@ void GameScreen::drawManeuverMovableSpaces()
 
         DrawCircleV(center, radius, Color{80, 220, 100, 130});
         DrawCircleLinesV(center, radius, Color{120, 255, 150, 220});
+    }
+}
+
+void GameScreen::finalizeSchemeCard(Card *playedCard)
+{
+    Player *currentPlayer = game->getTurnManager().getCurrentPlayer();
+
+    if (currentPlayer == nullptr || playedCard == nullptr)
+    {
+        return;
+    }
+
+    Hand &hand = currentPlayer->getHand();
+    const std::vector<Card *> &cards = hand.getCards();
+
+    for (int i = 0; i < static_cast<int>(cards.size()); i++)
+    {
+        if (cards[i] == playedCard)
+        {
+            Card *removed = hand.removeCard(i);
+            currentPlayer->getDiscardPile().addCard(removed);
+            break;
+        }
+    }
+
+    game->getTurnManager().useAction();
+    checkAndEndTurnIfNeeded();
+}
+
+void GameScreen::drawEffectSelectableSpaces()
+{
+    if (!effectUI.isChoosingSpace())
+    {
+        return;
+    }
+
+    float mapX, mapY, scale, mapWidth, mapHeight;
+    calculateMapTransform(mapX, mapY, scale, mapWidth, mapHeight);
+
+    for (Space *space : effectUI.getCandidateSpaces())
+    {
+        int spaceId = space->getId();
+
+        if (spaceId < 1 || spaceId > 32)
+        {
+            continue;
+        }
+
+        Vector2 center = mapImageToScreen(SPACE_GRAPHICS[spaceId - 1].center);
+        float radius = SPACE_GRAPHICS[spaceId - 1].radius * scale;
+
+        DrawCircleV(center, radius, Color{255, 200, 60, 130});
+        DrawCircleLinesV(center, radius, Color{255, 220, 100, 220});
     }
 }

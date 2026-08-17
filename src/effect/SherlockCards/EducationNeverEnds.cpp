@@ -7,7 +7,9 @@
 
 using namespace std;
 
-void EducationNeverEnds::apply(Game &game, Fighter &fighter, Fighter &target, const Card &self, Card *opponentCard, bool didUserWin)
+void EducationNeverEnds::apply(Game &game, Fighter &fighter, Fighter &target,
+                               const Card &self, Card *opponentCard, bool didUserWin,
+                               const EffectChoice &choice)
 {
     cout << "\n========================================\n";
     cout << "-< Education Never Ends >- ACTIVATED!\n";

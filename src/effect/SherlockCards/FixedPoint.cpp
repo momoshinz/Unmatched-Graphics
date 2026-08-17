@@ -1,76 +1,47 @@
-#include "effect/SherlockCards/FixedPoint.h"
-#include "game/Game.h"
-#include "card/Card.h"
+#include "effect/SherlockCards/FeintSherlock.h"
 #include "fighter/Fighter.h"
-#include "fighter/Sherlock.h"
+#include "game/Game.h"
 #include "player/Player.h"
-#include "board/Board.h"
-#include "board/Space.h"
+#include "card/Card.h"
 #include <iostream>
-
+#include <stdexcept>
 using namespace std;
 
-void FixedPoint::apply(Game &game, Fighter &fighter, Fighter &target, const Card &self, Card *opponentCard, bool attackerWon)
+void FeintSherlock::apply(Game &game, Fighter &fighter, Fighter &target,
+                          const Card &self, Card *opponentCard, bool didUserWin,
+                          const EffectChoice &choice)
 {
-    if (fighter.isHero())
-    {
-        throw runtime_error("\n[!] ERROR : Fixed Point In A Changing Age can only be used by Dr. Watson!\n");
-    }
-
     Player *player = fighter.getOwner();
-
     if (player == nullptr)
     {
         throw runtime_error("\n[!] ERROR : Fighter has NO owner!\n");
     }
 
-    Watson *watson = player->getWatson();
-
-    if (watson == nullptr)
+    if (opponentCard == nullptr)
     {
-        throw runtime_error("\n[!] ERROR : Watson NOT found!\n");
+        cerr << "\n[!] ERROR : Opponent has NO card to cancel.\n";
+        return;
     }
 
-    Hero *sherlock = player->getHero();
-
-    if (sherlock == nullptr)
+    if (!opponentCard->hasEffect())
     {
-        throw runtime_error("\n[!] ERROR : Sherlock NOT found!\n");
+        cerr << "\n[!] ERROR : Opponent's card has NO effect to cancel.\n";
+        return;
     }
 
-    if (watson->getPosition() == nullptr)
-    {
-        throw runtime_error("\n[!] ERROR : Watson has NO position on map!\n");
-    }
-
-    if (sherlock->getPosition() == nullptr)
-    {
-        throw runtime_error("\n[!] ERROR : Sherlock has NO position on map!\n");
-    }
-
-    if (watson->isAdjacent(sherlock, game.getBoard()))
-    {
-        watson->heal(1);
-        sherlock->heal(1);
-
-        cout << "\n========================================\n";
-        cout << "-< Fixed Point >- ACTIVATED!\n";
-
-        cout << "[+] Watson and Sherlock each RECOVER +1 health!\n";
-        cout << "========================================\n";
-    }
-    else
-    {
-        cout << "\n[!] Watson is NOT adjacent to Sherlock. Effect CANCELED.\n";
-    }
+    opponentCard->cancelEffects();
+    cout << "========================================";
+    cout << "\n-< feint >- ACTIVATED!\n";
+    cout << "\n[+] Effects of " << opponentCard->getName() << " have been CANCELED!\n";
+    cout << "========================================\n";
 }
 
-string FixedPoint::getDescription() const
+string FeintSherlock::getDescription() const
 {
-    return "> If Dr. Watson is adjacent to Holmes, add 1 health to both.";
+    return "> Cancel all effects on your opponent's card.";
 }
 
-Effect *FixedPoint::clone() const
+Effect *FeintSherlock::clone() const
 {
-    return new FixedPoint(*this);
+    return new FeintSherlock(*this);
 }

@@ -1,23 +1,15 @@
-#ifndef THEGAMEISAFOOT_H
-#define THEGAMEISAFOOT_H
-
+#pragma once
 #include "effect/Effect.h"
 
 class TheGameIsAfoot : public Effect
 {
 public:
-    TheGameIsAfoot() = default;
-    ~TheGameIsAfoot() override = default;
+    void apply(Game &game, Fighter &fighter, Fighter &target,
+               const Card &self, Card *opponentCard, bool didUserWin,
+               const EffectChoice &choice) override;
 
-    void apply(Game &game,
-               Fighter &fighter,
-               Fighter &target,
-               const Card &self,
-               Card *opponentCard,
-               bool didUserWin) override;
-
-    virtual string getDescription() const override;
+    EffectInputKind getInputKind() const override;
+    int getMoveRange() const override;
+    string getDescription() const override;
     Effect *clone() const override;
 };
-
-#endif

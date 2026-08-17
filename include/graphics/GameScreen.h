@@ -7,6 +7,7 @@
 #include "graphics/AttackUI.h"
 #include "graphics/SchemeUI.h"
 #include "graphics/ManeuverUI.h"
+#include "graphics/EffectUI.h"
 
 class GameScreen
 {
@@ -16,6 +17,8 @@ private:
     AttackUI attackUI;
     SchemeUI schemeUI;
     ManeuverUI maneuverUI;
+    EffectUI effectUI;
+    Card *pendingSchemeCard = nullptr;  
 
     bool guideOpen = false;
 
@@ -80,6 +83,8 @@ public:
     void drawTurnIndicator();
     void checkAndEndTurnIfNeeded();
     void drawManeuverMovableSpaces();
+    void finalizeSchemeCard(Card *playedCard);
+    void drawEffectSelectableSpaces();
 };
 
 #endif

@@ -10,7 +10,9 @@
 
 using namespace std;
 
-void AdministerAid::apply(Game &game, Fighter &fighter, Fighter &target, const Card &self, Card *opponentCard, bool didUserWin)
+void AdministerAid::apply(Game &game, Fighter &fighter, Fighter &target,
+                          const Card &self, Card *opponentCard, bool didUserWin,
+                          const EffectChoice &choice)
 {
     if (fighter.isHero())
     {
@@ -38,50 +40,22 @@ void AdministerAid::apply(Game &game, Fighter &fighter, Fighter &target, const C
         throw runtime_error("\n[!] ERROR : Sherlock NOT found!\n");
     }
 
-    Space *heroSpace = sherlock->getPosition();
-
-    if (heroSpace == nullptr)
+    if (choice.selectedSpace == nullptr)
     {
-        throw runtime_error("\n[!] ERROR : Sherlock is NOT on the map!\n");
+        throw runtime_error("\n[!] ERROR : No destination selected for Dr. Watson!\n");
     }
 
-    vector<Space *> availableSpaces;
-
-    for (Space *neighbor : heroSpace->getNeighbors())
+    if (choice.selectedSpace->isOccupied())
     {
-        if (!neighbor->isOccupied())
-        {
-            availableSpaces.push_back(neighbor);
-        }
-    }
-
-    if (availableSpaces.empty())
-    {
-        throw runtime_error("\n[!] ERROR : There is NO empty adjacent home to Sherlock!\n");
+        throw runtime_error("\n[!] ERROR : Selected home is already OCCUPIED!\n");
     }
 
     cout << "\n========================================";
     cout << "\n-< Administer Aid >- ACTIVATED!\n";
 
-    cout << "\nAvailable destinations for Dr. Watson :\n";
+    watson->moveTo(choice.selectedSpace);
 
-    for (size_t i = 0; i < availableSpaces.size(); i++)
-    {
-        cout << i + 1 << ". Home " << availableSpaces[i]->getId() << endl;
-    }
-
-    int choice;
-    cout << "\n> Choose destination : ";
-    cin >> choice;
-
-    if (choice < 1 || choice > static_cast<int>(availableSpaces.size()))
-    {
-        throw out_of_range("\n[!] ERROR : Invalid home selection! :(\n");
-    }
-
-    watson->moveTo(availableSpaces[choice - 1]);
-
-    cout << "\n[o] Dr. Watson moved to Home " << availableSpaces[choice - 1]->getId() << endl;
+    cout << "\n[o] Dr. Watson moved to Home " << choice.selectedSpace->getId() << endl;
 
     sherlock->heal(1);
 
@@ -96,6 +70,11 @@ void AdministerAid::apply(Game &game, Fighter &fighter, Fighter &target, const C
         cout << "[!] Deck is empty. No card drawn.\n";
     }
     cout << "========================================\n";
+}
+
+EffectInputKind AdministerAid::getInputKind() const
+{
+    return EffectInputKind::ChooseAdjacentEmptySpace;
 }
 
 string AdministerAid::getDescription() const
