@@ -52,6 +52,9 @@ class AttackUI
         bool defenseChoiceMade = false;
         bool wantsDefenseCard = false;
         Rectangle playButton;
+
+        bool showError = false;
+        std::string errorMessage;
         
     public:
         AttackUI(AssetManager *assets);

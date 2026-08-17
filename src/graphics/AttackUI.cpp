@@ -195,6 +195,29 @@ void AttackUI::update()
 
     Vector2 mouse = GetMousePosition();
 
+    if (showError)
+    {
+        Rectangle closeButton{
+            (GetScreenWidth() - 220.0f) / 2.0f,
+            350.0f,
+            220.0f,
+            60.0f};
+
+        if (CheckCollisionPointRec(
+                mouse,
+                closeButton))
+        {
+            showError = false;
+            errorMessage.clear();
+
+            open = false;
+
+            return;
+        }
+
+        return;
+    }
+
     // ========================================================
     // SELECT ATTACKER
     // ========================================================
@@ -260,10 +283,8 @@ void AttackUI::update()
 
                 if (selectableAttackCards.empty())
                 {
-                    std::cout
-                        << "[!] No playable attack cards."
-                        << std::endl;
-
+                    showError = true;
+                    errorMessage = "THIS FIGHTER HAS NO PLAYABLE ATTACK CARD!";
                     return;
                 }
 
@@ -405,6 +426,16 @@ void AttackUI::update()
                     if (inRange)
                         selectableTargets.push_back(enemySidekick);
                 }
+            }
+
+            if (selectableTargets.empty())
+            {
+                showError = true;
+
+                errorMessage =
+                    "NO VALID TARGET FOR THIS ATTACKER!";
+
+                return;
             }
 
             // ========================================
@@ -564,11 +595,8 @@ void AttackUI::update()
             // اگر مدافع کارت دفاعی قابل استفاده ندارد
             if (selectableDefenseCards.empty())
             {
-                std::cout
-                    << "[!] Defender has no playable defense cards."
-                    << std::endl;
-
-                open = false;
+                showError = true;
+                errorMessage = "DEFENDER HAS NO PLAYABLE DEFEND CARD!";
                 return;
             }
 
@@ -703,6 +731,100 @@ void AttackUI::draw()
     }
 
     Font font = assets->getGameFont();
+
+    if (showError)
+    {
+        DrawRectangle(
+            0,
+            0,
+            GetScreenWidth(),
+            GetScreenHeight(),
+            Color{0, 0, 0, 220}
+        );
+        const float messageSize = 32.0f;
+
+        Vector2 messageSizeVec =
+            MeasureTextEx(
+                font,
+                errorMessage.c_str(),
+                messageSize,
+                2.0f);
+
+        DrawTextEx(
+            font,
+            errorMessage.c_str(),
+
+            Vector2{
+                (GetScreenWidth() -
+                messageSizeVec.x) / 2.0f,
+                250.0f},
+
+            messageSize,
+            2.0f,
+            WHITE);
+
+        // ====================================================
+        // CLOSE BUTTON
+        // ====================================================
+
+        Rectangle closeButton{
+            (GetScreenWidth() - 220.0f) / 2.0f,
+            350.0f,
+            220.0f,
+            60.0f};
+
+        Vector2 mouse =
+            GetMousePosition();
+
+        bool hovered =
+            CheckCollisionPointRec(
+                mouse,
+                closeButton);
+
+        DrawRectangleRounded(
+            closeButton,
+            1.0f,
+            20,
+            hovered
+                ? Color{75, 75, 75, 245}
+                : Color{35, 35, 35, 235});
+
+        DrawRectangleRoundedLines(
+            closeButton,
+            1.0f,
+            20,
+            hovered
+                ? WHITE
+                : Color{150, 150, 150, 255});
+
+        const char *text = "CLOSE";
+
+        Vector2 textSize =
+            MeasureTextEx(
+                font,
+                text,
+                26.0f,
+                1.5f);
+
+        DrawTextEx(
+            font,
+            text,
+
+            Vector2{
+                closeButton.x +
+                    (closeButton.width -
+                    textSize.x) / 2.0f,
+
+                closeButton.y +
+                    (closeButton.height -
+                    textSize.y) / 2.0f},
+
+            26.0f,
+            1.5f,
+            WHITE);
+
+        return;
+    }
 
     // ========================================================
     // Dark overlay
