@@ -963,159 +963,149 @@ void AttackUI::draw()
     }
     
 
-    // ========================================================
-    // Fighter boxes
-    // ========================================================
-
-    Vector2 mouse =
-        GetMousePosition();
-
-    for (size_t i = 0;
-         i < selectableFighters.size();
-         i++)
+    if (phase == AttackPhase::SelectAttacker)
     {
-        Fighter *fighter =
-            selectableFighters[i];
+        // ========================================================
+        // Fighter boxes
+        // ========================================================
 
-        if (fighter == nullptr)
+        Vector2 mouse =
+            GetMousePosition();
+
+        for (size_t i = 0;
+            i < selectableFighters.size();
+            i++)
         {
-            continue;
-        }
+            Fighter *fighter =
+                selectableFighters[i];
 
-        Rectangle box =
-            fighterBoxes[i];
+            if (fighter == nullptr)
+            {
+                continue;
+            }
 
-        bool hovered =
-            CheckCollisionPointRec(
-                mouse,
-                box);
+            Rectangle box =
+                fighterBoxes[i];
 
-        // ----------------------------------------------------
-        // Box
-        // ----------------------------------------------------
+            bool hovered =
+                CheckCollisionPointRec(
+                    mouse,
+                    box);
 
-        Color boxColor =
-            hovered
-                ? Color{75, 75, 75, 245}
-                : Color{35, 35, 35, 235};
+            Color boxColor =
+                hovered
+                    ? Color{75, 75, 75, 245}
+                    : Color{35, 35, 35, 235};
 
-        DrawRectangleRounded(
-            box,
-            0.08f,
-            20,
-            boxColor);
+            DrawRectangleRounded(
+                box,
+                0.08f,
+                20,
+                boxColor);
 
-        // ----------------------------------------------------
-        // Border
-        // ----------------------------------------------------
+            DrawRectangleRoundedLines(
+                box,
+                0.08f,
+                20,
+                hovered
+                    ? WHITE
+                    : Color{150, 150, 150, 255});
 
-        DrawRectangleRoundedLines(
-            box,
-            0.08f,
-            20,
-            hovered
-                ? WHITE
-                : Color{150, 150, 150, 255});
+            // ----------------------------------------------------
+            // Fighter image
+            // ----------------------------------------------------
 
-        // ----------------------------------------------------
-        // Fighter image
-        // ----------------------------------------------------
+            Texture2D texture =
+                getFighterTexture(
+                    assets,
+                    fighter);
 
-        Texture2D texture =
-            getFighterTexture(
-                assets,
-                fighter);
+            if (texture.id != 0)
+            {
+                const float imagePadding = 15.0f;
 
-        if (texture.id != 0)
-        {
-            const float imagePadding =
-                15.0f;
+                Rectangle source{
+                    0.0f,
+                    0.0f,
+                    static_cast<float>(
+                        texture.width),
+                    static_cast<float>(
+                        texture.height)};
 
-            Rectangle source{
-                0.0f,
-                0.0f,
-                static_cast<float>(
-                    texture.width),
-                static_cast<float>(
-                    texture.height)};
+                Rectangle destination{
+                    box.x + imagePadding,
+                    box.y + imagePadding,
+                    box.width -
+                        2.0f * imagePadding,
+                    220.0f};
 
-            Rectangle destination{
-                box.x + imagePadding,
-                box.y + imagePadding,
+                DrawTexturePro(
+                    texture,
+                    source,
+                    destination,
+                    Vector2{0.0f, 0.0f},
+                    0.0f,
+                    WHITE);
+            }
 
-                box.width -
-                    2.0f * imagePadding,
+            // ----------------------------------------------------
+            // Fighter name
+            // ----------------------------------------------------
 
-                220.0f};
+            std::string name =
+                fighter->getName();
 
-            DrawTexturePro(
-                texture,
-                source,
-                destination,
-                Vector2{0.0f, 0.0f},
-                0.0f,
-                WHITE);
-        }
+            Vector2 nameSize =
+                MeasureTextEx(
+                    font,
+                    name.c_str(),
+                    22.0f,
+                    1.0f);
 
-        // ----------------------------------------------------
-        // Fighter name
-        // ----------------------------------------------------
-
-        std::string name =
-            fighter->getName();
-
-        Vector2 nameSize =
-            MeasureTextEx(
+            DrawTextEx(
                 font,
                 name.c_str(),
+
+                Vector2{
+                    box.x +
+                        (box.width -
+                        nameSize.x) / 2.0f,
+                    box.y + 245.0f},
+
                 22.0f,
-                1.0f);
+                1.0f,
+                WHITE);
 
-        DrawTextEx(
-            font,
-            name.c_str(),
+            // ----------------------------------------------------
+            // Health
+            // ----------------------------------------------------
 
-            Vector2{
-                box.x +
-                    (box.width -
-                     nameSize.x) / 2.0f,
+            std::string healthText =
+                "HP: " +
+                std::to_string(
+                    fighter->getHealth());
 
-                box.y + 245.0f},
+            Vector2 healthSize =
+                MeasureTextEx(
+                    font,
+                    healthText.c_str(),
+                    18.0f,
+                    1.0f);
 
-            22.0f,
-            1.0f,
-            WHITE);
-
-        // ----------------------------------------------------
-        // Health
-        // ----------------------------------------------------
-
-        std::string healthText =
-            "HP: " +
-            std::to_string(
-                fighter->getHealth());
-
-        Vector2 healthSize =
-            MeasureTextEx(
+            DrawTextEx(
                 font,
                 healthText.c_str(),
+
+                Vector2{
+                    box.x +
+                        (box.width -
+                        healthSize.x) / 2.0f,
+                    box.y + 270.0f},
+
                 18.0f,
-                1.0f);
-
-        DrawTextEx(
-            font,
-            healthText.c_str(),
-
-            Vector2{
-                box.x +
-                    (box.width -
-                     healthSize.x) / 2.0f,
-
-                box.y + 270.0f},
-
-            18.0f,
-            1.0f,
-            WHITE);
+                1.0f,
+                WHITE);
+        }
     }
 
     // ========================================================
