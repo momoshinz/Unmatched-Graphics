@@ -9,32 +9,34 @@
 #include <stdexcept>
 using namespace std;
 
-void DreamingOfRevenge::apply(Game &game, Fighter &fighter, Fighter &target, const Card &self, Card *opponentCard, bool didUserWin)
+void DreamingOfRevenge::apply(Game &game, Fighter &fighter, Fighter &target,
+                              const Card &self, Card *opponentCard, bool didUserWin,
+                              const EffectChoice &choice)
 {
-    Player* player = fighter.getOwner();
+    Player *player = fighter.getOwner();
     if (player == nullptr)
     {
         throw runtime_error("\n[!] ERROR : Fighter has NO owner!\n");
     }
 
-     if (!fighter.isHero())
+    if (!fighter.isHero())
     {
         throw runtime_error("\n[!] ERROR : Dreaming Of Revenge can only be used by Invisible Man!\n");
     }
 
-    Player* opponentPlayer = target.getOwner();
-    if(opponentPlayer == nullptr)
+    Player *opponentPlayer = target.getOwner();
+    if (opponentPlayer == nullptr)
     {
         cerr << "\n[!] ERROR : Target has NO owner!\n";
         return;
     }
 
-    Space* mySpace = fighter.getPosition();
-    if(mySpace == nullptr)
+    Space *mySpace = fighter.getPosition();
+    if (mySpace == nullptr)
     {
         throw runtime_error("\n[!] ERROR : Fighter has no position!");
     }
-    if(!mySpace->hasFogToken())
+    if (!mySpace->hasFogToken())
     {
         cout << "\n[!] ERROR : Invisible Man is not on a Fog token. card has no effect!\n";
         return;
@@ -42,38 +44,30 @@ void DreamingOfRevenge::apply(Game &game, Fighter &fighter, Fighter &target, con
     cout << "\n========================================";
     cout << "\n-< Dreaming Of Revenge >- ACTIVATED!\n";
 
-
     int damaged = 0;
-    Hero* enemyHero = opponentPlayer->getHero();
-    if(enemyHero != nullptr && enemyHero->isAlive() && enemyHero->getPosition() != nullptr && enemyHero->getPosition()->hasFogToken())
+    Hero *enemyHero = opponentPlayer->getHero();
+    if (enemyHero != nullptr && enemyHero->isAlive() && enemyHero->getPosition() != nullptr && enemyHero->getPosition()->hasFogToken())
     {
         enemyHero->takeDamage(1);
         damaged++;
         cout << "\n[-] " << enemyHero->getName() << " took 1 damage.\n";
     }
-    for(Sidekick* sidekick : opponentPlayer->getSideKicks())
+    for (Sidekick *sidekick : opponentPlayer->getSideKicks())
     {
-        if(sidekick == nullptr)
-        {
+        if (sidekick == nullptr)
             continue;
-        }
-        if(!sidekick->isAlive())
-        {
+        if (!sidekick->isAlive())
             continue;
-        }
-        if(sidekick->getPosition() == nullptr)
-        {
+        if (sidekick->getPosition() == nullptr)
             continue;
-        }
-        if(!sidekick->getPosition()->hasFogToken())
-        {
+        if (!sidekick->getPosition()->hasFogToken())
             continue;
-        }
+
         sidekick->takeDamage(1);
         damaged++;
         cout << "\n[-] " << sidekick->getName() << " took 1 damage.\n";
     }
-    if(damaged == 0)
+    if (damaged == 0)
     {
         cout << "\n[!] ERROR : No opposing fighter was on a Fog token!\n";
     }

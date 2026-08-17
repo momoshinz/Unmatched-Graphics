@@ -1,23 +1,14 @@
-#ifndef CODEDNOTES_H
-#define CODEDNOTES_H
-
+#pragma once
 #include "effect/Effect.h"
 
 class CodedNotes : public Effect
 {
-    public:
-        CodedNotes() = default;
-        ~CodedNotes() override = default;
+public:
+    void apply(Game &game, Fighter &fighter, Fighter &target,
+               const Card &self, Card *opponentCard, bool didUserWin,
+               const EffectChoice &choice) override;
 
-        virtual void apply(Game &game,
-                        Fighter &fighter,
-                        Fighter &target,
-                        const Card &self,
-                        Card *opponentCard,
-                        bool didUserWin) override;
-
-        virtual string getDescription() const override;
-        Effect *clone() const override;
+    EffectInputKind getInputKind() const override;
+    string getDescription() const override;
+    Effect *clone() const override;
 };
-
-#endif

@@ -1,23 +1,13 @@
-#ifndef DREAMINGOFREVENGE_H
-#define DREAMINGOFREVENGE_H
-
+#pragma once
 #include "effect/Effect.h"
 
 class DreamingOfRevenge : public Effect
 {
-    public:
-        DreamingOfRevenge() = default;
-        ~DreamingOfRevenge() override = default;
+public:
+    void apply(Game &game, Fighter &fighter, Fighter &target,
+               const Card &self, Card *opponentCard, bool didUserWin,
+               const EffectChoice &choice) override;
 
-        virtual void apply(Game &game,
-                        Fighter &fighter,
-                        Fighter &target,
-                        const Card &self,
-                        Card *opponentCard,
-                        bool didUserWin) override;
-
-        virtual string getDescription() const override;
-        Effect *clone() const override;
+    string getDescription() const override;
+    Effect *clone() const override;
 };
-
-#endif

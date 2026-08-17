@@ -6,10 +6,11 @@
 #include "board/Space.h"
 #include <iostream>
 #include <stdexcept>
-
 using namespace std;
 
-void RollingFog::apply(Game &game, Fighter &fighter, Fighter &target, const Card &self, Card *opponentCard, bool didUserWin)
+void RollingFog::apply(Game &game, Fighter &fighter, Fighter &target,
+                       const Card &self, Card *opponentCard, bool didUserWin,
+                       const EffectChoice &choice)
 {
     Player *player = fighter.getOwner();
 
@@ -23,127 +24,31 @@ void RollingFog::apply(Game &game, Fighter &fighter, Fighter &target, const Card
         throw runtime_error("\n[!] ERROR : Rolling Fog can only be used by Invisible Man!\n");
     }
 
-    Board &board = game.getBoard();
-
     cout << "\n========================================";
     cout << "\n-< Rolling Fog >- ACTIVATED!\n";
 
-    vector<Space *> fogSpaces;
-
-    for (Space *space : board.getSpaces())
+    if (choice.selectedSpace == nullptr || choice.secondSpace == nullptr)
     {
-        if (space != nullptr && space->hasFogToken())
-        {
-            fogSpaces.push_back(space);
-        }
+        throw runtime_error("\n[!] ERROR : Invalid Fog move selection!\n");
     }
 
-    if (fogSpaces.empty())
+    if (!choice.selectedSpace->hasFogToken())
     {
-        cout << "\n[!] There is NO Fog token on the board!\n";
-        cout << "    Rolling Fog has NO effect.\n";
-        cout << "========================================\n";
-        return;
+        throw runtime_error("\n[!] ERROR : Selected source has NO Fog token!\n");
     }
 
-    cout << "\n========== Choose Fog Token ==========\n";
-
-    for (size_t i = 0; i < fogSpaces.size(); i++)
+    if (choice.secondSpace->hasFogToken())
     {
-        cout << i + 1
-             << ". Home " << fogSpaces[i]->getId()
-             << endl;
+        throw runtime_error("\n[!] ERROR : Destination already has a Fog token!\n");
     }
 
-    int fogChoice;
-
-    while (true)
-    {
-        cout << "\n> Choose a Fog token to move : ";
-        cin >> fogChoice;
-
-        if (cin.fail())
-        {
-            cin.clear();
-            cin.ignore(1000, '\n');
-            cout << "\n[!] ERROR : Invalid Choice!\n";
-            continue;
-        }
-
-        if (fogChoice >= 1 && fogChoice <= static_cast<int>(fogSpaces.size()))
-        {
-            break;
-        }
-
-        cout << "\n[!] ERROR : Invalid choice!\n";
-    }
-
-    Space *source = fogSpaces[fogChoice - 1];
-
-    cout << "\n========== Choose Destination ==========\n";
-
-    vector<Space *> destinations;
-
-    for (Space *space : board.getSpaces())
-    {
-        if (space == nullptr)
-            continue;
-
-        if (space == source)
-            continue;
-
-        if (space->hasFogToken())
-            continue;
-
-        destinations.push_back(space);
-    }
-
-    if (destinations.empty())
-    {
-        cout << "\n[!] There is NO valid destination for the Fog token!\n";
-        cout << "========================================\n";
-        return;
-    }
-
-    for (size_t i = 0; i < destinations.size(); i++)
-    {
-        cout << i + 1
-             << ". Home " << destinations[i]->getId()
-             << endl;
-    }
-
-    int destinationChoice;
-
-    while (true)
-    {
-        cout << "\n> Choose destination home : ";
-        cin >> destinationChoice;
-
-        if (cin.fail())
-        {
-            cin.clear();
-            cin.ignore(1000, '\n');
-            cout << "\n[!] ERROR : Invalid Choice!\n";
-            continue;
-        }
-
-        if (destinationChoice >= 1 && destinationChoice <= static_cast<int>(destinations.size()))
-        {
-            break;
-        }
-
-        cout << "\n[!] ERROR : Invalid choice!\n";
-    }
-
-    Space *destination = destinations[destinationChoice - 1];
-
-    source->setFogToken(false);
-    destination->setFogToken(true);
+    choice.selectedSpace->setFogToken(false);
+    choice.secondSpace->setFogToken(true);
 
     cout << "\n[+] Fog token moved from Home "
-         << source->getId()
+         << choice.selectedSpace->getId()
          << " to Home "
-         << destination->getId()
+         << choice.secondSpace->getId()
          << ".\n";
 
     game.getTurnManager().addAction();
@@ -151,6 +56,11 @@ void RollingFog::apply(Game &game, Fighter &fighter, Fighter &target, const Card
     cout << "[+] Invisible Man gains 1 action.\n";
 
     cout << "========================================\n";
+}
+
+EffectInputKind RollingFog::getInputKind() const
+{
+    return EffectInputKind::ChooseFogSourceAndDestination;
 }
 
 string RollingFog::getDescription() const

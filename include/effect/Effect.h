@@ -1,6 +1,8 @@
 #ifndef EFFECT_H
 #define EFFECT_H
+
 #include <string>
+#include <vector>
 
 class Fighter;
 class Game;
@@ -9,26 +11,31 @@ class Space;
 
 using namespace std;
 
-// ============================================================
-// اطلاعاتی که GUI از قبل جمع می‌کنه و به apply() می‌ده
-// ============================================================
 struct EffectChoice
 {
-    Space *selectedSpace = nullptr;     // خونه‌ی انتخاب‌شده (AdministerAid, TheGameIsAfoot)
-    int selectedCardIndex = -1;         // ایندکس کارت انتخاب‌شده از یک دست (EliminateTheImpossible)
-    Fighter *selectedFighter = nullptr; // فایتر انتخاب‌شده (MasterOfDisguise)
+    Space *selectedSpace = nullptr;     // خونه‌ی اصلی (حرکت فایتر یا مقصد فاگ)
+    Space *secondSpace = nullptr;       // خونه‌ی دوم (وقتی هم فایتر هم فاگ حرکت می‌کنن)
+    Fighter *selectedFighter = nullptr; // فایتر انتخاب‌شده (دشمن یا هدف)
+    int selectedCardIndex = -1;         // یک کارت از یک دست
+    vector<int> selectedCardIndices;    // چند کارت (مثل CodedNotes)
+    int selectedOrder = 0;              // ترتیب انتخابی (CodedNotes)
+    int selectedFogId = -1;             // ایندکس فاگِ انتخابی در player->getFogs()
+    int selectedOptionIndex = -1;       // انتخاب بین چند گزینه (مثل Lurking)
 };
 
-// ============================================================
-// نوع ورودی‌ای که این افکت از UI نیاز داره
-// ============================================================
 enum class EffectInputKind
 {
-    None,                     // خودکار، نیازی به تعامل نیست
-    ChooseAdjacentEmptySpace, // انتخاب یک خونه‌ی خالی مجاورِ یک فایتر مشخص (AdministerAid)
-    ChooseOpponentCardToBurn, // انتخاب یک کارت از دست حریف (EliminateTheImpossible)
-    ChooseEnemyFighter,       // انتخاب یک فایتر از حریف (MasterOfDisguise)
-    ChooseReachableSpace      // انتخاب یک خونه در محدوده‌ی حرکتِ خود فایتر (TheGameIsAfoot)
+    None,
+    ChooseAdjacentEmptySpace,
+    ChooseReachableSpace,
+    ChooseOpponentCardToBurn,
+    ChooseEnemyFighter,
+    ChooseTwoCardsAndOrder,        // CodedNotes
+    ChooseFighterMoveThenFogMove,  // IntoThinAir
+    ChooseLurkingOption,           // Lurking
+    ChooseFogSourceAndDestination, // RollingFog
+    ChooseFogAndDestination,       // SlipAway
+    ChooseEnemyAndFogDestination   // StepLightly
 };
 
 class Effect
@@ -45,16 +52,9 @@ public:
                        bool didUserWin,
                        const EffectChoice &choice) = 0;
 
-    virtual EffectInputKind getInputKind() const
-    {
-        return EffectInputKind::None;
-    }
-
-    // فقط برای افکت‌هایی که ChooseReachableSpace هستن معنا داره
-    virtual int getMoveRange() const
-    {
-        return 0;
-    }
+    virtual EffectInputKind getInputKind() const { return EffectInputKind::None; }
+    virtual int getMoveRange() const { return 0; }    // بُرد حرکت فایتر
+    virtual int getFogMoveRange() const { return 0; } // بُرد حرکت فاگ
 
     virtual string getDescription() const = 0;
     virtual Effect *clone() const = 0;

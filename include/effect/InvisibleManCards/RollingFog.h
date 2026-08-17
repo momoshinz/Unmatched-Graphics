@@ -1,23 +1,14 @@
-#ifndef ROLLINGFOG_H
-#define ROLLINGFOG_H
-
+#pragma once
 #include "effect/Effect.h"
 
 class RollingFog : public Effect
 {
 public:
-    RollingFog() = default;
-    ~RollingFog() override = default;
+    void apply(Game &game, Fighter &fighter, Fighter &target,
+               const Card &self, Card *opponentCard, bool didUserWin,
+               const EffectChoice &choice) override;
 
-    virtual void apply(Game &game,
-                       Fighter &fighter,
-                       Fighter &target,
-                       const Card &self,
-                       Card *opponentCard,
-                       bool didUserWin) override;
-
-    virtual string getDescription() const override;
+    EffectInputKind getInputKind() const override;
+    string getDescription() const override;
     Effect *clone() const override;
 };
-
-#endif

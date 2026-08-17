@@ -1,23 +1,13 @@
-#ifndef EMERGEFROMMIST_H
-#define EMERGEFROMMIST_H
-
+#pragma once
 #include "effect/Effect.h"
 
 class EmergeFromMist : public Effect
 {
 public:
-    EmergeFromMist() = default;
-    ~EmergeFromMist() override = default;
+    void apply(Game &game, Fighter &fighter, Fighter &target,
+               const Card &self, Card *opponentCard, bool didUserWin,
+               const EffectChoice &choice) override;
 
-    virtual void apply(Game &game,
-                       Fighter &fighter,
-                       Fighter &target,
-                       const Card &self,
-                       Card *opponentCard,
-                       bool didUserWin) override;
-
-    virtual string getDescription() const override;
+    string getDescription() const override;
     Effect *clone() const override;
 };
-
-#endif

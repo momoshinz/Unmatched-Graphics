@@ -3,14 +3,15 @@
 #include "player/Player.h"
 #include "fighter/Fighter.h"
 #include "fighter/Fog.h"
-#include "fighter/InvisibleMan.h"
 #include "board/Board.h"
 #include "board/Space.h"
 #include <iostream>
 #include <stdexcept>
 using namespace std;
 
-void StepLightly::apply(Game &game, Fighter &fighter, Fighter &target, const Card &self, Card *opponentCard, bool didUserWin)
+void StepLightly::apply(Game &game, Fighter &fighter, Fighter &target,
+                        const Card &self, Card *opponentCard, bool didUserWin,
+                        const EffectChoice &choice)
 {
     Player* player = fighter.getOwner();
     if (player == nullptr)
@@ -18,65 +19,26 @@ void StepLightly::apply(Game &game, Fighter &fighter, Fighter &target, const Car
         throw runtime_error("\n[!] ERROR : Fighter has NO owner!\n");
     }
 
-    Board &board = game.getBoard();
-    vector<Fighter *> adjacentEnemies;
+    cout << "\n========================================\n";
+    cout << "-< Step Lightly >- ACTIVATED!\n";
 
-    for (Space* space : board.getAdjacentSpaces(fighter.getPosition()))
+    if (choice.selectedFighter != nullptr)
     {
-        Fighter* enemy = space->getFighter();
-
-        if (enemy != nullptr && enemy->getOwner() != player && enemy->isAlive())
-        {
-            adjacentEnemies.push_back(enemy);
-        }
-    }
-
-    if (adjacentEnemies.empty())
-    {
-        cout << "\n[!] ERROR : No adjacent enemy.\n";
-    }
-    else
-    {
-        cout << "\n========================================\n";
-        cout << "-< Step Lightly >- ACTIVATED!\n";
-
-        cout << "\n> Choose enemy:\n";
-
-        for (int i = 0; i < adjacentEnemies.size(); i++)
-        {
-            cout << i+1 << ". " << adjacentEnemies[i]->getName() << endl;
-        }
-
-        int choice;
-        cin >> choice;
-
-        if (choice < 1 || choice > adjacentEnemies.size())
-        {
-            throw runtime_error("\n[!] ERROR : Invalid fighter!\n");
-        }
-
         int damage = 1;
-        if (fighter.getPosition()->hasFogToken())
+
+        if (fighter.getPosition() != nullptr && fighter.getPosition()->hasFogToken())
         {
             damage = 3;
         }
-        adjacentEnemies[choice - 1]->takeDamage(damage);
-        cout << "\n[+] " << adjacentEnemies[choice - 1]->getName() << " took " << damage << " damage.\n";
-    }
 
-    Player *opponent = nullptr;
-    for (Player *p : game.getPlayers())
-    {
-        if (p != player)
-        {
-            opponent = p;
-            break;
-        }
-    }
+        choice.selectedFighter->takeDamage(damage);
 
-    if (opponent == nullptr)
+        cout << "\n[+] " << choice.selectedFighter->getName()
+             << " took " << damage << " damage.\n";
+    }
+    else
     {
-        return;
+        cout << "\n[!] No adjacent enemy selected for damage.\n";
     }
 
     vector<Fog *> fogs = player->getFogs();
@@ -85,55 +47,40 @@ void StepLightly::apply(Game &game, Fighter &fighter, Fighter &target, const Car
         return;
     }
 
-    cout << "\n> Opponent chooses a Fog token to move.\n";
-
-    for (int i = 0; i < fogs.size(); i++)
+    if (choice.selectedFogId < 0 || choice.selectedFogId >= static_cast<int>(fogs.size()))
     {
-        cout << i + 1 << ". Fog " << fogs[i]->getID();
-        if (fogs[i]->getPosition() != nullptr)
-        {
-            cout << " (Home " << fogs[i]->getPosition()->getId() << ")";
-        }
-        cout << endl;
-    }
-
-    int fogChoice;
-    cin >> fogChoice;
-
-    if (fogChoice < 1 || fogChoice > fogs.size())
-    {
-        throw runtime_error("\n[!] ERROR : Invalid Fog!\n");
-    }
-
-    Fog *fog = fogs[fogChoice - 1];
-    vector<Space *> moves = board.getAvailableFogMoves(fog, 2);
-    if (moves.empty())
-    {
-        cout << "\n[!] ERROR : No available destination.\n";
+        cout << "\n[!] No Fog token selected.\n";
         return;
     }
 
-    cout << "\n> Choose a destination:\n";
-    for (size_t i = 0; i < moves.size(); i++)
+    Fog *fog = fogs[choice.selectedFogId];
+
+    if (choice.secondSpace == nullptr)
     {
-        cout << i + 1 << ". Home " << moves[i]->getId() << endl;
+        cout << "\n[!] No Fog destination selected.\n";
+        return;
     }
 
-    int moveChoice;
-    cin >> moveChoice;
-    if (moveChoice < 1 || moveChoice > moves.size())
-    {
-        throw runtime_error("\n[!] ERROR : Invalid destination!\n");
-    }
     if (fog->getPosition() != nullptr)
     {
         fog->getPosition()->setFogToken(false);
     }
 
-    fog->setPosition(moves[moveChoice - 1]);
-    moves[moveChoice - 1]->setFogToken(true);
+    fog->setPosition(choice.secondSpace);
+    choice.secondSpace->setFogToken(true);
+
     cout << "\n[+] Fog moved successfully.\n";
     cout << "\n========================================\n";
+}
+
+EffectInputKind StepLightly::getInputKind() const
+{
+    return EffectInputKind::ChooseEnemyAndFogDestination;
+}
+
+int StepLightly::getFogMoveRange() const
+{
+    return 2;
 }
 
 string StepLightly::getDescription() const

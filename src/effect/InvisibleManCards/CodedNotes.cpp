@@ -8,15 +8,17 @@
 #include <stdexcept>
 using namespace std;
 
-void CodedNotes::apply(Game &game, Fighter &fighter, Fighter &target, const Card &self, Card *opponentCard, bool didUserWin)
+void CodedNotes::apply(Game &game, Fighter &fighter, Fighter &target,
+                       const Card &self, Card *opponentCard, bool didUserWin,
+                       const EffectChoice &choice)
 {
-    Player* player = fighter.getOwner();
+    Player *player = fighter.getOwner();
     if (player == nullptr)
     {
         throw runtime_error("\n[!] ERROR : Fighter has NO owner!\n");
     }
 
-     if (!fighter.isHero())
+    if (!fighter.isHero())
     {
         throw runtime_error("\n[!] ERROR : Coded Notes can only be used by Invisible Man!\n");
     }
@@ -30,70 +32,42 @@ void CodedNotes::apply(Game &game, Fighter &fighter, Fighter &target, const Card
     Hand &hand = player->getHand();
     Deck &deck = player->getDeck();
 
-    hand.display();
-    Card* firstCard = nullptr;
-    Card* secondCard = nullptr;
-
-    int choice;
-    while(true)
+    if (choice.selectedCardIndices.size() != 2)
     {
-        cout << "\n> Choose the first card to place on top of your deck : ";
-        cin >> choice;
-        if(cin.fail())
-        {
-            cin.clear();
-            cin.ignore(1000, '\n');
-            continue;
-        }
-        if(choice >=1 && choice <= hand.getSize())
-        {
-            break;
-        }
-        cout << "\n[!] ERROR : Invalid choice!\n";
+        throw runtime_error("\n[!] ERROR : Exactly 2 cards must be selected!\n");
     }
-    firstCard = hand.removeCard(choice-1);
 
-    hand.display();
-    while(true)
-    {
-        cout << "\n> Choose the second card to place on top of your deck: ";
-        cin >> choice;
-        if(cin.fail())
-        {
-            cin.clear();
-            cin.ignore(1000, '\n');
-            continue;
-        }
-        if(choice >=1 && choice <= hand.getSize())
-        {
-            break;
-        }
-        cout << "\n[!] ERROR : Invalid choice!\n";
-    }
-    secondCard = hand.removeCard(choice-1);
+    int idx1 = choice.selectedCardIndices[0];
+    int idx2 = choice.selectedCardIndices[1];
 
-    cout << "\n> Which card should be TOP of the deck?\n";
-    cout << "\n1. " << firstCard->getName() << endl;
-    cout << "\n2. " << secondCard->getName() << endl;
-    
-    int order;
-    while(true)
+    if (idx1 < 0 || idx1 >= hand.getSize() ||
+        idx2 < 0 || idx2 >= hand.getSize() ||
+        idx1 == idx2)
     {
-        cout << "~~>";
-        cin >> order;
-        if(cin.fail())
-        {
-            cin.clear();
-            cin.ignore(1000, '\n');
-            continue;
-        }
-        if(order == 1 || order == 2)
-        {
-            break;
-        }
-        cout << "\n[!] ERROR : Invalid choice!\n";
+        throw out_of_range("\n[!] ERROR : Invalid card selection!\n");
     }
-    if(order == 1)
+
+    if (choice.selectedOrder != 1 && choice.selectedOrder != 2)
+    {
+        throw runtime_error("\n[!] ERROR : Invalid order selection!\n");
+    }
+
+    Card *firstCard;
+    Card *secondCard;
+
+    // حذف با ایندکس بزرگ‌تر اول، تا ایندکس کوچیک‌تر جابه‌جا نشه
+    if (idx1 > idx2)
+    {
+        firstCard = hand.removeCard(idx1);
+        secondCard = hand.removeCard(idx2);
+    }
+    else
+    {
+        secondCard = hand.removeCard(idx2);
+        firstCard = hand.removeCard(idx1);
+    }
+
+    if (choice.selectedOrder == 1)
     {
         deck.addToTop(secondCard);
         deck.addToTop(firstCard);
@@ -103,8 +77,14 @@ void CodedNotes::apply(Game &game, Fighter &fighter, Fighter &target, const Card
         deck.addToTop(firstCard);
         deck.addToTop(secondCard);
     }
+
     cout << "\n[+] Cards placed on top of the deck successfully.\n";
     cout << "\n========================================\n";
+}
+
+EffectInputKind CodedNotes::getInputKind() const
+{
+    return EffectInputKind::ChooseTwoCardsAndOrder;
 }
 
 string CodedNotes::getDescription() const

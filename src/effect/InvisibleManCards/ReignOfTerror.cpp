@@ -1,4 +1,4 @@
-#include "effect/InvisibleManCards//ReignOfTerror.h"
+#include "effect/InvisibleManCards/ReignOfTerror.h"
 #include "game/Game.h"
 #include "fighter/InvisibleMan.h"
 #include "fighter/Fog.h"
@@ -7,10 +7,11 @@
 #include "board/Space.h"
 #include <iostream>
 #include <stdexcept>
-
 using namespace std;
 
-void ReignOfTerror::apply(Game &game, Fighter &fighter, Fighter &target, const Card &self, Card *opponentCard, bool didUserWin)
+void ReignOfTerror::apply(Game &game, Fighter &fighter, Fighter &target,
+                          const Card &self, Card *opponentCard, bool didUserWin,
+                          const EffectChoice &choice)
 {
     Player *player = fighter.getOwner();
 
@@ -62,14 +63,9 @@ void ReignOfTerror::apply(Game &game, Fighter &fighter, Fighter &target, const C
     for (Sidekick *sidekick : opponentPlayer->getSideKicks())
     {
         if (sidekick == nullptr)
-        {
             continue;
-        }
-
         if (!sidekick->isAlive())
-        {
             continue;
-        }
 
         sidekick->takeDamage(2);
         damagedFightersCount++;

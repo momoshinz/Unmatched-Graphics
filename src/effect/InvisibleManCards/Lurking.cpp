@@ -7,21 +7,23 @@
 #include "board/Space.h"
 #include <iostream>
 #include <stdexcept>
-
 using namespace std;
 
-void Lurking::apply(Game &game, Fighter &fighter, Fighter &target, const Card &self, Card *opponentCard, bool didUserWin)
+void Lurking::apply(Game &game, Fighter &fighter, Fighter &target,
+                    const Card &self, Card *opponentCard, bool didUserWin,
+                    const EffectChoice &choice)
 {
-    Player* player = fighter.getOwner();
+    Player *player = fighter.getOwner();
     if (player == nullptr)
     {
         throw runtime_error("\n[!] ERROR : Fighter has NO owner!\n");
     }
 
-     if (!fighter.isHero())
+    if (!fighter.isHero())
     {
-        throw runtime_error("\n[!] ERROR : Coded Notes can only be used by Invisible Man!\n");
+        throw runtime_error("\n[!] ERROR : Lurking can only be used by Invisible Man!\n");
     }
+
     Board &board = game.getBoard();
 
     cout << "\n========================================\n";
@@ -30,115 +32,56 @@ void Lurking::apply(Game &game, Fighter &fighter, Fighter &target, const Card &s
     player->drawCardToHand();
     cout << "\n[+] Drew one card.\n";
 
-    cout << "\n> Choose one effect:\n";
-    cout << "1. Move Invisible Man to a Fog token.\n";
-    cout << "2. Move one Fog token up to 3 spaces.\n";
-    cout << "~~> ";
-
-    int choice;
-    cin >> choice;
-    if (choice == 1)
+    if (choice.selectedOptionIndex == 1)
     {
-        vector<Space *> fogSpaces;
-
-        for (Space *space : board.getSpaces())
+        if (choice.selectedSpace == nullptr)
         {
-            if (space->hasFogToken())
-            {
-                fogSpaces.push_back(space);
-            }
+            throw runtime_error("\n[!] ERROR : No destination selected!\n");
         }
 
-        if (fogSpaces.empty())
-        {
-            cout << "\n[!]ERROR : No Fog tokens on the board.\n";
-            return;
-        }
-
-        cout << "\n> Choose destination:\n";
-
-        for (int i = 0; i < fogSpaces.size(); i++)
-        {
-            cout << i + 1 << ". Home " << fogSpaces[i]->getId() << endl;
-        }
-
-        int moveChoice;
-        cin >> moveChoice;
-
-        if (moveChoice < 1 || moveChoice > fogSpaces.size())
-        {
-            throw runtime_error("\n[!] Invalid destination!\n");
-        }
-
-        board.moveFighter(&fighter, fogSpaces[moveChoice - 1]);
-
+        board.moveFighter(&fighter, choice.selectedSpace);
         cout << "\n[+] Invisible Man moved successfully.\n";
     }
-
-    else if (choice == 2)
+    else if (choice.selectedOptionIndex == 2)
     {
         vector<Fog *> fogs = player->getFogs();
 
-        if (fogs.empty())
+        if (choice.selectedFogId < 0 || choice.selectedFogId >= static_cast<int>(fogs.size()))
         {
-            cout << "\n[!]ERROR : No Fog tokens.\n";
-            return;
-        }
-        cout << "\n> Choose Fog token:\n";
-
-        for (int i = 0; i < fogs.size(); i++)
-        {
-            cout << i + 1 << ". Fog " << fogs[i]->getID();
-
-            if (fogs[i]->getPosition() != nullptr)
-            {
-                cout << " (Space " << fogs[i]->getPosition()->getId() << ")";
-            }
-            cout << endl;
+            throw runtime_error("\n[!] ERROR : Invalid Fog selection!\n");
         }
 
-        int fogChoice;
-        cin >> fogChoice;
+        Fog *fog = fogs[choice.selectedFogId];
 
-        if (fogChoice < 1 || fogChoice > fogs.size())
+        if (choice.secondSpace == nullptr)
         {
-            throw runtime_error("\n[!] Invalid Fog!\n");
-        }
-        Fog *fog = fogs[fogChoice - 1];
-
-        vector<Space *> moves = board.getAvailableFogMoves(fog, 3);
-
-        if (moves.empty())
-        {
-            cout << "\n[!]ERROR : No available destination.\n";
-            return;
+            throw runtime_error("\n[!] ERROR : No Fog destination selected!\n");
         }
 
-        cout << "\n> Choose destination:\n";
-
-        for (int i = 0; i < moves.size(); i++)
+        if (fog->getPosition() != nullptr)
         {
-            cout << i + 1 << ". Home " << moves[i]->getId() << endl;
+            fog->getPosition()->setFogToken(false);
         }
-
-        int moveChoice;
-        cin >> moveChoice;
-        if (moveChoice < 1 || moveChoice > moves.size())
-        {
-            throw runtime_error("\n[!] Invalid destination!\n");
-        }
-
-        fog->getPosition()->setFogToken(false);
-        fog->setPosition(moves[moveChoice - 1]);
-        moves[moveChoice - 1]->setFogToken(true);
+        fog->setPosition(choice.secondSpace);
+        choice.secondSpace->setFogToken(true);
 
         cout << "\n[+] Fog moved successfully.\n";
         cout << "\n========================================\n";
     }
     else
     {
-        throw runtime_error("\n[!] Invalid choice!\n");
+        throw runtime_error("\n[!] ERROR : Invalid option selected!\n");
     }
+}
+
+EffectInputKind Lurking::getInputKind() const
+{
+    return EffectInputKind::ChooseLurkingOption;
+}
+
+int Lurking::getFogMoveRange() const
+{
+    return 3;
 }
 
 string Lurking::getDescription() const

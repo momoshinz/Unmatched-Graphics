@@ -3,13 +3,14 @@
 #include "player/Player.h"
 #include "fighter/Fighter.h"
 #include "fighter/Hero.h"
-#include "fighter/Sidekick.h"
 #include "board/Space.h"
 #include <iostream>
 #include <stdexcept>
 using namespace std;
 
-void EmergeFromMist::apply(Game &game, Fighter &fighter, Fighter &target, const Card &self, Card *opponentCard, bool didUserWin)
+void EmergeFromMist::apply(Game &game, Fighter &fighter, Fighter &target,
+                           const Card &self, Card *opponentCard, bool didUserWin,
+                           const EffectChoice &choice)
 {
     Player *player = fighter.getOwner();
 

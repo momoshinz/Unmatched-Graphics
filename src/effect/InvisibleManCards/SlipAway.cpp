@@ -3,82 +3,45 @@
 #include "player/Player.h"
 #include "fighter/Fighter.h"
 #include "fighter/Fog.h"
-#include "fighter/InvisibleMan.h"
 #include "board/Board.h"
 #include "board/Space.h"
 #include <iostream>
 #include <stdexcept>
 using namespace std;
 
-void SlipAway::apply(Game &game, Fighter &fighter, Fighter &target, const Card &self, Card *opponentCard, bool didUserWin)
+void SlipAway::apply(Game &game, Fighter &fighter, Fighter &target,
+                     const Card &self, Card *opponentCard, bool didUserWin,
+                     const EffectChoice &choice)
 {
-    Player* player = fighter.getOwner();
+    Player *player = fighter.getOwner();
     if (player == nullptr)
     {
         throw runtime_error("\n[!] ERROR : Fighter has NO owner!\n");
     }
 
-    Board &board = game.getBoard();
-    vector<Fog*> fogs = player->getFogs();
-    if(fogs.empty())
+    vector<Fog *> fogs = player->getFogs();
+    if (fogs.empty())
     {
         cout << "\n[!] ERROR : No Fog tokens available.\n";
         return;
     }
+
     cout << "\n========================================\n";
     cout << "-< Slip Away >- ACTIVATED!\n";
 
-    cout << "\n> Choose a Fog token:\n";
-    for(int i=0 ; i<fogs.size() ; i++)
+    if (choice.selectedFogId < 0 || choice.selectedFogId >= static_cast<int>(fogs.size()))
     {
-        cout << i+1 << ". Fog " << fogs[i]->getID();
-        if(fogs[i]->getPosition() != nullptr)
-        {
-            cout << " (Home " << fogs[i]->getPosition()->getId() << ")";
-        }
-        cout << endl;
-    }
-    int fogChoice;
-    cin >> fogChoice;
-
-    if (fogChoice < 1 || fogChoice > fogs.size())
-    {
-        throw runtime_error("\n[!] ERROR : Invalid Fog token!\n");
+        throw runtime_error("\n[!] ERROR : Invalid Fog token selection!\n");
     }
 
-    Fog *fog = fogs[fogChoice - 1];
+    Fog *fog = fogs[choice.selectedFogId];
 
-    vector<Space *> availableSpaces;
-
-    for (Space *space : board.getSpaces())
+    if (choice.selectedSpace == nullptr)
     {
-        if (!space->isOccupied())
-        {
-            availableSpaces.push_back(space);
-        }
+        throw runtime_error("\n[!] ERROR : No destination selected!\n");
     }
 
-    if (availableSpaces.empty())
-    {
-        cout << "\n[!] No available spaces.\n";
-        return;
-    }
-
-    cout << "\nChoose destination:\n";
-
-    for (int i = 0; i < availableSpaces.size(); i++)
-    {
-        cout << i + 1 << ". Home " << availableSpaces[i]->getId() << endl;
-    }
-
-    int choice;
-    cin >> choice;
-
-    if (choice < 1 || choice > availableSpaces.size())
-    {
-        throw runtime_error("\n[!] ERROR : Invalid destination!\n");
-    }
-    Space *destination = availableSpaces[choice - 1];
+    Space *destination = choice.selectedSpace;
 
     if (fog->getPosition() != nullptr)
     {
@@ -88,11 +51,16 @@ void SlipAway::apply(Game &game, Fighter &fighter, Fighter &target, const Card &
     fog->setPosition(destination);
     destination->setFogToken(true);
 
-    board.moveFighter(&fighter, destination);
+    game.getBoard().moveFighter(&fighter, destination);
 
     cout << "\n[+] Fog token moved.\n";
     cout << "[+] Invisible Man moved to the same home.\n";
     cout << "\n========================================\n";
+}
+
+EffectInputKind SlipAway::getInputKind() const
+{
+    return EffectInputKind::ChooseFogAndDestination;
 }
 
 string SlipAway::getDescription() const

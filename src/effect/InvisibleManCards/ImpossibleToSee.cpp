@@ -2,15 +2,14 @@
 #include "game/Game.h"
 #include "player/Player.h"
 #include "fighter/Fighter.h"
-#include "fighter/Hero.h"
-#include "fighter/Sidekick.h"
-#include "board/Space.h"
 #include "card/Card.h"
 #include <iostream>
 #include <stdexcept>
 using namespace std;
 
-void ImpossibleToSee::apply(Game &game, Fighter &fighter, Fighter &target, const Card &self, Card *opponentCard, bool didUserWin)
+void ImpossibleToSee::apply(Game &game, Fighter &fighter, Fighter &target,
+                            const Card &self, Card *opponentCard, bool didUserWin,
+                            const EffectChoice &choice)
 {
     Player *player = fighter.getOwner();
 
@@ -46,7 +45,7 @@ string ImpossibleToSee::getDescription() const
     return "> The value of your opponents's attack or defense is 0 and cannot be changed by card effects.(other card effects still happen)";
 }
 
-Effect* ImpossibleToSee::clone() const
+Effect *ImpossibleToSee::clone() const
 {
     return new ImpossibleToSee(*this);
 }
