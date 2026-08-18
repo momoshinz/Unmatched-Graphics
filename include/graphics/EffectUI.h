@@ -10,24 +10,28 @@ class Fighter;
 class Card;
 class Space;
 class Player;
+class Fog;
 
 class EffectUI
 {
 public:
     explicit EffectUI(AssetManager *assets);
 
-    // فرآیند رو با کارت/فایتر/بازی مشخص شروع می‌کنه.
-    // اگه effect->getInputKind() == None باشه، isReady() فوراً true می‌شه.
     void open(Game *game, Effect *effect, Fighter *fighter, Fighter *target);
 
     void update();
     void draw();
 
     bool isOpen() const;
-    bool isReady() const; // یعنی انتخاب کاربر کامل شده و آماده‌ی apply()
+    bool isReady() const;
     const EffectChoice &getChoice() const;
 
     void reset();
+
+    void selectSpace(Space *space);
+
+    const std::vector<Space *> &getCandidateSpaces() const;
+    bool isChoosingSpace() const;
 
 private:
     AssetManager *assets;
@@ -35,6 +39,7 @@ private:
     Effect *effect = nullptr;
     Fighter *fighter = nullptr;
     Fighter *target = nullptr;
+    Player *actingPlayer = nullptr;
 
     EffectInputKind inputKind = EffectInputKind::None;
     EffectChoice choice;
@@ -42,39 +47,59 @@ private:
     bool open_ = false;
     bool ready = false;
 
-    // ------------------------------------------------------------
-    // برای ChooseAdjacentEmptySpace / ChooseReachableSpace
-    // (دایره‌های قابل‌کلیک روی نقشه - GameScreen این‌ها رو می‌خونه و می‌کشه)
-    // ------------------------------------------------------------
-    std::vector<Space *> candidateSpaces;
+    int subPhase = 0;
+    int pendingFirstCardIndex = -1;
 
-    // ------------------------------------------------------------
-    // برای ChooseOpponentCardToBurn (پنجره‌ی کارت‌ها، شبیه SchemeUI)
-    // ------------------------------------------------------------
+    // ---- خونه‌های قابل‌کلیک روی نقشه (مشترک بین چند نوع) ----
+    std::vector<Space *> candidateSpaces;
+    int fogMoveRange = 0;
+
+    // ---- انتخاب کارت (دست حریف برای سوزوندن / دست خود برای CodedNotes) ----
     std::vector<Card *> candidateCards;
     std::vector<Rectangle> cardBoxes;
     int selectedCardIndex = -1;
     Rectangle confirmButton{};
 
-    // ------------------------------------------------------------
-    // برای ChooseEnemyFighter (کادرهای اسم، شبیه ManeuverUI::SELECT_FIGHTER)
-    // ------------------------------------------------------------
+    // ---- انتخاب فایتر (دشمن / دشمن مجاور) ----
     std::vector<Fighter *> candidateFighters;
     std::vector<Rectangle> fighterBoxes;
 
+    // ---- انتخاب فاگ ----
+    std::vector<Fog *> candidateFogs;
+    std::vector<Rectangle> fogBoxes;
+    Fog *selectedFog = nullptr;
+    Space *fogSourceSpace = nullptr;
+
+    // ---- دکمه‌های عمومی Yes/No و دو-گزینه‌ای ----
+    Rectangle yesButton{};
+    Rectangle noButton{};
+    Rectangle optionButtonA{};
+    Rectangle optionButtonB{};
+    std::string optionTextA;
+    std::string optionTextB;
+
+    static std::string getCardTextureKey(const Card *card, const std::string &heroName);
+
+    // ---- setup برای هر نوع ----
     void setupChooseAdjacentEmptySpace();
     void setupChooseReachableSpace();
     void setupChooseOpponentCardToBurn();
     void setupChooseEnemyFighter();
+    void setupChooseTwoCardsAndOrder();
+    void setupChooseFighterMoveThenFogMove();
+    void setupChooseLurkingOption();
+    void setupChooseFogSourceAndDestination();
+    void setupChooseFogAndDestination();
+    void setupChooseEnemyAndFogDestination();
 
-    void layoutCardWindow();
-    void layoutFighterWindow();
+    // ---- layout کمکی ----
+    void layoutCardWindow(const std::vector<Card *> &cards);
+    void layoutFighterWindow(const std::vector<Fighter *> &fighters);
+    void layoutFogWindow();
+    void layoutYesNo();
+    void layoutTwoOptions(const std::string &textA, const std::string &textB);
 
-    static std::string getCardTextureKey(const Card *card, const std::string &heroName);
+    void beginFogDestinationStage(int range, bool excludeSource);
 
-public:
-    // GameScreen برای رسم دایره‌های روی نقشه به این لیست نیاز داره
-    const std::vector<Space *> &getCandidateSpaces() const;
-    bool isChoosingSpace() const;
-    void selectSpace(Space *space);
+    void finalizeReady();
 };

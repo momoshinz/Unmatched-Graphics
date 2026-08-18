@@ -5,11 +5,11 @@
 #include "fighter/Fighter.h"
 #include "fighter/Hero.h"
 #include "fighter/Sidekick.h"
+#include "fighter/Fog.h"
 #include "board/Board.h"
 #include "board/Space.h"
 #include "card/Hand.h"
 #include "card/Card.h"
-
 #include <iostream>
 #include <algorithm>
 #include <unordered_map>
@@ -20,7 +20,7 @@ EffectUI::EffectUI(AssetManager *assets)
 }
 
 // ============================================================
-// اسم کارت -> کلید تکسچر (کل مجموعه کارت‌ها)
+// اسم کارت -> کلید تکسچر
 // ============================================================
 
 std::string EffectUI::getCardTextureKey(const Card *card, const std::string &heroName)
@@ -90,8 +90,11 @@ void EffectUI::open(Game *game, Effect *effect, Fighter *fighter, Fighter *targe
     this->effect = effect;
     this->fighter = fighter;
     this->target = target;
+    this->actingPlayer = (fighter != nullptr) ? fighter->getOwner() : nullptr;
 
     choice = EffectChoice{};
+    subPhase = 0;
+    pendingFirstCardIndex = -1;
 
     candidateSpaces.clear();
     candidateCards.clear();
@@ -100,6 +103,11 @@ void EffectUI::open(Game *game, Effect *effect, Fighter *fighter, Fighter *targe
 
     candidateFighters.clear();
     fighterBoxes.clear();
+
+    candidateFogs.clear();
+    fogBoxes.clear();
+    selectedFog = nullptr;
+    fogSourceSpace = nullptr;
 
     ready = false;
 
@@ -134,30 +142,55 @@ void EffectUI::open(Game *game, Effect *effect, Fighter *fighter, Fighter *targe
     case EffectInputKind::ChooseEnemyFighter:
         setupChooseEnemyFighter();
         break;
+
+    case EffectInputKind::ChooseTwoCardsAndOrder:
+        setupChooseTwoCardsAndOrder();
+        break;
+
+    case EffectInputKind::ChooseFighterMoveThenFogMove:
+        setupChooseFighterMoveThenFogMove();
+        break;
+
+    case EffectInputKind::ChooseLurkingOption:
+        setupChooseLurkingOption();
+        break;
+
+    case EffectInputKind::ChooseFogSourceAndDestination:
+        setupChooseFogSourceAndDestination();
+        break;
+
+    case EffectInputKind::ChooseFogAndDestination:
+        setupChooseFogAndDestination();
+        break;
+
+    case EffectInputKind::ChooseEnemyAndFogDestination:
+        setupChooseEnemyAndFogDestination();
+        break;
     }
 
     open_ = true;
 }
 
+void EffectUI::finalizeReady()
+{
+    open_ = false;
+    ready = true;
+}
+
 // ============================================================
-// SETUP HELPERS
+// SETUP: کارت‌های ساده (از قبل داشتیم)
 // ============================================================
 
 void EffectUI::setupChooseAdjacentEmptySpace()
 {
     candidateSpaces.clear();
 
-    if (fighter == nullptr || game == nullptr)
-    {
+    if (fighter == nullptr)
         return;
-    }
 
     Space *center = fighter->getPosition();
-
     if (center == nullptr)
-    {
         return;
-    }
 
     for (Space *neighbor : center->getNeighbors())
     {
@@ -166,11 +199,6 @@ void EffectUI::setupChooseAdjacentEmptySpace()
             candidateSpaces.push_back(neighbor);
         }
     }
-
-    if (candidateSpaces.empty())
-    {
-        std::cout << "[!] No empty adjacent home available." << std::endl;
-    }
 }
 
 void EffectUI::setupChooseReachableSpace()
@@ -178,93 +206,48 @@ void EffectUI::setupChooseReachableSpace()
     candidateSpaces.clear();
 
     if (fighter == nullptr || game == nullptr || effect == nullptr)
-    {
         return;
-    }
 
-    int range = effect->getMoveRange();
-
-    candidateSpaces = game->getBoard().getAvailableMoves(fighter, range);
-
-    if (candidateSpaces.empty())
-    {
-        std::cout << "[!] No reachable empty home available." << std::endl;
-    }
+    candidateSpaces = game->getBoard().getAvailableMoves(fighter, effect->getMoveRange());
 }
 
 void EffectUI::setupChooseOpponentCardToBurn()
 {
     candidateCards.clear();
-    cardBoxes.clear();
-    selectedCardIndex = -1;
 
-    if (fighter == nullptr || game == nullptr)
-    {
+    if (actingPlayer == nullptr || game == nullptr)
         return;
-    }
 
-    Player *owner = fighter->getOwner();
-
-    if (owner == nullptr)
-    {
-        return;
-    }
-
-    Player *opponent = game->selectOpponent(*owner);
-
+    Player *opponent = game->selectOpponent(*actingPlayer);
     if (opponent == nullptr)
-    {
         return;
-    }
 
     for (Card *card : opponent->getHand().getCards())
     {
         if (card != nullptr)
-        {
             candidateCards.push_back(card);
-        }
-
         if (candidateCards.size() >= 7)
-        {
             break;
-        }
     }
 
-    if (candidateCards.empty())
+    if (!candidateCards.empty())
     {
-        std::cout << "[!] Opponent has no cards in hand." << std::endl;
-        return;
+        layoutCardWindow(candidateCards);
     }
-
-    layoutCardWindow();
 }
 
 void EffectUI::setupChooseEnemyFighter()
 {
     candidateFighters.clear();
-    fighterBoxes.clear();
 
-    if (fighter == nullptr || game == nullptr)
-    {
+    if (actingPlayer == nullptr || game == nullptr)
         return;
-    }
 
-    Player *owner = fighter->getOwner();
-
-    if (owner == nullptr)
-    {
-        return;
-    }
-
-    Player *opponent = game->selectOpponent(*owner);
-
+    Player *opponent = game->selectOpponent(*actingPlayer);
     if (opponent == nullptr)
-    {
         return;
-    }
 
     Hero *enemyHero = opponent->getHero();
-
     if (enemyHero != nullptr && enemyHero->isAlive())
     {
         candidateFighters.push_back(enemyHero);
@@ -278,22 +261,163 @@ void EffectUI::setupChooseEnemyFighter()
         }
     }
 
-    if (candidateFighters.empty())
+    if (!candidateFighters.empty())
     {
-        std::cout << "[!] Opponent has no available fighters." << std::endl;
-        return;
+        layoutFighterWindow(candidateFighters);
     }
-
-    layoutFighterWindow();
 }
 
 // ============================================================
-// LAYOUT
+// SETUP: CodedNotes
 // ============================================================
 
-void EffectUI::layoutCardWindow()
+void EffectUI::setupChooseTwoCardsAndOrder()
+{
+    subPhase = 0;
+
+    if (actingPlayer == nullptr)
+        return;
+
+    // کشیدن ۳ کارت همینجا (قبل از نمایش انتخاب)
+    actingPlayer->drawCards(3);
+    std::cout << "[+] Invisible Man drew 3 cards." << std::endl;
+
+    candidateCards.clear();
+    for (Card *card : actingPlayer->getHand().getCards())
+    {
+        candidateCards.push_back(card);
+    }
+
+    layoutCardWindow(candidateCards);
+}
+
+// ============================================================
+// SETUP: IntoThinAir
+// ============================================================
+
+void EffectUI::setupChooseFighterMoveThenFogMove()
+{
+    subPhase = 0;
+    layoutYesNo();
+}
+
+// ============================================================
+// SETUP: Lurking
+// ============================================================
+
+void EffectUI::setupChooseLurkingOption()
+{
+    subPhase = 0;
+    layoutTwoOptions("MOVE TO A FOG TOKEN", "MOVE A FOG TOKEN");
+}
+
+// ============================================================
+// SETUP: RollingFog
+// ============================================================
+
+void EffectUI::setupChooseFogSourceAndDestination()
+{
+    subPhase = 0;
+    candidateSpaces.clear();
+
+    if (game == nullptr)
+        return;
+
+    for (Space *space : game->getBoard().getSpaces())
+    {
+        if (space != nullptr && space->hasFogToken())
+        {
+            candidateSpaces.push_back(space);
+        }
+    }
+}
+
+// ============================================================
+// SETUP: SlipAway
+// ============================================================
+
+void EffectUI::setupChooseFogAndDestination()
+{
+    subPhase = 0;
+
+    if (actingPlayer == nullptr)
+        return;
+
+    for (Fog *fog : actingPlayer->getFogs())
+    {
+        if (fog != nullptr)
+            candidateFogs.push_back(fog);
+    }
+
+    if (!candidateFogs.empty())
+    {
+        layoutFogWindow();
+    }
+}
+
+// ============================================================
+// SETUP: StepLightly
+// ============================================================
+
+void EffectUI::setupChooseEnemyAndFogDestination()
+{
+    subPhase = 0;
+    candidateFighters.clear();
+
+    if (fighter == nullptr || game == nullptr || actingPlayer == nullptr)
+        return;
+
+    for (Space *space : game->getBoard().getAdjacentSpaces(fighter->getPosition()))
+    {
+        if (space == nullptr)
+            continue;
+
+        Fighter *enemy = space->getFighter();
+
+        if (enemy != nullptr && enemy->getOwner() != actingPlayer && enemy->isAlive())
+        {
+            candidateFighters.push_back(enemy);
+        }
+    }
+
+    if (!candidateFighters.empty())
+    {
+        layoutFighterWindow(candidateFighters);
+    }
+    else
+    {
+        // بدون دشمن مجاور، مستقیم برو به مرحله‌ی فاگ
+        subPhase = 1;
+
+        candidateFogs.clear();
+        if (actingPlayer != nullptr)
+        {
+            for (Fog *fog : actingPlayer->getFogs())
+            {
+                if (fog != nullptr)
+                    candidateFogs.push_back(fog);
+            }
+        }
+
+        if (!candidateFogs.empty())
+        {
+            layoutFogWindow();
+        }
+        else
+        {
+            finalizeReady();
+        }
+    }
+}
+
+// ============================================================
+// LAYOUT HELPERS
+// ============================================================
+
+void EffectUI::layoutCardWindow(const std::vector<Card *> &cards)
 {
     cardBoxes.clear();
+    selectedCardIndex = -1;
 
     const int maxPerRow = 3;
     const float boxWidth = 220.0f;
@@ -302,26 +426,20 @@ void EffectUI::layoutCardWindow()
     const float gapY = 25.0f;
     const float startY = 130.0f;
 
-    int total = static_cast<int>(candidateCards.size());
+    int total = static_cast<int>(cards.size());
     int rowCount = (total + maxPerRow - 1) / maxPerRow;
     int index = 0;
 
     for (int row = 0; row < rowCount; row++)
     {
         int cardsInRow = std::min(maxPerRow, total - index);
-
         float rowWidth = cardsInRow * boxWidth + (cardsInRow - 1) * gapX;
         float rowStartX = (GetScreenWidth() - rowWidth) / 2.0f;
         float rowY = startY + row * (boxHeight + gapY);
 
         for (int col = 0; col < cardsInRow; col++)
         {
-            Rectangle box{
-                rowStartX + col * (boxWidth + gapX),
-                rowY,
-                boxWidth,
-                boxHeight};
-
+            Rectangle box{rowStartX + col * (boxWidth + gapX), rowY, boxWidth, boxHeight};
             cardBoxes.push_back(box);
             index++;
         }
@@ -334,11 +452,10 @@ void EffectUI::layoutCardWindow()
     confirmButton = Rectangle{
         (GetScreenWidth() - confirmWidth) / 2.0f,
         lastRowBottom + 15.0f,
-        confirmWidth,
-        confirmHeight};
+        confirmWidth, confirmHeight};
 }
 
-void EffectUI::layoutFighterWindow()
+void EffectUI::layoutFighterWindow(const std::vector<Fighter *> &fighters)
 {
     fighterBoxes.clear();
 
@@ -346,23 +463,83 @@ void EffectUI::layoutFighterWindow()
     const float boxHeight = 320.0f;
     const float gapX = 25.0f;
 
-    int count = static_cast<int>(candidateFighters.size());
-
-    const float totalWidth =
-        count * boxWidth + (count > 0 ? (count - 1) : 0) * gapX;
-
+    int count = static_cast<int>(fighters.size());
+    const float totalWidth = count * boxWidth + (count > 0 ? (count - 1) : 0) * gapX;
     const float startX = (GetScreenWidth() - totalWidth) / 2.0f;
     const float startY = 170.0f;
 
     for (int i = 0; i < count; i++)
     {
-        Rectangle box{
-            startX + i * (boxWidth + gapX),
-            startY,
-            boxWidth,
-            boxHeight};
-
+        Rectangle box{startX + i * (boxWidth + gapX), startY, boxWidth, boxHeight};
         fighterBoxes.push_back(box);
+    }
+}
+
+void EffectUI::layoutFogWindow()
+{
+    fogBoxes.clear();
+
+    const float boxWidth = 220.0f;
+    const float boxHeight = 90.0f;
+    const float gap = 20.0f;
+
+    int count = static_cast<int>(candidateFogs.size());
+    const float totalWidth = count * boxWidth + (count > 0 ? (count - 1) : 0) * gap;
+    const float startX = (GetScreenWidth() - totalWidth) / 2.0f;
+    const float startY = GetScreenHeight() / 2.0f - boxHeight / 2.0f;
+
+    for (int i = 0; i < count; i++)
+    {
+        Rectangle box{startX + i * (boxWidth + gap), startY, boxWidth, boxHeight};
+        fogBoxes.push_back(box);
+    }
+}
+
+void EffectUI::layoutYesNo()
+{
+    const float buttonWidth = 160.0f;
+    const float buttonHeight = 55.0f;
+    const float gap = 30.0f;
+
+    const float totalWidth = 2.0f * buttonWidth + gap;
+    const float startX = (GetScreenWidth() - totalWidth) / 2.0f;
+    const float buttonY = GetScreenHeight() / 2.0f;
+
+    yesButton = Rectangle{startX, buttonY, buttonWidth, buttonHeight};
+    noButton = Rectangle{startX + buttonWidth + gap, buttonY, buttonWidth, buttonHeight};
+}
+
+void EffectUI::layoutTwoOptions(const std::string &textA, const std::string &textB)
+{
+    optionTextA = textA;
+    optionTextB = textB;
+
+    const float buttonWidth = 320.0f;
+    const float buttonHeight = 65.0f;
+    const float gap = 30.0f;
+
+    const float totalWidth = 2.0f * buttonWidth + gap;
+    const float startX = (GetScreenWidth() - totalWidth) / 2.0f;
+    const float buttonY = GetScreenHeight() / 2.0f;
+
+    optionButtonA = Rectangle{startX, buttonY, buttonWidth, buttonHeight};
+    optionButtonB = Rectangle{startX + buttonWidth + gap, buttonY, buttonWidth, buttonHeight};
+}
+
+void EffectUI::beginFogDestinationStage(int range, bool excludeSource)
+{
+    candidateSpaces.clear();
+
+    if (game == nullptr || selectedFog == nullptr)
+        return;
+
+    candidateSpaces = game->getBoard().getAvailableFogMoves(selectedFog, range);
+
+    if (excludeSource && fogSourceSpace != nullptr)
+    {
+        candidateSpaces.erase(
+            std::remove(candidateSpaces.begin(), candidateSpaces.end(), fogSourceSpace),
+            candidateSpaces.end());
     }
 }
 
@@ -373,26 +550,17 @@ void EffectUI::layoutFighterWindow()
 void EffectUI::update()
 {
     if (!open_ || ready)
-    {
         return;
-    }
 
-    // انتخاب خونه روی نقشه (ChooseAdjacentEmptySpace / ChooseReachableSpace)
-    // اینجا کاری نمی‌کنیم؛ GameScreen خودش کلیک روی نقشه رو پردازش می‌کنه
-    // و beginConfirmSpace(...) رو صدا می‌زنه.
-
-    if (inputKind == EffectInputKind::ChooseAdjacentEmptySpace ||
-        inputKind == EffectInputKind::ChooseReachableSpace)
-    {
-        return;
-    }
+    if (isChoosingSpace())
+        return; // GameScreen کلیک روی نقشه رو پردازش می‌کنه
 
     if (!IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
-    {
         return;
-    }
 
     Vector2 mouse = GetMousePosition();
+
+    // -------------------- کارت‌های ساده --------------------
 
     if (inputKind == EffectInputKind::ChooseOpponentCardToBurn)
     {
@@ -405,14 +573,11 @@ void EffectUI::update()
             }
         }
 
-        if (selectedCardIndex != -1 &&
-            CheckCollisionPointRec(mouse, confirmButton))
+        if (selectedCardIndex != -1 && CheckCollisionPointRec(mouse, confirmButton))
         {
             choice.selectedCardIndex = selectedCardIndex;
-            open_ = false;
-            ready = true;
+            finalizeReady();
         }
-
         return;
     }
 
@@ -423,32 +588,448 @@ void EffectUI::update()
             if (CheckCollisionPointRec(mouse, fighterBoxes[i]))
             {
                 choice.selectedFighter = candidateFighters[i];
-                open_ = false;
-                ready = true;
+                finalizeReady();
                 return;
             }
         }
+        return;
+    }
 
+    // -------------------- CodedNotes --------------------
+
+    if (inputKind == EffectInputKind::ChooseTwoCardsAndOrder)
+    {
+        if (subPhase == 0 || subPhase == 1)
+        {
+            for (size_t i = 0; i < cardBoxes.size(); i++)
+            {
+                if (CheckCollisionPointRec(mouse, cardBoxes[i]))
+                {
+                    if (subPhase == 0)
+                    {
+                        pendingFirstCardIndex = static_cast<int>(i);
+                        choice.selectedCardIndices.clear();
+                        choice.selectedCardIndices.push_back(pendingFirstCardIndex);
+                        subPhase = 1;
+                    }
+                    else if (subPhase == 1 && static_cast<int>(i) != pendingFirstCardIndex)
+                    {
+                        choice.selectedCardIndices.push_back(static_cast<int>(i));
+
+                        std::string firstName = candidateCards[pendingFirstCardIndex]->getName();
+                        std::string secondName = candidateCards[i]->getName();
+
+                        layoutTwoOptions(firstName + " ON TOP", secondName + " ON TOP");
+                        subPhase = 2;
+                    }
+                    return;
+                }
+            }
+            return;
+        }
+
+        if (subPhase == 2)
+        {
+            if (CheckCollisionPointRec(mouse, optionButtonA))
+            {
+                choice.selectedOrder = 1;
+                finalizeReady();
+            }
+            else if (CheckCollisionPointRec(mouse, optionButtonB))
+            {
+                choice.selectedOrder = 2;
+                finalizeReady();
+            }
+            return;
+        }
+        return;
+    }
+
+    // -------------------- IntoThinAir --------------------
+
+    if (inputKind == EffectInputKind::ChooseFighterMoveThenFogMove)
+    {
+        if (subPhase == 0)
+        {
+            if (CheckCollisionPointRec(mouse, yesButton))
+            {
+                candidateSpaces = game->getBoard().getAvailableMoves(fighter, effect->getMoveRange());
+
+                if (candidateSpaces.empty())
+                {
+                    std::cout << "[!] No available move for fighter." << std::endl;
+                    subPhase = 2;
+                    candidateFogs.clear();
+                    if (actingPlayer != nullptr)
+                    {
+                        for (Fog *fog : actingPlayer->getFogs())
+                            if (fog != nullptr)
+                                candidateFogs.push_back(fog);
+                    }
+                    if (!candidateFogs.empty())
+                        layoutFogWindow();
+                    else
+                        finalizeReady();
+                }
+                else
+                {
+                    subPhase = 1; // انتخاب خونه از روی نقشه (GameScreen مدیریت می‌کنه)
+                }
+            }
+            else if (CheckCollisionPointRec(mouse, noButton))
+            {
+                subPhase = 2;
+                candidateFogs.clear();
+                if (actingPlayer != nullptr)
+                {
+                    for (Fog *fog : actingPlayer->getFogs())
+                        if (fog != nullptr)
+                            candidateFogs.push_back(fog);
+                }
+                if (!candidateFogs.empty())
+                    layoutFogWindow();
+                else
+                    finalizeReady();
+            }
+            return;
+        }
+
+        if (subPhase == 2)
+        {
+            for (size_t i = 0; i < fogBoxes.size(); i++)
+            {
+                if (CheckCollisionPointRec(mouse, fogBoxes[i]))
+                {
+                    selectedFog = candidateFogs[i];
+                    choice.selectedFogId = static_cast<int>(i);
+                    subPhase = 3;
+                    beginFogDestinationStage(effect->getFogMoveRange(), false);
+
+                    if (candidateSpaces.empty())
+                    {
+                        std::cout << "[!] No destination for fog." << std::endl;
+                        finalizeReady();
+                    }
+                    return;
+                }
+            }
+            return;
+        }
+        return;
+    }
+
+    // -------------------- Lurking --------------------
+
+    if (inputKind == EffectInputKind::ChooseLurkingOption)
+    {
+        if (subPhase == 0)
+        {
+            if (CheckCollisionPointRec(mouse, optionButtonA))
+            {
+                choice.selectedOptionIndex = 1;
+                subPhase = 1;
+
+                candidateSpaces.clear();
+                if (game != nullptr)
+                {
+                    for (Space *space : game->getBoard().getSpaces())
+                    {
+                        if (space != nullptr && space->hasFogToken())
+                        {
+                            candidateSpaces.push_back(space);
+                        }
+                    }
+                }
+
+                if (candidateSpaces.empty())
+                {
+                    std::cout << "[!] No Fog token on the board." << std::endl;
+                    finalizeReady();
+                }
+            }
+            else if (CheckCollisionPointRec(mouse, optionButtonB))
+            {
+                choice.selectedOptionIndex = 2;
+                subPhase = 2;
+
+                candidateFogs.clear();
+                if (actingPlayer != nullptr)
+                {
+                    for (Fog *fog : actingPlayer->getFogs())
+                        if (fog != nullptr)
+                            candidateFogs.push_back(fog);
+                }
+
+                if (!candidateFogs.empty())
+                    layoutFogWindow();
+                else
+                    finalizeReady();
+            }
+            return;
+        }
+
+        if (subPhase == 2)
+        {
+            for (size_t i = 0; i < fogBoxes.size(); i++)
+            {
+                if (CheckCollisionPointRec(mouse, fogBoxes[i]))
+                {
+                    selectedFog = candidateFogs[i];
+                    choice.selectedFogId = static_cast<int>(i);
+                    subPhase = 3;
+                    beginFogDestinationStage(effect->getFogMoveRange(), false);
+
+                    if (candidateSpaces.empty())
+                    {
+                        finalizeReady();
+                    }
+                    return;
+                }
+            }
+            return;
+        }
+        return;
+    }
+
+    // -------------------- SlipAway --------------------
+
+    if (inputKind == EffectInputKind::ChooseFogAndDestination)
+    {
+        if (subPhase == 0)
+        {
+            for (size_t i = 0; i < fogBoxes.size(); i++)
+            {
+                if (CheckCollisionPointRec(mouse, fogBoxes[i]))
+                {
+                    selectedFog = candidateFogs[i];
+                    choice.selectedFogId = static_cast<int>(i);
+                    subPhase = 1;
+
+                    candidateSpaces.clear();
+                    if (game != nullptr)
+                    {
+                        for (Space *space : game->getBoard().getSpaces())
+                        {
+                            if (space != nullptr && !space->isOccupied())
+                            {
+                                candidateSpaces.push_back(space);
+                            }
+                        }
+                    }
+
+                    if (candidateSpaces.empty())
+                    {
+                        finalizeReady();
+                    }
+                    return;
+                }
+            }
+            return;
+        }
+        return;
+    }
+
+    // -------------------- StepLightly --------------------
+
+    if (inputKind == EffectInputKind::ChooseEnemyAndFogDestination)
+    {
+        if (subPhase == 0)
+        {
+            for (size_t i = 0; i < fighterBoxes.size(); i++)
+            {
+                if (CheckCollisionPointRec(mouse, fighterBoxes[i]))
+                {
+                    choice.selectedFighter = candidateFighters[i];
+                    subPhase = 1;
+
+                    candidateFogs.clear();
+                    if (actingPlayer != nullptr)
+                    {
+                        for (Fog *fog : actingPlayer->getFogs())
+                            if (fog != nullptr)
+                                candidateFogs.push_back(fog);
+                    }
+
+                    if (!candidateFogs.empty())
+                        layoutFogWindow();
+                    else
+                        finalizeReady();
+                    return;
+                }
+            }
+            return;
+        }
+
+        if (subPhase == 1)
+        {
+            for (size_t i = 0; i < fogBoxes.size(); i++)
+            {
+                if (CheckCollisionPointRec(mouse, fogBoxes[i]))
+                {
+                    selectedFog = candidateFogs[i];
+                    choice.selectedFogId = static_cast<int>(i);
+                    subPhase = 2;
+                    beginFogDestinationStage(effect->getFogMoveRange(), false);
+
+                    if (candidateSpaces.empty())
+                    {
+                        finalizeReady();
+                    }
+                    return;
+                }
+            }
+            return;
+        }
         return;
     }
 }
 
+// ============================================================
+// SELECT SPACE (صدا زده می‌شه از GameScreen وقتی روی نقشه کلیک می‌شه)
+// ============================================================
+
 void EffectUI::selectSpace(Space *space)
 {
     if (space == nullptr)
-    {
         return;
-    }
 
+    bool valid = false;
     for (Space *candidate : candidateSpaces)
     {
         if (candidate == space)
         {
+            valid = true;
+            break;
+        }
+    }
+    if (!valid)
+        return;
+
+    // -------------------- انواع تک‌مرحله‌ای --------------------
+
+    if (inputKind == EffectInputKind::ChooseAdjacentEmptySpace ||
+        inputKind == EffectInputKind::ChooseReachableSpace)
+    {
+        choice.selectedSpace = space;
+        finalizeReady();
+        return;
+    }
+
+    // -------------------- IntoThinAir --------------------
+
+    if (inputKind == EffectInputKind::ChooseFighterMoveThenFogMove)
+    {
+        if (subPhase == 1)
+        {
             choice.selectedSpace = space;
-            open_ = false;
-            ready = true;
+            subPhase = 2;
+
+            candidateFogs.clear();
+            if (actingPlayer != nullptr)
+            {
+                for (Fog *fog : actingPlayer->getFogs())
+                    if (fog != nullptr)
+                        candidateFogs.push_back(fog);
+            }
+
+            if (!candidateFogs.empty())
+                layoutFogWindow();
+            else
+                finalizeReady();
             return;
         }
+
+        if (subPhase == 3)
+        {
+            choice.secondSpace = space;
+            finalizeReady();
+            return;
+        }
+        return;
+    }
+
+    // -------------------- Lurking --------------------
+
+    if (inputKind == EffectInputKind::ChooseLurkingOption)
+    {
+        if (subPhase == 1)
+        {
+            choice.selectedSpace = space;
+            finalizeReady();
+            return;
+        }
+
+        if (subPhase == 3)
+        {
+            choice.secondSpace = space;
+            finalizeReady();
+            return;
+        }
+        return;
+    }
+
+    // -------------------- RollingFog --------------------
+
+    if (inputKind == EffectInputKind::ChooseFogSourceAndDestination)
+    {
+        if (subPhase == 0)
+        {
+            choice.selectedSpace = space;
+            fogSourceSpace = space;
+            subPhase = 1;
+
+            candidateSpaces.clear();
+            if (game != nullptr)
+            {
+                for (Space *s : game->getBoard().getSpaces())
+                {
+                    if (s != nullptr && s != fogSourceSpace && !s->hasFogToken())
+                    {
+                        candidateSpaces.push_back(s);
+                    }
+                }
+            }
+
+            if (candidateSpaces.empty())
+            {
+                finalizeReady();
+            }
+            return;
+        }
+
+        if (subPhase == 1)
+        {
+            choice.secondSpace = space;
+            finalizeReady();
+            return;
+        }
+        return;
+    }
+
+    // -------------------- SlipAway --------------------
+
+    if (inputKind == EffectInputKind::ChooseFogAndDestination)
+    {
+        if (subPhase == 1)
+        {
+            choice.selectedSpace = space;
+            finalizeReady();
+            return;
+        }
+        return;
+    }
+
+    // -------------------- StepLightly --------------------
+
+    if (inputKind == EffectInputKind::ChooseEnemyAndFogDestination)
+    {
+        if (subPhase == 2)
+        {
+            choice.secondSpace = space;
+            finalizeReady();
+            return;
+        }
+        return;
     }
 }
 
@@ -459,49 +1040,180 @@ void EffectUI::selectSpace(Space *space)
 void EffectUI::draw()
 {
     if (!open_ || assets == nullptr)
-    {
         return;
-    }
 
     Font font = assets->getGameFont();
     Vector2 mouse = GetMousePosition();
 
-    if (inputKind == EffectInputKind::ChooseAdjacentEmptySpace ||
-        inputKind == EffectInputKind::ChooseReachableSpace)
+    // -------------------- انتخاب روی نقشه (بدون overlay تیره) --------------------
+
+    if (isChoosingSpace())
     {
         const char *title = "CHOOSE A DESTINATION ON THE MAP";
         const float titleSize = 28.0f;
-
         Vector2 titleTextSize = MeasureTextEx(font, title, titleSize, 1.5f);
 
-        DrawTextEx(
-            font, title,
-            Vector2{
-                (GetScreenWidth() - titleTextSize.x) / 2.0f,
-                20.0f},
-            titleSize, 1.5f, WHITE);
-
+        DrawTextEx(font, title,
+                   Vector2{(GetScreenWidth() - titleTextSize.x) / 2.0f, 20.0f},
+                   titleSize, 1.5f, WHITE);
         return;
     }
 
+    // -------------------- بقیه: overlay تیره --------------------
+
     DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), Color{0, 0, 0, 190});
 
-    if (inputKind == EffectInputKind::ChooseOpponentCardToBurn)
+    // ---- Yes/No (IntoThinAir subPhase 0) ----
+    if (inputKind == EffectInputKind::ChooseFighterMoveThenFogMove && subPhase == 0)
     {
-        const char *title = "CHOOSE A CARD TO BURN";
-        const float titleSize = 32.0f;
+        const char *question = "Do you want to move Invisible Man?";
+        Vector2 qSize = MeasureTextEx(font, question, 28.0f, 1.5f);
+        DrawTextEx(font, question,
+                   Vector2{(GetScreenWidth() - qSize.x) / 2.0f, GetScreenHeight() / 2.0f - 80.0f},
+                   28.0f, 1.5f, WHITE);
 
-        Vector2 titleTextSize = MeasureTextEx(font, title, titleSize, 2.0f);
+        bool yesHovered = CheckCollisionPointRec(mouse, yesButton);
+        DrawRectangleRounded(yesButton, 1.0f, 20, yesHovered ? Color{75, 75, 75, 245} : Color{35, 35, 35, 235});
+        Vector2 yesSize = MeasureTextEx(font, "YES", 24.0f, 1.5f);
+        DrawTextEx(font, "YES", Vector2{yesButton.x + (yesButton.width - yesSize.x) / 2.0f, yesButton.y + (yesButton.height - yesSize.y) / 2.0f}, 24.0f, 1.5f, WHITE);
 
-        DrawTextEx(
-            font, title,
-            Vector2{(GetScreenWidth() - titleTextSize.x) / 2.0f, 70.0f},
-            titleSize, 2.0f, WHITE);
+        bool noHovered = CheckCollisionPointRec(mouse, noButton);
+        DrawRectangleRounded(noButton, 1.0f, 20, noHovered ? Color{75, 75, 75, 245} : Color{35, 35, 35, 235});
+        Vector2 noSize = MeasureTextEx(font, "NO", 24.0f, 1.5f);
+        DrawTextEx(font, "NO", Vector2{noButton.x + (noButton.width - noSize.x) / 2.0f, noButton.y + (noButton.height - noSize.y) / 2.0f}, 24.0f, 1.5f, WHITE);
+        return;
+    }
+
+    // ---- دو گزینه (Lurking subPhase 0 / CodedNotes subPhase 2) ----
+    bool showTwoOptions =
+        (inputKind == EffectInputKind::ChooseLurkingOption && subPhase == 0) ||
+        (inputKind == EffectInputKind::ChooseTwoCardsAndOrder && subPhase == 2);
+
+    if (showTwoOptions)
+    {
+        const char *title =
+            (inputKind == EffectInputKind::ChooseLurkingOption)
+                ? "CHOOSE ONE EFFECT"
+                : "WHICH CARD ON TOP?";
+
+        Vector2 titleSize = MeasureTextEx(font, title, 30.0f, 2.0f);
+        DrawTextEx(font, title,
+                   Vector2{(GetScreenWidth() - titleSize.x) / 2.0f, GetScreenHeight() / 2.0f - 100.0f},
+                   30.0f, 2.0f, WHITE);
+
+        bool hoveredA = CheckCollisionPointRec(mouse, optionButtonA);
+        DrawRectangleRounded(optionButtonA, 0.3f, 20, hoveredA ? Color{75, 75, 75, 245} : Color{35, 35, 35, 235});
+        Vector2 aSize = MeasureTextEx(font, optionTextA.c_str(), 20.0f, 1.5f);
+        DrawTextEx(font, optionTextA.c_str(),
+                   Vector2{optionButtonA.x + (optionButtonA.width - aSize.x) / 2.0f, optionButtonA.y + (optionButtonA.height - aSize.y) / 2.0f},
+                   20.0f, 1.5f, WHITE);
+
+        bool hoveredB = CheckCollisionPointRec(mouse, optionButtonB);
+        DrawRectangleRounded(optionButtonB, 0.3f, 20, hoveredB ? Color{75, 75, 75, 245} : Color{35, 35, 35, 235});
+        Vector2 bSize = MeasureTextEx(font, optionTextB.c_str(), 20.0f, 1.5f);
+        DrawTextEx(font, optionTextB.c_str(),
+                   Vector2{optionButtonB.x + (optionButtonB.width - bSize.x) / 2.0f, optionButtonB.y + (optionButtonB.height - bSize.y) / 2.0f},
+                   20.0f, 1.5f, WHITE);
+        return;
+    }
+
+    // ---- لیست فاگ‌ها ----
+    bool showFogList =
+        !fogBoxes.empty() &&
+        ((inputKind == EffectInputKind::ChooseFighterMoveThenFogMove && subPhase == 2) ||
+         (inputKind == EffectInputKind::ChooseLurkingOption && subPhase == 2) ||
+         (inputKind == EffectInputKind::ChooseFogAndDestination && subPhase == 0) ||
+         (inputKind == EffectInputKind::ChooseEnemyAndFogDestination && subPhase == 1));
+
+    if (showFogList)
+    {
+        const char *title = "CHOOSE A FOG TOKEN";
+        Vector2 titleSize = MeasureTextEx(font, title, 32.0f, 2.0f);
+        DrawTextEx(font, title,
+                   Vector2{(GetScreenWidth() - titleSize.x) / 2.0f, 70.0f},
+                   32.0f, 2.0f, WHITE);
+
+        for (size_t i = 0; i < candidateFogs.size(); i++)
+        {
+            Rectangle box = fogBoxes[i];
+            bool hovered = CheckCollisionPointRec(mouse, box);
+
+            DrawRectangleRounded(box, 0.3f, 20, hovered ? Color{75, 75, 75, 245} : Color{35, 35, 35, 235});
+            DrawRectangleRoundedLines(box, 0.3f, 20, hovered ? WHITE : Color{150, 150, 150, 255});
+
+            std::string text = "Fog " + std::to_string(candidateFogs[i]->getID());
+            if (candidateFogs[i]->getPosition() != nullptr)
+            {
+                text += " (Home " + std::to_string(candidateFogs[i]->getPosition()->getId()) + ")";
+            }
+
+            Vector2 textSize = MeasureTextEx(font, text.c_str(), 18.0f, 1.0f);
+            DrawTextEx(font, text.c_str(),
+                       Vector2{box.x + (box.width - textSize.x) / 2.0f, box.y + (box.height - textSize.y) / 2.0f},
+                       18.0f, 1.0f, WHITE);
+        }
+        return;
+    }
+
+    // ---- لیست فایترها (دشمن / دشمن مجاور) ----
+    bool showFighterList =
+        !fighterBoxes.empty() &&
+        (inputKind == EffectInputKind::ChooseEnemyFighter ||
+         (inputKind == EffectInputKind::ChooseEnemyAndFogDestination && subPhase == 0));
+
+    if (showFighterList)
+    {
+        const char *title = "CHOOSE A FIGHTER";
+        Vector2 titleSize = MeasureTextEx(font, title, 38.0f, 2.0f);
+        DrawTextEx(font, title,
+                   Vector2{(GetScreenWidth() - titleSize.x) / 2.0f, 70.0f},
+                   38.0f, 2.0f, WHITE);
+
+        for (size_t i = 0; i < candidateFighters.size(); i++)
+        {
+            Fighter *candidate = candidateFighters[i];
+            Rectangle box = fighterBoxes[i];
+            bool hovered = CheckCollisionPointRec(mouse, box);
+
+            DrawRectangleRounded(box, 0.08f, 20, hovered ? Color{75, 75, 75, 245} : Color{35, 35, 35, 235});
+            DrawRectangleRoundedLines(box, 0.08f, 20, hovered ? WHITE : Color{150, 150, 150, 255});
+
+            std::string name = candidate->getName();
+            Vector2 nameSize = MeasureTextEx(font, name.c_str(), 22.0f, 1.0f);
+            DrawTextEx(font, name.c_str(),
+                       Vector2{box.x + (box.width - nameSize.x) / 2.0f, box.y + 245.0f},
+                       22.0f, 1.0f, WHITE);
+
+            std::string hpText = "HP: " + std::to_string(candidate->getHealth());
+            Vector2 hpSize = MeasureTextEx(font, hpText.c_str(), 18.0f, 1.0f);
+            DrawTextEx(font, hpText.c_str(),
+                       Vector2{box.x + (box.width - hpSize.x) / 2.0f, box.y + 270.0f},
+                       18.0f, 1.0f, WHITE);
+        }
+        return;
+    }
+
+    // ---- لیست کارت‌ها (سوزوندن حریف / انتخاب برای CodedNotes) ----
+    bool showCardList =
+        !cardBoxes.empty() &&
+        (inputKind == EffectInputKind::ChooseOpponentCardToBurn ||
+         inputKind == EffectInputKind::ChooseTwoCardsAndOrder);
+
+    if (showCardList)
+    {
+        const char *title =
+            (inputKind == EffectInputKind::ChooseOpponentCardToBurn)
+                ? "CHOOSE A CARD TO BURN"
+                : (subPhase == 0 ? "CHOOSE FIRST CARD" : "CHOOSE SECOND CARD");
+
+        Vector2 titleSize = MeasureTextEx(font, title, 32.0f, 2.0f);
+        DrawTextEx(font, title,
+                   Vector2{(GetScreenWidth() - titleSize.x) / 2.0f, 70.0f},
+                   32.0f, 2.0f, WHITE);
 
         std::string heroName =
-            (fighter != nullptr && fighter->getOwner() != nullptr &&
-             fighter->getOwner()->getHero() != nullptr)
-                ? fighter->getOwner()->getHero()->getName()
+            (actingPlayer != nullptr && actingPlayer->getHero() != nullptr)
+                ? actingPlayer->getHero()->getName()
                 : "";
 
         for (size_t i = 0; i < candidateCards.size(); i++)
@@ -510,7 +1222,9 @@ void EffectUI::draw()
             Rectangle box = cardBoxes[i];
 
             bool hovered = CheckCollisionPointRec(mouse, box);
-            bool selected = (static_cast<int>(i) == selectedCardIndex);
+            bool selected =
+                (inputKind == EffectInputKind::ChooseOpponentCardToBurn && static_cast<int>(i) == selectedCardIndex) ||
+                (inputKind == EffectInputKind::ChooseTwoCardsAndOrder && static_cast<int>(i) == pendingFirstCardIndex);
 
             Color boxColor;
             if (selected)
@@ -521,119 +1235,48 @@ void EffectUI::draw()
                 boxColor = Color{35, 35, 35, 235};
 
             DrawRectangleRounded(box, 0.08f, 20, boxColor);
-            DrawRectangleRoundedLines(box, 0.08f, 20,
-                                      (hovered || selected) ? WHITE : Color{150, 150, 150, 255});
+            DrawRectangleRoundedLines(box, 0.08f, 20, (hovered || selected) ? WHITE : Color{150, 150, 150, 255});
 
             std::string textureKey = getCardTextureKey(card, heroName);
-
             if (!textureKey.empty())
             {
                 Texture2D texture = assets->getCard(textureKey);
-
                 if (texture.id != 0)
                 {
                     const float padding = 14.0f;
-
-                    Rectangle source{
-                        0.0f, 0.0f,
-                        static_cast<float>(texture.width),
-                        static_cast<float>(texture.height)};
-
-                    Rectangle destination{
-                        box.x + padding,
-                        box.y + padding,
-                        box.width - 2.0f * padding,
-                        box.height - 65.0f};
-
-                    DrawTexturePro(texture, source, destination,
-                                   Vector2{0.0f, 0.0f}, 0.0f, WHITE);
+                    Rectangle source{0.0f, 0.0f, static_cast<float>(texture.width), static_cast<float>(texture.height)};
+                    Rectangle destination{box.x + padding, box.y + padding, box.width - 2.0f * padding, box.height - 65.0f};
+                    DrawTexturePro(texture, source, destination, Vector2{0.0f, 0.0f}, 0.0f, WHITE);
                 }
             }
 
             std::string name = card->getName();
             Vector2 nameSize = MeasureTextEx(font, name.c_str(), 20.0f, 1.0f);
-
-            DrawTextEx(
-                font, name.c_str(),
-                Vector2{
-                    box.x + (box.width - nameSize.x) / 2.0f,
-                    box.y + box.height - 40.0f},
-                20.0f, 1.0f, WHITE);
+            DrawTextEx(font, name.c_str(),
+                       Vector2{box.x + (box.width - nameSize.x) / 2.0f, box.y + box.height - 40.0f},
+                       20.0f, 1.0f, WHITE);
         }
 
-        bool confirmEnabled = (selectedCardIndex != -1);
-        bool confirmHovered = CheckCollisionPointRec(mouse, confirmButton);
-
-        Color confirmColor;
-        if (!confirmEnabled)
-            confirmColor = Color{30, 30, 30, 120};
-        else if (confirmHovered)
-            confirmColor = Color{140, 40, 40, 245};
-        else
-            confirmColor = Color{100, 30, 30, 235};
-
-        DrawRectangleRounded(confirmButton, 1.0f, 20, confirmColor);
-
-        const char *confirmText = "BURN";
-        Vector2 confirmTextSize = MeasureTextEx(font, confirmText, 26.0f, 1.5f);
-
-        DrawTextEx(
-            font, confirmText,
-            Vector2{
-                confirmButton.x + (confirmButton.width - confirmTextSize.x) / 2.0f,
-                confirmButton.y + (confirmButton.height - confirmTextSize.y) / 2.0f},
-            26.0f, 1.5f,
-            confirmEnabled ? WHITE : Color{150, 150, 150, 150});
-
-        return;
-    }
-
-    if (inputKind == EffectInputKind::ChooseEnemyFighter)
-    {
-        const char *title = "CHOOSE AN OPPONENT'S FIGHTER";
-        const float titleSize = 38.0f;
-
-        Vector2 titleTextSize = MeasureTextEx(font, title, titleSize, 2.0f);
-
-        DrawTextEx(
-            font, title,
-            Vector2{(GetScreenWidth() - titleTextSize.x) / 2.0f, 70.0f},
-            titleSize, 2.0f, WHITE);
-
-        for (size_t i = 0; i < candidateFighters.size(); i++)
+        if (inputKind == EffectInputKind::ChooseOpponentCardToBurn)
         {
-            Fighter *candidate = candidateFighters[i];
-            Rectangle box = fighterBoxes[i];
+            bool confirmEnabled = (selectedCardIndex != -1);
+            bool confirmHovered = CheckCollisionPointRec(mouse, confirmButton);
 
-            bool hovered = CheckCollisionPointRec(mouse, box);
+            Color confirmColor;
+            if (!confirmEnabled)
+                confirmColor = Color{30, 30, 30, 120};
+            else if (confirmHovered)
+                confirmColor = Color{140, 40, 40, 245};
+            else
+                confirmColor = Color{100, 30, 30, 235};
 
-            DrawRectangleRounded(box, 0.08f, 20,
-                                 hovered ? Color{75, 75, 75, 245} : Color{35, 35, 35, 235});
-
-            DrawRectangleRoundedLines(box, 0.08f, 20,
-                                      hovered ? WHITE : Color{150, 150, 150, 255});
-
-            std::string name = candidate->getName();
-            Vector2 nameSize = MeasureTextEx(font, name.c_str(), 22.0f, 1.0f);
-
-            DrawTextEx(
-                font, name.c_str(),
-                Vector2{
-                    box.x + (box.width - nameSize.x) / 2.0f,
-                    box.y + 245.0f},
-                22.0f, 1.0f, WHITE);
-
-            std::string healthText = "HP: " + std::to_string(candidate->getHealth());
-            Vector2 healthSize = MeasureTextEx(font, healthText.c_str(), 18.0f, 1.0f);
-
-            DrawTextEx(
-                font, healthText.c_str(),
-                Vector2{
-                    box.x + (box.width - healthSize.x) / 2.0f,
-                    box.y + 270.0f},
-                18.0f, 1.0f, WHITE);
+            DrawRectangleRounded(confirmButton, 1.0f, 20, confirmColor);
+            const char *confirmText = "BURN";
+            Vector2 confirmTextSize = MeasureTextEx(font, confirmText, 26.0f, 1.5f);
+            DrawTextEx(font, confirmText,
+                       Vector2{confirmButton.x + (confirmButton.width - confirmTextSize.x) / 2.0f, confirmButton.y + (confirmButton.height - confirmTextSize.y) / 2.0f},
+                       26.0f, 1.5f, confirmEnabled ? WHITE : Color{150, 150, 150, 150});
         }
-
         return;
     }
 }
@@ -642,29 +1285,23 @@ void EffectUI::draw()
 // GETTERS
 // ============================================================
 
-bool EffectUI::isOpen() const
-{
-    return open_;
-}
-
-bool EffectUI::isReady() const
-{
-    return ready;
-}
-
-const EffectChoice &EffectUI::getChoice() const
-{
-    return choice;
-}
+bool EffectUI::isOpen() const { return open_; }
+bool EffectUI::isReady() const { return ready; }
+const EffectChoice &EffectUI::getChoice() const { return choice; }
 
 void EffectUI::reset()
 {
     open_ = false;
     ready = false;
     choice = EffectChoice{};
+    subPhase = 0;
+    pendingFirstCardIndex = -1;
     candidateSpaces.clear();
     candidateCards.clear();
     candidateFighters.clear();
+    candidateFogs.clear();
+    selectedFog = nullptr;
+    fogSourceSpace = nullptr;
 }
 
 const std::vector<Space *> &EffectUI::getCandidateSpaces() const
@@ -674,7 +1311,31 @@ const std::vector<Space *> &EffectUI::getCandidateSpaces() const
 
 bool EffectUI::isChoosingSpace() const
 {
-    return open_ &&
-           (inputKind == EffectInputKind::ChooseAdjacentEmptySpace ||
-            inputKind == EffectInputKind::ChooseReachableSpace);
+    if (!open_)
+        return false;
+
+    switch (inputKind)
+    {
+    case EffectInputKind::ChooseAdjacentEmptySpace:
+    case EffectInputKind::ChooseReachableSpace:
+        return true;
+
+    case EffectInputKind::ChooseFighterMoveThenFogMove:
+        return subPhase == 1 || subPhase == 3;
+
+    case EffectInputKind::ChooseLurkingOption:
+        return subPhase == 1 || subPhase == 3;
+
+    case EffectInputKind::ChooseFogSourceAndDestination:
+        return subPhase == 0 || subPhase == 1;
+
+    case EffectInputKind::ChooseFogAndDestination:
+        return subPhase == 1;
+
+    case EffectInputKind::ChooseEnemyAndFogDestination:
+        return subPhase == 2;
+
+    default:
+        return false;
+    }
 }

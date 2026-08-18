@@ -7,6 +7,7 @@
 #include "board/Space.h"
 #include <iostream>
 #include <stdexcept>
+
 using namespace std;
 
 void StepLightly::apply(Game &game, Fighter &fighter, Fighter &target,

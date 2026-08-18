@@ -26,9 +26,6 @@ void CodedNotes::apply(Game &game, Fighter &fighter, Fighter &target,
     cout << "\n========================================\n";
     cout << "-< Coded Notes >- ACTIVATED!\n";
 
-    player->drawCards(3);
-    cout << "\n[+] Invisible Man drew 3 cards.\n";
-
     Hand &hand = player->getHand();
     Deck &deck = player->getDeck();
 
