@@ -845,7 +845,7 @@ void Game::playSchemeCard()
         try
         {
             Effect *effect = scheme->getEffect();
-
+            EffectChoice choice;
             if (effect != nullptr)
             {
                 effect->apply(
@@ -854,7 +854,8 @@ void Game::playSchemeCard()
                     *fighter,
                     *scheme,
                     nullptr,
-                    false);
+                    false,
+                    choice);
             }
             hand.removeCard(handIndex);
             currentPlayer->getDiscardPile().addCard(scheme);

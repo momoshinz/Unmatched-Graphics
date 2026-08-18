@@ -119,6 +119,8 @@ set(SOURCES
     src/graphics/AttackUI.cpp
     src/graphics/SchemeUI.cpp
     src/graphics/ManeuverUI.cpp
+    src/graphics/EffectUI.cpp
+    
     src/ui/TerminalUI.cpp
 )
 
