@@ -135,6 +135,10 @@ void EffectUI::open(Game *game, Effect *effect, Fighter *fighter, Fighter *targe
         setupChooseReachableSpace();
         break;
 
+    case EffectInputKind::ChooseAnyEmptySpace:
+        setupChooseAnyEmptySpace();
+        break;
+
     case EffectInputKind::ChooseOpponentCardToBurn:
         setupChooseOpponentCardToBurn();
         break;
@@ -166,8 +170,23 @@ void EffectUI::open(Game *game, Effect *effect, Fighter *fighter, Fighter *targe
     case EffectInputKind::ChooseEnemyAndFogDestination:
         setupChooseEnemyAndFogDestination();
         break;
-    }
 
+    case EffectInputKind::ChooseDefeatedSisterAndZoneSpace:
+        setupChooseDefeatedSisterAndZoneSpace();
+        break;
+
+    case EffectInputKind::ChooseCardsToDiscard:
+        setupChooseCardsToDiscard();
+        break;
+
+    case EffectInputKind::ChooseFighterAndReachableSpace:
+        setupChooseFighterAndReachableSpace();
+        break;
+
+    case EffectInputKind::ChooseTargetAdjacentEmptySpace:
+        setupChooseTargetAdjacentEmptySpace();
+        break;
+    }
     open_ = true;
 }
 
@@ -560,6 +579,79 @@ void EffectUI::update()
 
     Vector2 mouse = GetMousePosition();
 
+    if (inputKind == EffectInputKind::ChooseDefeatedSisterAndZoneSpace)
+    {
+        // مرحله اول: انتخاب Sister
+        if (subPhase == 0)
+        {
+            for (size_t i = 0; i < fighterBoxes.size(); i++)
+            {
+                if (CheckCollisionPointRec(mouse, fighterBoxes[i]))
+                {
+                    choice.selectedFighter = candidateFighters[i];
+
+                    subPhase = 1;
+
+                    candidateSpaces.clear();
+
+                    // Zone دراکولا را پیدا کن
+                    if (fighter != nullptr &&
+                        fighter->getPosition() != nullptr)
+                    {
+                        const vector<ZoneType> &draculaZones =
+                            fighter->getPosition()->getZones();
+
+                        for (Space *space : game->getBoard().getSpaces())
+                        {
+                            if (space == nullptr)
+                                continue;
+
+                            if (space->isOccupied())
+                                continue;
+
+                            const vector<ZoneType> &zones =
+                                space->getZones();
+
+                            bool sameZone = false;
+
+                            for (ZoneType zone : zones)
+                            {
+                                for (ZoneType draculaZone : draculaZones)
+                                {
+                                    if (zone == draculaZone)
+                                    {
+                                        sameZone = true;
+                                        break;
+                                    }
+                                }
+
+                                if (sameZone)
+                                    break;
+                            }
+
+                            if (sameZone)
+                            {
+                                candidateSpaces.push_back(space);
+                            }
+                        }
+                    }
+
+                    if (candidateSpaces.empty())
+                    {
+                        finalizeReady();
+                    }
+
+                    return;
+                }
+            }
+
+            return;
+        }
+
+        // مرحله دوم توسط selectSpace انجام می‌شود
+        return;
+    }
+
     // -------------------- کارت‌های ساده --------------------
 
     if (inputKind == EffectInputKind::ChooseOpponentCardToBurn)
@@ -581,6 +673,45 @@ void EffectUI::update()
         return;
     }
 
+    if (inputKind == EffectInputKind::ChooseFighterAndReachableSpace)
+    {
+        // مرحله اول: انتخاب Fighter
+        if (subPhase == 0)
+        {
+            for (size_t i = 0; i < fighterBoxes.size(); i++)
+            {
+                if (CheckCollisionPointRec(mouse, fighterBoxes[i]))
+                {
+                    choice.selectedFighter = candidateFighters[i];
+
+                    subPhase = 1;
+
+                    candidateSpaces.clear();
+
+                    if (game != nullptr &&
+                        choice.selectedFighter != nullptr)
+                    {
+                        candidateSpaces =
+                            game->getBoard().getAvailableMoves(
+                                choice.selectedFighter,
+                                2);
+                    }
+
+                    if (candidateSpaces.empty())
+                    {
+                        finalizeReady();
+                    }
+
+                    return;
+                }
+            }
+
+            return;
+        }
+
+        return;
+    }
+
     if (inputKind == EffectInputKind::ChooseEnemyFighter)
     {
         for (size_t i = 0; i < fighterBoxes.size(); i++)
@@ -592,6 +723,47 @@ void EffectUI::update()
                 return;
             }
         }
+        return;
+    }
+
+    // -------------------- Beastform --------------------
+
+    if (inputKind == EffectInputKind::ChooseCardsToDiscard)
+    {
+        // انتخاب / لغو انتخاب کارت
+        for (size_t i = 0; i < cardBoxes.size(); i++)
+        {
+            if (CheckCollisionPointRec(mouse, cardBoxes[i]))
+            {
+                int index = static_cast<int>(i);
+
+                auto it = std::find(
+                    choice.selectedCardIndices.begin(),
+                    choice.selectedCardIndices.end(),
+                    index);
+
+                // اگر قبلاً انتخاب شده → لغو انتخاب
+                if (it != choice.selectedCardIndices.end())
+                {
+                    choice.selectedCardIndices.erase(it);
+                }
+                else
+                {
+                    // انتخاب کارت جدید
+                    choice.selectedCardIndices.push_back(index);
+                }
+
+                return;
+            }
+        }
+
+        // دکمه تأیید
+        if (CheckCollisionPointRec(mouse, confirmButton))
+        {
+            finalizeReady();
+            return;
+        }
+
         return;
     }
 
@@ -908,10 +1080,24 @@ void EffectUI::selectSpace(Space *space)
     // -------------------- انواع تک‌مرحله‌ای --------------------
 
     if (inputKind == EffectInputKind::ChooseAdjacentEmptySpace ||
-        inputKind == EffectInputKind::ChooseReachableSpace)
+        inputKind == EffectInputKind::ChooseReachableSpace ||
+        inputKind == EffectInputKind::ChooseAnyEmptySpace ||
+        inputKind == EffectInputKind::ChooseTargetAdjacentEmptySpace)
     {
         choice.selectedSpace = space;
         finalizeReady();
+        return;
+    }
+
+    if (inputKind == EffectInputKind::ChooseFighterAndReachableSpace)
+    {
+        if (subPhase == 1)
+        {
+            choice.selectedSpace = space;
+            finalizeReady();
+            return;
+        }
+
         return;
     }
 
@@ -1029,6 +1215,18 @@ void EffectUI::selectSpace(Space *space)
             finalizeReady();
             return;
         }
+        return;
+    }
+
+    if (inputKind == EffectInputKind::ChooseDefeatedSisterAndZoneSpace)
+    {
+        if (subPhase == 1)
+        {
+            choice.selectedSpace = space;
+            finalizeReady();
+            return;
+        }
+
         return;
     }
 }
@@ -1159,11 +1357,23 @@ void EffectUI::draw()
     bool showFighterList =
         !fighterBoxes.empty() &&
         (inputKind == EffectInputKind::ChooseEnemyFighter ||
-         (inputKind == EffectInputKind::ChooseEnemyAndFogDestination && subPhase == 0));
+        (inputKind == EffectInputKind::ChooseEnemyAndFogDestination &&
+        subPhase == 0) ||
+        (inputKind == EffectInputKind::ChooseDefeatedSisterAndZoneSpace &&
+        subPhase == 0));
 
     if (showFighterList)
     {
-        const char *title = "CHOOSE A FIGHTER";
+        const char *title;
+
+        if (inputKind == EffectInputKind::ChooseDefeatedSisterAndZoneSpace)
+        {
+            title = "CHOOSE A DEFEATED SISTER";
+        }
+        else
+        {
+            title = "CHOOSE A FIGHTER";
+        }
         Vector2 titleSize = MeasureTextEx(font, title, 38.0f, 2.0f);
         DrawTextEx(font, title,
                    Vector2{(GetScreenWidth() - titleSize.x) / 2.0f, 70.0f},
@@ -1197,14 +1407,26 @@ void EffectUI::draw()
     bool showCardList =
         !cardBoxes.empty() &&
         (inputKind == EffectInputKind::ChooseOpponentCardToBurn ||
-         inputKind == EffectInputKind::ChooseTwoCardsAndOrder);
-
+        inputKind == EffectInputKind::ChooseTwoCardsAndOrder ||
+        inputKind == EffectInputKind::ChooseCardsToDiscard);
     if (showCardList)
     {
-        const char *title =
-            (inputKind == EffectInputKind::ChooseOpponentCardToBurn)
-                ? "CHOOSE A CARD TO BURN"
-                : (subPhase == 0 ? "CHOOSE FIRST CARD" : "CHOOSE SECOND CARD");
+        const char *title;
+
+        if (inputKind == EffectInputKind::ChooseOpponentCardToBurn)
+        {
+            title = "CHOOSE A CARD TO BURN";
+        }
+        else if (inputKind == EffectInputKind::ChooseTwoCardsAndOrder)
+        {
+            title = (subPhase == 0)
+                        ? "CHOOSE FIRST CARD"
+                        : "CHOOSE SECOND CARD";
+        }
+        else
+        {
+            title = "CHOOSE CARDS TO DISCARD";
+        }
 
         Vector2 titleSize = MeasureTextEx(font, title, 32.0f, 2.0f);
         DrawTextEx(font, title,
@@ -1223,8 +1445,17 @@ void EffectUI::draw()
 
             bool hovered = CheckCollisionPointRec(mouse, box);
             bool selected =
-                (inputKind == EffectInputKind::ChooseOpponentCardToBurn && static_cast<int>(i) == selectedCardIndex) ||
-                (inputKind == EffectInputKind::ChooseTwoCardsAndOrder && static_cast<int>(i) == pendingFirstCardIndex);
+                (inputKind == EffectInputKind::ChooseOpponentCardToBurn &&
+                static_cast<int>(i) == selectedCardIndex) ||
+
+                (inputKind == EffectInputKind::ChooseTwoCardsAndOrder &&
+                static_cast<int>(i) == pendingFirstCardIndex) ||
+
+                (inputKind == EffectInputKind::ChooseCardsToDiscard &&
+                std::find(
+                    choice.selectedCardIndices.begin(),
+                    choice.selectedCardIndices.end(),
+                    static_cast<int>(i)) != choice.selectedCardIndices.end());
 
             Color boxColor;
             if (selected)
@@ -1257,9 +1488,12 @@ void EffectUI::draw()
                        20.0f, 1.0f, WHITE);
         }
 
-        if (inputKind == EffectInputKind::ChooseOpponentCardToBurn)
+        if (inputKind == EffectInputKind::ChooseOpponentCardToBurn || inputKind == EffectInputKind::ChooseCardsToDiscard)
         {
-            bool confirmEnabled = (selectedCardIndex != -1);
+            bool confirmEnabled =
+            (inputKind == EffectInputKind::ChooseCardsToDiscard)
+                ? true
+                : (selectedCardIndex != -1);
             bool confirmHovered = CheckCollisionPointRec(mouse, confirmButton);
 
             Color confirmColor;
@@ -1271,7 +1505,10 @@ void EffectUI::draw()
                 confirmColor = Color{100, 30, 30, 235};
 
             DrawRectangleRounded(confirmButton, 1.0f, 20, confirmColor);
-            const char *confirmText = "BURN";
+            const char *confirmText =
+            (inputKind == EffectInputKind::ChooseCardsToDiscard)
+                ? "CONFIRM"
+                : "BURN";
             Vector2 confirmTextSize = MeasureTextEx(font, confirmText, 26.0f, 1.5f);
             DrawTextEx(font, confirmText,
                        Vector2{confirmButton.x + (confirmButton.width - confirmTextSize.x) / 2.0f, confirmButton.y + (confirmButton.height - confirmTextSize.y) / 2.0f},
@@ -1316,26 +1553,164 @@ bool EffectUI::isChoosingSpace() const
 
     switch (inputKind)
     {
-    case EffectInputKind::ChooseAdjacentEmptySpace:
-    case EffectInputKind::ChooseReachableSpace:
-        return true;
+        case EffectInputKind::ChooseAdjacentEmptySpace:
+        case EffectInputKind::ChooseReachableSpace:
+        case EffectInputKind::ChooseAnyEmptySpace:
+        case EffectInputKind::ChooseTargetAdjacentEmptySpace:
+            return true;
 
-    case EffectInputKind::ChooseFighterMoveThenFogMove:
-        return subPhase == 1 || subPhase == 3;
+        case EffectInputKind::ChooseFighterMoveThenFogMove:
+            return subPhase == 1 || subPhase == 3;
 
-    case EffectInputKind::ChooseLurkingOption:
-        return subPhase == 1 || subPhase == 3;
+        case EffectInputKind::ChooseLurkingOption:
+            return subPhase == 1 || subPhase == 3;
 
-    case EffectInputKind::ChooseFogSourceAndDestination:
-        return subPhase == 0 || subPhase == 1;
+        case EffectInputKind::ChooseFogSourceAndDestination:
+            return subPhase == 0 || subPhase == 1;
 
-    case EffectInputKind::ChooseFogAndDestination:
-        return subPhase == 1;
+        case EffectInputKind::ChooseFogAndDestination:
+            return subPhase == 1;
 
-    case EffectInputKind::ChooseEnemyAndFogDestination:
-        return subPhase == 2;
+        case EffectInputKind::ChooseEnemyAndFogDestination:
+            return subPhase == 2;
 
-    default:
-        return false;
+        case EffectInputKind::ChooseDefeatedSisterAndZoneSpace:
+            return subPhase == 1;
+
+        case EffectInputKind::ChooseFighterAndReachableSpace:
+            return subPhase == 1;
+
+        default:
+            return false;
+    }
+}
+
+void EffectUI::setupChooseCardsToDiscard()
+{
+    subPhase = 0;
+
+    candidateCards.clear();
+
+    if (actingPlayer == nullptr)
+        return;
+
+    for (Card *card : actingPlayer->getHand().getCards())
+    {
+        if (card != nullptr)
+            candidateCards.push_back(card);
+    }
+
+    // حتی اگر دست خالی باشد، UI باز می‌شود
+    // و کاربر می‌تواند با CONFIRM بدون انتخاب کارت ادامه دهد.
+    layoutCardWindow(candidateCards);
+
+    choice.selectedCardIndices.clear();
+}
+
+void EffectUI::setupChooseDefeatedSisterAndZoneSpace()
+{
+    subPhase = 0;
+
+    candidateFighters.clear();
+    candidateSpaces.clear();
+
+    if (actingPlayer == nullptr || game == nullptr)
+        return;
+
+    // پیدا کردن Sisterهای شکست‌خورده
+    for (Sidekick *sidekick : actingPlayer->getSideKicks())
+    {
+        if (sidekick != nullptr &&
+            sidekick->isSister() &&
+            !sidekick->isAlive())
+        {
+            candidateFighters.push_back(sidekick);
+        }
+    }
+
+    // اگر Sister شکست‌خورده نداریم
+    if (candidateFighters.empty())
+    {
+        finalizeReady();
+        return;
+    }
+
+    layoutFighterWindow(candidateFighters);
+}
+
+void EffectUI::setupChooseAnyEmptySpace()
+{
+    candidateSpaces.clear();
+
+    if (game == nullptr)
+        return;
+
+    for (Space *space : game->getBoard().getSpaces())
+    {
+        if (space == nullptr)
+            continue;
+
+        if (space->isOccupied())
+            continue;
+
+        candidateSpaces.push_back(space);
+    }
+}
+
+void EffectUI::setupChooseFighterAndReachableSpace()
+{
+    subPhase = 0;
+
+    candidateFighters.clear();
+    candidateSpaces.clear();
+
+    if (actingPlayer == nullptr)
+        return;
+
+    Hero *hero = actingPlayer->getHero();
+
+    if (hero != nullptr && hero->isAlive())
+    {
+        candidateFighters.push_back(hero);
+    }
+
+    for (Sidekick *sidekick : actingPlayer->getSideKicks())
+    {
+        if (sidekick != nullptr && sidekick->isAlive())
+        {
+            candidateFighters.push_back(sidekick);
+        }
+    }
+
+    if (candidateFighters.empty())
+    {
+        finalizeReady();
+        return;
+    }
+
+    layoutFighterWindow(candidateFighters);
+}
+
+void EffectUI::setupChooseTargetAdjacentEmptySpace()
+{
+    candidateSpaces.clear();
+
+    if (target == nullptr || game == nullptr)
+        return;
+
+    Space *targetSpace = target->getPosition();
+
+    if (targetSpace == nullptr)
+        return;
+
+    for (Space *space : targetSpace->getNeighbors())
+    {
+        if (space == nullptr)
+            continue;
+
+        if (space->isOccupied())
+            continue;
+
+        candidateSpaces.push_back(space);
     }
 }

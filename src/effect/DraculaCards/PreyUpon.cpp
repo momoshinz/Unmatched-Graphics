@@ -9,20 +9,29 @@
 #include <iostream>
 #include <stdexcept>
 #include <vector>
+
 using namespace std;
 
-void PreyUpon::apply(Game &game, Fighter &fighter, Fighter &target, const Card &self, Card *opponentCard, bool didUserWin)
+void PreyUpon::apply(Game &game,
+                     Fighter &fighter,
+                     Fighter &target,
+                     const Card &self,
+                     Card *opponentCard,
+                     bool didUserWin,
+                     const EffectChoice &choice)
 {
     Player *player = fighter.getOwner();
+
     if (player == nullptr)
     {
         throw runtime_error("\n[!] ERROR : Fighter has NO owner!\n");
     }
-    Player* opponentPlayer = target.getOwner();
-    if(opponentPlayer == nullptr)
+
+    Player *opponentPlayer = target.getOwner();
+
+    if (opponentPlayer == nullptr)
     {
         throw runtime_error("\n[!] ERROR : Target has NO owner!\n");
-        return;
     }
 
     if (!fighter.isHero())
@@ -30,52 +39,66 @@ void PreyUpon::apply(Game &game, Fighter &fighter, Fighter &target, const Card &
         throw runtime_error("\n[!] ERROR : Prey Upon can only be used by Dracula!\n");
     }
 
-    vector<Fighter*> adjacentOpponents;
-    Hero* opponentHero = opponentPlayer->getHero();
-    if(opponentHero != nullptr && opponentHero->isAlive())
+    vector<Fighter *> adjacentOpponents;
+
+    Hero *opponentHero = opponentPlayer->getHero();
+
+    if (opponentHero != nullptr &&
+        opponentHero->isAlive() &&
+        fighter.isAdjacent(opponentHero, game.getBoard()))
     {
-        if(fighter.isAdjacent(opponentHero, game.getBoard()))
-        {
-            adjacentOpponents.push_back(opponentHero);
-        }
+        adjacentOpponents.push_back(opponentHero);
     }
-    for(Sidekick* sidekick : opponentPlayer->getSideKicks())
+
+    for (Sidekick *sidekick : opponentPlayer->getSideKicks())
     {
-        if(sidekick != nullptr && sidekick->isAlive())
+        if (sidekick != nullptr &&
+            sidekick->isAlive() &&
+            fighter.isAdjacent(sidekick, game.getBoard()))
         {
-            if(fighter.isAdjacent(sidekick, game.getBoard()))
-            {
-                adjacentOpponents.push_back(sidekick);
-            }
+            adjacentOpponents.push_back(sidekick);
         }
     }
 
-    if(adjacentOpponents.empty())
+    if (adjacentOpponents.empty())
     {
         cerr << "\n[!] ERROR : No adjacent opponent found!\n";
         return;
     }
+
     cout << "\n========================================\n";
     cout << "-< Prey Upon >- ACTIVATED!\n";
 
     int totalDamage = 0;
+
     cout << "\n[o] Affected fighters :\n";
-    for(auto opponent : adjacentOpponents)
+
+    for (Fighter *opponent : adjacentOpponents)
     {
         opponent->takeDamage(1);
         totalDamage++;
+
         cout << "> " << opponent->getName() << " took 1 Damage!\n";
     }
 
     fighter.heal(totalDamage);
+
     cout << "[-] Total damage amount : " << totalDamage << "\n";
+
     cout << "[+] " << fighter.getName() << " recovered " << totalDamage << " health!\n";
+
     cout << "========================================\n";
+}
+
+EffectInputKind PreyUpon::getInputKind() const
+{
+    return EffectInputKind::None;
 }
 
 string PreyUpon::getDescription() const
 {
-    return "> Deal 1 damage to all opposing fighters adjacent to Dracula. Dracula recovers 1 health for each damage dealt.";
+    return "> Deal 1 damage to all opposing fighters adjacent to Dracula. "
+           "Dracula recovers 1 health for each damage dealt.";
 }
 
 Effect *PreyUpon::clone() const

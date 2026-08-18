@@ -1,52 +1,85 @@
 #include "effect/DraculaCards/Ambush.h"
 #include "game/Game.h"
-#include "fighter/Fighter.h"
 #include "player/Player.h"
+#include "fighter/Fighter.h"
 #include "card/Card.h"
+#include "card/Hand.h"
 #include <iostream>
+#include <vector>
+#include <stdexcept>
 #include <cstdlib>
-#include <ctime>
+
 using namespace std;
 
-void Ambush::apply(Game &game, Fighter &fighter, Fighter &target, const Card &self, Card *opponentCard, bool didUserWin)
+void Ambush::apply(Game &game,
+                   Fighter &fighter,
+                   Fighter &target,
+                   const Card &self,
+                   Card *opponentCard,
+                   bool didUserWin,
+                   const EffectChoice &choice)
 {
-    Player* opponentPlayer = target.getOwner();
-    if(opponentPlayer == nullptr)
+    Player *opponent = target.getOwner();
+
+    if (opponent == nullptr)
     {
-        cerr << "\n[!] ERROR : Target has NO owner!\n";
-        return;
+        throw runtime_error("\n[!] ERROR : Opponent has NO owner!\n");
     }
 
-    Hand &opponentHand = opponentPlayer->getHand();
-    if(opponentHand.isEmpty())
+    const vector<Card *> &cards = opponent->getHand().getCards();
+
+    if (cards.empty())
     {
-        cerr << "\n[!] ERROR : Opponent player has NO cards in hand!\nAmbush effect is CANCELED.\n";
-        return;
+        throw runtime_error("\n[!] ERROR : Opponent has NO card to discard!\n");
     }
+
+    int randomIndex = rand() % static_cast<int>(cards.size());
+
+    Card *selectedCard = cards[randomIndex];
+
+    if (selectedCard == nullptr)
+    {
+        throw runtime_error("\n[!] ERROR : Selected opponent card is NULL!\n");
+    }
+
+    int boostValue = selectedCard->getBoost();
+
+    Card *removedCard = opponent->getHand().removeCard(randomIndex);
+
+    if (removedCard == nullptr)
+    {
+        throw runtime_error("\n[!] ERROR : Could not remove opponent card!\n");
+    }
+
+    opponent->getDiscardPile().addCard(removedCard);
+
+    fighter.addTempAttackBoost(boostValue);
 
     cout << "\n========================================";
+
     cout << "\n-< Ambush >- ACTIVATED!\n";
 
-    srand(time(0));
-    int randomCard = rand() % opponentHand.getSize();
-    Card* discardedCard = opponentHand.removeCard(randomCard);
+    cout << "[!] Opponent discarded: " << removedCard->getName() << endl;
 
-    opponentPlayer->getDiscardPile().addCard((discardedCard));
-    cout << endl;
-    cout << "[o] " << target.getName() << " discarded : " << discardedCard->getName() << endl;
+    cout << "[+] Boost value: " << boostValue << endl;
 
-    int boostValue = discardedCard->getBoost();
-    fighter.addTempAttackBoost(boostValue);
-    cout << "[+] Ambush gains +" << boostValue << " attack from discarded card's boost!\n";
+    cout << "[+] Attack receives +" << boostValue << " temporary boost.\n";
+
     cout << "========================================\n";
+}
+
+EffectInputKind Ambush::getInputKind() const
+{
+    return EffectInputKind::None;
 }
 
 string Ambush::getDescription() const
 {
-    return "\n> Your opponent discards 1 random card.add it's BOOST value to this card's ATTACK POWER!";
+    return
+        "> Your opponent discards a random card.\nAdd its BOOST value to your attack.";
 }
 
-Effect* Ambush::clone() const
+Effect *Ambush::clone() const
 {
     return new Ambush(*this);
 }

@@ -6,70 +6,80 @@
 #include "board/Board.h"
 #include <iostream>
 #include <stdexcept>
-#include <vector>
+
 using namespace std;
 
-void MistForm::apply(Game &game, Fighter &fighter, Fighter &target, const Card &self, Card *opponentCard, bool didUserWin)
+void MistForm::apply(Game &game,
+                     Fighter &fighter,
+                     Fighter &target,
+                     const Card &self,
+                     Card *opponentCard,
+                     bool didUserWin,
+                     const EffectChoice &choice)
 {
     Player *player = fighter.getOwner();
+
     if (player == nullptr)
     {
         throw runtime_error("\n[!] ERROR : Fighter has NO owner!\n");
     }
+
     if (!fighter.isHero())
     {
         throw runtime_error("\n[!] ERROR : Mistform can only be used by Dracula!\n");
     }
 
-    vector<Space*> targetSpaces;
-    for(auto space : game.getBoard().getSpaces())
+    if (choice.selectedSpace == nullptr)
     {
-        if(!space->isOccupied())
-        {
-            targetSpaces.push_back(space);
-        }
+        throw runtime_error("\n[!] ERROR : No destination selected for MistForm!\n");
     }
-    if(targetSpaces.empty())
+
+    Space *chosenSpace = choice.selectedSpace;
+
+    if (chosenSpace->isOccupied())
     {
-        cout << "\n[!] ERROR : No empty home available.\n";
-        return;
+        throw runtime_error("\n[!] ERROR : Selected home is already OCCUPIED!\n");
     }
+
     cout << "\n========================================\n";
     cout << "-< MistForm >- ACTIVATED!\n";
 
-    cout << "\n[o] Choose a home to go :\n";
-    
-    for(int i=0 ; i<targetSpaces.size() ; i++)
+    Space *currentSpace = fighter.getPosition();
+
+    if (currentSpace != nullptr)
     {
-        cout << i+1 << ". home " << targetSpaces[i]->getId() << endl;
-    }
-    cout << "\n> Enter your choice :";
-    int choice;
-    cin >> choice;
-    if(choice < 1 || choice > targetSpaces.size())
-    {
-        throw invalid_argument("\n[!] ERROR : Invalid choice!\n");
+        currentSpace->removeFighter(&fighter);
     }
 
-    Space* currentPos = fighter.getPosition();
-    Space* chosenSpace = targetSpaces[choice-1];
-    if(currentPos != nullptr)
-    {
-        currentPos->removeFighter(&fighter);
-    }
     fighter.setPosition(chosenSpace);
     chosenSpace->setFighter(&fighter);
-    cout << "\n[+] " << fighter.getName() << " moved to home " << chosenSpace->getId() << "!\n";
+
+    cout << "\n[+] "
+         << fighter.getName()
+         << " moved to home "
+         << chosenSpace->getId()
+         << "!\n";
 
     game.getTurnManager().addAction();
-    cout << "[+] " << fighter.getName() << " gain 1 extra action!\n";
+
+    cout << "[+] "
+         << fighter.getName()
+         << " gained 1 extra action!\n";
+
     cout << "========================================\n";
+}
+
+
+EffectInputKind MistForm::getInputKind() const
+{
+    return EffectInputKind::ChooseAnyEmptySpace;
 }
 
 string MistForm::getDescription() const
 {
-    return "> Place Dracula in any space.Gain 1 action.";
+    return "> Place Dracula in any empty space. Gain 1 action.";
 }
+
 
 Effect *MistForm::clone() const
 {

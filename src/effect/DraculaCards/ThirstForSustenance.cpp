@@ -9,80 +9,98 @@
 #include <iostream>
 #include <stdexcept>
 #include <vector>
+
 using namespace std;
 
-void ThirstForSustenance::apply(Game &game, Fighter &fighter, Fighter &target, const Card &self, Card *opponentCard, bool didUserWin)
+void ThirstForSustenance::apply(
+    Game &game,
+    Fighter &fighter,
+    Fighter &target,
+    const Card &self,
+    Card *opponentCard,
+    bool didUserWin,
+    const EffectChoice &choice)
 {
-    if(!didUserWin)
+    if (!didUserWin)
     {
         cout << "\n[!] ERROR : You didn't win in combat!\n";
         return;
     }
+
     Player *player = fighter.getOwner();
+
     if (player == nullptr)
     {
         throw runtime_error("\n[!] ERROR : Fighter has NO owner!\n");
     }
-    if(!fighter.isSister())
+
+    if (!fighter.isSister())
     {
         throw runtime_error("\n[!] ERROR : Thirst For Sustenance can only be used by Sisters!\n");
     }
 
-    Hero* dracula = player->getHero();
-    if(dracula == nullptr)
+    Hero *dracula = player->getHero();
+
+    if (dracula == nullptr)
     {
         throw runtime_error("\n[!] ERROR : Dracula not found!\n");
     }
 
-    Board &board = game.getBoard();
-    Space* enemySpace = target.getPosition();
-    if(enemySpace == nullptr)
+    Space *enemySpace = target.getPosition();
+
+    if (enemySpace == nullptr)
     {
         throw runtime_error("\n[!] ERROR : Target has NO position!\n");
     }
-    
-    vector<Space*> availableSpaces;
-    for(auto neighbor : enemySpace->getNeighbors())
+
+    Space *chosenSpace = choice.selectedSpace;
+
+    if (chosenSpace == nullptr)
     {
-        if(!neighbor->isOccupied())
+        throw runtime_error("\n[!] ERROR : No destination space was selected!\n");
+    }
+
+    bool validDestination = false;
+
+    for (Space *neighbor : enemySpace->getNeighbors())
+    {
+        if (neighbor == chosenSpace)
         {
-            availableSpaces.push_back(neighbor);
+            validDestination = true;
+            break;
         }
     }
-    if(availableSpaces.empty())
+
+    if (!validDestination)
     {
-        cerr << "\n[!] ERROR : There is no empty adjacent home!\n";
-        return;
+        throw runtime_error("\n[!] ERROR : Selected destination is NOT adjacent to target!\n");
+    }
+
+    if (chosenSpace->isOccupied())
+    {
+        throw runtime_error("\n[!] ERROR : Selected destination is OCCUPIED!\n");
     }
 
     cout << "\n========================================\n";
     cout << "-< Thirst For Sustenance >- ACTIVATED!\n";
 
-    cout << "\n========================================\n";
-    cout << "[?] Choose where to move Dracula :\n";
-    cout << "========================================\n";
+    game.getBoard().moveFighter(dracula, chosenSpace);
 
-    for(int i=0 ; i<availableSpaces.size() ; i++)
-    {
-        cout << i+1 << ". Home " << availableSpaces[i]->getId() << endl;
-    }
-    int choice;
-    cout << "> Enter your choice :";
-    cin >> choice;
+    cout << "[+] Dracula moved next to "
+         << target.getName()
+         << ".\n";
 
-    if(choice < 1 || choice > availableSpaces.size())
-    {
-        throw runtime_error("\n[!] ERROR : Invalid choice! :(\n");
-    }
-
-    board.moveFighter(dracula, availableSpaces[choice-1]);
-    cout << "\n[+] Dracula moved next to " << target.getName() << ".\n";
     cout << "========================================\n";
 }
 
 string ThirstForSustenance::getDescription() const
 {
     return "> If you won the combat, move Dracula to any empty adjacent home next to the opposing fighter.";
+}
+
+EffectInputKind ThirstForSustenance::getInputKind() const
+{
+    return EffectInputKind::ChooseTargetAdjacentEmptySpace;
 }
 
 Effect *ThirstForSustenance::clone() const

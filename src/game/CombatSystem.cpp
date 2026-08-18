@@ -186,8 +186,8 @@ void CombatSystem::applyEffects(Timing timing, Fighter &user, Fighter &target, C
             return;
         }
     }
-
-    effect->apply(*currentGame, user, target, card, opponentCard, didUserWin);
+    EffectChoice choice;
+    effect->apply(*currentGame, user, target, card, opponentCard, didUserWin, choice);
 }
 
 bool CombatSystem::canFighterPlayCard(const Fighter &fighter, const Card &card) const

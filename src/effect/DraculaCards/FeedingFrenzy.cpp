@@ -3,25 +3,36 @@
 #include "player/Player.h"
 #include "fighter/Fighter.h"
 #include "fighter/Sisters.h"
+#include "board/Space.h"
 #include <iostream>
 #include <stdexcept>
 #include <vector>
+
 using namespace std;
 
-void FeedingFrenzy::apply(Game &game, Fighter &fighter, Fighter &target, const Card &self, Card *opponentCard, bool didUserWin)
+void FeedingFrenzy::apply(Game &game,
+                          Fighter &fighter,
+                          Fighter &target,
+                          const Card &self,
+                          Card *opponentCard,
+                          bool didUserWin,
+                          const EffectChoice &choice)
 {
     Player *player = fighter.getOwner();
+
     if (player == nullptr)
     {
         throw runtime_error("\n[!] ERROR : Fighter has NO owner!\n");
     }
+
     if (!fighter.isHero())
     {
         throw runtime_error("\n[!] ERROR : Feeding Frenzy can only be used by Dracula!\n");
     }
 
-    Space* targetPos = target.getPosition();
-    if(targetPos == nullptr)
+    Space *targetPos = target.getPosition();
+
+    if (targetPos == nullptr)
     {
         throw runtime_error("\n[!] ERROR : Target has NO position on the map!\n");
     }
@@ -29,46 +40,63 @@ void FeedingFrenzy::apply(Game &game, Fighter &fighter, Fighter &target, const C
     vector<ZoneType> targetZones = targetPos->getZones();
 
     int sisterCount = 0;
-    for(Sisters* sister : player->getSisters())
+
+    for (Sisters *sister : player->getSisters())
     {
-        if(!sister->isAlive())
+        if (!sister->isAlive())
         {
             continue;
         }
-        Space* sisterPos = sister->getPosition();
-        if(sisterPos == nullptr)
+
+        Space *sisterPos = sister->getPosition();
+
+        if (sisterPos == nullptr)
         {
             continue;
         }
+
         vector<ZoneType> sisterZones = sisterPos->getZones();
 
         bool sameZone = false;
-        for(ZoneType Tzones : targetZones)
+
+        for (ZoneType targetZone : targetZones)
         {
-            for(ZoneType Szones : sisterZones)
+            for (ZoneType sisterZone : sisterZones)
             {
-                if(Tzones == Szones)
+                if (targetZone == sisterZone)
                 {
-                    cout << "\n========================================\n";
-                    cout << "-< Feeding Frenzy >- ACTIVATED!\n";
                     sameZone = true;
                     break;
                 }
             }
-            if(sameZone)
+
+            if (sameZone)
             {
                 break;
             }
         }
-        if(sameZone)
+
+        if (sameZone)
         {
             sisterCount++;
         }
     }
+
+    cout << "\n========================================\n";
+    cout << "-< Feeding Frenzy >- ACTIVATED!\n";
+
     fighter.addTempAttackBoost(sisterCount);
+
     cout << "[+] " << sisterCount << " Sister(s) in the same zone as the target!\n";
+
     cout << "[+] Attack value increased by " << sisterCount << ".\n";
+
     cout << "========================================\n";
+}
+
+EffectInputKind FeedingFrenzy::getInputKind() const
+{
+    return EffectInputKind::None;
 }
 
 string FeedingFrenzy::getDescription() const
@@ -76,7 +104,7 @@ string FeedingFrenzy::getDescription() const
     return "> This card's ATTACK value is +1 for each Sister in the same zone as opposing fighter.";
 }
 
-Effect* FeedingFrenzy::clone() const
+Effect *FeedingFrenzy::clone() const
 {
     return new FeedingFrenzy(*this);
 }

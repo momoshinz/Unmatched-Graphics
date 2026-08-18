@@ -1,6 +1,5 @@
 #ifndef EFFECT_H
 #define EFFECT_H
-
 #include <string>
 #include <vector>
 
@@ -35,7 +34,12 @@ enum class EffectInputKind
     ChooseLurkingOption,           // Lurking
     ChooseFogSourceAndDestination, // RollingFog
     ChooseFogAndDestination,       // SlipAway
-    ChooseEnemyAndFogDestination   // StepLightly
+    ChooseEnemyAndFogDestination,   // StepLightly
+    ChooseDefeatedSisterAndZoneSpace, // Baptism Of Blood
+    ChooseCardsToDiscard,
+    ChooseAnyEmptySpace,
+    ChooseFighterAndReachableSpace,
+    ChooseTargetAdjacentEmptySpace
 };
 
 class Effect

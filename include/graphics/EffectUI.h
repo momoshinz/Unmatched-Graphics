@@ -91,6 +91,11 @@ private:
     void setupChooseFogSourceAndDestination();
     void setupChooseFogAndDestination();
     void setupChooseEnemyAndFogDestination();
+    void setupChooseDefeatedSisterAndZoneSpace();
+    void setupChooseCardsToDiscard();
+    void setupChooseAnyEmptySpace();
+    void setupChooseFighterAndReachableSpace();
+    void setupChooseTargetAdjacentEmptySpace();
 
     // ---- layout کمکی ----
     void layoutCardWindow(const std::vector<Card *> &cards);

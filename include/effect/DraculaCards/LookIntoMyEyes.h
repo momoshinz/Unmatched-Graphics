@@ -14,8 +14,10 @@ public:
                Fighter &target,
                const Card &self,
                Card *opponentCard,
-               bool didUserWin) override;
+               bool didUserWin,
+               const EffectChoice &choice) override;
 
+    virtual EffectInputKind getInputKind() const override;
     virtual string getDescription() const override;
     virtual Effect *clone() const override;
 };
