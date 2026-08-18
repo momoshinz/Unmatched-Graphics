@@ -282,9 +282,84 @@ int GameScreen::update()
         }
     } // <-- پایان if (IsMouseButtonPressed(...))
 
+    if (combatInProgress)
+    {
+        CombatSystem &combatSystem = game->getCombatSystem();
+
+        if (combatSystem.isWaitingForEffectInput() && !combatEffectRequested)
+        {
+            effectUI.open(game, combatSystem.getPendingEffect(),
+                          combatSystem.getPendingUser(),
+                          combatSystem.getPendingTarget());
+
+            combatEffectRequested = true;
+        }
+    }
+
     if (attackUI.isOpen())
     {
         attackUI.update();
+    }
+
+    if (attackUI.isAttackConfirmed())
+    {
+        Fighter *chosenAttacker = attackUI.getSelectedAttacker();
+        Fighter *chosenTarget = attackUI.getSelectedTarget();
+        Card *chosenAttackCard = attackUI.getSelectedAttackCard();
+        Card *chosenDefenseCard = attackUI.getSelectedDefenseCard();
+
+        if (chosenAttacker != nullptr &&
+            chosenTarget != nullptr &&
+            chosenAttackCard != nullptr)
+        {
+            Player *currentPlayer = game->getTurnManager().getCurrentPlayer();
+            Player *defenderPlayer = chosenTarget->getOwner();
+
+            Card *removedAttackCard = nullptr;
+            Card *removedDefenceCard = nullptr;
+
+            if (currentPlayer != nullptr)
+            {
+                Hand &attackerHand = currentPlayer->getHand();
+                const std::vector<Card *> &attackerCards = attackerHand.getCards();
+
+                for (int i = 0; i < static_cast<int>(attackerCards.size()); i++)
+                {
+                    if (attackerCards[i] == chosenAttackCard)
+                    {
+                        removedAttackCard = attackerHand.removeCard(i);
+                        break;
+                    }
+                }
+            }
+
+            if (chosenDefenseCard != nullptr && defenderPlayer != nullptr)
+            {
+                Hand &defenderHand = defenderPlayer->getHand();
+                const std::vector<Card *> &defenderCards = defenderHand.getCards();
+
+                for (int i = 0; i < static_cast<int>(defenderCards.size()); i++)
+                {
+                    if (defenderCards[i] == chosenDefenseCard)
+                    {
+                        removedDefenceCard = defenderHand.removeCard(i);
+                        break;
+                    }
+                }
+            }
+
+            if (removedAttackCard != nullptr)
+            {
+                game->getCombatSystem().beginCombat(
+                    *game, *chosenAttacker, *chosenTarget,
+                    *removedAttackCard, removedDefenceCard);
+
+                combatInProgress = true;
+                combatEffectRequested = false;
+            }
+        }
+
+        attackUI.resetAttackConfirmed();
     }
 
     if (schemeUI.isOpen())
@@ -376,6 +451,26 @@ int GameScreen::update()
         pendingSchemeCard = nullptr;
         effectUI.reset();
     }
+
+    if (effectUI.isReady() && combatInProgress && combatEffectRequested)
+    {
+        game->getCombatSystem().provideEffectChoice(effectUI.getChoice());
+        effectUI.reset();
+        combatEffectRequested = false;
+    }
+
+    if (combatInProgress && game->getCombatSystem().isFinished())
+    {
+        game->getTurnManager().useAction();
+
+        std::cout << "[.] Actions remaining: "
+                  << game->getTurnManager().getRemainingActions()
+                  << std::endl;
+
+        checkAndEndTurnIfNeeded();
+
+        combatInProgress = false;
+    }
     return 0;
 }
 
@@ -451,14 +546,6 @@ void GameScreen::draw()
         effectUI.draw();
     }
 }
-
-// =========================================
-// DRAW MAP
-// =========================================
-
-// ============================================================
-// DRAW MAP
-// ============================================================
 
 void GameScreen::drawMap()
 {

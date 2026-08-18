@@ -45,6 +45,9 @@ void AttackUI::openAttack(Player *player, const std::vector<Fighter *> &fighters
     defenseChoiceMade = false;
     wantsDefenseCard = false;
 
+    attackConfirmed = false;
+    errorIsDefenseless = false;
+
     phase = AttackPhase::SelectAttacker;
 
     if (player == nullptr)
@@ -76,7 +79,7 @@ void AttackUI::openAttack(Player *player, const std::vector<Fighter *> &fighters
     const float gapY = 25.0f;
 
     const float totalWidth = selectableFighters.size() * boxWidth +
-    (selectableFighters.size() - 1) * gapX;
+                             (selectableFighters.size() - 1) * gapX;
 
     const float startX =
         (GetScreenWidth() - totalWidth) / 2.0f;
@@ -84,15 +87,14 @@ void AttackUI::openAttack(Player *player, const std::vector<Fighter *> &fighters
     const float startY = 170.0f;
 
     for (size_t i = 0;
-        i < selectableFighters.size();
-        i++)
+         i < selectableFighters.size();
+         i++)
     {
         Rectangle box{
             startX + i * (boxWidth + gapX),
             startY,
             boxWidth,
-            boxHeight
-        };
+            boxHeight};
 
         fighterBoxes.push_back(box);
     }
@@ -164,7 +166,7 @@ static Texture2D getFighterTexture(
     {
         return assets->getCharacter("drwatson");
     }
-    
+
     // -----------------------------
     // Invisible Man
     // -----------------------------
@@ -203,14 +205,20 @@ void AttackUI::update()
             220.0f,
             60.0f};
 
-        if (CheckCollisionPointRec(
-                mouse,
-                closeButton))
+        if (CheckCollisionPointRec(mouse, closeButton))
         {
+            bool wasDefenseless = errorIsDefenseless; // <-- خط جدید
+
             showError = false;
             errorMessage.clear();
+            errorIsDefenseless = false; // <-- خط جدید
 
             open = false;
+
+            if (wasDefenseless) // <-- بلوک جدید
+            {
+                attackConfirmed = true;
+            }
 
             return;
         }
@@ -285,6 +293,7 @@ void AttackUI::update()
                 {
                     showError = true;
                     errorMessage = "THIS FIGHTER HAS NO PLAYABLE ATTACK CARD!";
+                    errorIsDefenseless = false; // <-- خط جدید
                     return;
                 }
 
@@ -316,8 +325,7 @@ void AttackUI::update()
                         startY,
 
                         cardWidth,
-                        cardHeight
-                    };
+                        cardHeight};
 
                     attackCardBoxes.push_back(box);
                 }
@@ -333,8 +341,7 @@ void AttackUI::update()
                     (GetScreenWidth() - playWidth) / 2.0f,
                     startY + cardHeight + 25.0f,
                     playWidth,
-                    playHeight
-                };
+                    playHeight};
 
                 phase = AttackPhase::SelectAttackCard;
 
@@ -354,8 +361,8 @@ void AttackUI::update()
         // --------------------------------------------
 
         for (size_t i = 0;
-            i < attackCardBoxes.size();
-            i++)
+             i < attackCardBoxes.size();
+             i++)
         {
             if (CheckCollisionPointRec(
                     mouse,
@@ -381,8 +388,7 @@ void AttackUI::update()
             CheckCollisionPointRec(mouse, playButton))
         {
             selectedAttackCard =
-                selectableAttackCards[
-                    selectedAttackCardIndex];
+                selectableAttackCards[selectedAttackCardIndex];
 
             confirmedAttackCard = true;
 
@@ -400,7 +406,7 @@ void AttackUI::update()
 
             for (Player *other : game->getPlayers())
             {
-                if (other == nullptr || other == attackPlayer)  // فقط حریف‌ها
+                if (other == nullptr || other == attackPlayer) // فقط حریف‌ها
                     continue;
 
                 Hero *enemyHero = other->getHero();
@@ -431,10 +437,8 @@ void AttackUI::update()
             if (selectableTargets.empty())
             {
                 showError = true;
-
-                errorMessage =
-                    "NO VALID TARGET FOR THIS ATTACKER!";
-
+                errorMessage = "NO VALID TARGET FOR THIS ATTACKER!";
+                errorIsDefenseless = false; // <-- خط جدید
                 return;
             }
 
@@ -456,8 +460,8 @@ void AttackUI::update()
             const float startY = 170.0f;
 
             for (size_t j = 0;
-                j < selectableTargets.size();
-                j++)
+                 j < selectableTargets.size();
+                 j++)
             {
                 Rectangle box{
                     startX +
@@ -466,8 +470,7 @@ void AttackUI::update()
                     startY,
 
                     boxWidth,
-                    boxHeight
-                };
+                    boxHeight};
 
                 targetBoxes.push_back(box);
             }
@@ -485,8 +488,8 @@ void AttackUI::update()
     if (phase == AttackPhase::SelectTarget)
     {
         for (size_t i = 0;
-            i < targetBoxes.size();
-            i++)
+             i < targetBoxes.size();
+             i++)
         {
             if (CheckCollisionPointRec(
                     mouse,
@@ -521,16 +524,14 @@ void AttackUI::update()
             GetScreenWidth() / 2.0f - 230.0f,
             430.0f,
             200.0f,
-            70.0f
-        };
+            70.0f};
 
         // NO
         Rectangle noButton{
             GetScreenWidth() / 2.0f + 30.0f,
             430.0f,
             200.0f,
-            70.0f
-        };
+            70.0f};
 
         if (CheckCollisionPointRec(mouse, yesButton))
         {
@@ -568,7 +569,7 @@ void AttackUI::update()
             }
 
             for (Card *card :
-                defenderPlayer->getHand().getCards())
+                 defenderPlayer->getHand().getCards())
             {
                 if (card == nullptr)
                     continue;
@@ -597,6 +598,7 @@ void AttackUI::update()
             {
                 showError = true;
                 errorMessage = "DEFENDER HAS NO PLAYABLE DEFEND CARD!";
+                errorIsDefenseless = true; // <-- خط جدید
                 return;
             }
 
@@ -618,8 +620,8 @@ void AttackUI::update()
             const float startY = 170.0f;
 
             for (size_t i = 0;
-                i < selectableDefenseCards.size();
-                i++)
+                 i < selectableDefenseCards.size();
+                 i++)
             {
                 Rectangle box{
                     startX +
@@ -628,8 +630,7 @@ void AttackUI::update()
                     startY,
 
                     cardWidth,
-                    cardHeight
-                };
+                    cardHeight};
 
                 defenseCardBoxes.push_back(box);
             }
@@ -655,6 +656,7 @@ void AttackUI::update()
                 << std::endl;
 
             open = false;
+            attackConfirmed = true;
 
             return;
         }
@@ -667,8 +669,8 @@ void AttackUI::update()
     if (phase == AttackPhase::SelectDefenseCard)
     {
         for (size_t i = 0;
-            i < defenseCardBoxes.size();
-            i++)
+             i < defenseCardBoxes.size();
+             i++)
         {
             if (CheckCollisionPointRec(
                     mouse,
@@ -683,35 +685,7 @@ void AttackUI::update()
                     << std::endl;
 
                 open = false;
-
-                return;
-            }
-        }
-    }
-
-    // ========================================================
-    // SELECT DEFENSE CARD
-    // ========================================================
-
-    if (phase == AttackPhase::SelectDefenseCard)
-    {
-        for (size_t i = 0;
-            i < defenseCardBoxes.size();
-            i++)
-        {
-            if (CheckCollisionPointRec(
-                    mouse,
-                    defenseCardBoxes[i]))
-            {
-                selectedDefenseCard =
-                    selectableDefenseCards[i];
-
-                std::cout
-                    << "Defense card selected : "
-                    << selectedDefenseCard->getName()
-                    << std::endl;
-
-                open = false;
+                attackConfirmed = true;
 
                 return;
             }
@@ -739,8 +713,7 @@ void AttackUI::draw()
             0,
             GetScreenWidth(),
             GetScreenHeight(),
-            Color{0, 0, 0, 220}
-        );
+            Color{0, 0, 0, 220});
         const float messageSize = 32.0f;
 
         Vector2 messageSizeVec =
@@ -756,7 +729,8 @@ void AttackUI::draw()
 
             Vector2{
                 (GetScreenWidth() -
-                messageSizeVec.x) / 2.0f,
+                 messageSizeVec.x) /
+                    2.0f,
                 250.0f},
 
             messageSize,
@@ -813,11 +787,13 @@ void AttackUI::draw()
             Vector2{
                 closeButton.x +
                     (closeButton.width -
-                    textSize.x) / 2.0f,
+                     textSize.x) /
+                        2.0f,
 
                 closeButton.y +
                     (closeButton.height -
-                    textSize.y) / 2.0f},
+                     textSize.y) /
+                        2.0f},
 
             26.0f,
             1.5f,
@@ -861,7 +837,8 @@ void AttackUI::draw()
 
             Vector2{
                 (GetScreenWidth() -
-                 titleMeasure.x) / 2.0f,
+                 titleMeasure.x) /
+                    2.0f,
                 60.0f},
 
             titleSize,
@@ -905,13 +882,12 @@ void AttackUI::draw()
             // ------------------------------------------------
 
             DrawRectangleRoundedLines(
-            box,
-            0.08f,
-            20,
-            (hovered || selected)
-                ? WHITE
-                : Color{150, 150, 150, 255});
-
+                box,
+                0.08f,
+                20,
+                (hovered || selected)
+                    ? WHITE
+                    : Color{150, 150, 150, 255});
 
             Texture2D texture = getCardTexture(assets, card);
 
@@ -923,15 +899,13 @@ void AttackUI::draw()
                     0.0f,
                     0.0f,
                     static_cast<float>(texture.width),
-                    static_cast<float>(texture.height)
-                };
+                    static_cast<float>(texture.height)};
 
                 Rectangle destination{
                     box.x + padding,
                     box.y + padding,
                     box.width - 2.0f * padding,
-                    box.height - 65.0f
-                };
+                    box.height - 65.0f};
 
                 DrawTexturePro(
                     texture,
@@ -939,8 +913,7 @@ void AttackUI::draw()
                     destination,
                     Vector2{0.0f, 0.0f},
                     0.0f,
-                    WHITE
-                );
+                    WHITE);
             }
 
             // ------------------------------------------------
@@ -968,8 +941,7 @@ void AttackUI::draw()
 
                     box.y +
                         box.height -
-                        40.0f
-                },
+                        40.0f},
 
                 nameFontSize,
                 1.0f,
@@ -1035,12 +1007,13 @@ void AttackUI::draw()
             Vector2{
                 playButton.x +
                     (playButton.width -
-                    playTextSize.x) / 2.0f,
+                     playTextSize.x) /
+                        2.0f,
 
                 playButton.y +
                     (playButton.height -
-                    playTextSize.y) / 2.0f
-            },
+                     playTextSize.y) /
+                        2.0f},
 
             playFontSize,
             1.5f,
@@ -1055,7 +1028,7 @@ void AttackUI::draw()
     // ========================================================
     // SELECT ATTACKER
     // ========================================================
-    if(phase == AttackPhase::SelectAttacker)
+    if (phase == AttackPhase::SelectAttacker)
     {
         const char *title = "CHOOSE YOUR ATTACKER";
 
@@ -1075,7 +1048,8 @@ void AttackUI::draw()
 
             Vector2{
                 (GetScreenWidth() -
-                titleMeasure.x) / 2.0f,
+                 titleMeasure.x) /
+                    2.0f,
 
                 70.0f},
 
@@ -1083,7 +1057,6 @@ void AttackUI::draw()
             2.0f,
             WHITE);
     }
-    
 
     if (phase == AttackPhase::SelectAttacker)
     {
@@ -1095,8 +1068,8 @@ void AttackUI::draw()
             GetMousePosition();
 
         for (size_t i = 0;
-            i < selectableFighters.size();
-            i++)
+             i < selectableFighters.size();
+             i++)
         {
             Fighter *fighter =
                 selectableFighters[i];
@@ -1191,7 +1164,8 @@ void AttackUI::draw()
                 Vector2{
                     box.x +
                         (box.width -
-                        nameSize.x) / 2.0f,
+                         nameSize.x) /
+                            2.0f,
                     box.y + 245.0f},
 
                 22.0f,
@@ -1221,7 +1195,8 @@ void AttackUI::draw()
                 Vector2{
                     box.x +
                         (box.width -
-                        healthSize.x) / 2.0f,
+                         healthSize.x) /
+                            2.0f,
                     box.y + 270.0f},
 
                 18.0f,
@@ -1254,7 +1229,8 @@ void AttackUI::draw()
 
             Vector2{
                 (GetScreenWidth() -
-                titleMeasure.x) / 2.0f,
+                 titleMeasure.x) /
+                    2.0f,
                 70.0f},
 
             titleSize,
@@ -1265,8 +1241,8 @@ void AttackUI::draw()
             GetMousePosition();
 
         for (size_t i = 0;
-            i < selectableTargets.size();
-            i++)
+             i < selectableTargets.size();
+             i++)
         {
             Fighter *fighter =
                 selectableTargets[i];
@@ -1315,15 +1291,13 @@ void AttackUI::draw()
                     0.0f,
                     0.0f,
                     static_cast<float>(texture.width),
-                    static_cast<float>(texture.height)
-                };
+                    static_cast<float>(texture.height)};
 
                 Rectangle destination{
                     box.x + imagePadding,
                     box.y + imagePadding,
                     box.width - 2.0f * imagePadding,
-                    220.0f
-                };
+                    220.0f};
 
                 DrawTexturePro(
                     texture,
@@ -1355,10 +1329,10 @@ void AttackUI::draw()
                 Vector2{
                     box.x +
                         (box.width -
-                        nameSize.x) / 2.0f,
+                         nameSize.x) /
+                            2.0f,
 
-                    box.y + 245.0f
-                },
+                    box.y + 245.0f},
 
                 22.0f,
                 1.0f,
@@ -1387,10 +1361,10 @@ void AttackUI::draw()
                 Vector2{
                     box.x +
                         (box.width -
-                        healthSize.x) / 2.0f,
+                         healthSize.x) /
+                            2.0f,
 
-                    box.y + 270.0f
-                },
+                    box.y + 270.0f},
 
                 18.0f,
                 1.0f,
@@ -1424,15 +1398,14 @@ void AttackUI::draw()
 
             Vector2{
                 (GetScreenWidth() -
-                titleMeasure.x) / 2.0f,
+                 titleMeasure.x) /
+                    2.0f,
 
-                180.0f
-            },
+                180.0f},
 
             titleSize,
             2.0f,
-            WHITE
-        );
+            WHITE);
 
         // ----------------------------------------------------
         // YES
@@ -1442,8 +1415,7 @@ void AttackUI::draw()
             GetScreenWidth() / 2.0f - 230.0f,
             430.0f,
             200.0f,
-            70.0f
-        };
+            70.0f};
 
         // ----------------------------------------------------
         // NO
@@ -1453,8 +1425,7 @@ void AttackUI::draw()
             GetScreenWidth() / 2.0f + 30.0f,
             430.0f,
             200.0f,
-            70.0f
-        };
+            70.0f};
 
         Vector2 mouse =
             GetMousePosition();
@@ -1475,8 +1446,7 @@ void AttackUI::draw()
             20,
             yesHovered
                 ? Color{75, 75, 75, 245}
-                : Color{35, 35, 35, 235}
-        );
+                : Color{35, 35, 35, 235});
 
         DrawRectangleRoundedLines(
             yesButton,
@@ -1484,8 +1454,7 @@ void AttackUI::draw()
             20,
             yesHovered
                 ? WHITE
-                : Color{150, 150, 150, 255}
-        );
+                : Color{150, 150, 150, 255});
 
         DrawRectangleRounded(
             noButton,
@@ -1493,8 +1462,7 @@ void AttackUI::draw()
             20,
             noHovered
                 ? Color{75, 75, 75, 245}
-                : Color{35, 35, 35, 235}
-        );
+                : Color{35, 35, 35, 235});
 
         DrawRectangleRoundedLines(
             noButton,
@@ -1502,8 +1470,7 @@ void AttackUI::draw()
             20,
             noHovered
                 ? WHITE
-                : Color{150, 150, 150, 255}
-        );
+                : Color{150, 150, 150, 255});
 
         // ----------------------------------------------------
         // YES TEXT
@@ -1527,13 +1494,11 @@ void AttackUI::draw()
                     (yesButton.width - yesSize.x) / 2.0f,
 
                 yesButton.y +
-                    (yesButton.height - yesSize.y) / 2.0f
-            },
+                    (yesButton.height - yesSize.y) / 2.0f},
 
             26.0f,
             1.0f,
-            WHITE
-        );
+            WHITE);
 
         // ----------------------------------------------------
         // NO TEXT
@@ -1557,13 +1522,11 @@ void AttackUI::draw()
                     (noButton.width - noSize.x) / 2.0f,
 
                 noButton.y +
-                    (noButton.height - noSize.y) / 2.0f
-            },
+                    (noButton.height - noSize.y) / 2.0f},
 
             26.0f,
             1.0f,
-            WHITE
-        );
+            WHITE);
 
         return;
     }
@@ -1592,21 +1555,20 @@ void AttackUI::draw()
 
             Vector2{
                 (GetScreenWidth() -
-                titleMeasure.x) / 2.0f,
-                60.0f
-            },
+                 titleMeasure.x) /
+                    2.0f,
+                60.0f},
 
             titleSize,
             2.0f,
-            WHITE
-        );
+            WHITE);
 
         Vector2 mouse =
             GetMousePosition();
 
         for (size_t i = 0;
-            i < selectableDefenseCards.size();
-            i++)
+             i < selectableDefenseCards.size();
+             i++)
         {
             Card *card =
                 selectableDefenseCards[i];
@@ -1636,8 +1598,7 @@ void AttackUI::draw()
                 20,
                 hovered
                     ? WHITE
-                    : Color{150, 150, 150, 255}
-            );
+                    : Color{150, 150, 150, 255});
 
             // -----------------------------
             // Card image
@@ -1658,8 +1619,7 @@ void AttackUI::draw()
                     static_cast<float>(
                         texture.width),
                     static_cast<float>(
-                        texture.height)
-                };
+                        texture.height)};
 
                 Rectangle destination{
                     box.x + padding,
@@ -1669,8 +1629,7 @@ void AttackUI::draw()
                         2.0f * padding,
 
                     box.height -
-                        65.0f
-                };
+                        65.0f};
 
                 DrawTexturePro(
                     texture,
@@ -1678,8 +1637,7 @@ void AttackUI::draw()
                     destination,
                     Vector2{0.0f, 0.0f},
                     0.0f,
-                    WHITE
-                );
+                    WHITE);
             }
 
             // -----------------------------
@@ -1697,8 +1655,7 @@ void AttackUI::draw()
                     font,
                     name.c_str(),
                     nameFontSize,
-                    1.0f
-                );
+                    1.0f);
 
             DrawTextEx(
                 font,
@@ -1707,17 +1664,16 @@ void AttackUI::draw()
                 Vector2{
                     box.x +
                         (box.width -
-                        nameSize.x) / 2.0f,
+                         nameSize.x) /
+                            2.0f,
 
                     box.y +
                         box.height -
-                        40.0f
-                },
+                        40.0f},
 
                 nameFontSize,
                 1.0f,
-                WHITE
-            );
+                WHITE);
         }
 
         return;
@@ -1747,7 +1703,6 @@ Card *AttackUI::getSelectedAttackCard() const
 {
     return selectedAttackCard;
 }
-
 
 Texture2D AttackUI::getCardTexture(AssetManager *assets, Card *card)
 {
@@ -1863,4 +1818,14 @@ Texture2D AttackUI::getCardTexture(AssetManager *assets, Card *card)
 Card *AttackUI::getSelectedDefenseCard() const
 {
     return selectedDefenseCard;
+}
+
+bool AttackUI::isAttackConfirmed() const
+{
+    return attackConfirmed;
+}
+
+void AttackUI::resetAttackConfirmed()
+{
+    attackConfirmed = false;
 }

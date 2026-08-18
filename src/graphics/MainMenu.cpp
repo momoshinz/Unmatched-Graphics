@@ -904,13 +904,13 @@ void MainMenu::drawPlayerInput(
     // ENTER MESSAGE
     // =====================================
 
-    const char *enterMessage = "Please Enter To Confirm Your Information.";
+    const char *enterMessage = "> Please Enter To Confirm Your Information.";
 
     Vector2 enterMessageSize =
         MeasureTextEx(
             font,
             enterMessage,
-            18.0f,
+            25.0f,
             1.0f);
 
     DrawTextEx(
@@ -921,7 +921,7 @@ void MainMenu::drawPlayerInput(
             GetScreenWidth() - enterMessageSize.x - 20.0f,
             GetScreenHeight() - enterMessageSize.y - 15.0f},
 
-        18.0f,
+        25.0f,
         1.0f,
 
         WHITE);
@@ -1229,7 +1229,7 @@ int MainMenu::handleInput()
         const float startButtonHeight = 75.0f;
 
         const float startButtonX =
-            (GetScreenWidth() - startButtonWidth) / 2.0f;
+            (GetScreenWidth() - 300.0f) / 2.0f;
 
         const float startButtonY = 650.0f;
 
@@ -1494,14 +1494,14 @@ void MainMenu::drawHeroSelection(Font font)
     if (age1 == age2)
     {
         const char *line1 =
-            "Both players are the same age.";
+            "Both players are the same age!";
 
         const char *line2 =
             "Hero selection order was chosen randomly.";
 
-        const float messageFontSize = 20.0f;
+        const float messageFontSize = 30.0f;
         const float messageSpacing = 1.0f;
-        const float rightPadding = 30.0f;
+        const float rightPadding = 35.0f;
 
         Vector2 line1Size =
             MeasureTextEx(
@@ -1565,8 +1565,8 @@ void MainMenu::drawHeroSelection(Font font)
     // Hero boxes
     // =====================================
 
-    const float boxWidth = 250.0f;
-    const float boxHeight = 300.0f;
+    const float boxWidth = 320.0f;
+    const float boxHeight = 370.0f;
     const float gap = 35.0f;
 
     const float totalWidth =
@@ -1748,7 +1748,7 @@ void MainMenu::drawHeroSelection(Font font)
 
     Rectangle finishButton{
         (GetScreenWidth() - 300.0f) / 2.0f,
-        650.0f,
+        750.0f,
         300.0f,
         70.0f};
 

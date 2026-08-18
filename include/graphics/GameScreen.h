@@ -18,7 +18,7 @@ private:
     SchemeUI schemeUI;
     ManeuverUI maneuverUI;
     EffectUI effectUI;
-    Card *pendingSchemeCard = nullptr;  
+    Card *pendingSchemeCard = nullptr;
 
     bool guideOpen = false;
 
@@ -60,6 +60,9 @@ private:
 
     PlayerPanel rightPlayerPanel;
     PlayerPanel leftPlayerPanel;
+
+    bool combatInProgress = false;
+    bool combatEffectRequested = false;
 
 public:
     GameScreen(

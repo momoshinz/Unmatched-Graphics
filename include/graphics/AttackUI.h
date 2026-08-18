@@ -10,74 +10,71 @@ class AssetManager;
 
 class AttackUI
 {
-    private:
-        AssetManager *assets;
-        Game* game = nullptr;
-        bool open = false;
+private:
+    AssetManager *assets;
+    Game *game = nullptr;
+    bool open = false;
 
-        Fighter *selectedAttacker = nullptr;
-        Fighter *selectedTarget = nullptr;
+    Fighter *selectedAttacker = nullptr;
+    Fighter *selectedTarget = nullptr;
 
-        std::vector<Fighter *> selectableFighters;
-        std::vector<Rectangle> fighterBoxes;
-        
-        enum class AttackPhase
-        {
-            SelectAttacker,
-            SelectAttackCard,
-            AskDefenseCard,
-            SelectTarget,
-            SelectDefenseCard
-        };
+    std::vector<Fighter *> selectableFighters;
+    std::vector<Rectangle> fighterBoxes;
 
-        AttackPhase phase = AttackPhase::SelectAttacker;
+    enum class AttackPhase
+    {
+        SelectAttacker,
+        SelectAttackCard,
+        AskDefenseCard,
+        SelectTarget,
+        SelectDefenseCard
+    };
 
-        std::vector<Card *> selectableAttackCards;
-        std::vector<Rectangle> attackCardBoxes;
+    AttackPhase phase = AttackPhase::SelectAttacker;
 
-        Card *selectedAttackCard = nullptr;
+    std::vector<Card *> selectableAttackCards;
+    std::vector<Rectangle> attackCardBoxes;
 
-        Player *attackPlayer = nullptr;
-        int selectedAttackCardIndex = -1;
-        bool confirmedAttackCard = false;
+    Card *selectedAttackCard = nullptr;
 
-        std::vector<Fighter *> selectableTargets;
-        std::vector<Rectangle> targetBoxes;
+    Player *attackPlayer = nullptr;
+    int selectedAttackCardIndex = -1;
+    bool confirmedAttackCard = false;
 
-        Card *selectedDefenseCard = nullptr;
+    std::vector<Fighter *> selectableTargets;
+    std::vector<Rectangle> targetBoxes;
 
-        std::vector<Card *> selectableDefenseCards;
-        std::vector<Rectangle> defenseCardBoxes;
+    Card *selectedDefenseCard = nullptr;
 
-        bool defenseChoiceMade = false;
-        bool wantsDefenseCard = false;
-        Rectangle playButton;
+    std::vector<Card *> selectableDefenseCards;
+    std::vector<Rectangle> defenseCardBoxes;
 
-        bool showError = false;
-        std::string errorMessage;
-        
-    public:
-        AttackUI(AssetManager *assets);
+    bool defenseChoiceMade = false;
+    bool wantsDefenseCard = false;
+    Rectangle playButton;
 
-        void openAttack(Player *player,const std::vector<Fighter *> &fighters, Game *game);
+    bool showError = false;
+    std::string errorMessage;
 
-        void update();
+    bool attackConfirmed = false;
+    bool errorIsDefenseless = false;
 
-        void draw();
+public:
+    AttackUI(AssetManager *assets);
+    void openAttack(Player *player, const std::vector<Fighter *> &fighters, Game *game);
+    void update();
+    void draw();
+    bool isOpen() const;
 
-        bool isOpen() const;
+    Fighter *getSelectedAttacker() const;
+    Fighter *getSelectedTarget() const;
+    Card *getSelectedAttackCard() const;
+    static Texture2D getCardTexture(AssetManager *assets, Card *card);
+    Card *getSelectedDefenseCard() const;
+    bool isAttackCardConfirmed() const;
 
-        Fighter *getSelectedAttacker() const;
-
-        Fighter *getSelectedTarget() const;
-
-        Card *getSelectedAttackCard() const;
-
-        static Texture2D getCardTexture(AssetManager *assets, Card *card);
-
-        Card *getSelectedDefenseCard() const;
-
-        bool isAttackCardConfirmed() const;
+    bool isAttackConfirmed() const;
+    void resetAttackConfirmed();
 };
 
 #endif
