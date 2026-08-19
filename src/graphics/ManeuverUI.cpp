@@ -424,7 +424,7 @@ int ManeuverUI::getMovementBudget() const
     return selectedFighter->getMovement() + boostAmount;
 }
 
-void ManeuverUI::beginSpaceSelection(const std::vector<std::pair<Space *, int>> &moves)
+void ManeuverUI::beginSpaceSelection(const std::vector<Space *> &moves)
 {
     availableMoves = moves;
     waitingForMoves = false;
@@ -436,7 +436,7 @@ Fighter *ManeuverUI::getSelectedFighter() const
     return selectedFighter;
 }
 
-const std::vector<std::pair<Space *, int>> &ManeuverUI::getAvailableMoves() const
+const std::vector<Space *> &ManeuverUI::getAvailableMoves() const
 {
     return availableMoves;
 }

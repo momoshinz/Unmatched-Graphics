@@ -36,10 +36,10 @@ public:
     bool needsAvailableMoves() const;
     Fighter *getFighterNeedingMoves() const;
     int getMovementBudget() const;
-    void beginSpaceSelection(const std::vector<std::pair<Space *, int>> &moves);
+    void beginSpaceSelection(const std::vector<Space *> &moves);
 
     Fighter *getSelectedFighter() const;
-    const std::vector<std::pair<Space *, int>> &getAvailableMoves() const;
+    const std::vector<Space *> &getAvailableMoves() const;
 
     void finishAfterMove();
     bool consumeReadyToFinalize();
@@ -62,7 +62,7 @@ private:
     Rectangle burnButton{};
     int boostAmount = 0;
 
-    std::vector<std::pair<Space *, int>> availableMoves;
+    std::vector<Space *> availableMoves;
     bool waitingForMoves = false;
     bool readyToFinalize = false;
 

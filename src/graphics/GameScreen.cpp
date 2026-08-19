@@ -260,13 +260,14 @@ int GameScreen::update()
 
             if (maneuverUI.isSelectingSpace())
             {
-                for (const auto &movePair : maneuverUI.getAvailableMoves())
+                for (Space *space : maneuverUI.getAvailableMoves())
                 {
-                    if (movePair.first->getId() == clickedSpaceId)
+                    if (space != nullptr &&
+                        space->getId() == clickedSpaceId)
                     {
                         game->getBoard().moveFighter(
                             maneuverUI.getSelectedFighter(),
-                            movePair.first);
+                            space);
 
                         maneuverUI.finishAfterMove();
                         break;
@@ -416,6 +417,39 @@ int GameScreen::update()
         }
 
         schemeUI.resetConfirmed();
+    }
+
+    if (maneuverUI.isOpen())
+    {
+        maneuverUI.update();
+    }
+
+    if (maneuverUI.needsAvailableMoves())
+    {
+        Fighter *fighter = maneuverUI.getFighterNeedingMoves();
+
+        if (fighter != nullptr)
+        {
+            int movementBudget = maneuverUI.getMovementBudget();
+
+            std::vector<Space *> moves =
+                game->getBoard().getAvailableMoves(
+                    fighter,
+                    movementBudget);
+
+            if (moves.empty())
+            {
+                std::cout << "\n[!] No available moves for "
+                        << fighter->getName()
+                        << std::endl;
+
+                maneuverUI.finishAfterMove();
+            }
+            else
+            {
+                maneuverUI.beginSpaceSelection(moves);
+            }
+        }
     }
 
     if (effectUI.isOpen())
@@ -2255,22 +2289,43 @@ void GameScreen::drawManeuverMovableSpaces()
     float mapWidth;
     float mapHeight;
 
-    calculateMapTransform(mapX, mapY, scale, mapWidth, mapHeight);
+    calculateMapTransform(
+        mapX,
+        mapY,
+        scale,
+        mapWidth,
+        mapHeight);
 
-    for (const auto &movePair : maneuverUI.getAvailableMoves())
+    for (Space *space : maneuverUI.getAvailableMoves())
     {
-        int spaceId = movePair.first->getId();
+        if (space == nullptr)
+        {
+            continue;
+        }
+
+        int spaceId = space->getId();
 
         if (spaceId < 1 || spaceId > 32)
         {
             continue;
         }
 
-        Vector2 center = mapImageToScreen(SPACE_GRAPHICS[spaceId - 1].center);
-        float radius = SPACE_GRAPHICS[spaceId - 1].radius * scale;
+        Vector2 center =
+            mapImageToScreen(
+                SPACE_GRAPHICS[spaceId - 1].center);
 
-        DrawCircleV(center, radius, Color{80, 220, 100, 130});
-        DrawCircleLinesV(center, radius, Color{120, 255, 150, 220});
+        float radius =
+            SPACE_GRAPHICS[spaceId - 1].radius * scale;
+
+        DrawCircleV(
+            center,
+            radius,
+            Color{80, 220, 100, 130});
+
+        DrawCircleLinesV(
+            center,
+            radius,
+            Color{120, 255, 150, 220});
     }
 }
 
