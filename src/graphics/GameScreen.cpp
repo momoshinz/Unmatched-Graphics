@@ -304,46 +304,69 @@ int GameScreen::update()
 
     if (attackUI.isAttackConfirmed())
     {
-        Fighter *chosenAttacker = attackUI.getSelectedAttacker();
-        Fighter *chosenTarget = attackUI.getSelectedTarget();
-        Card *chosenAttackCard = attackUI.getSelectedAttackCard();
-        Card *chosenDefenseCard = attackUI.getSelectedDefenseCard();
+        Player *currentPlayer =
+            game->getTurnManager().getCurrentPlayer();
+
+        Fighter *chosenAttacker =
+            attackUI.getSelectedAttacker();
+
+        Fighter *chosenTarget =
+            attackUI.getSelectedTarget();
+
+        Card *chosenAttackCard =
+            attackUI.getSelectedAttackCard();
+
+        Card *chosenDefenseCard =
+            attackUI.getSelectedDefenseCard();
 
         if (chosenAttacker != nullptr &&
             chosenTarget != nullptr &&
             chosenAttackCard != nullptr)
         {
-            Player *currentPlayer = game->getTurnManager().getCurrentPlayer();
-            Player *defenderPlayer = chosenTarget->getOwner();
+            Player *defenderPlayer =
+                chosenTarget->getOwner();
 
             Card *removedAttackCard = nullptr;
             Card *removedDefenceCard = nullptr;
 
             if (currentPlayer != nullptr)
             {
-                Hand &attackerHand = currentPlayer->getHand();
-                const std::vector<Card *> &attackerCards = attackerHand.getCards();
+                Hand &attackerHand =
+                    currentPlayer->getHand();
 
-                for (int i = 0; i < static_cast<int>(attackerCards.size()); i++)
+                const std::vector<Card *> &attackerCards =
+                    attackerHand.getCards();
+
+                for (int i = 0;
+                    i < static_cast<int>(attackerCards.size());
+                    i++)
                 {
                     if (attackerCards[i] == chosenAttackCard)
                     {
-                        removedAttackCard = attackerHand.removeCard(i);
+                        removedAttackCard =
+                            attackerHand.removeCard(i);
                         break;
                     }
                 }
             }
 
-            if (chosenDefenseCard != nullptr && defenderPlayer != nullptr)
+            if (chosenDefenseCard != nullptr &&
+                defenderPlayer != nullptr)
             {
-                Hand &defenderHand = defenderPlayer->getHand();
-                const std::vector<Card *> &defenderCards = defenderHand.getCards();
+                Hand &defenderHand =
+                    defenderPlayer->getHand();
 
-                for (int i = 0; i < static_cast<int>(defenderCards.size()); i++)
+                const std::vector<Card *> &defenderCards =
+                    defenderHand.getCards();
+
+                for (int i = 0;
+                    i < static_cast<int>(defenderCards.size());
+                    i++)
                 {
                     if (defenderCards[i] == chosenDefenseCard)
                     {
-                        removedDefenceCard = defenderHand.removeCard(i);
+                        removedDefenceCard =
+                            defenderHand.removeCard(i);
                         break;
                     }
                 }
@@ -352,8 +375,11 @@ int GameScreen::update()
             if (removedAttackCard != nullptr)
             {
                 game->getCombatSystem().beginCombat(
-                    *game, *chosenAttacker, *chosenTarget,
-                    *removedAttackCard, removedDefenceCard);
+                    *game,
+                    *chosenAttacker,
+                    *chosenTarget,
+                    *removedAttackCard,
+                    removedDefenceCard);
 
                 combatInProgress = true;
                 combatEffectRequested = false;
@@ -381,18 +407,32 @@ int GameScreen::update()
             {
                 Effect *effect = playedCard->getEffect();
 
-                if (effect == nullptr || effect->getInputKind() == EffectInputKind::None)
+                if (effect == nullptr ||
+    effect->getInputKind() == EffectInputKind::None)
                 {
-                    // خودکار: مستقیم اجرا کن
                     if (effect != nullptr)
                     {
                         EffectChoice emptyChoice;
-                        effect->apply(*game, *currentPlayer->getHero(),
-                                      *currentPlayer->getHero(), *playedCard,
-                                      nullptr, false, emptyChoice);
+
+                        effect->apply(
+                            *game,
+                            *currentPlayer->getHero(),
+                            *currentPlayer->getHero(),
+                            *playedCard,
+                            nullptr,
+                            false,
+                            emptyChoice);
                     }
 
                     finalizeSchemeCard(playedCard);
+
+                    game->getTurnManager().useAction();
+
+                    std::cout << "[.] Actions remaining: "
+                            << game->getTurnManager().getRemainingActions()
+                            << std::endl;
+
+                    checkAndEndTurnIfNeeded();
                 }
                 else
                 {
@@ -500,8 +540,15 @@ int GameScreen::update()
             }
 
             finalizeSchemeCard(pendingSchemeCard);
-        }
 
+            game->getTurnManager().useAction();
+
+            std::cout << "[.] Actions remaining: "
+                    << game->getTurnManager().getRemainingActions()
+                    << std::endl;
+
+            checkAndEndTurnIfNeeded();
+        }
         pendingSchemeCard = nullptr;
         effectUI.reset();
     }
