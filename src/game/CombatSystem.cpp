@@ -407,7 +407,8 @@ bool CombatSystem::tryApplyEffect(Timing timing, Fighter &user, Fighter &target,
         }
     }
 
-    if (effect->getInputKind() != EffectInputKind::None)
+    if (effect->getInputKind() != EffectInputKind::None &&
+        effect->shouldRequestInput(*currentGame, user, target, didUserWin))
     {
         pendingEffect = effect;
         pendingUser = &user;

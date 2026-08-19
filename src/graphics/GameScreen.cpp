@@ -440,8 +440,8 @@ int GameScreen::update()
             if (moves.empty())
             {
                 std::cout << "\n[!] No available moves for "
-                        << fighter->getName()
-                        << std::endl;
+                          << fighter->getName()
+                          << std::endl;
 
                 maneuverUI.finishAfterMove();
             }
@@ -449,6 +449,26 @@ int GameScreen::update()
             {
                 maneuverUI.beginSpaceSelection(moves);
             }
+        }
+    }
+
+    if (maneuverUI.consumeReadyToFinalize())
+    {
+        Player *currentPlayer = game->getTurnManager().getCurrentPlayer();
+
+        if (currentPlayer != nullptr)
+        {
+            currentPlayer->drawCardToHand();
+
+            std::cout << "[+] Drew one card from maneuver." << std::endl;
+
+            game->getTurnManager().useAction();
+
+            std::cout << "[.] Actions remaining: "
+                      << game->getTurnManager().getRemainingActions()
+                      << std::endl;
+
+            checkAndEndTurnIfNeeded();
         }
     }
 

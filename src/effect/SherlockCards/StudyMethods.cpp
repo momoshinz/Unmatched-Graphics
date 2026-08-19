@@ -12,34 +12,25 @@ void StudyMethods::apply(Game &game, Fighter &fighter, Fighter &target,
                          const Card &self, Card *opponentCard, bool attackerWon,
                          const EffectChoice &choice)
 {
-    Player *player = fighter.getOwner();
-
-    if (player == nullptr)
-    {
-        throw runtime_error("\n[!] ERROR : Fighter has NO owner!\n");
-    }
-
-    if (!attackerWon)
-    {
-        cout << "\n[!] Fighter didn't win the combat therefore Study Methods is CANCELED.\n";
-        return;
-    }
-
-    Player *opponent = target.getOwner();
-
-    if (opponent == nullptr)
-    {
-        throw runtime_error("\n[!] ERROR : Opponent has NO owner!\n");
-    }
+    // اگه به اینجا رسیدیم یعنی shouldRequestInput از قبل تایید کرده
+    // که attackerWon == true بوده، پس دیگه لازم نیست دوباره چک کنیم.
+    // خود نمایش دست حریف رو EffectUI قبل از این apply انجام داده،
+    // پس اینجا کار خاصی لازم نیست انجام بشه.
 
     cout << "\n========================================\n";
     cout << "-< Study Methods >- ACTIVATED!\n";
+    cout << "[+] You looked at your opponent's hand.\n";
+    cout << "========================================\n";
+}
 
-    cout << "\nOpponent's hand :\n";
+EffectInputKind StudyMethods::getInputKind() const
+{
+    return EffectInputKind::ShowOpponentHand;
+}
 
-    opponent->getHand().display();
-
-    cout << "\n========================================\n";
+bool StudyMethods::shouldRequestInput(Game &game, Fighter &user, Fighter &target, bool didUserWin) const
+{
+    return didUserWin;
 }
 
 string StudyMethods::getDescription() const

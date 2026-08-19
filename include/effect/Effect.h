@@ -39,7 +39,8 @@ enum class EffectInputKind
     ChooseCardsToDiscard,
     ChooseAnyEmptySpace,
     ChooseFighterAndReachableSpace,
-    ChooseTargetAdjacentEmptySpace
+    ChooseTargetAdjacentEmptySpace,
+    ShowOpponentHand   
 };
 
 class Effect
@@ -57,6 +58,10 @@ public:
                        const EffectChoice &choice) = 0;
 
     virtual EffectInputKind getInputKind() const { return EffectInputKind::None; }
+    virtual bool shouldRequestInput(Game &game, Fighter &user, Fighter &target, bool didUserWin) const
+    {
+        return true;
+    }
     virtual int getMoveRange() const { return 0; }    // بُرد حرکت فایتر
     virtual int getFogMoveRange() const { return 0; } // بُرد حرکت فاگ
 

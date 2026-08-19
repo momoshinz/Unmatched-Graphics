@@ -186,6 +186,10 @@ void EffectUI::open(Game *game, Effect *effect, Fighter *fighter, Fighter *targe
     case EffectInputKind::ChooseTargetAdjacentEmptySpace:
         setupChooseTargetAdjacentEmptySpace();
         break;
+
+    case EffectInputKind::ShowOpponentHand:
+        setupShowOpponentHand();
+        break;
     }
     open_ = true;
 }
@@ -722,6 +726,15 @@ void EffectUI::update()
                 finalizeReady();
                 return;
             }
+        }
+        return;
+    }
+
+    if (inputKind == EffectInputKind::ShowOpponentHand)
+    {
+        if (CheckCollisionPointRec(mouse, confirmButton))
+        {
+            finalizeReady();
         }
         return;
     }
@@ -1357,10 +1370,10 @@ void EffectUI::draw()
     bool showFighterList =
         !fighterBoxes.empty() &&
         (inputKind == EffectInputKind::ChooseEnemyFighter ||
-        (inputKind == EffectInputKind::ChooseEnemyAndFogDestination &&
-        subPhase == 0) ||
-        (inputKind == EffectInputKind::ChooseDefeatedSisterAndZoneSpace &&
-        subPhase == 0));
+         (inputKind == EffectInputKind::ChooseEnemyAndFogDestination &&
+          subPhase == 0) ||
+         (inputKind == EffectInputKind::ChooseDefeatedSisterAndZoneSpace &&
+          subPhase == 0));
 
     if (showFighterList)
     {
@@ -1407,8 +1420,11 @@ void EffectUI::draw()
     bool showCardList =
         !cardBoxes.empty() &&
         (inputKind == EffectInputKind::ChooseOpponentCardToBurn ||
-        inputKind == EffectInputKind::ChooseTwoCardsAndOrder ||
-        inputKind == EffectInputKind::ChooseCardsToDiscard);
+         inputKind == EffectInputKind::ChooseTwoCardsAndOrder ||
+         inputKind == EffectInputKind::ShowOpponentHand);
+    const char *title =
+        (inputKind == EffectInputKind::ShowOpponentHand) ? "OPPONENT'S HAND" : (inputKind == EffectInputKind::ChooseOpponentCardToBurn) ? "CHOOSE A CARD TO BURN"
+                                                                                                                                        : (subPhase == 0 ? "CHOOSE FIRST CARD" : "CHOOSE SECOND CARD");
     if (showCardList)
     {
         const char *title;
@@ -1425,7 +1441,7 @@ void EffectUI::draw()
         }
         else
         {
-            title = "CHOOSE CARDS TO DISCARD";
+            title = "OPPONENT'S HAND";
         }
 
         Vector2 titleSize = MeasureTextEx(font, title, 32.0f, 2.0f);
@@ -1446,16 +1462,16 @@ void EffectUI::draw()
             bool hovered = CheckCollisionPointRec(mouse, box);
             bool selected =
                 (inputKind == EffectInputKind::ChooseOpponentCardToBurn &&
-                static_cast<int>(i) == selectedCardIndex) ||
+                 static_cast<int>(i) == selectedCardIndex) ||
 
                 (inputKind == EffectInputKind::ChooseTwoCardsAndOrder &&
-                static_cast<int>(i) == pendingFirstCardIndex) ||
+                 static_cast<int>(i) == pendingFirstCardIndex) ||
 
                 (inputKind == EffectInputKind::ChooseCardsToDiscard &&
-                std::find(
-                    choice.selectedCardIndices.begin(),
-                    choice.selectedCardIndices.end(),
-                    static_cast<int>(i)) != choice.selectedCardIndices.end());
+                 std::find(
+                     choice.selectedCardIndices.begin(),
+                     choice.selectedCardIndices.end(),
+                     static_cast<int>(i)) != choice.selectedCardIndices.end());
 
             Color boxColor;
             if (selected)
@@ -1491,9 +1507,9 @@ void EffectUI::draw()
         if (inputKind == EffectInputKind::ChooseOpponentCardToBurn || inputKind == EffectInputKind::ChooseCardsToDiscard)
         {
             bool confirmEnabled =
-            (inputKind == EffectInputKind::ChooseCardsToDiscard)
-                ? true
-                : (selectedCardIndex != -1);
+                (inputKind == EffectInputKind::ChooseCardsToDiscard)
+                    ? true
+                    : (selectedCardIndex != -1);
             bool confirmHovered = CheckCollisionPointRec(mouse, confirmButton);
 
             Color confirmColor;
@@ -1506,9 +1522,36 @@ void EffectUI::draw()
 
             DrawRectangleRounded(confirmButton, 1.0f, 20, confirmColor);
             const char *confirmText =
-            (inputKind == EffectInputKind::ChooseCardsToDiscard)
-                ? "CONFIRM"
-                : "BURN";
+                (inputKind == EffectInputKind::ChooseCardsToDiscard)
+                    ? "CONFIRM"
+                    : "BURN";
+
+            if (inputKind == EffectInputKind::ChooseOpponentCardToBurn ||
+                inputKind == EffectInputKind::ShowOpponentHand)
+            {
+                bool confirmEnabled =
+                    (inputKind == EffectInputKind::ShowOpponentHand) ? true : (selectedCardIndex != -1);
+
+                bool confirmHovered = CheckCollisionPointRec(mouse, confirmButton);
+
+                Color confirmColor;
+                if (!confirmEnabled)
+                    confirmColor = Color{30, 30, 30, 120};
+                else if (confirmHovered)
+                    confirmColor = Color{75, 75, 75, 245};
+                else
+                    confirmColor = Color{35, 35, 35, 235};
+
+                DrawRectangleRounded(confirmButton, 1.0f, 20, confirmColor);
+
+                const char *confirmText =
+                    (inputKind == EffectInputKind::ShowOpponentHand) ? "CLOSE" : "BURN";
+
+                Vector2 confirmTextSize = MeasureTextEx(font, confirmText, 26.0f, 1.5f);
+                DrawTextEx(font, confirmText,
+                           Vector2{confirmButton.x + (confirmButton.width - confirmTextSize.x) / 2.0f, confirmButton.y + (confirmButton.height - confirmTextSize.y) / 2.0f},
+                           26.0f, 1.5f, confirmEnabled ? WHITE : Color{150, 150, 150, 150});
+            }
             Vector2 confirmTextSize = MeasureTextEx(font, confirmText, 26.0f, 1.5f);
             DrawTextEx(font, confirmText,
                        Vector2{confirmButton.x + (confirmButton.width - confirmTextSize.x) / 2.0f, confirmButton.y + (confirmButton.height - confirmTextSize.y) / 2.0f},
@@ -1553,35 +1596,35 @@ bool EffectUI::isChoosingSpace() const
 
     switch (inputKind)
     {
-        case EffectInputKind::ChooseAdjacentEmptySpace:
-        case EffectInputKind::ChooseReachableSpace:
-        case EffectInputKind::ChooseAnyEmptySpace:
-        case EffectInputKind::ChooseTargetAdjacentEmptySpace:
-            return true;
+    case EffectInputKind::ChooseAdjacentEmptySpace:
+    case EffectInputKind::ChooseReachableSpace:
+    case EffectInputKind::ChooseAnyEmptySpace:
+    case EffectInputKind::ChooseTargetAdjacentEmptySpace:
+        return true;
 
-        case EffectInputKind::ChooseFighterMoveThenFogMove:
-            return subPhase == 1 || subPhase == 3;
+    case EffectInputKind::ChooseFighterMoveThenFogMove:
+        return subPhase == 1 || subPhase == 3;
 
-        case EffectInputKind::ChooseLurkingOption:
-            return subPhase == 1 || subPhase == 3;
+    case EffectInputKind::ChooseLurkingOption:
+        return subPhase == 1 || subPhase == 3;
 
-        case EffectInputKind::ChooseFogSourceAndDestination:
-            return subPhase == 0 || subPhase == 1;
+    case EffectInputKind::ChooseFogSourceAndDestination:
+        return subPhase == 0 || subPhase == 1;
 
-        case EffectInputKind::ChooseFogAndDestination:
-            return subPhase == 1;
+    case EffectInputKind::ChooseFogAndDestination:
+        return subPhase == 1;
 
-        case EffectInputKind::ChooseEnemyAndFogDestination:
-            return subPhase == 2;
+    case EffectInputKind::ChooseEnemyAndFogDestination:
+        return subPhase == 2;
 
-        case EffectInputKind::ChooseDefeatedSisterAndZoneSpace:
-            return subPhase == 1;
+    case EffectInputKind::ChooseDefeatedSisterAndZoneSpace:
+        return subPhase == 1;
 
-        case EffectInputKind::ChooseFighterAndReachableSpace:
-            return subPhase == 1;
+    case EffectInputKind::ChooseFighterAndReachableSpace:
+        return subPhase == 1;
 
-        default:
-            return false;
+    default:
+        return false;
     }
 }
 
@@ -1713,4 +1756,26 @@ void EffectUI::setupChooseTargetAdjacentEmptySpace()
 
         candidateSpaces.push_back(space);
     }
+}
+
+void EffectUI::setupShowOpponentHand()
+{
+    candidateCards.clear();
+
+    if (target == nullptr)
+        return;
+
+    Player *opponent = target->getOwner();
+    if (opponent == nullptr)
+        return;
+
+    for (Card *card : opponent->getHand().getCards())
+    {
+        if (card != nullptr)
+            candidateCards.push_back(card);
+        if (candidateCards.size() >= 7)
+            break;
+    }
+
+    layoutCardWindow(candidateCards);
 }

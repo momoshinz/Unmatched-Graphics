@@ -14,25 +14,6 @@ class Fog;
 
 class EffectUI
 {
-public:
-    explicit EffectUI(AssetManager *assets);
-
-    void open(Game *game, Effect *effect, Fighter *fighter, Fighter *target);
-
-    void update();
-    void draw();
-
-    bool isOpen() const;
-    bool isReady() const;
-    const EffectChoice &getChoice() const;
-
-    void reset();
-
-    void selectSpace(Space *space);
-
-    const std::vector<Space *> &getCandidateSpaces() const;
-    bool isChoosingSpace() const;
-
 private:
     AssetManager *assets;
     Game *game = nullptr;
@@ -107,4 +88,24 @@ private:
     void beginFogDestinationStage(int range, bool excludeSource);
 
     void finalizeReady();
+    void setupShowOpponentHand();
+
+public:
+    explicit EffectUI(AssetManager *assets);
+
+    void open(Game *game, Effect *effect, Fighter *fighter, Fighter *target);
+
+    void update();
+    void draw();
+
+    bool isOpen() const;
+    bool isReady() const;
+    const EffectChoice &getChoice() const;
+
+    void reset();
+
+    void selectSpace(Space *space);
+
+    const std::vector<Space *> &getCandidateSpaces() const;
+    bool isChoosingSpace() const;
 };
