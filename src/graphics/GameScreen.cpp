@@ -1822,7 +1822,7 @@ void GameScreen::drawActionButtons()
         (GetScreenWidth() - totalWidth) / 2.0f;
 
     const float buttonY =
-        GetScreenHeight() - 75.0f;
+        GetScreenHeight() - 175.0f;
 
     // =========================================
     // BUTTON RECTANGLES
