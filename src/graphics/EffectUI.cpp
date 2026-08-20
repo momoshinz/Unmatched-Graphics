@@ -743,7 +743,10 @@ void EffectUI::update()
 
     if (inputKind == EffectInputKind::ChooseCardsToDiscard)
     {
+        // -------------------------
         // انتخاب / لغو انتخاب کارت
+        // -------------------------
+
         for (size_t i = 0; i < cardBoxes.size(); i++)
         {
             if (CheckCollisionPointRec(mouse, cardBoxes[i]))
@@ -755,14 +758,14 @@ void EffectUI::update()
                     choice.selectedCardIndices.end(),
                     index);
 
-                // اگر قبلاً انتخاب شده → لغو انتخاب
                 if (it != choice.selectedCardIndices.end())
                 {
+                    // لغو انتخاب
                     choice.selectedCardIndices.erase(it);
                 }
                 else
                 {
-                    // انتخاب کارت جدید
+                    // انتخاب کارت
                     choice.selectedCardIndices.push_back(index);
                 }
 
@@ -770,9 +773,16 @@ void EffectUI::update()
             }
         }
 
-        // دکمه تأیید
+        // -------------------------
+        // DONE
+        // -------------------------
+
         if (CheckCollisionPointRec(mouse, confirmButton))
         {
+            std::cout
+                << "[+] BeastForm card selection finished."
+                << std::endl;
+
             finalizeReady();
             return;
         }
@@ -1522,7 +1532,7 @@ void EffectUI::draw()
 
             const char *confirmText;
             if (inputKind == EffectInputKind::ChooseCardsToDiscard)
-                confirmText = "CONFIRM";
+                confirmText = "DONE";
             else if (inputKind == EffectInputKind::ShowOpponentHand)
                 confirmText = "BACK";
             else
@@ -1753,4 +1763,13 @@ void EffectUI::setupShowOpponentHand()
     }
 
     layoutCardWindow(candidateCards);
+}
+
+void EffectUI::finishCardSelection()
+{
+    if (inputKind != EffectInputKind::ChooseCardsToDiscard)
+        return;
+
+    // انتخاب کارت‌ها همین الان داخل selectedCardIndices است
+    finalizeReady();
 }

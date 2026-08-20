@@ -309,8 +309,28 @@ int GameScreen::update()
 
             if (effectUI.isChoosingSpace())
             {
-                Space *clickedSpace = game->getBoard().getSpace(clickedSpaceId);
-                effectUI.selectSpace(clickedSpace);
+                Space *clickedSpace =
+                    game->getBoard().getSpace(clickedSpaceId);
+
+                if (clickedSpace != nullptr)
+                {
+                    std::cout
+                        << "[+] Effect destination clicked: Space "
+                        << clickedSpace->getId()
+                        << std::endl;
+
+                    effectUI.selectSpace(clickedSpace);
+
+                    if (effectUI.isReady() &&
+                        combatInProgress &&
+                        combatEffectRequested)
+                    {
+                        game->getCombatSystem().provideEffectChoice(effectUI.getChoice());
+                        effectUI.reset();
+                        combatEffectRequested = false;
+                        combatShowLookButton = false;
+                    }
+                }
             }
         }
     } // <-- پایان if (IsMouseButtonPressed(...))
@@ -2468,9 +2488,6 @@ void GameScreen::finalizeSchemeCard(Card *playedCard)
             break;
         }
     }
-
-    game->getTurnManager().useAction();
-    checkAndEndTurnIfNeeded();
 }
 
 void GameScreen::drawEffectSelectableSpaces()

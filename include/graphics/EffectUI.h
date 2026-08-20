@@ -108,4 +108,6 @@ public:
 
     const std::vector<Space *> &getCandidateSpaces() const;
     bool isChoosingSpace() const;
+
+    void finishCardSelection();
 };
