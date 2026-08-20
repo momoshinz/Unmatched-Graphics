@@ -199,7 +199,7 @@ void ManeuverUI::layoutBurnCardWindow()
         }
     }
 
-    const int maxPerRow = 3;
+    const int maxPerRow = 4;
     const float boxWidth = 180.0f;
     const float boxHeight = 260.0f;
     const float gapX = 20.0f;

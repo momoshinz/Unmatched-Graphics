@@ -8,6 +8,7 @@
 #include "fighter/Fog.h"
 #include "card/Card.h"
 #include "card/Hand.h"
+#include <sstream>
 
 GameScreen::GameScreen(
     AssetManager *assets,
@@ -244,6 +245,37 @@ int GameScreen::update()
             }
         }
 
+        if (combatShowLookButton && CheckCollisionPointRec(mousePosition, lookButton))
+        {
+            CombatSystem &combatSystem = game->getCombatSystem();
+
+            effectUI.open(game, combatSystem.getPendingEffect(),
+                          combatSystem.getPendingUser(),
+                          combatSystem.getPendingTarget());
+
+            combatEffectRequested = true;
+            combatShowLookButton = false;
+
+            return 0;
+        }
+
+        if (combatInProgress &&
+            !combatResultPopupOpen &&
+            game->getCombatSystem().isAwaitingResultReveal() &&
+            CheckCollisionPointRec(mousePosition, resultRevealButton))
+        {
+            combatResultPopupOpen = true;
+            return 0;
+        }
+
+        if (combatResultPopupOpen &&
+            CheckCollisionPointRec(mousePosition, resultBackButton))
+        {
+            combatResultPopupOpen = false;
+            game->getCombatSystem().acknowledgeResult();
+            return 0;
+        }
+
         // =========================================
         // MAP SPACE CLICK
         // =========================================
@@ -289,11 +321,21 @@ int GameScreen::update()
 
         if (combatSystem.isWaitingForEffectInput() && !combatEffectRequested)
         {
-            effectUI.open(game, combatSystem.getPendingEffect(),
-                          combatSystem.getPendingUser(),
-                          combatSystem.getPendingTarget());
+            Effect *pending = combatSystem.getPendingEffect();
 
-            combatEffectRequested = true;
+            if (pending != nullptr && pending->getInputKind() == EffectInputKind::ShowOpponentHand)
+            {
+                // به‌جای باز کردن خودکار، دکمه‌ی LOOK رو نشون بده
+                combatShowLookButton = true;
+            }
+            else
+            {
+                effectUI.open(game, combatSystem.getPendingEffect(),
+                              combatSystem.getPendingUser(),
+                              combatSystem.getPendingTarget());
+
+                combatEffectRequested = true;
+            }
         }
     }
 
@@ -338,8 +380,8 @@ int GameScreen::update()
                     attackerHand.getCards();
 
                 for (int i = 0;
-                    i < static_cast<int>(attackerCards.size());
-                    i++)
+                     i < static_cast<int>(attackerCards.size());
+                     i++)
                 {
                     if (attackerCards[i] == chosenAttackCard)
                     {
@@ -360,8 +402,8 @@ int GameScreen::update()
                     defenderHand.getCards();
 
                 for (int i = 0;
-                    i < static_cast<int>(defenderCards.size());
-                    i++)
+                     i < static_cast<int>(defenderCards.size());
+                     i++)
                 {
                     if (defenderCards[i] == chosenDefenseCard)
                     {
@@ -408,7 +450,7 @@ int GameScreen::update()
                 Effect *effect = playedCard->getEffect();
 
                 if (effect == nullptr ||
-    effect->getInputKind() == EffectInputKind::None)
+                    effect->getInputKind() == EffectInputKind::None)
                 {
                     if (effect != nullptr)
                     {
@@ -429,8 +471,8 @@ int GameScreen::update()
                     game->getTurnManager().useAction();
 
                     std::cout << "[.] Actions remaining: "
-                            << game->getTurnManager().getRemainingActions()
-                            << std::endl;
+                              << game->getTurnManager().getRemainingActions()
+                              << std::endl;
 
                     checkAndEndTurnIfNeeded();
                 }
@@ -544,8 +586,8 @@ int GameScreen::update()
             game->getTurnManager().useAction();
 
             std::cout << "[.] Actions remaining: "
-                    << game->getTurnManager().getRemainingActions()
-                    << std::endl;
+                      << game->getTurnManager().getRemainingActions()
+                      << std::endl;
 
             checkAndEndTurnIfNeeded();
         }
@@ -558,6 +600,7 @@ int GameScreen::update()
         game->getCombatSystem().provideEffectChoice(effectUI.getChoice());
         effectUI.reset();
         combatEffectRequested = false;
+        combatShowLookButton = false;
     }
 
     if (combatInProgress && game->getCombatSystem().isFinished())
@@ -617,8 +660,11 @@ void GameScreen::draw()
     drawPlayerPanels();
     drawTopButtons();
     drawTurnIndicator();
+    drawCombatEffectText();
+    drawResultRevealButton();
+    drawLookButton();
 
-    if (!maneuverUI.isOpen())
+    if (!maneuverUI.isOpen() && !combatInProgress)
     {
         drawActionButtons();
     }
@@ -645,6 +691,11 @@ void GameScreen::draw()
     if (effectUI.isOpen())
     {
         effectUI.draw();
+    }
+
+    if (combatResultPopupOpen)
+    {
+        drawCombatResultPopup();
     }
 }
 
@@ -2447,4 +2498,269 @@ void GameScreen::drawEffectSelectableSpaces()
         DrawCircleV(center, radius, Color{255, 200, 60, 130});
         DrawCircleLinesV(center, radius, Color{255, 220, 100, 220});
     }
+}
+
+void GameScreen::drawLookButton()
+{
+    if (!combatShowLookButton || assets == nullptr)
+    {
+        return;
+    }
+
+    Font font = assets->getGameFont();
+
+    float mapX, mapY, scale, mapWidth, mapHeight;
+    calculateMapTransform(mapX, mapY, scale, mapWidth, mapHeight);
+
+    const float buttonWidth = 160.0f;
+    const float buttonHeight = 50.0f;
+
+    lookButton = Rectangle{
+        (GetScreenWidth() - buttonWidth) / 2.0f,
+        mapY + mapHeight + 70.0f, // کمی پایین‌تر از نوار "Turn"
+        buttonWidth,
+        buttonHeight};
+
+    Vector2 mouse = GetMousePosition();
+    bool hovered = CheckCollisionPointRec(mouse, lookButton);
+
+    Color buttonColor = hovered ? Color{75, 75, 75, 245} : Color{35, 35, 35, 235};
+
+    DrawRectangleRounded(lookButton, 1.0f, 20, buttonColor);
+    DrawRectangleRoundedLines(lookButton, 1.0f, 20, hovered ? WHITE : Color{150, 150, 150, 255});
+
+    const char *text = "LOOK";
+    const float fontSize = 24.0f;
+
+    Vector2 textSize = MeasureTextEx(font, text, fontSize, 1.5f);
+
+    DrawTextEx(
+        font, text,
+        Vector2{
+            lookButton.x + (lookButton.width - textSize.x) / 2.0f,
+            lookButton.y + (lookButton.height - textSize.y) / 2.0f},
+        fontSize, 1.5f, WHITE);
+}
+
+void GameScreen::drawCombatEffectText()
+{
+    if (!combatInProgress || assets == nullptr || game == nullptr)
+    {
+        return;
+    }
+
+    const std::string &description = game->getCombatSystem().getCurrentEffectDescription();
+
+    if (description.empty())
+    {
+        return;
+    }
+
+    Font font = assets->getGameFont();
+
+    float mapX, mapY, scale, mapWidth, mapHeight;
+    calculateMapTransform(mapX, mapY, scale, mapWidth, mapHeight);
+
+    const float fontSize = 22.0f;
+    const float spacing = 1.5f;
+    const float maxWidth = mapWidth - 40.0f;
+
+    std::vector<std::string> lines;
+    std::string currentLine;
+    std::string word;
+
+    std::istringstream stream(description);
+    while (stream >> word)
+    {
+        std::string testLine = currentLine.empty() ? word : currentLine + " " + word;
+        Vector2 testSize = MeasureTextEx(font, testLine.c_str(), fontSize, spacing);
+
+        if (testSize.x > maxWidth && !currentLine.empty())
+        {
+            lines.push_back(currentLine);
+            currentLine = word;
+        }
+        else
+        {
+            currentLine = testLine;
+        }
+    }
+    if (!currentLine.empty())
+    {
+        lines.push_back(currentLine);
+    }
+
+    const float lineHeight = 28.0f;
+    float textY = mapY + mapHeight + 55.0f;
+    float blockHeight = lines.size() * lineHeight + 16.0f;
+
+    Rectangle background{
+        mapX + 20.0f,
+        textY - 8.0f,
+        maxWidth,
+        blockHeight};
+
+    DrawRectangleRounded(background, 0.15f, 12, Color{20, 20, 20, 190});
+
+    for (size_t i = 0; i < lines.size(); i++)
+    {
+        Vector2 lineSize = MeasureTextEx(font, lines[i].c_str(), fontSize, spacing);
+
+        DrawTextEx(
+            font, lines[i].c_str(),
+            Vector2{
+                mapX + 20.0f + (maxWidth - lineSize.x) / 2.0f,
+                textY + i * lineHeight},
+            fontSize, spacing, WHITE);
+    }
+}
+
+void GameScreen::drawResultRevealButton()
+{
+    if (!combatInProgress || assets == nullptr || game == nullptr)
+    {
+        return;
+    }
+
+    if (!game->getCombatSystem().isAwaitingResultReveal())
+    {
+        return;
+    }
+
+    if (combatResultPopupOpen)
+    {
+        return;
+    }
+
+    Font font = assets->getGameFont();
+
+    float mapX, mapY, scale, mapWidth, mapHeight;
+    calculateMapTransform(mapX, mapY, scale, mapWidth, mapHeight);
+
+    const float buttonWidth = 220.0f;
+    const float buttonHeight = 50.0f;
+
+    resultRevealButton = Rectangle{
+        (GetScreenWidth() - buttonWidth) / 2.0f,
+        mapY + mapHeight + 140.0f,
+        buttonWidth,
+        buttonHeight};
+
+    Vector2 mouse = GetMousePosition();
+    bool hovered = CheckCollisionPointRec(mouse, resultRevealButton);
+
+    Color buttonColor = hovered ? Color{75, 75, 75, 245} : Color{35, 35, 35, 235};
+
+    DrawRectangleRounded(resultRevealButton, 1.0f, 20, buttonColor);
+    DrawRectangleRoundedLines(resultRevealButton, 1.0f, 20, hovered ? WHITE : Color{150, 150, 150, 255});
+
+    const char *text = "SHOW RESULT";
+    const float fontSize = 22.0f;
+
+    Vector2 textSize = MeasureTextEx(font, text, fontSize, 1.5f);
+
+    DrawTextEx(
+        font, text,
+        Vector2{
+            resultRevealButton.x + (resultRevealButton.width - textSize.x) / 2.0f,
+            resultRevealButton.y + (resultRevealButton.height - textSize.y) / 2.0f},
+        fontSize, 1.5f, WHITE);
+}
+
+void GameScreen::drawCombatResultPopup()
+{
+    if (!combatResultPopupOpen || assets == nullptr || game == nullptr)
+    {
+        return;
+    }
+
+    Font font = assets->getGameFont();
+    CombatSystem &combatSystem = game->getCombatSystem();
+
+    DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), Color{0, 0, 0, 190});
+
+    const float popupWidth = 500.0f;
+    const float popupHeight = 350.0f;
+
+    Rectangle popup{
+        (GetScreenWidth() - popupWidth) / 2.0f,
+        (GetScreenHeight() - popupHeight) / 2.0f,
+        popupWidth,
+        popupHeight};
+
+    DrawRectangleRounded(popup, 0.06f, 20, Color{25, 20, 18, 245});
+    DrawRectangleRoundedLines(popup, 0.06f, 20, Color{180, 160, 130, 255});
+
+    const char *title = "COMBAT RESULT";
+    const float titleSize = 32.0f;
+
+    Vector2 titleTextSize = MeasureTextEx(font, title, titleSize, 2.0f);
+
+    DrawTextEx(
+        font, title,
+        Vector2{popup.x + (popup.width - titleTextSize.x) / 2.0f, popup.y + 25.0f},
+        titleSize, 2.0f, WHITE);
+
+    Fighter *attackerFighter = combatSystem.getAttacker();
+    Fighter *defenderFighter = combatSystem.getDefender();
+
+    int attackValue = combatSystem.getPendingAttackValue();
+    int defenceValue = combatSystem.getPendingDefenceValue();
+    int damage = combatSystem.getLastDamage();
+    bool attackerWon = combatSystem.didAttackerWin();
+
+    std::string attackLine = "Attack Value : " + std::to_string(attackValue);
+    std::string defenceLine = "Defense Value : " + std::to_string(defenceValue);
+    std::string damageLine =
+        (defenderFighter != nullptr ? defenderFighter->getName() : "Defender") +
+        std::string(" took ") + std::to_string(damage) + " damage";
+    std::string winnerLine =
+        attackerWon
+            ? ((attackerFighter != nullptr ? attackerFighter->getName() : "Attacker") + std::string(" WINS the combat!"))
+            : ((defenderFighter != nullptr ? defenderFighter->getName() : "Defender") + std::string(" WINS the combat!"));
+
+    const float lineFontSize = 24.0f;
+    const float lineSpacing = 1.5f;
+    const float lineHeight = 42.0f;
+
+    float lineY = popup.y + 100.0f;
+    float lineX = popup.x + 40.0f;
+
+    DrawTextEx(font, attackLine.c_str(), Vector2{lineX, lineY}, lineFontSize, lineSpacing, WHITE);
+    lineY += lineHeight;
+
+    DrawTextEx(font, defenceLine.c_str(), Vector2{lineX, lineY}, lineFontSize, lineSpacing, WHITE);
+    lineY += lineHeight;
+
+    DrawTextEx(font, damageLine.c_str(), Vector2{lineX, lineY}, lineFontSize, lineSpacing, WHITE);
+    lineY += lineHeight;
+
+    DrawTextEx(font, winnerLine.c_str(), Vector2{lineX, lineY}, lineFontSize, lineSpacing,
+               attackerWon ? Color{120, 220, 120, 255} : Color{220, 120, 120, 255});
+
+    const float backWidth = 160.0f;
+    const float backHeight = 50.0f;
+
+    resultBackButton = Rectangle{
+        popup.x + (popup.width - backWidth) / 2.0f,
+        popup.y + popup.height - 70.0f,
+        backWidth,
+        backHeight};
+
+    Vector2 mouse = GetMousePosition();
+    bool hovered = CheckCollisionPointRec(mouse, resultBackButton);
+
+    Color backColor = hovered ? Color{75, 75, 75, 255} : Color{40, 40, 40, 255};
+
+    DrawRectangleRounded(resultBackButton, 1.0f, 20, backColor);
+
+    const char *backText = "BACK";
+    Vector2 backTextSize = MeasureTextEx(font, backText, 24.0f, 1.5f);
+
+    DrawTextEx(
+        font, backText,
+        Vector2{
+            resultBackButton.x + (resultBackButton.width - backTextSize.x) / 2.0f,
+            resultBackButton.y + (resultBackButton.height - backTextSize.y) / 2.0f},
+        24.0f, 1.5f, WHITE);
 }

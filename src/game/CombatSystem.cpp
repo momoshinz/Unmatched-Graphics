@@ -30,7 +30,9 @@ CombatSystem::CombatSystem()
       pendingOpponentCard(nullptr),
       pendingDidUserWin(false),
       lastDamage(0),
-      attackerWon(false)
+      attackerWon(false),
+      pendingAttackValue(0),
+      pendingDefenceValue(0)
 {
 }
 
@@ -407,6 +409,16 @@ bool CombatSystem::tryApplyEffect(Timing timing, Fighter &user, Fighter &target,
         }
     }
 
+    // این افکت واقعاً قراره اجرا بشه - متنش رو برای نمایش زیر نقشه ثبت کن
+    if (card.getEffect() != nullptr)
+    {
+        currentEffectDescription = card.getEffect()->getDescription();
+    }
+    else
+    {
+        currentEffectDescription.clear();
+    }
+
     if (effect->getInputKind() != EffectInputKind::None &&
         effect->shouldRequestInput(*currentGame, user, target, didUserWin))
     {
@@ -481,7 +493,9 @@ void CombatSystem::beginCombat(Game &game, Fighter &attacker, Fighter &defender,
 
 void CombatSystem::advance()
 {
-    while (phase != CombatPhase::Finished && !waitingForInput)
+    while (phase != CombatPhase::Finished &&
+           phase != CombatPhase::AwaitingResultReveal &&
+           !waitingForInput)
     {
         switch (phase)
         {
@@ -528,54 +542,56 @@ void CombatSystem::advance()
             {
                 done = tryApplyEffect(Timing::DuringCombat, *attacker, *defender, *attackCard, false);
             }
+
             if (done)
-                phase = CombatPhase::ApplyDamage;
-            break;
-        }
-
-        case CombatPhase::ApplyDamage:
-        {
-            int attackValue;
-
-            if (defender->shouldUseOpponentBoostValue())
             {
-                attackValue = attackCard->getBoost();
-            }
-            else
-            {
-                attackValue = calculateFinalAttackValue(*attackCard, *attacker);
-            }
+                currentEffectDescription.clear();
 
-            int defenceValue = 0;
+                int attackValue;
 
-            if (defenceCard != nullptr)
-            {
-                if (attacker->shouldUseOpponentBoostValue())
+                if (defender->shouldUseOpponentBoostValue())
                 {
-                    defenceValue = defenceCard->getBoost();
+                    attackValue = attackCard->getBoost();
                 }
                 else
                 {
-                    defenceValue = calculateFinalDefenseValue(*defenceCard, *defender);
+                    attackValue = calculateFinalAttackValue(*attackCard, *attacker);
                 }
 
-                InvisibleMan *invisible = dynamic_cast<InvisibleMan *>(defender);
+                int defenceValue = 0;
 
-                if (invisible != nullptr && invisible->isOnFog())
+                if (defenceCard != nullptr)
                 {
-                    defenceValue++;
+                    if (attacker->shouldUseOpponentBoostValue())
+                    {
+                        defenceValue = defenceCard->getBoost();
+                    }
+                    else
+                    {
+                        defenceValue = calculateFinalDefenseValue(*defenceCard, *defender);
+                    }
+
+                    InvisibleMan *invisible = dynamic_cast<InvisibleMan *>(defender);
+
+                    if (invisible != nullptr && invisible->isOnFog())
+                    {
+                        defenceValue++;
+                    }
                 }
+
+                cout << "\n-> Attack Value : " << attackValue << endl;
+                cout << "-> Defense Value : " << defenceValue << endl;
+
+                pendingAttackValue = attackValue;
+                pendingDefenceValue = defenceValue;
+
+                lastDamage = calculateDamage(attackValue, defenceValue);
+                attackerWon = (lastDamage > 0);
+
+                applyDamage(lastDamage, *defender);
+
+                phase = CombatPhase::AwaitingResultReveal;
             }
-
-            cout << "\n-> Attack Value : " << attackValue << endl;
-            cout << "-> Defense Value : " << defenceValue << endl;
-
-            lastDamage = calculateDamage(attackValue, defenceValue);
-            attackerWon = (lastDamage > 0);
-
-            applyDamage(lastDamage, *defender);
-
-            phase = CombatPhase::AfterCombatDefender;
             break;
         }
 
@@ -600,6 +616,7 @@ void CombatSystem::advance()
             }
             if (done)
             {
+                currentEffectDescription.clear();
                 finalizeCombat();
                 phase = CombatPhase::Finished;
             }
@@ -736,4 +753,45 @@ int CombatSystem::getLastDamage() const
 bool CombatSystem::didAttackerWin() const
 {
     return attackerWon;
+}
+
+void CombatSystem::acknowledgeResult()
+{
+    if (phase != CombatPhase::AwaitingResultReveal)
+    {
+        return;
+    }
+
+    phase = CombatPhase::AfterCombatDefender;
+    advance();
+}
+
+bool CombatSystem::isAwaitingResultReveal() const
+{
+    return phase == CombatPhase::AwaitingResultReveal;
+}
+
+int CombatSystem::getPendingAttackValue() const
+{
+    return pendingAttackValue;
+}
+
+int CombatSystem::getPendingDefenceValue() const
+{
+    return pendingDefenceValue;
+}
+
+const string &CombatSystem::getCurrentEffectDescription() const
+{
+    return currentEffectDescription;
+}
+
+Fighter *CombatSystem::getAttacker() const
+{
+    return attacker;
+}
+
+Fighter *CombatSystem::getDefender() const
+{
+    return defender;
 }

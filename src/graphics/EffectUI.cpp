@@ -442,7 +442,7 @@ void EffectUI::layoutCardWindow(const std::vector<Card *> &cards)
     cardBoxes.clear();
     selectedCardIndex = -1;
 
-    const int maxPerRow = 3;
+    const int maxPerRow = 4;
     const float boxWidth = 220.0f;
     const float boxHeight = 320.0f;
     const float gapX = 25.0f;
@@ -1366,27 +1366,20 @@ void EffectUI::draw()
         return;
     }
 
-    // ---- لیست فایترها (دشمن / دشمن مجاور) ----
+    // ---- لیست فایترها (دشمن / دشمن مجاور / خواهر شکست‌خورده) ----
     bool showFighterList =
         !fighterBoxes.empty() &&
         (inputKind == EffectInputKind::ChooseEnemyFighter ||
-         (inputKind == EffectInputKind::ChooseEnemyAndFogDestination &&
-          subPhase == 0) ||
-         (inputKind == EffectInputKind::ChooseDefeatedSisterAndZoneSpace &&
-          subPhase == 0));
+         (inputKind == EffectInputKind::ChooseEnemyAndFogDestination && subPhase == 0) ||
+         (inputKind == EffectInputKind::ChooseDefeatedSisterAndZoneSpace && subPhase == 0));
 
     if (showFighterList)
     {
-        const char *title;
+        const char *title =
+            (inputKind == EffectInputKind::ChooseDefeatedSisterAndZoneSpace)
+                ? "CHOOSE A DEFEATED SISTER"
+                : "CHOOSE A FIGHTER";
 
-        if (inputKind == EffectInputKind::ChooseDefeatedSisterAndZoneSpace)
-        {
-            title = "CHOOSE A DEFEATED SISTER";
-        }
-        else
-        {
-            title = "CHOOSE A FIGHTER";
-        }
         Vector2 titleSize = MeasureTextEx(font, title, 38.0f, 2.0f);
         DrawTextEx(font, title,
                    Vector2{(GetScreenWidth() - titleSize.x) / 2.0f, 70.0f},
@@ -1416,15 +1409,14 @@ void EffectUI::draw()
         return;
     }
 
-    // ---- لیست کارت‌ها (سوزوندن حریف / انتخاب برای CodedNotes) ----
+    // ---- لیست کارت‌ها (سوزوندن حریف / انتخاب برای CodedNotes / دور ریختن / نمایش دست حریف) ----
     bool showCardList =
         !cardBoxes.empty() &&
         (inputKind == EffectInputKind::ChooseOpponentCardToBurn ||
          inputKind == EffectInputKind::ChooseTwoCardsAndOrder ||
+         inputKind == EffectInputKind::ChooseCardsToDiscard ||
          inputKind == EffectInputKind::ShowOpponentHand);
-    const char *title =
-        (inputKind == EffectInputKind::ShowOpponentHand) ? "OPPONENT'S HAND" : (inputKind == EffectInputKind::ChooseOpponentCardToBurn) ? "CHOOSE A CARD TO BURN"
-                                                                                                                                        : (subPhase == 0 ? "CHOOSE FIRST CARD" : "CHOOSE SECOND CARD");
+
     if (showCardList)
     {
         const char *title;
@@ -1435,9 +1427,11 @@ void EffectUI::draw()
         }
         else if (inputKind == EffectInputKind::ChooseTwoCardsAndOrder)
         {
-            title = (subPhase == 0)
-                        ? "CHOOSE FIRST CARD"
-                        : "CHOOSE SECOND CARD";
+            title = (subPhase == 0) ? "CHOOSE FIRST CARD" : "CHOOSE SECOND CARD";
+        }
+        else if (inputKind == EffectInputKind::ChooseCardsToDiscard)
+        {
+            title = "CHOOSE CARDS TO DISCARD";
         }
         else
         {
@@ -1504,12 +1498,16 @@ void EffectUI::draw()
                        20.0f, 1.0f, WHITE);
         }
 
-        if (inputKind == EffectInputKind::ChooseOpponentCardToBurn || inputKind == EffectInputKind::ChooseCardsToDiscard)
+        // ---- دکمه‌ی پایین: BURN / CONFIRM / CLOSE (بسته به نوع) ----
+        if (inputKind == EffectInputKind::ChooseOpponentCardToBurn ||
+            inputKind == EffectInputKind::ChooseCardsToDiscard ||
+            inputKind == EffectInputKind::ShowOpponentHand)
         {
             bool confirmEnabled =
-                (inputKind == EffectInputKind::ChooseCardsToDiscard)
-                    ? true
-                    : (selectedCardIndex != -1);
+                (inputKind == EffectInputKind::ChooseOpponentCardToBurn)
+                    ? (selectedCardIndex != -1)
+                    : true; // ChooseCardsToDiscard و ShowOpponentHand همیشه فعال
+
             bool confirmHovered = CheckCollisionPointRec(mouse, confirmButton);
 
             Color confirmColor;
@@ -1521,37 +1519,15 @@ void EffectUI::draw()
                 confirmColor = Color{100, 30, 30, 235};
 
             DrawRectangleRounded(confirmButton, 1.0f, 20, confirmColor);
-            const char *confirmText =
-                (inputKind == EffectInputKind::ChooseCardsToDiscard)
-                    ? "CONFIRM"
-                    : "BURN";
 
-            if (inputKind == EffectInputKind::ChooseOpponentCardToBurn ||
-                inputKind == EffectInputKind::ShowOpponentHand)
-            {
-                bool confirmEnabled =
-                    (inputKind == EffectInputKind::ShowOpponentHand) ? true : (selectedCardIndex != -1);
+            const char *confirmText;
+            if (inputKind == EffectInputKind::ChooseCardsToDiscard)
+                confirmText = "CONFIRM";
+            else if (inputKind == EffectInputKind::ShowOpponentHand)
+                confirmText = "BACK";
+            else
+                confirmText = "BURN";
 
-                bool confirmHovered = CheckCollisionPointRec(mouse, confirmButton);
-
-                Color confirmColor;
-                if (!confirmEnabled)
-                    confirmColor = Color{30, 30, 30, 120};
-                else if (confirmHovered)
-                    confirmColor = Color{75, 75, 75, 245};
-                else
-                    confirmColor = Color{35, 35, 35, 235};
-
-                DrawRectangleRounded(confirmButton, 1.0f, 20, confirmColor);
-
-                const char *confirmText =
-                    (inputKind == EffectInputKind::ShowOpponentHand) ? "CLOSE" : "BURN";
-
-                Vector2 confirmTextSize = MeasureTextEx(font, confirmText, 26.0f, 1.5f);
-                DrawTextEx(font, confirmText,
-                           Vector2{confirmButton.x + (confirmButton.width - confirmTextSize.x) / 2.0f, confirmButton.y + (confirmButton.height - confirmTextSize.y) / 2.0f},
-                           26.0f, 1.5f, confirmEnabled ? WHITE : Color{150, 150, 150, 150});
-            }
             Vector2 confirmTextSize = MeasureTextEx(font, confirmText, 26.0f, 1.5f);
             DrawTextEx(font, confirmText,
                        Vector2{confirmButton.x + (confirmButton.width - confirmTextSize.x) / 2.0f, confirmButton.y + (confirmButton.height - confirmTextSize.y) / 2.0f},
@@ -1560,7 +1536,6 @@ void EffectUI::draw()
         return;
     }
 }
-
 // ============================================================
 // GETTERS
 // ============================================================

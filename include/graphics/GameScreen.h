@@ -63,6 +63,13 @@ private:
 
     bool combatInProgress = false;
     bool combatEffectRequested = false;
+    bool combatShowLookButton = false;
+    Rectangle lookButton{};
+    void drawLookButton(); // for study methods
+
+    bool combatResultPopupOpen = false;
+    Rectangle resultRevealButton{};
+    Rectangle resultBackButton{};
 
 public:
     GameScreen(
@@ -88,6 +95,9 @@ public:
     void drawManeuverMovableSpaces();
     void finalizeSchemeCard(Card *playedCard);
     void drawEffectSelectableSpaces();
+    void drawCombatEffectText();
+    void drawResultRevealButton();
+    void drawCombatResultPopup();
 };
 
 #endif

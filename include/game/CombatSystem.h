@@ -2,6 +2,7 @@
 #define COMBATSYSTEM_H
 using namespace std;
 #include <vector>
+#include <string>
 #include "utils/Types.h"
 
 class Game;
@@ -19,7 +20,7 @@ enum class CombatPhase
     ImmediatelyAttacker,
     DuringCombatDefender,
     DuringCombatAttacker,
-    ApplyDamage,
+    AwaitingResultReveal,
     AfterCombatDefender,
     AfterCombatAttacker,
     Finished
@@ -35,9 +36,6 @@ private:
     Game *currentGame;
     bool combatResolved;
 
-    // ---------------------------------------------
-    // State machine جدید (برای پشتیبانی افکت‌های تعاملی)
-    // ---------------------------------------------
     CombatPhase phase;
     bool waitingForInput;
 
@@ -51,14 +49,13 @@ private:
     int lastDamage;
     bool attackerWon;
 
-    // اجرای فازها تا جایی که ممکنه (متوقف می‌شه اگه ورودی تعاملی لازم بشه)
+    int pendingAttackValue;
+    int pendingDefenceValue;
+
+    string currentEffectDescription;
+
     void advance();
-
-    // تلاش برای اجرای افکت یک کارت در یک تایمینگ مشخص.
-    // اگه نیاز به ورودی تعاملی داشت، pending* رو ست می‌کنه و false برمی‌گردونه.
-    // در غیر این صورت (اجرا شد یا رد شد) true برمی‌گردونه.
     bool tryApplyEffect(Timing timing, Fighter &user, Fighter &target, Card &card, bool didUserWin);
-
     void finalizeCombat();
 
 public:
@@ -75,7 +72,6 @@ public:
     void applyEffects(Timing timing, Fighter &user, Fighter &target, Card &card, bool didUserWin);
     void applyDamage(int damage, Fighter &defender);
 
-    // نسخه‌ی قدیمی (بلاکینگ) - برای سازگاری با کد ترمینالی قدیم، دست‌نخورده می‌مونه
     void resolveCombat(Game &game, Fighter &attacker, Fighter &defender,
                        Card &attackCard, Card *defenceCard);
 
@@ -89,8 +85,14 @@ public:
     Effect *getPendingEffect() const;
     Fighter *getPendingUser() const;
     Fighter *getPendingTarget() const;
-
     void provideEffectChoice(const EffectChoice &choice);
+
+    bool isAwaitingResultReveal() const;
+    void acknowledgeResult();
+    int getPendingAttackValue() const;
+    int getPendingDefenceValue() const;
+
+    const string &getCurrentEffectDescription() const;
 
     bool isFinished() const;
     int getLastDamage() const;

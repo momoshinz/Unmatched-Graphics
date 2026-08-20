@@ -99,7 +99,7 @@ void SchemeUI::openScheme(const Hand &hand)
     // چیدمان Grid: حداکثر ۳ کارت در هر ردیف
     // ========================================================
 
-    const int maxPerRow = 3;
+    const int maxPerRow = 4;
 
     const float boxWidth = 220.0f;
     const float boxHeight = 320.0f;
