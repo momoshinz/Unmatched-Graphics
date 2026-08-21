@@ -74,6 +74,14 @@ private:
     bool deckEmptyPopupOpen = false;
     Rectangle deckEmptyOkButton{};
 
+    // the process of checking hand limit
+    bool handLimitPopupOpen = false;
+    Player *handLimitPlayer = nullptr;
+    std::vector<Card *> handLimitCards;
+    std::vector<Rectangle> handLimitCardBoxes;
+    int handLimitSelectedIndex = -1;
+    Rectangle handLimitBurnButton{};
+
 public:
     GameScreen(AssetManager *assets, Game *game);
 
@@ -101,6 +109,10 @@ public:
     void drawCombatResultPopup();
 
     void drawDeckEmptyPopup();
+
+    void checkHandLimit();
+    void openHandLimitPopup(Player *player);
+    void drawHandLimitPopup();
 };
 
 #endif
