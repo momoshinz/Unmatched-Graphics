@@ -86,7 +86,7 @@ bool AssetManager::load()
     cardTextures["EducationNeverEnds"] = LoadTexture("Unmatched_Assets/cards/sherlock/education-never-ends.png");
     cardTextures["EliminateTheImpossible"] = LoadTexture("Unmatched_Assets/cards/sherlock/eliminate-the-impossible.png");
     cardTextures["FeintSherlock"] = LoadTexture("Unmatched_Assets/cards/sherlock/feint (2).png");
-    cardTextures["FixedPoint"] = LoadTexture("Unmatched_Assets/cards/sherlock/fixed-point-in-a-changing-aga.png");
+    cardTextures["FixedPoint"] = LoadTexture("Unmatched_Assets/cards/sherlock/fixed-point-in-a-changing-age.png");
     cardTextures["MasterOfDisguise"] = LoadTexture("Unmatched_Assets/cards/sherlock/master-of-disguise.png");
     cardTextures["StudyMethods"] = LoadTexture("Unmatched_Assets/cards/sherlock/study-methods.png");
     cardTextures["TheGameIsAfoot"] = LoadTexture("Unmatched_Assets/cards/sherlock/the-game-is-afoot.png");
@@ -94,7 +94,7 @@ bool AssetManager::load()
 
 
     cardTextures["CodedNotes"] = LoadTexture("Unmatched_Assets/cards/invisibleMan/coded-notes.png");
-    cardTextures["DreamingOfRevange"] = LoadTexture("Unmatched_Assets/cards/invisibleMan/dreaming-of-revange.png");
+    cardTextures["DreamingOfRevange"] = LoadTexture("Unmatched_Assets/cards/invisibleMan/dreaming-of-revenge.png");
     cardTextures["EmergeFromMist"] = LoadTexture("Unmatched_Assets/cards/invisibleMan/emerge-from-mist.png");
     cardTextures["ImpossibleToSee"] = LoadTexture("Unmatched_Assets/cards/invisibleMan/impossible-to-see.png");
     cardTextures["IntoThinAir"] = LoadTexture("Unmatched_Assets/cards/invisibleMan/into-thin-air.png");
