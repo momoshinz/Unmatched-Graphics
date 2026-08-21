@@ -703,15 +703,65 @@ void CombatSystem::provideEffectChoice(const EffectChoice &choice)
         return;
     }
 
-    pendingEffect->apply(*currentGame, *pendingUser, *pendingTarget, *pendingCard,
-                         pendingOpponentCard, pendingDidUserWin, choice);
+    // اجرای واقعی Effect با انتخاب کاربر
+    pendingEffect->apply(
+        *currentGame,
+        *pendingUser,
+        *pendingTarget,
+        *pendingCard,
+        pendingOpponentCard,
+        pendingDidUserWin,
+        choice);
 
+    // Effect تمام شد
     waitingForInput = false;
+
     pendingEffect = nullptr;
     pendingUser = nullptr;
     pendingTarget = nullptr;
     pendingCard = nullptr;
     pendingOpponentCard = nullptr;
+
+    // رفتن به Phase بعدی
+    switch (phase)
+    {
+    case CombatPhase::ImmediatelyDefender:
+        phase = CombatPhase::ImmediatelyAttacker;
+        break;
+
+    case CombatPhase::ImmediatelyAttacker:
+        phase = CombatPhase::DuringCombatDefender;
+        break;
+
+    case CombatPhase::DuringCombatDefender:
+        phase = CombatPhase::DuringCombatAttacker;
+        break;
+
+    case CombatPhase::DuringCombatAttacker:
+        // ApplyDamage یک Phase نیست.
+        // اینجا مستقیماً Damage را اعمال می‌کنیم
+        if (currentGame != nullptr &&
+            attacker != nullptr &&
+            defender != nullptr)
+        {
+            applyDamage(lastDamage, *defender);
+        }
+
+        phase = CombatPhase::AwaitingResultReveal;
+        break;
+
+    case CombatPhase::AfterCombatDefender:
+        phase = CombatPhase::AfterCombatAttacker;
+        break;
+
+    case CombatPhase::AfterCombatAttacker:
+        finalizeCombat();
+        phase = CombatPhase::Finished;
+        break;
+
+    default:
+        break;
+    }
 
     advance();
 }
