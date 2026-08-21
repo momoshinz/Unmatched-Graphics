@@ -1788,7 +1788,7 @@ Texture2D AttackUI::getCardTexture(AssetManager *assets, Card *card)
     if (name == "Dreaming Of Revenge")
         return assets->getCard("DreamingOfRevange");
 
-    if (name == "Emerge rom Mist")
+    if (name == "Emerge From Mist")
         return assets->getCard("EmergeFromMist");
 
     if (name == "Impossible To See")

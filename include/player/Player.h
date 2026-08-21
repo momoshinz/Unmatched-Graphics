@@ -23,6 +23,7 @@ private:
     Hand hand;
     DiscardPile discardPile;
     vector<Fog *> fogs;
+    bool lastDrawFailed = false;
 
 public:
     Player(int age);
@@ -52,5 +53,6 @@ public:
     DiscardPile &getDiscardPile();
 
     bool hasPlayableCard(const Fighter &fighter, CardType requiredType) const;
+    bool consumeDeckEmptyFlag(); // we need a signal when deck is empty
 };
 #endif

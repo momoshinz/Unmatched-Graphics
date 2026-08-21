@@ -151,6 +151,7 @@ bool Player::drawCardToHand()
     if (card == nullptr)
     {
         cout << "\n[!] ERROR : Deck empty. All your fighters take 2 damage!\n";
+
         if (hero != nullptr && hero->isAlive())
         {
             hero->takeDamage(2);
@@ -162,6 +163,9 @@ bool Player::drawCardToHand()
                 sidekick->takeDamage(2);
             }
         }
+
+        lastDrawFailed = true; // <-- خط جدید
+
         return false;
     }
 
@@ -234,4 +238,15 @@ bool Player::hasPlayableCard(const Fighter &fighter, CardType requiredType) cons
     }
 
     return false;
+}
+
+bool Player::consumeDeckEmptyFlag()
+{
+    if (!lastDrawFailed)
+    {
+        return false;
+    }
+
+    lastDrawFailed = false;
+    return true;
 }

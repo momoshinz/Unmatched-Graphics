@@ -1347,7 +1347,7 @@ int MainMenu::handleInput()
 
         Rectangle finishButton{
             (GetScreenWidth() - 300.0f) / 2.0f,
-            620.0f,
+            700.0f,
             300.0f,
             70.0f};
 
@@ -1748,7 +1748,7 @@ void MainMenu::drawHeroSelection(Font font)
 
     Rectangle finishButton{
         (GetScreenWidth() - 300.0f) / 2.0f,
-        620.0f,
+        700.0f,
         300.0f,
         70.0f};
 

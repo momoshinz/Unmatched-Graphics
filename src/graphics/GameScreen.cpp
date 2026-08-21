@@ -113,6 +113,18 @@ int GameScreen::update()
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
     {
         // =========================================
+        // DECK EMPTY POPUP (بالاترین اولویت)
+        // =========================================
+
+        if (deckEmptyPopupOpen)
+        {
+            if (CheckCollisionPointRec(mousePosition, deckEmptyOkButton))
+            {
+                deckEmptyPopupOpen = false;
+            }
+            return 0;
+        }
+        // =========================================
         // EXIT
         // =========================================
 
@@ -613,6 +625,27 @@ int GameScreen::update()
 
         combatInProgress = false;
     }
+
+    // =========================================
+    // DECK EMPTY POPUP
+    // =========================================
+
+    if (!deckEmptyPopupOpen)
+    {
+        Player *currentPlayer = game->getTurnManager().getCurrentPlayer();
+
+        if (currentPlayer != nullptr && currentPlayer->consumeDeckEmptyFlag())
+        {
+            deckEmptyPopupOpen = true;
+        }
+
+        Player *waitingPlayer = game->getTurnManager().getWaitingPlayer();
+
+        if (waitingPlayer != nullptr && waitingPlayer->consumeDeckEmptyFlag())
+        {
+            deckEmptyPopupOpen = true;
+        }
+    }
     return 0;
 }
 
@@ -623,78 +656,68 @@ void GameScreen::draw()
         return;
     }
 
-    Texture2D background =
-        assets->getMainPanelBackground();
+    Texture2D background = assets->getMainPanelBackground();
 
     if (background.id != 0)
     {
         DrawTexturePro(
             background,
-            Rectangle{
-                0.0f,
-                0.0f,
-                static_cast<float>(background.width),
-                static_cast<float>(background.height)},
-            Rectangle{
-                0.0f,
-                0.0f,
-                static_cast<float>(GetScreenWidth()),
-                static_cast<float>(GetScreenHeight())},
-            Vector2{0.0f, 0.0f},
-            0.0f,
-            WHITE);
+            Rectangle{0.0f, 0.0f, static_cast<float>(background.width), static_cast<float>(background.height)},
+            Rectangle{0.0f, 0.0f, static_cast<float>(GetScreenWidth()), static_cast<float>(GetScreenHeight())},
+            Vector2{0.0f, 0.0f}, 0.0f, WHITE);
     }
     else
     {
-        ClearBackground(
-            Color{
-                45,
-                30,
-                20,
-                255});
+        ClearBackground(Color{45, 30, 20, 255});
     }
 
     drawMap();
     drawPlayerPanels();
     drawTopButtons();
     drawTurnIndicator();
-    drawCombatEffectText();
-    drawResultRevealButton();
-    drawLookButton();
 
-    if (!maneuverUI.isOpen() && !combatInProgress)
+    if (!deckEmptyPopupOpen)
     {
-        drawActionButtons();
+        drawCombatEffectText();
+        drawResultRevealButton();
+        drawLookButton();
+
+        if (!maneuverUI.isOpen() && !combatInProgress)
+        {
+            drawActionButtons();
+        }
+
+        if (guideOpen)
+        {
+            drawGuidePopup();
+        }
+        if (attackUI.isOpen())
+        {
+            attackUI.draw();
+        }
+
+        if (schemeUI.isOpen())
+        {
+            schemeUI.draw();
+        }
+
+        if (maneuverUI.isOpen())
+        {
+            maneuverUI.draw();
+        }
+
+        if (effectUI.isOpen())
+        {
+            effectUI.draw();
+        }
+
+        if (combatResultPopupOpen)
+        {
+            drawCombatResultPopup();
+        }
     }
 
-    if (guideOpen)
-    {
-        drawGuidePopup();
-    }
-    if (attackUI.isOpen())
-    {
-        attackUI.draw();
-    }
-
-    if (schemeUI.isOpen())
-    {
-        schemeUI.draw();
-    }
-
-    if (maneuverUI.isOpen())
-    {
-        maneuverUI.draw();
-    }
-
-    if (effectUI.isOpen())
-    {
-        effectUI.draw();
-    }
-
-    if (combatResultPopupOpen)
-    {
-        drawCombatResultPopup();
-    }
+    drawDeckEmptyPopup();
 }
 
 void GameScreen::drawMap()
@@ -1938,7 +1961,7 @@ void GameScreen::drawActionButtons()
         (GetScreenWidth() - totalWidth) / 2.0f;
 
     const float buttonY =
-        GetScreenHeight() - 175.0f;
+        GetScreenHeight() - 160.0f;
 
     // =========================================
     // BUTTON RECTANGLES
@@ -2758,4 +2781,62 @@ void GameScreen::drawCombatResultPopup()
             resultBackButton.x + (resultBackButton.width - backTextSize.x) / 2.0f,
             resultBackButton.y + (resultBackButton.height - backTextSize.y) / 2.0f},
         24.0f, 1.5f, WHITE);
+}
+
+void GameScreen::drawDeckEmptyPopup()
+{
+    if (!deckEmptyPopupOpen || assets == nullptr)
+    {
+        return;
+    }
+
+    Font font = assets->getGameFont();
+
+    const char *message = "DECK IS EMPTY! YOUR FIGHTERS TAKE 2 DAMAGE.";
+    const float fontSize = 24.0f;
+    const float spacing = 1.5f;
+
+    Vector2 textSize = MeasureTextEx(font, message, fontSize, spacing);
+
+    const float buttonWidth = 140.0f;
+    const float buttonHeight = 48.0f;
+
+    // فاصله از پایین صفحه، درست جایی که قبلاً دکمه‌های اکشن بودن
+    float textY = GetScreenHeight() - 130.0f;
+    float textX = (GetScreenWidth() - textSize.x) / 2.0f;
+
+    Rectangle background{
+        textX - 20.0f,
+        textY - 10.0f,
+        textSize.x + 40.0f,
+        textSize.y + 20.0f};
+
+    DrawRectangleRounded(background, 0.2f, 12, Color{80, 20, 20, 220});
+    DrawRectangleRoundedLines(background, 0.2f, 12, Color{220, 100, 100, 255});
+
+    DrawTextEx(font, message, Vector2{textX, textY}, fontSize, spacing, WHITE);
+
+    deckEmptyOkButton = Rectangle{
+        (GetScreenWidth() - buttonWidth) / 2.0f,
+        textY + textSize.y + 25.0f,
+        buttonWidth,
+        buttonHeight};
+
+    Vector2 mouse = GetMousePosition();
+    bool hovered = CheckCollisionPointRec(mouse, deckEmptyOkButton);
+
+    Color buttonColor = hovered ? Color{75, 75, 75, 245} : Color{35, 35, 35, 235};
+
+    DrawRectangleRounded(deckEmptyOkButton, 1.0f, 20, buttonColor);
+    DrawRectangleRoundedLines(deckEmptyOkButton, 1.0f, 20, hovered ? WHITE : Color{150, 150, 150, 255});
+
+    const char *okText = "OK";
+    Vector2 okTextSize = MeasureTextEx(font, okText, 22.0f, 1.5f);
+
+    DrawTextEx(
+        font, okText,
+        Vector2{
+            deckEmptyOkButton.x + (deckEmptyOkButton.width - okTextSize.x) / 2.0f,
+            deckEmptyOkButton.y + (deckEmptyOkButton.height - okTextSize.y) / 2.0f},
+        22.0f, 1.5f, WHITE);
 }

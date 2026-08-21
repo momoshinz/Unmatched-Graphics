@@ -71,10 +71,11 @@ private:
     Rectangle resultRevealButton{};
     Rectangle resultBackButton{};
 
+    bool deckEmptyPopupOpen = false;
+    Rectangle deckEmptyOkButton{};
+
 public:
-    GameScreen(
-        AssetManager *assets,
-        Game *game);
+    GameScreen(AssetManager *assets, Game *game);
 
     int update();
     void draw();
@@ -98,6 +99,8 @@ public:
     void drawCombatEffectText();
     void drawResultRevealButton();
     void drawCombatResultPopup();
+
+    void drawDeckEmptyPopup();
 };
 
 #endif
