@@ -17,51 +17,31 @@ void Dash::apply(Game &game,
                  bool didUserWin,
                  const EffectChoice &choice)
 {
-    Player *player = fighter.getOwner();
-
-    if (player == nullptr)
+    if (choice.selectedSpace == nullptr)
     {
-        throw runtime_error("\n[!] ERROR : Fighter has NO owner!\n");
+        throw runtime_error(
+            "\n[!] ERROR : No destination selected for Dash!\n");
     }
 
     Space *currentPos = fighter.getPosition();
 
     if (currentPos == nullptr)
     {
-        throw runtime_error("\n[!] ERROR : Fighter has NO position on the map!\n");
-    }
-
-    if (choice.selectedSpace == nullptr)
-    {
-        throw runtime_error("\n[!] ERROR : No destination selected for Dash!\n");
+        throw runtime_error(
+            "\n[!] ERROR : Fighter has NO position on the map!\n");
     }
 
     Space *destination = choice.selectedSpace;
 
-    vector<Space *> reachableSpaces = game.getBoard().getAvailableMoves(&fighter, 3);
-
-    bool validDestination = false;
-
-    for (Space *space : reachableSpaces)
-    {
-        if (space == destination)
-        {
-            validDestination = true;
-            break;
-        }
-    }
-
-    if (!validDestination)
-    {
-        throw runtime_error("\n[!] ERROR : Selected destination is NOT reachable by Dash!\n");
-    }
-
     cout << "\n========================================\n";
     cout << "-< Dash >- ACTIVATED!\n";
 
+    cout << "[DEBUG] Dash destination = "
+         << destination->getId() << endl;
+
     if (game.getBoard().moveFighter(&fighter, destination))
     {
-        cout << "\n[+] " << fighter.getName()
+        cout << "[+] " << fighter.getName()
              << " moved from home "
              << currentPos->getId()
              << " to home "
@@ -72,7 +52,8 @@ void Dash::apply(Game &game,
     }
     else
     {
-        throw runtime_error("\n[!] ERROR : FAILED to move fighter!\n");
+        throw runtime_error(
+            "\n[!] ERROR : FAILED to move fighter!\n");
     }
 }
 
