@@ -462,46 +462,32 @@ int GameScreen::update()
 
         if (playedCard != nullptr)
         {
-            Player *currentPlayer =
-                game->getTurnManager().getCurrentPlayer();
+            Player *currentPlayer = game->getTurnManager().getCurrentPlayer();
 
             if (currentPlayer != nullptr)
             {
                 Effect *effect = playedCard->getEffect();
 
-                if (effect == nullptr ||
-                    effect->getInputKind() == EffectInputKind::None)
+                if (effect == nullptr || effect->getInputKind() == EffectInputKind::None)
                 {
+                    // خودکار: مستقیم اجرا کن
                     if (effect != nullptr)
                     {
                         EffectChoice emptyChoice;
-
-                        effect->apply(
-                            *game,
-                            *currentPlayer->getHero(),
-                            *currentPlayer->getHero(),
-                            *playedCard,
-                            nullptr,
-                            false,
-                            emptyChoice);
+                        effect->apply(*game, *currentPlayer->getHero(),
+                                      *currentPlayer->getHero(), *playedCard,
+                                      nullptr, false, emptyChoice);
                     }
 
                     finalizeSchemeCard(playedCard);
-
-                    game->getTurnManager().useAction();
-
-                    std::cout << "[.] Actions remaining: "
-                              << game->getTurnManager().getRemainingActions()
-                              << std::endl;
-
-                    checkAndEndTurnIfNeeded();
                 }
                 else
                 {
-                    // تعاملی: EffectUI رو باز کن، فعلاً کارت رو نگه دار
+                    // <<<< دقیقاً همینجا، به‌جای else فعلی، این نسخه رو بذارید >>>>
                     pendingSchemeCard = playedCard;
 
                     Fighter *actingFighter = currentPlayer->getHero();
+                    Fighter *referenceFighter = currentPlayer->getHero();
 
                     if (playedCard->getOwnerType() == OwnerType::Sidekick)
                     {
@@ -513,7 +499,7 @@ int GameScreen::update()
                         }
                     }
 
-                    effectUI.open(game, effect, actingFighter, actingFighter);
+                    effectUI.open(game, effect, actingFighter, referenceFighter);
                 }
             }
         }
@@ -602,14 +588,6 @@ int GameScreen::update()
             }
 
             finalizeSchemeCard(pendingSchemeCard);
-
-            game->getTurnManager().useAction();
-
-            std::cout << "[.] Actions remaining: "
-                      << game->getTurnManager().getRemainingActions()
-                      << std::endl;
-
-            checkAndEndTurnIfNeeded();
         }
         pendingSchemeCard = nullptr;
         effectUI.reset();

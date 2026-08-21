@@ -208,10 +208,13 @@ void EffectUI::setupChooseAdjacentEmptySpace()
 {
     candidateSpaces.clear();
 
-    if (fighter == nullptr)
+    Fighter *referenceFighter = (target != nullptr) ? target : fighter;
+
+    if (referenceFighter == nullptr)
         return;
 
-    Space *center = fighter->getPosition();
+    Space *center = referenceFighter->getPosition();
+
     if (center == nullptr)
         return;
 
