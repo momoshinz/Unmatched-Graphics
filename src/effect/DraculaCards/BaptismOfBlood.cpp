@@ -32,11 +32,25 @@ void BaptismOfBlood::apply(Game &game,
         throw runtime_error("\n[!] ERROR : Baptism Of Blood can only be used by Dracula!\n");
     }
 
+    cout << "\n========================================\n";
+    cout << "-< Baptism Of Blood >- ACTIVATED!\n";
+
+    fighter.heal(2);
+
+    cout << "[+] " << fighter.getName() << " recovered 2 health!\n";
+
+    if (choice.selectedFighter == nullptr)
+    {
+        cout << "[o] No defeated Sister available.\n";
+        cout << "========================================\n";
+        return;
+    }
+
     Sisters *selectedSister = dynamic_cast<Sisters *>(choice.selectedFighter);
 
     if (selectedSister == nullptr)
     {
-        throw runtime_error("\n[!] ERROR : No defeated Sister selected!\n");
+        throw runtime_error("\n[!] ERROR : Selected fighter is not a Sister!\n");
     }
 
     if (selectedSister->getOwner() != player)
@@ -53,7 +67,8 @@ void BaptismOfBlood::apply(Game &game,
 
     if (selectedSpace == nullptr)
     {
-        throw runtime_error("\n[!] ERROR : No destination selected for Sister!\n");
+        throw runtime_error(
+            "\n[!] ERROR : No destination selected for Sister!\n");
     }
 
     if (selectedSpace->isOccupied())
@@ -75,9 +90,9 @@ void BaptismOfBlood::apply(Game &game,
         throw runtime_error("\n[!] ERROR : Dracula is not in any ZONE!\n");
     }
 
-    bool sameZone = false;
-
     const vector<ZoneType> &targetZones = selectedSpace->getZones();
+
+    bool sameZone = false;
 
     for (ZoneType draculaZone : draculaZones)
     {
@@ -90,29 +105,28 @@ void BaptismOfBlood::apply(Game &game,
             }
         }
         if (sameZone)
-        {
             break;
-        }
     }
 
     if (!sameZone)
     {
-        throw runtime_error("\n[!] ERROR : Selected home is NOT in Dracula's zone!\n");
+        throw runtime_error(
+            "\n[!] ERROR : Selected home is NOT in Dracula's zone!\n");
     }
-
-    cout << "\n========================================";
-    cout << "\n-< Baptism Of Blood >- ACTIVATED!\n";
-    fighter.heal(2);
-    cout << "[+] " << fighter.getName() << " recovered 2 health!" << endl;
 
     selectedSister->heal(selectedSister->getMaxHealth());
 
     selectedSister->setPosition(selectedSpace);
-
     selectedSpace->setFighter(selectedSister);
 
-    cout << "[+] " << selectedSister->getName() << " has been revived in Dracula's zone." << endl;
-    cout << "[o] Sister moved to Home " << selectedSpace->getId() << endl;
+    cout << "[+] "
+         << selectedSister->getName()
+         << " has been revived in Dracula's zone.\n";
+
+    cout << "[o] Sister moved to Home "
+         << selectedSpace->getId()
+         << "\n";
+
     cout << "========================================\n";
 }
 

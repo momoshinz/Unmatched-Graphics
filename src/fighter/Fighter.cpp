@@ -24,6 +24,11 @@ void Fighter::takeDamage(int damage)
     {
         health = 0;
     }
+    if (health == 0 && position != nullptr)
+    {
+        position->removeFighter(this);
+        position = nullptr;
+    }
 }
 
 void Fighter::heal(int amount)
