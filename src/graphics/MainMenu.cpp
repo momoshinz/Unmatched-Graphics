@@ -508,14 +508,22 @@ void MainMenu::draw()
     if (state == State::READY)
     {
         // -----------------------------
-        // Player 1 info
+        // Player information
         // -----------------------------
 
-        const float infoX =
-            GetScreenWidth() - 420.0f;
+        const float infoX = GetScreenWidth() - 420.0f;
 
-        const float player1Y = 250.0f;
-        const float player2Y = 390.0f;
+        // فاصله بیشتر بین دو Player
+        const float player1Y = 180.0f;
+        const float player2Y = 430.0f;
+
+        const float playerTitleSize = 40.0f;
+        const float playerInfoSize = 32.0f;
+        const float textSpacing = 2.0f;
+
+        // -----------------------------
+        // Player 1
+        // -----------------------------
 
         DrawTextEx(
             font,
@@ -525,8 +533,8 @@ void MainMenu::draw()
                 infoX,
                 player1Y},
 
-            30.0f,
-            2.0f,
+            playerTitleSize,
+            textSpacing,
             WHITE);
 
         std::string player1Info =
@@ -541,14 +549,14 @@ void MainMenu::draw()
 
             Vector2{
                 infoX,
-                player1Y + 45.0f},
+                player1Y + 55.0f},
 
-            25.0f,
-            2.0f,
+            playerInfoSize,
+            textSpacing,
             WHITE);
 
         // -----------------------------
-        // Player 2 info
+        // Player 2
         // -----------------------------
 
         DrawTextEx(
@@ -559,8 +567,8 @@ void MainMenu::draw()
                 infoX,
                 player2Y},
 
-            30.0f,
-            2.0f,
+            playerTitleSize,
+            textSpacing,
             WHITE);
 
         std::string player2Info =
@@ -575,21 +583,30 @@ void MainMenu::draw()
 
             Vector2{
                 infoX,
-                player2Y + 45.0f},
+                player2Y + 55.0f},
 
-            25.0f,
-            2.0f,
+            playerInfoSize,
+            textSpacing,
             WHITE);
 
         // -----------------------------
         // START BUTTON
         // -----------------------------
 
+        const float startButtonWidth = 300.0f;
+        const float startButtonHeight = 75.0f;
+
+        const float startButtonX =
+            (GetScreenWidth() - startButtonWidth) / 2.0f;
+
+        const float startButtonY =
+            (GetScreenHeight() - startButtonHeight) / 2.0f;
+
         Rectangle startButton{
-            500.0f,
-            650.0f,
-            300.0f,
-            75.0f};
+            startButtonX,
+            startButtonY,
+            startButtonWidth,
+            startButtonHeight};
 
         Vector2 mousePosition = GetMousePosition();
 
@@ -618,14 +635,15 @@ void MainMenu::draw()
             32,
             startButtonColor);
 
-        const char *startText = "START";
+        const char *startText = "START ?";
+        const float startFontSize = 35.0f;
 
         Vector2 startTextSize =
             MeasureTextEx(
                 font,
                 startText,
-                35.0f,
-                2.0f);
+                startFontSize,
+                textSpacing);
 
         DrawTextEx(
             font,
@@ -642,8 +660,8 @@ void MainMenu::draw()
                      startTextSize.y) /
                         2.0f},
 
-            35.0f,
-            2.0f,
+            startFontSize,
+            textSpacing,
             WHITE);
     }
 
@@ -1152,13 +1170,14 @@ int MainMenu::handleInput()
                     mousePosition,
                     finishButton))
             {
-                // فقط اگر اطلاعات کامل باشد
                 if (isPlayer2Complete())
                 {
                     state = State::READY;
 
                     enteringName = false;
                     enteringAge = false;
+
+                    return 0;
                 }
             }
         }
@@ -1229,9 +1248,10 @@ int MainMenu::handleInput()
         const float startButtonHeight = 75.0f;
 
         const float startButtonX =
-            (GetScreenWidth() - 300.0f) / 2.0f;
+            (GetScreenWidth() - startButtonWidth) / 2.0f;
 
-        const float startButtonY = 650.0f;
+        const float startButtonY =
+            (GetScreenHeight() - startButtonHeight) / 2.0f;
 
         Rectangle startButton{
             startButtonX,
@@ -1246,6 +1266,7 @@ int MainMenu::handleInput()
                     startButton))
             {
                 startHeroSelection();
+                return 0;
             }
         }
     }
@@ -2095,6 +2116,7 @@ bool MainMenu::placeHeroOnSpace(int spaceId)
 
         return true;
     }
+    return false;
 }
 
 bool MainMenu::isValidSidekickPlacement(Space *space) const
@@ -2344,10 +2366,10 @@ void MainMenu::drawPlacement(Font font)
     Vector2 mouse = GetMousePosition();
 
     // ===== رنگ‌های هایلایت =====
-    Color hoverColor = Color{255, 255, 255, 90};  // زرد شفاف (ماوس روی خانه)
+    Color hoverColor = Color{255, 255, 255, 90};    // زرد شفاف (ماوس روی خانه)
     Color selectedColor = Color{140, 200, 255, 80}; // سبز (خانه انتخاب شده)
-    Color heroColor = Color{200, 160, 255, 80};    // قرمز (خانه قهرمان)
-    Color sidekickColor = Color{0, 0, 255, 150}; // آبی (خانه یاران)
+    Color heroColor = Color{200, 160, 255, 80};     // قرمز (خانه قهرمان)
+    Color sidekickColor = Color{0, 0, 255, 150};    // آبی (خانه یاران)
 
     // ===== بررسی اینکه آیا خانه‌ای زیر ماوس است =====
     int hoveredSpace = -1;

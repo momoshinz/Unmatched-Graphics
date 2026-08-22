@@ -30,7 +30,7 @@ bool AssetManager::load()
 
 
     gameFont = LoadFont("Unmatched_Assets/fonts/Sweet Magic.ttf");
-    titleFont = LoadFont("Unmatched_Assets/fonts/title.otf");
+    titleFont = LoadFont("Unmatched_Assets/fonts/title.ttf");
     loading = LoadFont("Unmatched_Assets/fonts/NexaRustSlab.ttf");
     guideFont = LoadFont("Unmatched_Assets/fonts/guide.TTF");
 

@@ -1431,13 +1431,13 @@ void EffectUI::draw()
             std::string text = "Fog " + std::to_string(candidateFogs[i]->getID());
             if (candidateFogs[i]->getPosition() != nullptr)
             {
-                text += " (Home " + std::to_string(candidateFogs[i]->getPosition()->getId()) + ")";
+                text += " { Home " + std::to_string(candidateFogs[i]->getPosition()->getId()) + " }";
             }
 
-            Vector2 textSize = MeasureTextEx(font, text.c_str(), 18.0f, 1.0f);
+            Vector2 textSize = MeasureTextEx(font, text.c_str(), 24.0f, 1.0f);
             DrawTextEx(font, text.c_str(),
                        Vector2{box.x + (box.width - textSize.x) / 2.0f, box.y + (box.height - textSize.y) / 2.0f},
-                       18.0f, 1.0f, WHITE);
+                       24.0f, 1.0f, WHITE);
         }
         return;
     }
