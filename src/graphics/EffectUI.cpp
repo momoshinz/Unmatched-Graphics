@@ -14,6 +14,56 @@
 #include <algorithm>
 #include <unordered_map>
 
+// ============================================================
+// اسم فایتر -> کلید تکسچر کاراکتر در AssetManager
+// ============================================================
+
+static Texture2D getFighterTextureForEffectUI(AssetManager *assets, Fighter *fighter)
+{
+    if (assets == nullptr || fighter == nullptr)
+    {
+        return {};
+    }
+
+    std::string name = fighter->getName();
+
+    if (name == "DRACULA")
+    {
+        return assets->getCharacter("dracula");
+    }
+
+    if (name == "* Sister 1")
+    {
+        return assets->getCharacter("sister1");
+    }
+
+    if (name == "* Sister 2")
+    {
+        return assets->getCharacter("sister2");
+    }
+
+    if (name == "* Sister 3")
+    {
+        return assets->getCharacter("sister3");
+    }
+
+    if (name == "SHERLOCK HOLMES")
+    {
+        return assets->getCharacter("sherlock_art");
+    }
+
+    if (name == "* Dr. Watson")
+    {
+        return assets->getCharacter("drwatson");
+    }
+
+    if (name == "INVISIBLE MAN")
+    {
+        return assets->getCharacter("invisible_man");
+    }
+    return {};
+}
+
 EffectUI::EffectUI(AssetManager *assets)
     : assets(assets)
 {
@@ -1383,9 +1433,9 @@ void EffectUI::draw()
     bool showFighterList =
         !fighterBoxes.empty() &&
         (inputKind == EffectInputKind::ChooseEnemyFighter ||
-        (inputKind == EffectInputKind::ChooseEnemyAndFogDestination && subPhase == 0) ||
-        (inputKind == EffectInputKind::ChooseDefeatedSisterAndZoneSpace && subPhase == 0) ||
-        inputKind == EffectInputKind::ChooseFighterAndReachableSpace);
+         (inputKind == EffectInputKind::ChooseEnemyAndFogDestination && subPhase == 0) ||
+         (inputKind == EffectInputKind::ChooseDefeatedSisterAndZoneSpace && subPhase == 0) ||
+         inputKind == EffectInputKind::ChooseFighterAndReachableSpace);
 
     if (showFighterList)
     {
@@ -1440,7 +1490,7 @@ void EffectUI::draw()
                 15,
                 boxColor);
 
-            DrawRectangleRoundedLines(
+            (
                 box,
                 0.15f,
                 15,
@@ -1448,8 +1498,31 @@ void EffectUI::draw()
                     ? WHITE
                     : Color{150, 150, 150, 255});
 
-            std::string name = candidate->getName();
+            if (inputKind != EffectInputKind::ChooseFighterAndReachableSpace)
+            {
+                Texture2D texture = getFighterTextureForEffectUI(assets, candidate);
 
+                if (texture.id != 0)
+                {
+                    const float imagePadding = 15.0f;
+
+                    Rectangle source{
+                        0.0f, 0.0f,
+                        static_cast<float>(texture.width),
+                        static_cast<float>(texture.height)};
+
+                    Rectangle destination{
+                        box.x + imagePadding,
+                        box.y + imagePadding,
+                        box.width - 2.0f * imagePadding,
+                        220.0f};
+
+                    DrawTexturePro(
+                        texture, source, destination,
+                        Vector2{0.0f, 0.0f}, 0.0f, WHITE);
+                }
+            }
+            std::string name = candidate->getName();
             // ====================================================
             // Ravening Seduction:
             // کادر 180x80 است، پس اسم باید وسط همان کادر باشد.

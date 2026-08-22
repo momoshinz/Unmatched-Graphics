@@ -2344,9 +2344,9 @@ void MainMenu::drawPlacement(Font font)
     Vector2 mouse = GetMousePosition();
 
     // ===== رنگ‌های هایلایت =====
-    Color hoverColor = Color{255, 255, 0, 100};  // زرد شفاف (ماوس روی خانه)
-    Color selectedColor = Color{0, 255, 0, 150}; // سبز (خانه انتخاب شده)
-    Color heroColor = Color{255, 0, 0, 150};     // قرمز (خانه قهرمان)
+    Color hoverColor = Color{255, 255, 255, 90};  // زرد شفاف (ماوس روی خانه)
+    Color selectedColor = Color{140, 200, 255, 80}; // سبز (خانه انتخاب شده)
+    Color heroColor = Color{200, 160, 255, 80};    // قرمز (خانه قهرمان)
     Color sidekickColor = Color{0, 0, 255, 150}; // آبی (خانه یاران)
 
     // ===== بررسی اینکه آیا خانه‌ای زیر ماوس است =====
@@ -2371,7 +2371,7 @@ void MainMenu::drawPlacement(Font font)
             if (space != nullptr && isValidSidekickPlacement(space))
             {
                 // خانه معتبر برای Sidekick
-                DrawCircleV(center, radius, Color{0, 255, 0, 80});
+                DrawCircleV(center, radius, Color{255, 220, 120, 120});
             }
         }
 
@@ -2381,7 +2381,7 @@ void MainMenu::drawPlacement(Font font)
         {
             if (i + 1 == 7 || i + 1 == 22)
             {
-                DrawCircleV(center, radius, Color{255, 255, 0, 80});
+                DrawCircleV(center, radius, Color{200, 160, 250, 180});
             }
         }
 
@@ -2400,7 +2400,7 @@ void MainMenu::drawPlacement(Font font)
                 DrawCircleV(
                     center,
                     radius,
-                    Color{180, 220, 255, 80});
+                    Color{140, 200, 255, 120});
             }
         }
 
