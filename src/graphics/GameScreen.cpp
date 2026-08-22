@@ -456,13 +456,13 @@ int GameScreen::update()
 
                     if (playedCard->getOwnerType() == OwnerType::Sidekick)
                     {
-                        actingFighter = currentPlayer->getWatson();
-
-                        if (actingFighter == nullptr && !currentPlayer->getSideKicks().empty())
+                        if (!currentPlayer->getSideKicks().empty())
                         {
                             actingFighter = currentPlayer->getSideKicks()[0];
                         }
                     }
+
+                    pendingEffectFighter = actingFighter;
 
                     effectUI.open(game, effect, actingFighter, referenceFighter);
                 }
@@ -533,21 +533,21 @@ int GameScreen::update()
 
             Fighter *actingFighter = currentPlayer->getHero();
 
-            if (pendingSchemeCard->getOwnerType() == OwnerType::Sidekick)
+            if (effect != nullptr && pendingEffectFighter != nullptr)
             {
-                actingFighter = currentPlayer->getWatson();
+                effect->apply(
+                    *game,
+                    *pendingEffectFighter,
+                    *pendingEffectFighter,
+                    *pendingSchemeCard,
+                    nullptr,
+                    false,
+                    effectUI.getChoice());
             }
-
-            if (effect != nullptr && actingFighter != nullptr)
-            {
-                effect->apply(*game, *actingFighter, *actingFighter, *pendingSchemeCard,
-                              nullptr, false,
-                              effectUI.getChoice());
-            }
-
             finalizeSchemeCard(pendingSchemeCard);
         }
         pendingSchemeCard = nullptr;
+        pendingEffectFighter = nullptr;
         effectUI.reset();
     }
 

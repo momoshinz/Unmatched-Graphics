@@ -19,25 +19,20 @@ void Dash::apply(Game &game,
 {
     if (choice.selectedSpace == nullptr)
     {
-        throw runtime_error(
-            "\n[!] ERROR : No destination selected for Dash!\n");
+        throw runtime_error("\n[!] ERROR : No destination selected for Dash!\n");
     }
 
     Space *currentPos = fighter.getPosition();
 
     if (currentPos == nullptr)
     {
-        throw runtime_error(
-            "\n[!] ERROR : Fighter has NO position on the map!\n");
+        throw runtime_error("\n[!] ERROR : Fighter has NO position on the map!\n");
     }
 
     Space *destination = choice.selectedSpace;
 
     cout << "\n========================================\n";
     cout << "-< Dash >- ACTIVATED!\n";
-
-    cout << "[DEBUG] Dash destination = "
-         << destination->getId() << endl;
 
     if (game.getBoard().moveFighter(&fighter, destination))
     {
@@ -52,8 +47,7 @@ void Dash::apply(Game &game,
     }
     else
     {
-        throw runtime_error(
-            "\n[!] ERROR : FAILED to move fighter!\n");
+        throw runtime_error("\n[!] ERROR : FAILED to move fighter!\n");
     }
 }
 

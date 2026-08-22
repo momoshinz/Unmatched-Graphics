@@ -47,6 +47,7 @@ void RaveningSeduction::apply(Game &game,
     Fighter *selected = choice.selectedFighter;
     Space *destination = choice.selectedSpace;
 
+
     if (!selected->isAlive())
     {
         throw runtime_error("\n[!] ERROR : Selected fighter is NOT alive!\n");
@@ -60,14 +61,7 @@ void RaveningSeduction::apply(Game &game,
     cout << "\n========================================\n";
     cout << "-< Ravening Seduction >- ACTIVATED!\n";
 
-    Board &board = game.getBoard();
-
-    board.moveFighter(selected, destination);
-
-    cout << "[+] " << selected->getName()
-         << " moved to home "
-         << destination->getId()
-         << "!\n";
+    game.getBoard().moveFighter(selected, destination);
 
     int damage = 0;
 

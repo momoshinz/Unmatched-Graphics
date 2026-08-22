@@ -82,6 +82,8 @@ private:
     int handLimitSelectedIndex = -1;
     Rectangle handLimitBurnButton{};
 
+    Fighter *pendingEffectFighter = nullptr;
+
 public:
     GameScreen(AssetManager *assets, Game *game);
 
