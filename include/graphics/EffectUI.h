@@ -84,6 +84,7 @@ private:
     void layoutFogWindow();
     void layoutYesNo();
     void layoutTwoOptions(const std::string &textA, const std::string &textB);
+    void layoutRaveningFighters();
 
     void beginFogDestinationStage(int range, bool excludeSource);
 

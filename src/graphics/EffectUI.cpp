@@ -1383,42 +1383,143 @@ void EffectUI::draw()
     bool showFighterList =
         !fighterBoxes.empty() &&
         (inputKind == EffectInputKind::ChooseEnemyFighter ||
-         (inputKind == EffectInputKind::ChooseEnemyAndFogDestination && subPhase == 0) ||
-         (inputKind == EffectInputKind::ChooseDefeatedSisterAndZoneSpace && subPhase == 0));
+        (inputKind == EffectInputKind::ChooseEnemyAndFogDestination && subPhase == 0) ||
+        (inputKind == EffectInputKind::ChooseDefeatedSisterAndZoneSpace && subPhase == 0) ||
+        inputKind == EffectInputKind::ChooseFighterAndReachableSpace);
 
     if (showFighterList)
     {
-        const char *title =
-            (inputKind == EffectInputKind::ChooseDefeatedSisterAndZoneSpace)
-                ? "CHOOSE A DEFEATED SISTER"
-                : "CHOOSE A FIGHTER";
+        const char *title;
 
-        Vector2 titleSize = MeasureTextEx(font, title, 38.0f, 2.0f);
-        DrawTextEx(font, title,
-                   Vector2{(GetScreenWidth() - titleSize.x) / 2.0f, 70.0f},
-                   38.0f, 2.0f, WHITE);
+        if (inputKind == EffectInputKind::ChooseDefeatedSisterAndZoneSpace)
+        {
+            title = "CHOOSE A DEFEATED SISTER";
+        }
+        else if (inputKind == EffectInputKind::ChooseFighterAndReachableSpace)
+        {
+            title = "CHOOSE A FIGHTER TO MOVE";
+        }
+        else
+        {
+            title = "CHOOSE A FIGHTER";
+        }
+
+        Vector2 titleSize =
+            MeasureTextEx(font, title, 32.0f, 2.0f);
+
+        DrawTextEx(
+            font,
+            title,
+            Vector2{
+                (GetScreenWidth() - titleSize.x) / 2.0f,
+                70.0f},
+            32.0f,
+            2.0f,
+            WHITE);
 
         for (size_t i = 0; i < candidateFighters.size(); i++)
         {
             Fighter *candidate = candidateFighters[i];
-            Rectangle box = fighterBoxes[i];
-            bool hovered = CheckCollisionPointRec(mouse, box);
 
-            DrawRectangleRounded(box, 0.08f, 20, hovered ? Color{75, 75, 75, 245} : Color{35, 35, 35, 235});
-            DrawRectangleRoundedLines(box, 0.08f, 20, hovered ? WHITE : Color{150, 150, 150, 255});
+            if (candidate == nullptr || i >= fighterBoxes.size())
+                continue;
+
+            Rectangle box = fighterBoxes[i];
+
+            bool hovered =
+                CheckCollisionPointRec(mouse, box);
+
+            Color boxColor =
+                hovered
+                    ? Color{75, 75, 75, 245}
+                    : Color{35, 35, 35, 235};
+
+            DrawRectangleRounded(
+                box,
+                0.15f,
+                15,
+                boxColor);
+
+            DrawRectangleRoundedLines(
+                box,
+                0.15f,
+                15,
+                hovered
+                    ? WHITE
+                    : Color{150, 150, 150, 255});
 
             std::string name = candidate->getName();
-            Vector2 nameSize = MeasureTextEx(font, name.c_str(), 22.0f, 1.0f);
-            DrawTextEx(font, name.c_str(),
-                       Vector2{box.x + (box.width - nameSize.x) / 2.0f, box.y + 245.0f},
-                       22.0f, 1.0f, WHITE);
 
-            std::string hpText = "HP: " + std::to_string(candidate->getHealth());
-            Vector2 hpSize = MeasureTextEx(font, hpText.c_str(), 18.0f, 1.0f);
-            DrawTextEx(font, hpText.c_str(),
-                       Vector2{box.x + (box.width - hpSize.x) / 2.0f, box.y + 270.0f},
-                       18.0f, 1.0f, WHITE);
+            // ====================================================
+            // Ravening Seduction:
+            // کادر 180x80 است، پس اسم باید وسط همان کادر باشد.
+            // ====================================================
+
+            if (inputKind == EffectInputKind::ChooseFighterAndReachableSpace)
+            {
+                Vector2 nameSize =
+                    MeasureTextEx(
+                        font,
+                        name.c_str(),
+                        20.0f,
+                        1.0f);
+
+                DrawTextEx(
+                    font,
+                    name.c_str(),
+                    Vector2{
+                        box.x + (box.width - nameSize.x) / 2.0f,
+                        box.y + (box.height - nameSize.y) / 2.0f},
+                    20.0f,
+                    1.0f,
+                    WHITE);
+            }
+
+            // ====================================================
+            // بقیه Effectها:
+            // همان ظاهر قبلی با اسم + HP
+            // ====================================================
+            else
+            {
+                Vector2 nameSize =
+                    MeasureTextEx(
+                        font,
+                        name.c_str(),
+                        22.0f,
+                        1.0f);
+
+                DrawTextEx(
+                    font,
+                    name.c_str(),
+                    Vector2{
+                        box.x + (box.width - nameSize.x) / 2.0f,
+                        box.y + 245.0f},
+                    22.0f,
+                    1.0f,
+                    WHITE);
+
+                std::string hpText =
+                    "HP: " + std::to_string(candidate->getHealth());
+
+                Vector2 hpSize =
+                    MeasureTextEx(
+                        font,
+                        hpText.c_str(),
+                        18.0f,
+                        1.0f);
+
+                DrawTextEx(
+                    font,
+                    hpText.c_str(),
+                    Vector2{
+                        box.x + (box.width - hpSize.x) / 2.0f,
+                        box.y + 270.0f},
+                    18.0f,
+                    1.0f,
+                    WHITE);
+            }
         }
+
         return;
     }
 
@@ -1695,21 +1796,19 @@ void EffectUI::setupChooseFighterAndReachableSpace()
     candidateFighters.clear();
     candidateSpaces.clear();
 
-    if (actingPlayer == nullptr)
+    if (game == nullptr)
         return;
 
-    Hero *hero = actingPlayer->getHero();
-
-    if (hero != nullptr && hero->isAlive())
+    for (Space *space : game->getBoard().getSpaces())
     {
-        candidateFighters.push_back(hero);
-    }
+        if (space == nullptr)
+            continue;
 
-    for (Sidekick *sidekick : actingPlayer->getSideKicks())
-    {
-        if (sidekick != nullptr && sidekick->isAlive())
+        Fighter *f = space->getFighter();
+
+        if (f != nullptr && f->isAlive())
         {
-            candidateFighters.push_back(sidekick);
+            candidateFighters.push_back(f);
         }
     }
 
@@ -1719,7 +1818,7 @@ void EffectUI::setupChooseFighterAndReachableSpace()
         return;
     }
 
-    layoutFighterWindow(candidateFighters);
+    layoutRaveningFighters();
 }
 
 void EffectUI::setupChooseTargetAdjacentEmptySpace()
@@ -1775,4 +1874,52 @@ void EffectUI::finishCardSelection()
 
     // انتخاب کارت‌ها همین الان داخل selectedCardIndices است
     finalizeReady();
+}
+
+void EffectUI::layoutRaveningFighters()
+{
+    fighterBoxes.clear();
+
+    const int maxPerRow = 3;
+
+    const float boxWidth = 180.0f;
+    const float boxHeight = 80.0f;
+
+    const float gapX = 25.0f;
+    const float gapY = 20.0f;
+
+    const float startY = 170.0f;
+
+    int count = static_cast<int>(candidateFighters.size());
+
+    int rowCount = (count + maxPerRow - 1) / maxPerRow;
+
+    for (int row = 0; row < rowCount; row++)
+    {
+        int fightersInThisRow =
+            std::min(maxPerRow, count - row * maxPerRow);
+
+        float rowWidth =
+            fightersInThisRow * boxWidth +
+            (fightersInThisRow - 1) * gapX;
+
+        float startX =
+            (GetScreenWidth() - rowWidth) / 2.0f;
+
+        for (int col = 0; col < fightersInThisRow; col++)
+        {
+            float x =
+                startX + col * (boxWidth + gapX);
+
+            float y =
+                startY + row * (boxHeight + gapY);
+
+            fighterBoxes.push_back(
+                Rectangle{
+                    x,
+                    y,
+                    boxWidth,
+                    boxHeight});
+        }
+    }
 }
