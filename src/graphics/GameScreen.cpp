@@ -8,6 +8,9 @@
 #include "fighter/Fog.h"
 #include "card/Card.h"
 #include "card/Hand.h"
+#include "fighter/InvisibleMan.h"
+#include "fighter/Dracula.h"
+#include "fighter/Sherlock.h"
 #include <sstream>
 #include <unordered_map>
 
@@ -445,6 +448,14 @@ int GameScreen::update()
                     }
 
                     finalizeSchemeCard(playedCard);
+
+                    game->getTurnManager().useAction();
+
+                    std::cout << "[.] Actions remaining: "
+                              << game->getTurnManager().getRemainingActions()
+                              << std::endl;
+
+                    checkAndEndTurnIfNeeded();
                 }
                 else
                 {
@@ -545,6 +556,13 @@ int GameScreen::update()
                     effectUI.getChoice());
             }
             finalizeSchemeCard(pendingSchemeCard);
+            game->getTurnManager().useAction();
+
+            std::cout << "[.] Actions remaining: "
+                      << game->getTurnManager().getRemainingActions()
+                      << std::endl;
+
+            checkAndEndTurnIfNeeded();
         }
         pendingSchemeCard = nullptr;
         pendingEffectFighter = nullptr;
@@ -1437,17 +1455,13 @@ void GameScreen::drawSpaces()
 
 void GameScreen::drawPlacedFighters()
 {
-    if (game == nullptr ||
-        assets == nullptr)
+    if (game == nullptr || assets == nullptr)
     {
         return;
     }
 
-    Font font =
-        assets->getGameFont();
-
-    const std::vector<Player *> &players =
-        game->getPlayers();
+    Font font = assets->getGameFont();
+    const std::vector<Player *> &players = game->getPlayers();
 
     for (Player *player : players)
     {
@@ -1460,59 +1474,41 @@ void GameScreen::drawPlacedFighters()
         // HERO
         // =====================================
 
-        Hero *hero =
-            player->getHero();
-
+        Hero *hero = player->getHero();
         if (hero != nullptr)
         {
-            Space *space =
-                hero->getPosition();
+            Space *space = hero->getPosition();
 
             if (space != nullptr)
             {
-                int spaceId =
-                    space->getId();
+                int spaceId = space->getId();
 
-                if (spaceId >= 1 &&
-                    spaceId <= 32)
+                if (spaceId >= 1 && spaceId <= 32)
                 {
-                    Vector2 center =
-                        mapImageToScreen(
-                            SPACE_GRAPHICS[spaceId - 1].center);
+                    Vector2 center = mapImageToScreen(SPACE_GRAPHICS[spaceId - 1].center);
+                    Color heroColor = Color{180, 40, 40, 230};
 
-                    DrawCircleV(
-                        center,
-                        22.0f,
-                        Color{
-                            180,
-                            40,
-                            40,
-                            230});
+                    if (dynamic_cast<Sherlock *>(hero) != nullptr)
+                    {
+                        heroColor = Color{115, 70, 35, 230};
+                    }
+                    else if (dynamic_cast<Dracula *>(hero) != nullptr)
+                    {
+                        heroColor = Color{120, 20, 40, 230};
+                    }
+                    else if (dynamic_cast<InvisibleMan *>(hero) != nullptr)
+                    {
+                        heroColor = Color{90, 100, 105, 230};
+                    }
 
-                    std::string heroName =
-                        hero->getName();
+                    DrawCircleV(center, 22.0f, heroColor);
+                    std::string heroName = hero->getName();
+                    Vector2 textSize = MeasureTextEx(font, heroName.c_str(), 18.0f, 1.0f);
 
-                    Vector2 textSize =
-                        MeasureTextEx(
-                            font,
-                            heroName.c_str(),
-                            16.0f,
-                            1.0f);
-
-                    DrawTextEx(
-                        font,
-                        heroName.c_str(),
-
-                        Vector2{
-                            center.x -
-                                textSize.x / 2.0f,
-
-                            center.y -
-                                35.0f},
-
-                        16.0f,
-                        1.0f,
-                        WHITE);
+                    DrawTextEx(font, heroName.c_str(), Vector2{center.x - textSize.x / 2.0f, center.y - 35.0f},
+                               18.0f,
+                               1.0f,
+                               WHITE);
                 }
             }
         }
@@ -1521,9 +1517,7 @@ void GameScreen::drawPlacedFighters()
         // SIDEKICKS
         // =====================================
 
-        std::vector<Sidekick *> sidekicks =
-            player->getSideKicks();
-
+        std::vector<Sidekick *> sidekicks = player->getSideKicks();
         for (Sidekick *sidekick : sidekicks)
         {
             if (sidekick == nullptr)
@@ -1531,60 +1525,38 @@ void GameScreen::drawPlacedFighters()
                 continue;
             }
 
-            Space *space =
-                sidekick->getPosition();
-
+            Space *space = sidekick->getPosition();
             if (space == nullptr)
             {
                 continue;
             }
 
-            int spaceId =
-                space->getId();
-
-            if (spaceId < 1 ||
-                spaceId > 32)
+            int spaceId = space->getId();
+            if (spaceId < 1 || spaceId > 32)
             {
                 continue;
             }
 
-            Vector2 center =
-                mapImageToScreen(
-                    SPACE_GRAPHICS[spaceId - 1].center);
+            Vector2 center = mapImageToScreen(SPACE_GRAPHICS[spaceId - 1].center);
+            Color sidekickColor = Color{60, 120, 200, 230};
+            if (dynamic_cast<Watson *>(sidekick) != nullptr)
+            {
+                sidekickColor = Color{205, 165, 55, 230};
+            }
+            else if (dynamic_cast<Sisters *>(sidekick) != nullptr)
+            {
+                sidekickColor = Color{28, 28, 30, 230};
+            }
 
-            DrawCircleV(
-                center,
-                15.0f,
-                Color{
-                    60,
-                    120,
-                    200,
-                    230});
+            DrawCircleV(center, 15.0f, sidekickColor);
+            std::string sidekickName = sidekick->getName();
 
-            std::string sidekickName =
-                sidekick->getName();
+            Vector2 textSize = MeasureTextEx(font, sidekickName.c_str(), 16.0f, 1.0f);
 
-            Vector2 textSize =
-                MeasureTextEx(
-                    font,
-                    sidekickName.c_str(),
-                    12.0f,
-                    1.0f);
-
-            DrawTextEx(
-                font,
-                sidekickName.c_str(),
-
-                Vector2{
-                    center.x -
-                        textSize.x / 2.0f,
-
-                    center.y -
-                        28.0f},
-
-                12.0f,
-                1.0f,
-                WHITE);
+            DrawTextEx(font, sidekickName.c_str(), Vector2{center.x - textSize.x / 2.0f, center.y - 28.0f},
+                       16.0f,
+                       1.0f,
+                       WHITE);
         }
     }
 }

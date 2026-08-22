@@ -1,6 +1,5 @@
 #include <raylib.h>
 #include <iostream>
-
 #include "graphics/AssetManager.h"
 #include "graphics/LoadingScreen.h"
 #include "graphics/MainMenu.h"
@@ -16,10 +15,19 @@ int main()
     // Window
     // =========================================
 
-    InitWindow(
-        screenWidth,
-        screenHeight,
-        "Unmatched");
+    InitWindow(screenWidth, screenHeight, "UNMATCHED");
+
+    Image icon = LoadImage("Unmatched_Assets/dracula/iconTest.png");
+
+    if (icon.data == nullptr)
+    {
+        std::cout << "Failed to load window icon!\n";
+    }
+    else
+    {
+        SetWindowIcon(icon);
+        UnloadImage(icon);
+    }
 
     SetTargetFPS(60);
 
@@ -34,9 +42,7 @@ int main()
     if (!assets.load())
     {
         std::cout << "ASSET LOADING FAILED!\n";
-
         CloseWindow();
-
         return 1;
     }
 
@@ -46,22 +52,14 @@ int main()
     // Loading Screen
     // =========================================
 
-    LoadingScreen loadingScreen(
-        assets,
-        5.0f);
+    LoadingScreen loadingScreen(assets, 5.0f);
 
-    while (
-        !WindowShouldClose() &&
-        !loadingScreen.isFinished())
+    while (!WindowShouldClose() && !loadingScreen.isFinished())
     {
         loadingScreen.update();
-
         BeginDrawing();
-
         ClearBackground(BLACK);
-
         loadingScreen.draw();
-
         EndDrawing();
     }
 
@@ -70,11 +68,7 @@ int main()
     // =========================================
 
     Game game;
-
-    MainMenu mainMenu(
-        &assets,
-        &game);
-
+    MainMenu mainMenu(&assets, &game);
     GameScreen gameScreen(&assets, &game);
 
     // =========================================
@@ -87,8 +81,7 @@ int main()
         GAME
     };
 
-    Screen currentScreen =
-        Screen::MAIN_MENU;
+    Screen currentScreen = Screen::MAIN_MENU;
 
     // =========================================
     // Main Loop
@@ -113,8 +106,7 @@ int main()
 
             mainMenu.update();
 
-            int result =
-                mainMenu.handleInput();
+            int result = mainMenu.handleInput();
 
             // -------------------------------------------------
             // NEW GAME
@@ -126,8 +118,7 @@ int main()
 
             if (result == 1)
             {
-                std::cout
-                    << "NEW GAME selected.\n";
+                std::cout << "NEW GAME selected.\n";
             }
 
             // -------------------------------------------------
@@ -136,8 +127,7 @@ int main()
 
             else if (result == 2)
             {
-                std::cout
-                    << "LOAD GAME selected.\n";
+                std::cout << "LOAD GAME selected.\n";
 
                 try
                 {
@@ -177,13 +167,11 @@ int main()
 
             else if (result == 4)
             {
-                std::cout
-                    << "Placement finished.\n";
+                std::cout << "Placement finished.\n";
 
                 game.beginTurns();
 
-                std::cout
-                    << "Starting game screen...\n";
+                std::cout << "Starting game screen...\n";
 
                 currentScreen = Screen::GAME;
             }
@@ -195,8 +183,7 @@ int main()
 
         else if (currentScreen == Screen::GAME)
         {
-            int result =
-                gameScreen.update();
+            int result = gameScreen.update();
 
             // -------------------------------------------------
             // RETURN TO MAIN MENU
@@ -204,8 +191,7 @@ int main()
 
             if (result == 1)
             {
-                std::cout
-                    << "Returning to main menu...\n";
+                std::cout << "Returning to main menu...\n";
 
                 // Recreate MainMenu so that:
                 // state = MAIN_MENU
@@ -213,13 +199,8 @@ int main()
                 // placement state is reset
                 // hero selection state is reset
 
-                mainMenu =
-                    MainMenu(
-                        &assets,
-                        &game);
-
-                currentScreen =
-                    Screen::MAIN_MENU;
+                mainMenu = MainMenu(&assets, &game);
+                currentScreen = Screen::MAIN_MENU;
             }
         }
 
@@ -255,8 +236,6 @@ int main()
     // =========================================
 
     assets.unload();
-
     CloseWindow();
-
     return 0;
 }
