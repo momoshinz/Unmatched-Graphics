@@ -394,18 +394,26 @@ void EffectUI::setupChooseLurkingOption()
 void EffectUI::setupChooseFogSourceAndDestination()
 {
     subPhase = 0;
-    candidateSpaces.clear();
+    candidateFogs.clear();
+    selectedFog = nullptr;
+    fogSourceSpace = nullptr;
 
-    if (game == nullptr)
+    if (actingPlayer == nullptr)
         return;
 
-    for (Space *space : game->getBoard().getSpaces())
+    for (Fog *fog : actingPlayer->getFogs())
     {
-        if (space != nullptr && space->hasFogToken())
-        {
-            candidateSpaces.push_back(space);
-        }
+        if (fog != nullptr)
+            candidateFogs.push_back(fog);
     }
+
+    if (candidateFogs.empty())
+    {
+        std::cout << "[!] No Fog tokens available." << std::endl;
+        return;
+    }
+
+    layoutFogWindow();
 }
 
 // ============================================================
@@ -1077,6 +1085,35 @@ void EffectUI::update()
         return;
     }
 
+    if (inputKind == EffectInputKind::ChooseFogSourceAndDestination)
+    {
+        if (subPhase == 0)
+        {
+            for (size_t i = 0; i < fogBoxes.size(); i++)
+            {
+                if (CheckCollisionPointRec(mouse, fogBoxes[i]))
+                {
+                    selectedFog = candidateFogs[i];
+                    choice.selectedFogId = static_cast<int>(i);
+                    fogSourceSpace = selectedFog->getPosition();
+                    choice.selectedSpace = fogSourceSpace;
+
+                    subPhase = 1;
+                    beginUnlimitedFogDestinationStage(fogSourceSpace);
+
+                    if (candidateSpaces.empty())
+                    {
+                        std::cout << "[!] No destination for fog." << std::endl;
+                        finalizeReady();
+                    }
+                    return;
+                }
+            }
+            return;
+        }
+        return;
+    }
+
     // -------------------- StepLightly --------------------
 
     if (inputKind == EffectInputKind::ChooseEnemyAndFogDestination)
@@ -1234,31 +1271,6 @@ void EffectUI::selectSpace(Space *space)
 
     if (inputKind == EffectInputKind::ChooseFogSourceAndDestination)
     {
-        if (subPhase == 0)
-        {
-            choice.selectedSpace = space;
-            fogSourceSpace = space;
-            subPhase = 1;
-
-            candidateSpaces.clear();
-            if (game != nullptr)
-            {
-                for (Space *s : game->getBoard().getSpaces())
-                {
-                    if (s != nullptr && s != fogSourceSpace && !s->hasFogToken())
-                    {
-                        candidateSpaces.push_back(s);
-                    }
-                }
-            }
-
-            if (candidateSpaces.empty())
-            {
-                finalizeReady();
-            }
-            return;
-        }
-
         if (subPhase == 1)
         {
             choice.secondSpace = space;
@@ -1397,7 +1409,8 @@ void EffectUI::draw()
         ((inputKind == EffectInputKind::ChooseFighterMoveThenFogMove && subPhase == 2) ||
          (inputKind == EffectInputKind::ChooseLurkingOption && subPhase == 2) ||
          (inputKind == EffectInputKind::ChooseFogAndDestination && subPhase == 0) ||
-         (inputKind == EffectInputKind::ChooseEnemyAndFogDestination && subPhase == 1));
+         (inputKind == EffectInputKind::ChooseEnemyAndFogDestination && subPhase == 1) ||
+         (inputKind == EffectInputKind::ChooseFogSourceAndDestination && subPhase == 0));
 
     if (showFogList)
     {
@@ -1771,7 +1784,7 @@ bool EffectUI::isChoosingSpace() const
         return subPhase == 1 || subPhase == 3;
 
     case EffectInputKind::ChooseFogSourceAndDestination:
-        return subPhase == 0 || subPhase == 1;
+        return subPhase == 1;
 
     case EffectInputKind::ChooseFogAndDestination:
         return subPhase == 1;
@@ -1994,5 +2007,25 @@ void EffectUI::layoutRaveningFighters()
                     boxWidth,
                     boxHeight});
         }
+    }
+}
+
+void EffectUI::beginUnlimitedFogDestinationStage(Space *excludeSource)
+{
+    candidateSpaces.clear();
+
+    if (game == nullptr)
+        return;
+
+    for (Space *space : game->getBoard().getSpaces())
+    {
+        if (space == nullptr)
+            continue;
+        if (space == excludeSource)
+            continue;
+        if (space->hasFogToken())
+            continue;
+
+        candidateSpaces.push_back(space);
     }
 }

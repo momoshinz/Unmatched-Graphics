@@ -2,6 +2,7 @@
 #include "game/Game.h"
 #include "player/Player.h"
 #include "fighter/Fighter.h"
+#include "fighter/Fog.h"
 #include "board/Board.h"
 #include "board/Space.h"
 #include <iostream>
@@ -27,29 +28,36 @@ void RollingFog::apply(Game &game, Fighter &fighter, Fighter &target,
     cout << "\n========================================";
     cout << "\n-< Rolling Fog >- ACTIVATED!\n";
 
-    if (choice.selectedSpace == nullptr || choice.secondSpace == nullptr)
+    vector<Fog *> fogs = player->getFogs();
+
+    if (choice.selectedFogId < 0 || choice.selectedFogId >= static_cast<int>(fogs.size()))
     {
-        throw runtime_error("\n[!] ERROR : Invalid Fog move selection!\n");
+        throw runtime_error("\n[!] ERROR : Invalid Fog token selection!\n");
     }
 
-    if (!choice.selectedSpace->hasFogToken())
+    Fog *fog = fogs[choice.selectedFogId];
+
+    if (choice.secondSpace == nullptr)
     {
-        throw runtime_error("\n[!] ERROR : Selected source has NO Fog token!\n");
+        throw runtime_error("\n[!] ERROR : No destination selected!\n");
     }
 
-    if (choice.secondSpace->hasFogToken())
+    Space *destination = choice.secondSpace;
+
+    if (destination->hasFogToken())
     {
         throw runtime_error("\n[!] ERROR : Destination already has a Fog token!\n");
     }
 
-    choice.selectedSpace->setFogToken(false);
-    choice.secondSpace->setFogToken(true);
+    if (fog->getPosition() != nullptr)
+    {
+        fog->getPosition()->setFogToken(false);
+    }
 
-    cout << "\n[+] Fog token moved from Home "
-         << choice.selectedSpace->getId()
-         << " to Home "
-         << choice.secondSpace->getId()
-         << ".\n";
+    fog->setPosition(destination);
+    destination->setFogToken(true);
+
+    cout << "\n[+] Fog token moved to Home " << destination->getId() << ".\n";
 
     game.getTurnManager().addAction();
 

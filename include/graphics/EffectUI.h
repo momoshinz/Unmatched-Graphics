@@ -111,4 +111,6 @@ public:
     bool isChoosingSpace() const;
 
     void finishCardSelection();
+
+    void beginUnlimitedFogDestinationStage(Space *excludeSource);
 };
