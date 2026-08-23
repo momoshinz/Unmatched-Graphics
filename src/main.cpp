@@ -1,9 +1,11 @@
 #include <raylib.h>
 #include <iostream>
+
 #include "graphics/AssetManager.h"
 #include "graphics/LoadingScreen.h"
 #include "graphics/MainMenu.h"
 #include "graphics/GameScreen.h"
+#include "graphics/Transition.h"
 #include "game/Game.h"
 
 int main()
@@ -15,14 +17,19 @@ int main()
     // Window
     // =========================================
 
-    
-    InitWindow(screenWidth, screenHeight, "UNMATCHED");
+    InitWindow(
+        screenWidth,
+        screenHeight,
+        "UNMATCHED");
 
-    Image icon = LoadImage("Unmatched_Assets/dracula/iconTest.png");
+    Image icon =
+        LoadImage(
+            "Unmatched_Assets/dracula/iconTest.png");
 
     if (icon.data == nullptr)
     {
-        std::cout << "Failed to load window icon!\n";
+        std::cout
+            << "Failed to load window icon!\n";
     }
     else
     {
@@ -32,7 +39,8 @@ int main()
 
     SetTargetFPS(60);
 
-    std::cout << "Window created.\n";
+    std::cout
+        << "Window created.\n";
 
     // =========================================
     // Asset Manager
@@ -42,25 +50,37 @@ int main()
 
     if (!assets.load())
     {
-        std::cout << "ASSET LOADING FAILED!\n";
+        std::cout
+            << "ASSET LOADING FAILED!\n";
+
         CloseWindow();
+
         return 1;
     }
 
-    std::cout << "ALL ASSETS LOADED!\n";
+    std::cout
+        << "ALL ASSETS LOADED!\n";
 
     // =========================================
     // Loading Screen
     // =========================================
 
-    LoadingScreen loadingScreen(assets, 5.0f);
+    LoadingScreen loadingScreen(
+        assets,
+        5.0f);
 
-    while (!WindowShouldClose() && !loadingScreen.isFinished())
+    while (
+        !WindowShouldClose() &&
+        !loadingScreen.isFinished())
     {
         loadingScreen.update();
+
         BeginDrawing();
+
         ClearBackground(BLACK);
+
         loadingScreen.draw();
+
         EndDrawing();
     }
 
@@ -69,11 +89,17 @@ int main()
     // =========================================
 
     Game game;
-    MainMenu mainMenu(&assets, &game);
-    GameScreen gameScreen(&assets, &game);
+
+    MainMenu mainMenu(
+        &assets,
+        &game);
+
+    GameScreen gameScreen(
+        &assets,
+        &game);
 
     // =========================================
-    // Current Screen
+    // Screen State
     // =========================================
 
     enum class Screen
@@ -82,7 +108,21 @@ int main()
         GAME
     };
 
-    Screen currentScreen = Screen::MAIN_MENU;
+    Screen currentScreen =
+        Screen::MAIN_MENU;
+
+    Screen nextScreen =
+        Screen::MAIN_MENU;
+
+    // =========================================
+    // Transition
+    // =========================================
+
+    Transition transition;
+
+    // Use NexaRustSlab.ttf
+    transition.setFont(
+        assets.getLoadingFont());
 
     // =========================================
     // Main Loop
@@ -90,118 +130,192 @@ int main()
 
     while (!WindowShouldClose())
     {
+        float deltaTime =
+            GetFrameTime();
+
         // =====================================================
-        // UPDATE
+        // TRANSITION UPDATE
         // =====================================================
 
-        if (currentScreen == Screen::MAIN_MENU)
+        if (transition.isActive())
         {
-            // -------------------------------------------------
-            // MainMenu update
-            //
-            // This also handles:
-            // Player input
-            // Hero selection
-            // Placement
-            // -------------------------------------------------
-
-            mainMenu.update();
-
-            int result = mainMenu.handleInput();
+            transition.update(deltaTime);
 
             // -------------------------------------------------
-            // NEW GAME
-            //
-            // Do nothing here.
-            // MainMenu itself handles the transition
-            // from player input -> ready -> hero selection.
+            // Switch screen when the screen becomes completely
+            // black.
             // -------------------------------------------------
 
-            if (result == 1)
+            if (transition.shouldSwitch())
             {
-                std::cout << "NEW GAME selected.\n";
-            }
+                currentScreen = nextScreen;
 
-            // -------------------------------------------------
-            // LOAD GAME
-            // -------------------------------------------------
+                transition.finishSwitch();
 
-            else if (result == 2)
-            {
-                std::cout << "LOAD GAME selected.\n";
-
-                try
-                {
-                    if (game.loadMenu())
-                    {
-                        game.run(true);
-                    }
-                }
-                catch (const std::exception &e)
-                {
-                    std::cout
-                        << "\n[!] ERROR: "
-                        << e.what()
-                        << "\n";
-                }
-            }
-
-            // -------------------------------------------------
-            // EXIT APPLICATION
-            // -------------------------------------------------
-
-            else if (result == 3)
-            {
-                break;
-            }
-
-            // -------------------------------------------------
-            // GAME START
-            //
-            // IMPORTANT:
-            //
-            // This result should ONLY happen after
-            // the whole placement process is finished.
-            //
-            // Hero selection itself must NOT return 4 anymore.
-            // -------------------------------------------------
-
-            else if (result == 4)
-            {
-                std::cout << "Placement finished.\n";
-
-                game.beginTurns();
-
-                std::cout << "Starting game screen...\n";
-
-                currentScreen = Screen::GAME;
+                std::cout
+                    << "Screen switched.\n";
             }
         }
 
         // =====================================================
-        // GAME SCREEN
+        // NORMAL UPDATE
         // =====================================================
 
-        else if (currentScreen == Screen::GAME)
+        else
         {
-            int result = gameScreen.update();
+            // =================================================
+            // MAIN MENU
+            // =================================================
 
-            // -------------------------------------------------
-            // RETURN TO MAIN MENU
-            // -------------------------------------------------
-
-            if (result == 1)
+            if (currentScreen ==
+                Screen::MAIN_MENU)
             {
-                std::cout << "Returning to main menu...\n";
+                mainMenu.update();
 
-                // Recreate MainMenu so that:
-                // state = MAIN_MENU
-                // previous player information is cleared
-                // placement state is reset
-                // hero selection state is reset
+                int result =
+                    mainMenu.handleInput();
 
-                mainMenu = MainMenu(&assets, &game);
-                currentScreen = Screen::MAIN_MENU;
+                // =============================================
+                // NEW GAME
+                // =============================================
+
+                if (result == 1)
+                {
+                    std::cout
+                        << "NEW GAME selected.\n";
+                }
+
+                // =============================================
+                // LOAD GAME
+                // =============================================
+
+                else if (result == 2)
+                {
+                    std::cout
+                        << "LOAD GAME selected.\n";
+
+                    try
+                    {
+                        if (game.loadMenu())
+                        {
+                            game.run(true);
+                        }
+                    }
+                    catch (
+                        const std::exception &e)
+                    {
+                        std::cout
+                            << "\n[!] ERROR: "
+                            << e.what()
+                            << "\n";
+                    }
+                }
+
+                // =============================================
+                // EXIT
+                // =============================================
+
+                else if (result == 3)
+                {
+                    break;
+                }
+
+                // =============================================
+                // START GAME
+                // =============================================
+
+                else if (result == 4)
+                {
+                    std::cout
+                        << "Placement finished.\n";
+
+                    // -----------------------------------------
+                    // Start game logic
+                    // -----------------------------------------
+
+                    game.beginTurns();
+
+                    std::cout
+                        << "Starting transition to game...\n";
+
+                    // -----------------------------------------
+                    // Destination
+                    // -----------------------------------------
+
+                    nextScreen =
+                        Screen::GAME;
+
+                    // -----------------------------------------
+                    // Transition Text
+                    // -----------------------------------------
+
+                    transition.setText(
+                        "GET READY FIGHTERS . . .");
+
+                    // -----------------------------------------
+                    // Transition
+                    //
+                    // Fade Out  = 1.0 second
+                    // Black Hold = 2.5 seconds
+                    // Fade In   = 1.0 second
+                    //
+                    // Total = 4.5 seconds
+                    // -----------------------------------------
+
+                    transition.start(
+                        TransitionType::Fade,
+                        1.0f,
+                        4.5f);
+                }
+            }
+
+            // =================================================
+            // GAME SCREEN
+            // =================================================
+
+            else if (currentScreen ==
+                     Screen::GAME)
+            {
+                int result =
+                    gameScreen.update();
+
+                // =============================================
+                // RETURN TO MAIN MENU
+                // =============================================
+
+                if (result == 1)
+                {
+                    std::cout
+                        << "Returning to main menu...\n";
+
+                    // -----------------------------------------
+                    // Destination
+                    // -----------------------------------------
+
+                    nextScreen =
+                        Screen::MAIN_MENU;
+
+                    // -----------------------------------------
+                    // Change transition text
+                    // -----------------------------------------
+
+                    transition.setText("LOADING . . .");
+
+                    // -----------------------------------------
+                    // Transition
+                    //
+                    // Fade Out  = 1.0 second
+                    // Black Hold = 1.5 seconds
+                    // Fade In   = 1.0 second
+                    //
+                    // Total = 3.5 seconds
+                    // -----------------------------------------
+
+                    transition.start(
+                        TransitionType::Fade,
+                        1.0f,
+                        1.5f);
+                }
             }
         }
 
@@ -211,23 +325,30 @@ int main()
 
         BeginDrawing();
 
-        // -----------------------------------------------------
-        // MAIN MENU
-        // -----------------------------------------------------
+        ClearBackground(BLACK);
 
-        if (currentScreen == Screen::MAIN_MENU)
+        // =====================================================
+        // Current Screen
+        // =====================================================
+
+        if (currentScreen ==
+            Screen::MAIN_MENU)
         {
             mainMenu.draw();
         }
-
-        // -----------------------------------------------------
-        // GAME SCREEN
-        // -----------------------------------------------------
-
-        else if (currentScreen == Screen::GAME)
+        else if (currentScreen ==
+                 Screen::GAME)
         {
             gameScreen.draw();
         }
+
+        // =====================================================
+        // Transition
+        //
+        // MUST be drawn AFTER the screen.
+        // =====================================================
+
+        transition.draw();
 
         EndDrawing();
     }
@@ -237,6 +358,8 @@ int main()
     // =========================================
 
     assets.unload();
+
     CloseWindow();
+
     return 0;
 }
