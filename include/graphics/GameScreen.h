@@ -8,6 +8,7 @@
 #include "graphics/SchemeUI.h"
 #include "graphics/ManeuverUI.h"
 #include "graphics/EffectUI.h"
+#include "graphics/SaveManager.h"
 
 class GameScreen
 {
@@ -84,6 +85,13 @@ private:
 
     Fighter *pendingEffectFighter = nullptr;
 
+    SaveManager saveManager;
+    bool saveMenuOpen = false;
+    std::vector<std::string> saveFiles;
+    std::vector<Rectangle> saveButtons;
+    Rectangle newSaveButton;
+    Rectangle saveMenuBackButton;
+
 public:
     GameScreen(AssetManager *assets, Game *game);
 
@@ -115,6 +123,10 @@ public:
     void checkHandLimit();
     void openHandLimitPopup(Player *player);
     void drawHandLimitPopup();
+
+    void drawSaveMenu();
+    void updateSaveMenu();
+    void refreshSaveFiles();
 };
 
 #endif

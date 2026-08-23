@@ -13,6 +13,7 @@
 #include "fighter/Sherlock.h"
 #include <sstream>
 #include <unordered_map>
+#include "graphics/SaveManager.h"
 
 static std::string getCardTextureKeyForHandLimit(const Card *card, const std::string &heroName)
 {
@@ -75,6 +76,12 @@ int GameScreen::update()
                           buttonHeight};
 
     Vector2 mousePosition = GetMousePosition();
+
+    if (saveMenuOpen)
+    {
+        updateSaveMenu();
+        return 0;
+    }
 
     if (guideOpen)
     {
@@ -173,8 +180,8 @@ int GameScreen::update()
 
         if (CheckCollisionPointRec(mousePosition, saveButton))
         {
-            // TODO:
-            // Save game logic
+            refreshSaveFiles();
+            saveMenuOpen = true;
             return 0;
         }
 
@@ -664,6 +671,12 @@ void GameScreen::draw()
     drawPlayerPanels();
     drawTopButtons();
     drawTurnIndicator();
+
+    if (saveMenuOpen)
+    {
+        drawSaveMenu();
+        return;
+    }
 
     if (!deckEmptyPopupOpen)
     {
@@ -2759,4 +2772,350 @@ void GameScreen::drawHandLimitPopup()
             handLimitBurnButton.y + (handLimitBurnButton.height - burnTextSize.y) / 2.0f},
         26.0f, 1.5f,
         burnEnabled ? WHITE : Color{150, 150, 150, 150});
+}
+
+void GameScreen::refreshSaveFiles()
+{
+    saveFiles = saveManager.getSaveFiles();
+}
+
+void GameScreen::updateSaveMenu()
+{
+    if (!saveMenuOpen)
+    {
+        return;
+    }
+
+    Vector2 mousePosition = GetMousePosition();
+
+    if (!IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+    {
+        return;
+    }
+
+    // =========================================
+    // Existing Save Files
+    // =========================================
+
+    for (size_t i = 0; i < saveButtons.size(); i++)
+    {
+        if (CheckCollisionPointRec(mousePosition, saveButtons[i]))
+        {
+            try
+            {
+                // انتخاب Save قبلی = overwrite
+                saveManager.saveGame(game, saveFiles[i]);
+
+                std::cout
+                    << "\n[+] Save overwritten: "
+                    << saveFiles[i]
+                    << std::endl;
+
+                saveMenuOpen = false;
+            }
+            catch (const std::exception &e)
+            {
+                std::cerr
+                    << "\n[!] Save failed: "
+                    << e.what()
+                    << std::endl;
+            }
+
+            return;
+        }
+    }
+
+    // =========================================
+    // NEW SAVE
+    // =========================================
+
+    if (CheckCollisionPointRec(mousePosition, newSaveButton))
+    {
+        try
+        {
+            std::string newSaveName =
+                saveManager.createNewSaveName();
+
+            saveManager.saveGame(game, newSaveName);
+
+            std::cout
+                << "\n[+] New save created: "
+                << newSaveName
+                << std::endl;
+
+            saveMenuOpen = false;
+        }
+        catch (const std::exception &e)
+        {
+            std::cerr
+                << "\n[!] Save failed: "
+                << e.what()
+                << std::endl;
+        }
+
+        return;
+    }
+
+    // =========================================
+    // BACK
+    // =========================================
+
+    if (CheckCollisionPointRec(mousePosition, saveMenuBackButton))
+    {
+        saveMenuOpen = false;
+        return;
+    }
+}
+
+void GameScreen::drawSaveMenu()
+{
+    if (!saveMenuOpen || assets == nullptr)
+    {
+        return;
+    }
+
+    Font font = assets->getGameFont();
+
+    // =========================================
+    // Dark Overlay
+    // =========================================
+
+    DrawRectangle(
+        0,
+        0,
+        GetScreenWidth(),
+        GetScreenHeight(),
+        Color{0, 0, 0, 190});
+
+    // =========================================
+    // Popup
+    // =========================================
+
+    const float popupWidth = 650.0f;
+    const float popupHeight = 600.0f;
+
+    Rectangle popup{
+        (GetScreenWidth() - popupWidth) / 2.0f,
+        (GetScreenHeight() - popupHeight) / 2.0f,
+        popupWidth,
+        popupHeight};
+
+    DrawRectangleRounded(
+        popup,
+        0.05f,
+        20,
+        Color{25, 20, 18, 250});
+
+    DrawRectangleRoundedLines(
+        popup,
+        0.05f,
+        20,
+        Color{180, 160, 130, 255});
+
+    // =========================================
+    // Title
+    // =========================================
+
+    const char *title = "SAVE GAME";
+
+    const float titleSize = 34.0f;
+
+    Vector2 titleSizeVec =
+        MeasureTextEx(
+            font,
+            title,
+            titleSize,
+            2.0f);
+
+    DrawTextEx(
+        font,
+        title,
+        Vector2{
+            popup.x + (popup.width - titleSizeVec.x) / 2.0f,
+            popup.y + 30.0f},
+        titleSize,
+        2.0f,
+        WHITE);
+
+    // =========================================
+    // Save Buttons
+    // =========================================
+
+    saveButtons.clear();
+
+    const float buttonWidth = 420.0f;
+    const float buttonHeight = 55.0f;
+    const float buttonGap = 15.0f;
+
+    float startX =
+        popup.x + (popup.width - buttonWidth) / 2.0f;
+
+    float startY = popup.y + 100.0f;
+
+    Vector2 mousePosition = GetMousePosition();
+
+    for (size_t i = 0; i < saveFiles.size(); i++)
+    {
+        Rectangle button{
+            startX,
+            startY + i * (buttonHeight + buttonGap),
+            buttonWidth,
+            buttonHeight};
+
+        saveButtons.push_back(button);
+
+        bool hovered =
+            CheckCollisionPointRec(
+                mousePosition,
+                button);
+
+        Color buttonColor =
+            hovered
+                ? Color{75, 75, 75, 245}
+                : Color{35, 35, 35, 235};
+
+        DrawRectangleRounded(
+            button,
+            0.1f,
+            20,
+            buttonColor);
+
+        DrawRectangleRoundedLines(
+            button,
+            0.1f,
+            20,
+            hovered
+                ? WHITE
+                : Color{150, 150, 150, 255});
+
+        std::string text =
+            saveFiles[i];
+
+        Vector2 textSize =
+            MeasureTextEx(
+                font,
+                text.c_str(),
+                23.0f,
+                1.5f);
+
+        DrawTextEx(
+            font,
+            text.c_str(),
+            Vector2{
+                button.x +
+                    (button.width - textSize.x) / 2.0f,
+                button.y +
+                    (button.height - textSize.y) / 2.0f},
+            23.0f,
+            1.5f,
+            WHITE);
+    }
+
+    // =========================================
+    // NEW SAVE BUTTON
+    // =========================================
+
+    float newSaveY =
+        startY +
+        saveFiles.size() *
+            (buttonHeight + buttonGap);
+
+    newSaveButton = Rectangle{
+        startX,
+        newSaveY,
+        buttonWidth,
+        buttonHeight};
+
+    bool newSaveHovered =
+        CheckCollisionPointRec(
+            mousePosition,
+            newSaveButton);
+
+    DrawRectangleRounded(
+        newSaveButton,
+        0.1f,
+        20,
+        newSaveHovered
+            ? Color{80, 110, 70, 245}
+            : Color{45, 80, 40, 235});
+
+    DrawRectangleRoundedLines(
+        newSaveButton,
+        0.1f,
+        20,
+        newSaveHovered
+            ? WHITE
+            : Color{130, 180, 130, 255});
+
+    const char *newSaveText = "+ NEW SAVE";
+
+    Vector2 newSaveTextSize =
+        MeasureTextEx(font,
+            newSaveText,
+            23.0f,
+            1.5f);
+
+    DrawTextEx(
+        font,
+        newSaveText,
+        Vector2{
+            newSaveButton.x +
+                (newSaveButton.width -
+                 newSaveTextSize.x) /
+                    2.0f,
+            newSaveButton.y +
+                (newSaveButton.height -
+                 newSaveTextSize.y) /
+                    2.0f},
+        23.0f,
+        1.5f,
+        WHITE);
+
+    // =========================================
+    // BACK BUTTON
+    // =========================================
+
+    saveMenuBackButton = Rectangle{
+        popup.x + (popup.width - 150.0f) / 2.0f,
+        popup.y + popup.height - 75.0f,
+        150.0f,
+        48.0f};
+
+    bool backHovered =
+        CheckCollisionPointRec(
+            mousePosition,
+            saveMenuBackButton);
+
+    DrawRectangleRounded(
+        saveMenuBackButton,
+        0.1f,
+        20,
+        backHovered
+            ? Color{75, 75, 75, 245}
+            : Color{35, 35, 35, 235});
+
+    const char *backText = "BACK";
+
+    Vector2 backTextSize =
+        MeasureTextEx(
+            font,
+            backText,
+            22.0f,
+            1.5f);
+
+    DrawTextEx(
+        font,
+        backText,
+        Vector2{
+            saveMenuBackButton.x +
+                (saveMenuBackButton.width -
+                 backTextSize.x) /
+                    2.0f,
+            saveMenuBackButton.y +
+                (saveMenuBackButton.height -
+                 backTextSize.y) /
+                    2.0f},
+        22.0f,
+        1.5f,
+        WHITE);
 }

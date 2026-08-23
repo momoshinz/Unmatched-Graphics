@@ -120,6 +120,7 @@ set(SOURCES
     src/graphics/SchemeUI.cpp
     src/graphics/ManeuverUI.cpp
     src/graphics/EffectUI.cpp
+    src/graphics/SaveManager.cpp
     
     src/ui/TerminalUI.cpp
 )
