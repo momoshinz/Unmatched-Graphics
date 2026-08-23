@@ -455,7 +455,10 @@ void EffectUI::setupChooseLurkingOption()
 void EffectUI::setupChooseFogSourceAndDestination()
 {
     subPhase = 0;
+
     candidateFogs.clear();
+    candidateSpaces.clear();
+
     selectedFog = nullptr;
     fogSourceSpace = nullptr;
 
@@ -465,14 +468,22 @@ void EffectUI::setupChooseFogSourceAndDestination()
     for (Fog *fog : actingPlayer->getFogs())
     {
         if (fog != nullptr)
+        {
             candidateFogs.push_back(fog);
+        }
     }
 
     if (candidateFogs.empty())
     {
         std::cout << "[!] No Fog tokens available." << std::endl;
+        finalizeReady();
         return;
     }
+
+    std::cout
+        << "[Rolling Fog] Available Fog tokens: "
+        << candidateFogs.size()
+        << std::endl;
 
     layoutFogWindow();
 }
@@ -1141,30 +1152,96 @@ void EffectUI::update()
 
     if (inputKind == EffectInputKind::ChooseFogSourceAndDestination)
     {
+        // ========================================================
+        // مرحله 0:
+        // انتخاب Fog
+        // ========================================================
+
         if (subPhase == 0)
         {
             for (size_t i = 0; i < fogBoxes.size(); i++)
             {
-                if (CheckCollisionPointRec(mouse, fogBoxes[i]))
+                if (!CheckCollisionPointRec(mouse, fogBoxes[i]))
+                    continue;
+
+                if (i >= candidateFogs.size())
+                    return;
+
+                selectedFog = candidateFogs[i];
+
+                choice.selectedFogId =
+                    static_cast<int>(i);
+
+                fogSourceSpace =
+                    selectedFog->getPosition();
+
+                if (fogSourceSpace == nullptr)
                 {
-                    selectedFog = candidateFogs[i];
-                    choice.selectedFogId = static_cast<int>(i);
-                    fogSourceSpace = selectedFog->getPosition();
-                    choice.selectedSpace = fogSourceSpace;
+                    std::cout
+                        << "[!] Selected Fog is not on the board."
+                        << std::endl;
 
-                    subPhase = 1;
-                    beginUnlimitedFogDestinationStage(fogSourceSpace);
-
-                    if (candidateSpaces.empty())
-                    {
-                        std::cout << "[!] No destination for fog." << std::endl;
-                        finalizeReady();
-                    }
                     return;
                 }
+
+                choice.selectedSpace =
+                    fogSourceSpace;
+
+                std::cout
+                    << "[Rolling Fog] Selected Fog "
+                    << selectedFog->getID()
+                    << " at Space "
+                    << fogSourceSpace->getId()
+                    << std::endl;
+
+                // =================================================
+                // ساخت خانه‌های مقصد
+                // =================================================
+
+                beginUnlimitedFogDestinationStage(
+                    fogSourceSpace);
+
+                std::cout
+                    << "[Rolling Fog] Valid destinations: "
+                    << candidateSpaces.size()
+                    << std::endl;
+
+                for (Space *space : candidateSpaces)
+                {
+                    if (space != nullptr)
+                    {
+                        std::cout
+                            << "  -> Space "
+                            << space->getId()
+                            << std::endl;
+                    }
+                }
+
+                // حالا وارد مرحله انتخاب مقصد می‌شویم
+                subPhase = 1;
+
+                if (candidateSpaces.empty())
+                {
+                    std::cout
+                        << "[!] No valid destination for Fog."
+                        << std::endl;
+
+                    finalizeReady();
+                }
+
+                return;
             }
+
             return;
         }
+
+        // ========================================================
+        // مرحله 1:
+        // انتخاب مقصد روی نقشه
+        //
+        // این قسمت توسط selectSpace() انجام می‌شود.
+        // ========================================================
+
         return;
     }
 
@@ -1301,6 +1378,11 @@ void EffectUI::selectSpace(Space *space)
         if (subPhase == 0)
         {
             choice.selectedSpace = space;
+
+            if (game != nullptr && fighter != nullptr)
+            {
+                game->getBoard().moveFighter(fighter, space);
+            }
 
             std::cout
                 << "[+] Invisible Man destination selected: Space "
@@ -1515,7 +1597,7 @@ void EffectUI::draw()
             title,
             Vector2{
                 (GetScreenWidth() - titleTextSize.x) / 2.0f,
-                20.0f},
+                72.0f},
             titleSize,
             1.5f,
             WHITE);
@@ -1566,7 +1648,7 @@ void EffectUI::draw()
          (inputKind == EffectInputKind::ChooseLurkingOption && subPhase == 2) ||
          (inputKind == EffectInputKind::ChooseFogAndDestination && subPhase == 0) ||
          (inputKind == EffectInputKind::ChooseEnemyAndFogDestination && subPhase == 1) ||
-         (inputKind == EffectInputKind::ChooseFogSourceAndDestination && subPhase == 0));
+         (inputKind == EffectInputKind::ChooseFogSourceAndDestination && subPhase == 0)); // <-- خط جدید
 
     if (showFogList)
     {

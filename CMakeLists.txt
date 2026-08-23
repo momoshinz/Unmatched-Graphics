@@ -121,6 +121,7 @@ set(SOURCES
     src/graphics/ManeuverUI.cpp
     src/graphics/EffectUI.cpp
     src/graphics/SaveManager.cpp
+    src/graphics/Transition.cpp
     
     src/ui/TerminalUI.cpp
 )

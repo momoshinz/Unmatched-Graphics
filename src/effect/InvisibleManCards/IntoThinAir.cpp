@@ -27,13 +27,8 @@ void IntoThinAir::apply(Game &game, Fighter &fighter, Fighter &target,
     cout << "\n========================================\n";
     cout << "-< Into Thin Air >- ACTIVATED!\n";
 
-    Board &board = game.getBoard();
-
-    if (choice.selectedSpace != nullptr)
-    {
-        board.moveFighter(&fighter, choice.selectedSpace);
-        cout << "\n[+] Invisible Man moves.\n";
-    }
+    // نکته: جابه‌جایی Invisible Man از قبل توسط EffectUI انجام شده
+    // (برای بازخورد بصری آنی هنگام کلیک روی نقشه)
 
     vector<Fog *> fogs = player->getFogs();
     if (fogs.empty())
