@@ -24,14 +24,15 @@ void DreamingOfRevenge::apply(Game &game, Fighter &fighter, Fighter &target,
         throw runtime_error("\n[!] ERROR : Dreaming Of Revenge can only be used by Invisible Man!\n");
     }
 
-    Player *opponentPlayer = target.getOwner();
+    Player *opponentPlayer = game.selectOpponent(*player);
     if (opponentPlayer == nullptr)
     {
-        cerr << "\n[!] ERROR : Target has NO owner!\n";
+        cerr << "\n[!] ERROR : Opponent has NO owner!\n";
         return;
     }
 
     Space *mySpace = fighter.getPosition();
+    
     if (mySpace == nullptr)
     {
         throw runtime_error("\n[!] ERROR : Fighter has no position!");
@@ -45,27 +46,31 @@ void DreamingOfRevenge::apply(Game &game, Fighter &fighter, Fighter &target,
     cout << "\n-< Dreaming Of Revenge >- ACTIVATED!\n";
 
     int damaged = 0;
-    Hero *enemyHero = opponentPlayer->getHero();
-    if (enemyHero != nullptr && enemyHero->isAlive() && enemyHero->getPosition() != nullptr && enemyHero->getPosition()->hasFogToken())
+    for (Space *space : game.getBoard().getSpaces())
     {
-        enemyHero->takeDamage(1);
-        damaged++;
-        cout << "\n[-] " << enemyHero->getName() << " took 1 damage.\n";
-    }
-    for (Sidekick *sidekick : opponentPlayer->getSideKicks())
-    {
-        if (sidekick == nullptr)
-            continue;
-        if (!sidekick->isAlive())
-            continue;
-        if (sidekick->getPosition() == nullptr)
-            continue;
-        if (!sidekick->getPosition()->hasFogToken())
+        if (space == nullptr)
             continue;
 
-        sidekick->takeDamage(1);
+        if (!space->hasFogToken())
+            continue;
+
+        Fighter *enemy = space->getFighter();
+
+        if (enemy == nullptr)
+            continue;
+
+        if (!enemy->isAlive())
+            continue;
+
+        if (enemy->getOwner() != opponentPlayer)
+            continue;
+
+        enemy->takeDamage(1);
         damaged++;
-        cout << "\n[-] " << sidekick->getName() << " took 1 damage.\n";
+
+        cout << "\n[-] "
+            << enemy->getName()
+            << " took 1 damage.\n";
     }
     if (damaged == 0)
     {
