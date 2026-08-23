@@ -41,7 +41,8 @@ GameScreen::GameScreen(AssetManager *assets, Game *game)
       attackUI(assets),
       schemeUI(assets),
       maneuverUI(assets),
-      effectUI(assets)
+      effectUI(assets),
+      draculaAbilityUI(assets)
 {
 }
 
@@ -50,6 +51,39 @@ int GameScreen::update()
     if (assets == nullptr)
     {
         return 0;
+    }
+
+    // =========================================
+    // DRACULA START-OF-TURN ABILITY
+    // =========================================
+
+    // needs to be first due to the priority it has
+    if (!draculaAbilityUI.isOpen() && game->getTurnManager().getTurnJustStarted())
+    {
+        if (game->getTurnManager().consumeTurnStart())
+        {
+            Player *currentPlayer = game->getTurnManager().getCurrentPlayer();
+
+            if (currentPlayer != nullptr)
+            {
+                Hero *hero = currentPlayer->getHero();
+
+                if (dynamic_cast<Dracula *>(hero) != nullptr)
+                {
+                    draculaAbilityUI.open(game, hero, currentPlayer);
+                }
+            }
+        }
+    }
+
+    if (draculaAbilityUI.isOpen())
+    {
+        draculaAbilityUI.update();
+    }
+
+    if (draculaAbilityUI.consumeFinished())
+    {
+        std::cout << "[.] Dracula ability phase finished." << std::endl;
     }
 
     // =========================================
@@ -672,17 +706,16 @@ void GameScreen::draw()
         return;
     }
 
-    if (!deckEmptyPopupOpen)
+    if (!deckEmptyPopupOpen && !handLimitPopupOpen)
     {
         drawCombatEffectText();
         drawResultRevealButton();
         drawLookButton();
 
-        if (!maneuverUI.isOpen() && !combatInProgress)
+        if (!maneuverUI.isOpen() && !combatInProgress && !draculaAbilityUI.isOpen())
         {
             drawActionButtons();
         }
-
         if (guideOpen)
         {
             drawGuidePopup();
@@ -710,6 +743,11 @@ void GameScreen::draw()
         if (combatResultPopupOpen)
         {
             drawCombatResultPopup();
+        }
+
+        if (draculaAbilityUI.isOpen())
+        {
+            draculaAbilityUI.draw();
         }
     }
 
