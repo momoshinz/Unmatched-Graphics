@@ -1503,10 +1503,10 @@ void GameScreen::drawPlacedFighters()
 
                     DrawCircleV(center, 22.0f, heroColor);
                     std::string heroName = hero->getName();
-                    Vector2 textSize = MeasureTextEx(font, heroName.c_str(), 18.0f, 1.0f);
+                    Vector2 textSize = MeasureTextEx(font, heroName.c_str(), 17.0f, 1.0f);
 
                     DrawTextEx(font, heroName.c_str(), Vector2{center.x - textSize.x / 2.0f, center.y - 35.0f},
-                               18.0f,
+                               17.0f,
                                1.0f,
                                WHITE);
                 }
@@ -2398,7 +2398,7 @@ void GameScreen::drawResultRevealButton()
 
     resultRevealButton = Rectangle{
         (GetScreenWidth() - buttonWidth) / 2.0f,
-        mapY + mapHeight + 140.0f,
+        mapY + mapHeight + 80.0f,
         buttonWidth,
         buttonHeight};
 
@@ -2530,7 +2530,7 @@ void GameScreen::drawDeckEmptyPopup()
 
     Font font = assets->getGameFont();
 
-    const char *message = "DECK IS EMPTY! YOUR FIGHTERS TAKE 2 DAMAGE.";
+    const char *message = "DECK IS EMPTY :< YOUR FIGHTERS TAKE 2 DAMAGE.";
     const float fontSize = 24.0f;
     const float spacing = 1.5f;
 

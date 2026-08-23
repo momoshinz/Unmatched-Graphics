@@ -155,7 +155,7 @@ static Texture2D getFighterTexture(
 
     if (name == "SHERLOCK HOLMES")
     {
-        return assets->getCharacter("sherlock_art");
+        return assets->getCharacter("sherlock_transparent");
     }
 
     // -----------------------------
