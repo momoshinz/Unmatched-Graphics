@@ -196,6 +196,21 @@ int GameScreen::update()
         }
 
         // =========================================
+        // COMBAT RESULT REVEAL
+        // =========================================
+
+        if (combatInProgress &&
+            !combatResultPopupOpen &&
+            game->getCombatSystem().isAwaitingResultReveal())
+        {
+            if (CheckCollisionPointRec(mousePosition, resultRevealButton))
+            {
+                combatResultPopupOpen = true;
+                return 0;
+            }
+        }
+
+        // =========================================
         // ACTION BUTTONS (فقط وقتی مانور باز نیست)
         // =========================================
 
@@ -594,27 +609,6 @@ int GameScreen::update()
 
         checkAndEndTurnIfNeeded();
         combatInProgress = false;
-    }
-
-    // =========================================
-    // DECK EMPTY POPUP
-    // =========================================
-
-    if (!deckEmptyPopupOpen)
-    {
-        Player *currentPlayer = game->getTurnManager().getCurrentPlayer();
-
-        if (currentPlayer != nullptr && currentPlayer->consumeDeckEmptyFlag())
-        {
-            deckEmptyPopupOpen = true;
-        }
-
-        Player *waitingPlayer = game->getTurnManager().getWaitingPlayer();
-
-        if (waitingPlayer != nullptr && waitingPlayer->consumeDeckEmptyFlag())
-        {
-            deckEmptyPopupOpen = true;
-        }
     }
 
     // =========================================
@@ -3051,9 +3045,9 @@ void GameScreen::drawSaveMenu()
 
     Vector2 newSaveTextSize =
         MeasureTextEx(font,
-            newSaveText,
-            23.0f,
-            1.5f);
+                      newSaveText,
+                      23.0f,
+                      1.5f);
 
     DrawTextEx(
         font,
