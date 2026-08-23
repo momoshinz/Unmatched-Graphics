@@ -373,8 +373,69 @@ void EffectUI::setupChooseTwoCardsAndOrder()
 
 void EffectUI::setupChooseFighterMoveThenFogMove()
 {
+    // ------------------------------------------------
+    // Into Thin Air
+    //
+    // subPhase 0:
+    // انتخاب مستقیم مقصد Invisible Man روی نقشه
+    //
+    // subPhase 2:
+    // انتخاب Fog از پنجره
+    //
+    // subPhase 3:
+    // انتخاب مقصد Fog روی نقشه
+    // ------------------------------------------------
+
     subPhase = 0;
-    layoutYesNo();
+
+    candidateSpaces.clear();
+    candidateFogs.clear();
+
+    selectedFog = nullptr;
+    fogSourceSpace = nullptr;
+
+    if (fighter == nullptr || game == nullptr || effect == nullptr)
+        return;
+
+    // ---------------------------------------------
+    // مرحله اول:
+    // خانه‌هایی که Invisible Man می‌تواند به آن‌ها برود
+    // ---------------------------------------------
+
+    candidateSpaces =
+        game->getBoard().getAvailableMoves(
+            fighter,
+            effect->getMoveRange());
+
+    std::cout << "[Into Thin Air] Invisible Man movement options: "
+              << candidateSpaces.size() << std::endl;
+
+    for (Space *space : candidateSpaces)
+    {
+        if (space != nullptr)
+        {
+            std::cout << "  -> Space "
+                      << space->getId()
+                      << std::endl;
+        }
+    }
+
+    // اگر هیچ خانه‌ای برای Invisible Man وجود ندارد
+    if (candidateSpaces.empty())
+    {
+        std::cout
+            << "[!] Invisible Man has no valid destination."
+            << std::endl;
+
+        finalizeReady();
+        return;
+    }
+
+    // ---------------------------------------------
+    // مهم:
+    // دیگر layoutYesNo نداریم.
+    // مستقیماً وارد انتخاب روی نقشه می‌شویم.
+    // ---------------------------------------------
 }
 
 // ============================================================
@@ -905,50 +966,22 @@ void EffectUI::update()
 
     if (inputKind == EffectInputKind::ChooseFighterMoveThenFogMove)
     {
+        // ------------------------------------------------
+        // subPhase 0:
+        // Invisible Man باید مستقیماً روی نقشه حرکت کند.
+        // کلیک روی نقشه توسط GameScreen -> selectSpace()
+        // مدیریت می‌شود.
+        // ------------------------------------------------
+
         if (subPhase == 0)
         {
-            if (CheckCollisionPointRec(mouse, yesButton))
-            {
-                candidateSpaces = game->getBoard().getAvailableMoves(fighter, effect->getMoveRange());
-
-                if (candidateSpaces.empty())
-                {
-                    std::cout << "[!] No available move for fighter." << std::endl;
-                    subPhase = 2;
-                    candidateFogs.clear();
-                    if (actingPlayer != nullptr)
-                    {
-                        for (Fog *fog : actingPlayer->getFogs())
-                            if (fog != nullptr)
-                                candidateFogs.push_back(fog);
-                    }
-                    if (!candidateFogs.empty())
-                        layoutFogWindow();
-                    else
-                        finalizeReady();
-                }
-                else
-                {
-                    subPhase = 1; // انتخاب خونه از روی نقشه (GameScreen مدیریت می‌کنه)
-                }
-            }
-            else if (CheckCollisionPointRec(mouse, noButton))
-            {
-                subPhase = 2;
-                candidateFogs.clear();
-                if (actingPlayer != nullptr)
-                {
-                    for (Fog *fog : actingPlayer->getFogs())
-                        if (fog != nullptr)
-                            candidateFogs.push_back(fog);
-                }
-                if (!candidateFogs.empty())
-                    layoutFogWindow();
-                else
-                    finalizeReady();
-            }
             return;
         }
+
+        // ------------------------------------------------
+        // subPhase 2:
+        // انتخاب Fog از پنجره
+        // ------------------------------------------------
 
         if (subPhase == 2)
         {
@@ -956,21 +989,42 @@ void EffectUI::update()
             {
                 if (CheckCollisionPointRec(mouse, fogBoxes[i]))
                 {
+                    if (i >= candidateFogs.size())
+                        return;
+
                     selectedFog = candidateFogs[i];
-                    choice.selectedFogId = static_cast<int>(i);
+
+                    choice.selectedFogId =
+                        static_cast<int>(i);
+
                     subPhase = 3;
-                    beginFogDestinationStage(effect->getFogMoveRange(), false);
+
+                    beginFogDestinationStage(
+                        effect->getFogMoveRange(),
+                        false);
 
                     if (candidateSpaces.empty())
                     {
-                        std::cout << "[!] No destination for fog." << std::endl;
+                        std::cout
+                            << "[!] No destination for Fog."
+                            << std::endl;
+
                         finalizeReady();
                     }
+
                     return;
                 }
             }
+
             return;
         }
+
+        // ------------------------------------------------
+        // subPhase 3:
+        // انتخاب مقصد Fog روی نقشه
+        // توسط selectSpace() انجام می‌شود.
+        // ------------------------------------------------
+
         return;
     }
 
@@ -1179,6 +1233,7 @@ void EffectUI::selectSpace(Space *space)
         return;
 
     bool valid = false;
+
     for (Space *candidate : candidateSpaces)
     {
         if (candidate == space)
@@ -1187,10 +1242,13 @@ void EffectUI::selectSpace(Space *space)
             break;
         }
     }
+
     if (!valid)
         return;
 
-    // -------------------- انواع تک‌مرحله‌ای --------------------
+    // ============================================================
+    // انواع تک‌مرحله‌ای
+    // ============================================================
 
     if (inputKind == EffectInputKind::ChooseAdjacentEmptySpace ||
         inputKind == EffectInputKind::ChooseReachableSpace ||
@@ -1198,15 +1256,21 @@ void EffectUI::selectSpace(Space *space)
         inputKind == EffectInputKind::ChooseTargetAdjacentEmptySpace)
     {
         choice.selectedSpace = space;
+
         finalizeReady();
         return;
     }
+
+    // ============================================================
+    // ChooseFighterAndReachableSpace
+    // ============================================================
 
     if (inputKind == EffectInputKind::ChooseFighterAndReachableSpace)
     {
         if (subPhase == 1)
         {
             choice.selectedSpace = space;
+
             finalizeReady();
             return;
         }
@@ -1214,46 +1278,111 @@ void EffectUI::selectSpace(Space *space)
         return;
     }
 
-    // -------------------- IntoThinAir --------------------
+    // ============================================================
+    // Into Thin Air
+    //
+    // subPhase 0:
+    //      Invisible Man -> انتخاب مقصد روی نقشه
+    //
+    // subPhase 2:
+    //      انتخاب Fog از پنجره
+    //
+    // subPhase 3:
+    //      Fog -> انتخاب مقصد روی نقشه
+    // ============================================================
 
     if (inputKind == EffectInputKind::ChooseFighterMoveThenFogMove)
     {
-        if (subPhase == 1)
+        // --------------------------------------------------------
+        // مرحله اول:
+        // حرکت Invisible Man
+        // --------------------------------------------------------
+
+        if (subPhase == 0)
         {
             choice.selectedSpace = space;
+
+            std::cout
+                << "[+] Invisible Man destination selected: Space "
+                << space->getId()
+                << std::endl;
+
+            // ----------------------------------------------------
+            // حالا باید Fog انتخاب شود
+            // ----------------------------------------------------
+
             subPhase = 2;
 
+            candidateSpaces.clear();
             candidateFogs.clear();
+
+            selectedFog = nullptr;
+            fogSourceSpace = nullptr;
+
             if (actingPlayer != nullptr)
             {
                 for (Fog *fog : actingPlayer->getFogs())
+                {
                     if (fog != nullptr)
+                    {
                         candidateFogs.push_back(fog);
+                    }
+                }
             }
 
+            std::cout
+                << "[Into Thin Air] Available Fog tokens: "
+                << candidateFogs.size()
+                << std::endl;
+
+            // ----------------------------------------------------
+            // اگر Fog داریم، پنجره انتخاب Fog باز می‌شود
+            // ----------------------------------------------------
+
             if (!candidateFogs.empty())
+            {
                 layoutFogWindow();
+            }
             else
+            {
+                // هیچ Fogی برای حرکت وجود ندارد
                 finalizeReady();
+            }
+
             return;
         }
+
+        // --------------------------------------------------------
+        // مرحله سوم:
+        // انتخاب مقصد Fog
+        // --------------------------------------------------------
 
         if (subPhase == 3)
         {
             choice.secondSpace = space;
+
+            std::cout
+                << "[+] Fog destination selected: Space "
+                << space->getId()
+                << std::endl;
+
             finalizeReady();
             return;
         }
+
         return;
     }
 
-    // -------------------- Lurking --------------------
+    // ============================================================
+    // Lurking
+    // ============================================================
 
     if (inputKind == EffectInputKind::ChooseLurkingOption)
     {
         if (subPhase == 1)
         {
             choice.selectedSpace = space;
+
             finalizeReady();
             return;
         }
@@ -1261,56 +1390,75 @@ void EffectUI::selectSpace(Space *space)
         if (subPhase == 3)
         {
             choice.secondSpace = space;
+
             finalizeReady();
             return;
         }
+
         return;
     }
 
-    // -------------------- RollingFog --------------------
+    // ============================================================
+    // RollingFog
+    // ============================================================
 
     if (inputKind == EffectInputKind::ChooseFogSourceAndDestination)
     {
         if (subPhase == 1)
         {
             choice.secondSpace = space;
+
             finalizeReady();
             return;
         }
+
         return;
     }
 
-    // -------------------- SlipAway --------------------
+    // ============================================================
+    // SlipAway
+    // ============================================================
 
     if (inputKind == EffectInputKind::ChooseFogAndDestination)
     {
         if (subPhase == 1)
         {
             choice.selectedSpace = space;
+
             finalizeReady();
             return;
         }
+
         return;
     }
 
-    // -------------------- StepLightly --------------------
+    // ============================================================
+    // StepLightly
+    // ============================================================
 
     if (inputKind == EffectInputKind::ChooseEnemyAndFogDestination)
     {
         if (subPhase == 2)
         {
             choice.secondSpace = space;
+
             finalizeReady();
             return;
         }
+
         return;
     }
+
+    // ============================================================
+    // Defeated Sister
+    // ============================================================
 
     if (inputKind == EffectInputKind::ChooseDefeatedSisterAndZoneSpace)
     {
         if (subPhase == 1)
         {
             choice.selectedSpace = space;
+
             finalizeReady();
             return;
         }
@@ -1335,40 +1483,48 @@ void EffectUI::draw()
 
     if (isChoosingSpace())
     {
-        const char *title = "CHOOSE A DESTINATION ON THE MAP";
-        const float titleSize = 28.0f;
-        Vector2 titleTextSize = MeasureTextEx(font, title, titleSize, 1.5f);
+        const char *title;
 
-        DrawTextEx(font, title,
-                   Vector2{(GetScreenWidth() - titleTextSize.x) / 2.0f, 20.0f},
-                   titleSize, 1.5f, WHITE);
+        if (inputKind == EffectInputKind::ChooseFighterMoveThenFogMove)
+        {
+            if (subPhase == 0)
+            {
+                title = "CHOOSE A DESTINATION FOR INVISIBLE MAN";
+            }
+            else
+            {
+                title = "CHOOSE A DESTINATION FOR THE FOG";
+            }
+        }
+        else
+        {
+            title = "CHOOSE A DESTINATION ON THE MAP";
+        }
+
+        const float titleSize = 28.0f;
+
+        Vector2 titleTextSize =
+            MeasureTextEx(
+                font,
+                title,
+                titleSize,
+                1.5f);
+
+        DrawTextEx(
+            font,
+            title,
+            Vector2{
+                (GetScreenWidth() - titleTextSize.x) / 2.0f,
+                20.0f},
+            titleSize,
+            1.5f,
+            WHITE);
+
         return;
     }
-
     // -------------------- بقیه: overlay تیره --------------------
 
     DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), Color{0, 0, 0, 190});
-
-    // ---- Yes/No (IntoThinAir subPhase 0) ----
-    if (inputKind == EffectInputKind::ChooseFighterMoveThenFogMove && subPhase == 0)
-    {
-        const char *question = "Do you want to move Invisible Man?";
-        Vector2 qSize = MeasureTextEx(font, question, 28.0f, 1.5f);
-        DrawTextEx(font, question,
-                   Vector2{(GetScreenWidth() - qSize.x) / 2.0f, GetScreenHeight() / 2.0f - 80.0f},
-                   28.0f, 1.5f, WHITE);
-
-        bool yesHovered = CheckCollisionPointRec(mouse, yesButton);
-        DrawRectangleRounded(yesButton, 1.0f, 20, yesHovered ? Color{75, 75, 75, 245} : Color{35, 35, 35, 235});
-        Vector2 yesSize = MeasureTextEx(font, "YES", 24.0f, 1.5f);
-        DrawTextEx(font, "YES", Vector2{yesButton.x + (yesButton.width - yesSize.x) / 2.0f, yesButton.y + (yesButton.height - yesSize.y) / 2.0f}, 24.0f, 1.5f, WHITE);
-
-        bool noHovered = CheckCollisionPointRec(mouse, noButton);
-        DrawRectangleRounded(noButton, 1.0f, 20, noHovered ? Color{75, 75, 75, 245} : Color{35, 35, 35, 235});
-        Vector2 noSize = MeasureTextEx(font, "NO", 24.0f, 1.5f);
-        DrawTextEx(font, "NO", Vector2{noButton.x + (noButton.width - noSize.x) / 2.0f, noButton.y + (noButton.height - noSize.y) / 2.0f}, 24.0f, 1.5f, WHITE);
-        return;
-    }
 
     // ---- دو گزینه (Lurking subPhase 0 / CodedNotes subPhase 2) ----
     bool showTwoOptions =
@@ -1778,7 +1934,10 @@ bool EffectUI::isChoosingSpace() const
         return true;
 
     case EffectInputKind::ChooseFighterMoveThenFogMove:
-        return subPhase == 1 || subPhase == 3;
+        // Into Thin Air:
+        // subPhase 0 = انتخاب مقصد Invisible Man
+        // subPhase 3 = انتخاب مقصد Fog
+        return subPhase == 0 || subPhase == 3;
 
     case EffectInputKind::ChooseLurkingOption:
         return subPhase == 1 || subPhase == 3;

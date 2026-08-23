@@ -2904,7 +2904,7 @@ bool MainMenu::placeFogOnSpace(int spaceId)
     }
 
     fog->setPosition(space);
-
+    space->setFogToken(true);
     currentFogIndex++;
 
     // همه Fogهای این بازیکن قرار گرفتند
