@@ -5,6 +5,7 @@
 #include <vector>
 #include "board/Board.h"
 #include "graphics/AssetManager.h"
+#include "graphics/SaveManager.h"
 
 class MainMenu
 {
@@ -90,6 +91,8 @@ private:
     Vector2 getMapPosition() const;
 
     Vector2 mapImageToScreen(Vector2 imagePosition) const;
+
+    SaveManager saveManager;
 
 public:
     MainMenu(AssetManager *assets, Game *game);

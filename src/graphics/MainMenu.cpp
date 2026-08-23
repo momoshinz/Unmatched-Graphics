@@ -13,6 +13,7 @@ MainMenu::MainMenu(AssetManager *assets, Game *game)
     : assets(assets),
       game(game),
       state(State::MAIN_MENU),
+      saveManager("saves"),
       player1Name(""),
       player1Age(""),
       player2Name(""),
@@ -53,7 +54,8 @@ void loadSaveFiles(std::vector<std::string> &saveFiles)
 
     while (true)
     {
-        std::string filename = "save" + std::to_string(slot) + ".json";
+        std::string filename =
+            "saves/save" + std::to_string(slot) + ".json";
 
         std::ifstream file(filename);
 
