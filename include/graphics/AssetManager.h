@@ -17,6 +17,7 @@ class AssetManager
         Font loading;
         Font guideFont;
         Texture2D fogTexture{};
+        Music gameMusic;
 
         bool loaded;
 
@@ -46,6 +47,7 @@ class AssetManager
         Texture2D getGameMap();
         Texture2D getMainPanelBackground() const;
         Texture2D getFogTexture() const;
+        Music getGameMusic() const;
 
         bool isLoaded() const;
 };

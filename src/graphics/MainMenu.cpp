@@ -201,8 +201,8 @@ void MainMenu::draw()
     if (state != State::LOAD_GAME)
     {
         const char *title = "UNMATCHED";
-        const float titleSize = 60.0f;
-        const float titleSpacing = 2.0f;
+        const float titleSize = 58.0f;
+        const float titleSpacing = 10.0f;
 
         Vector2 titleTextSize =
             MeasureTextEx(

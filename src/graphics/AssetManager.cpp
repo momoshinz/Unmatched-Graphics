@@ -10,7 +10,8 @@ AssetManager::AssetManager()
       gameFont{},
       titleFont{},
       loading{},
-      loaded(false)
+      loaded(false),
+      gameMusic{}
 {
 }
 
@@ -28,12 +29,14 @@ bool AssetManager::load()
     gameMap = LoadTexture("Unmatched_Assets/board.png");
     MainPanelBackground = LoadTexture("Unmatched_Assets/mainPanel.png");
 
-
     gameFont = LoadFont("Unmatched_Assets/fonts/Sweet Magic.ttf");
-    titleFont = LoadFont("Unmatched_Assets/fonts/title.ttf");
+    titleFont = LoadFont("Unmatched_Assets/fonts/Lost Saloon.ttf");
     loading = LoadFont("Unmatched_Assets/fonts/NexaRustSlab.ttf");
     guideFont = LoadFont("Unmatched_Assets/fonts/guide.TTF");
 
+    gameMusic = LoadMusicStream("Unmatched_Assets/sounds/MainMusic.mp3");
+    SetMusicVolume(gameMusic, 0.4f);
+    gameMusic.looping = true;
 
     characterTextures["dracula"] = LoadTexture("Unmatched_Assets/dracula/DracArtTran.png");
     characterTextures["dracula_art"] = LoadTexture("Unmatched_Assets/dracula/DracArt.png");
@@ -46,7 +49,6 @@ bool AssetManager::load()
     characterTextures["sister2"] = LoadTexture("Unmatched_Assets/dracula/sis2.png");
     characterTextures["sister3"] = LoadTexture("Unmatched_Assets/dracula/sis3.png");
 
-
     characterTextures["sherlock"] = LoadTexture("Unmatched_Assets/sherlock/holmsArtTransparent.png");
     characterTextures["sherlock_art"] = LoadTexture("Unmatched_Assets/sherlock/holmsArt.png");
     characterTextures["sherlock_transparent"] = LoadTexture("Unmatched_Assets/sherlock/holmsArtTransparent.png");
@@ -57,14 +59,10 @@ bool AssetManager::load()
     characterTextures["drwatson"] = LoadTexture("Unmatched_Assets/sherlock/watson.png");
     characterTextures["watson_health"] = LoadTexture("Unmatched_Assets/sherlock/watsonHealth.png");
 
-    
-
     characterTextures["invisible_man"] = LoadTexture("Unmatched_Assets/invisibleMan/invisibleManArT.png");
     characterTextures["invisible_man_transparent"] = LoadTexture("Unmatched_Assets/invisibleMan/tranInv.png");
     characterTextures["foggy"] = LoadTexture("Unmatched_Assets/invisibleMan/Fogs.png");
     fogTexture = LoadTexture("Unmatched_Assets/invisibleMan/fog.png");
-
-    
 
     cardTextures["BeastForm"] = LoadTexture("Unmatched_Assets/cards/dracula/Beastform.png");
     cardTextures["Ambush"] = LoadTexture("Unmatched_Assets/cards/dracula/ambush.png");
@@ -79,7 +77,6 @@ bool AssetManager::load()
     cardTextures["RaveningSeduction"] = LoadTexture("Unmatched_Assets/cards/dracula/ravening-seduction.png");
     cardTextures["ThirstForSustenance"] = LoadTexture("Unmatched_Assets/cards/dracula/thirst-for-sustenance.png");
 
-
     cardTextures["AdministerAid"] = LoadTexture("Unmatched_Assets/cards/sherlock/administer-aid.png");
     cardTextures["CounterPunch"] = LoadTexture("Unmatched_Assets/cards/sherlock/counterpunch.png");
     cardTextures["DeduceStrategy"] = LoadTexture("Unmatched_Assets/cards/sherlock/deduce-strategy.png");
@@ -92,7 +89,6 @@ bool AssetManager::load()
     cardTextures["TheGameIsAfoot"] = LoadTexture("Unmatched_Assets/cards/sherlock/the-game-is-afoot.png");
     cardTextures["ServiceRevolver"] = LoadTexture("Unmatched_Assets/cards/sherlock/service-revolver.png");
 
-
     cardTextures["CodedNotes"] = LoadTexture("Unmatched_Assets/cards/invisibleMan/coded-notes.png");
     cardTextures["DreamingOfRevange"] = LoadTexture("Unmatched_Assets/cards/invisibleMan/dreaming-of-revenge.png");
     cardTextures["EmergeFromMist"] = LoadTexture("Unmatched_Assets/cards/invisibleMan/emerge-from-mist.png");
@@ -104,11 +100,9 @@ bool AssetManager::load()
     cardTextures["SlipAway"] = LoadTexture("Unmatched_Assets/cards/invisibleMan/slip-away.png");
     cardTextures["StepLightly"] = LoadTexture("Unmatched_Assets/cards/invisibleMan/step-lightly.png");
 
-
     actionIcons = LoadTexture("Unmatched_Assets/actions.png");
     rangedIcon = LoadTexture("Unmatched_Assets/ranged.png");
     meleeIcon = LoadTexture("Unmatched_Assets/melee.png");
-
 
     if (!isTextureValid(mainMenuBackground))
     {
@@ -304,4 +298,9 @@ Texture2D AssetManager::getMainPanelBackground() const
 Texture2D AssetManager::getFogTexture() const
 {
     return fogTexture;
+}
+
+Music AssetManager::getGameMusic() const
+{
+    return gameMusic;
 }

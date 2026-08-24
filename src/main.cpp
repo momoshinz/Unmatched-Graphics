@@ -22,9 +22,15 @@ int main()
         screenHeight,
         "UNMATCHED");
 
+    // =========================================
+    // Audio
+    // =========================================
+
+    InitAudioDevice();
+
     Image icon =
         LoadImage(
-            "Unmatched_Assets/dracula/iconTest.png");
+            "Unmatched_Assets/icon.png");
 
     if (icon.data == nullptr)
     {
@@ -53,6 +59,7 @@ int main()
         std::cout
             << "ASSET LOADING FAILED!\n";
 
+        CloseAudioDevice();
         CloseWindow();
 
         return 1;
@@ -82,6 +89,26 @@ int main()
         loadingScreen.draw();
 
         EndDrawing();
+    }
+
+    // =========================================
+    // START MAIN MENU MUSIC
+    // =========================================
+
+    Music gameMusic =
+        assets.getGameMusic();
+
+    if (IsMusicValid(gameMusic))
+    {
+        PlayMusicStream(gameMusic);
+
+        std::cout
+            << "Main Menu music started.\n";
+    }
+    else
+    {
+        std::cout
+            << "Main Menu music is invalid!\n";
     }
 
     // =========================================
@@ -120,7 +147,6 @@ int main()
 
     Transition transition;
 
-    // Use NexaRustSlab.ttf
     transition.setFont(
         assets.getLoadingFont());
 
@@ -134,6 +160,15 @@ int main()
             GetFrameTime();
 
         // =====================================================
+        // MUSIC UPDATE
+        // =====================================================
+
+        if (IsMusicValid(gameMusic))
+        {
+            UpdateMusicStream(gameMusic);
+        }
+
+        // =====================================================
         // TRANSITION UPDATE
         // =====================================================
 
@@ -142,13 +177,29 @@ int main()
             transition.update(deltaTime);
 
             // -------------------------------------------------
-            // Switch screen when the screen becomes completely
-            // black.
+            // Switch screen when the black part of the
+            // transition is finished.
             // -------------------------------------------------
 
             if (transition.shouldSwitch())
             {
                 currentScreen = nextScreen;
+
+                // -------------------------------------------------
+                // Entering Game Screen
+                // Stop Main Menu music.
+                // -------------------------------------------------
+
+                if (currentScreen == Screen::GAME)
+                {
+                    if (IsMusicValid(gameMusic))
+                    {
+                        StopMusicStream(gameMusic);
+
+                        std::cout
+                            << "Main Menu music stopped.\n";
+                    }
+                }
 
                 transition.finishSwitch();
 
@@ -254,18 +305,12 @@ int main()
 
                     // -----------------------------------------
                     // Transition
-                    //
-                    // Fade Out  = 1.0 second
-                    // Black Hold = 2.5 seconds
-                    // Fade In   = 1.0 second
-                    //
-                    // Total = 4.5 seconds
                     // -----------------------------------------
 
                     transition.start(
                         TransitionType::Fade,
                         1.0f,
-                        4.5f);
+                        2.5f);
                 }
             }
 
@@ -289,6 +334,19 @@ int main()
                         << "Returning to main menu...\n";
 
                     // -----------------------------------------
+                    // Restart Main Menu music from the beginning
+                    // -----------------------------------------
+
+                    if (IsMusicValid(gameMusic))
+                    {
+                        StopMusicStream(gameMusic);
+                        PlayMusicStream(gameMusic);
+
+                        std::cout
+                            << "Main Menu music restarted.\n";
+                    }
+
+                    // -----------------------------------------
                     // Destination
                     // -----------------------------------------
 
@@ -299,16 +357,11 @@ int main()
                     // Change transition text
                     // -----------------------------------------
 
-                    transition.setText("LOADING . . .");
+                    transition.setText(
+                        "LOADING . . .");
 
                     // -----------------------------------------
                     // Transition
-                    //
-                    // Fade Out  = 1.0 second
-                    // Black Hold = 1.5 seconds
-                    // Fade In   = 1.0 second
-                    //
-                    // Total = 3.5 seconds
                     // -----------------------------------------
 
                     transition.start(
@@ -344,8 +397,6 @@ int main()
 
         // =====================================================
         // Transition
-        //
-        // MUST be drawn AFTER the screen.
         // =====================================================
 
         transition.draw();
@@ -358,6 +409,8 @@ int main()
     // =========================================
 
     assets.unload();
+
+    CloseAudioDevice();
 
     CloseWindow();
 
