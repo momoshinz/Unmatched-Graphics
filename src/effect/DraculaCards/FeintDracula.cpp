@@ -1,5 +1,6 @@
 #include "effect/DraculaCards/FeintDracula.h"
 #include "fighter/Fighter.h"
+#include "fighter/Hero.h"
 #include "game/Game.h"
 #include "player/Player.h"
 #include "card/Card.h"
@@ -32,6 +33,32 @@ void FeintDracula::apply(Game &game,
     if (!opponentCard->hasEffect())
     {
         throw runtime_error("\n[!] ERROR : Opponent's card has no effect to cancel.\n");
+    }
+
+    // --------------------------------------------------------
+    // چک ایمیونیتی: شرلوک و واتسون هرگز نمی‌تونن کنسل بشن
+    // --------------------------------------------------------
+
+    Player *opponentPlayer = target.getOwner();
+
+    if (opponentPlayer != nullptr)
+    {
+        Hero *opponentHero = opponentPlayer->getHero();
+
+        if (opponentHero != nullptr && opponentHero->isAbilityImmune())
+        {
+            cout << "\n========================================\n";
+            cout << "-< Feint >- BLOCKED!\n";
+            cout << "[!] " << opponentHero->getName()
+                 << "'s and Dr. Watson's abilities can never be disabled.\n";
+            cout << "========================================\n";
+
+            game.setFeintBlocked(
+                opponentHero->getName() +
+                " and Dr. Watson's abilities can never be disabled!");
+
+            return;
+        }
     }
 
     cout << "\n========================================\n";

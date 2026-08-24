@@ -1,6 +1,5 @@
 #ifndef GAME_H
 #define GAME_H
-using namespace std;
 #include "board/Board.h"
 #include "player/Player.h"
 #include "CombatSystem.h"
@@ -19,6 +18,8 @@ private:
     TurnManager turnManager;
     TerminalUI ui;
     bool isMapSetUp = false;
+    bool feintBlockedFlag = false; // for sherlock special ability
+    std::string feintBlockedMessage;
 
 public:
     Game();
@@ -63,5 +64,8 @@ public:
     void drawInitialCards();
     void startGame();
     void beginTurns();
+
+    void setFeintBlocked(const std::string &message);
+    bool consumeFeintBlockedFlag(std::string &outMessage);
 };
 #endif

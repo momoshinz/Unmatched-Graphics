@@ -545,7 +545,7 @@ void ManeuverUI::draw()
 
             std::string name = selectableFighters[i]->getName();
 
-            Vector2 nameSize = MeasureTextEx(font, name.c_str(), 20.0f, 1.0f);
+            Vector2 nameSize = MeasureTextEx(font, name.c_str(), 25.0f, 1.0f);
 
             DrawTextEx(
                 font, name.c_str(),

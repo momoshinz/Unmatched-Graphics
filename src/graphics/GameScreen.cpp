@@ -53,6 +53,8 @@ int GameScreen::update()
         return 0;
     }
 
+    Vector2 mousePosition = GetMousePosition();
+
     // =========================================
     // DRACULA START-OF-TURN ABILITY
     // =========================================
@@ -74,6 +76,18 @@ int GameScreen::update()
                 }
             }
         }
+    }
+
+    if (feintBlockedPopupOpen)
+    {
+        feintBlockedPopupTimer -= GetFrameTime();
+
+        if (feintBlockedPopupTimer <= 0.0f)
+        {
+            feintBlockedPopupOpen = false;
+        }
+
+        return 0;
     }
 
     if (draculaAbilityUI.isOpen())
@@ -108,8 +122,6 @@ int GameScreen::update()
                           buttonY,
                           buttonWidth,
                           buttonHeight};
-
-    Vector2 mousePosition = GetMousePosition();
 
     if (saveMenuOpen)
     {
@@ -248,7 +260,7 @@ int GameScreen::update()
         // ACTION BUTTONS (فقط وقتی مانور باز نیست)
         // =========================================
 
-        if (!maneuverUI.isOpen())
+        if (!maneuverUI.isOpen() && !draculaAbilityUI.isOpen() && !combatInProgress)
         {
             if (CheckCollisionPointRec(mousePosition, attackButton))
             {
@@ -646,6 +658,22 @@ int GameScreen::update()
     }
 
     // =========================================
+    // FEINT BLOCKED POPUP
+    // =========================================
+
+    if (!feintBlockedPopupOpen)
+    {
+        std::string message;
+
+        if (game->consumeFeintBlockedFlag(message))
+        {
+            feintBlockedMessage = message;
+            feintBlockedPopupOpen = true;
+            feintBlockedPopupTimer = feintBlockedPopupDuration;
+        }
+    }
+
+    // =========================================
     // DECK EMPTY POPUP
     // =========================================
 
@@ -706,7 +734,7 @@ void GameScreen::draw()
         return;
     }
 
-    if (!deckEmptyPopupOpen && !handLimitPopupOpen)
+    if (!deckEmptyPopupOpen && !handLimitPopupOpen && !feintBlockedPopupOpen)
     {
         drawCombatEffectText();
         drawResultRevealButton();
@@ -753,6 +781,7 @@ void GameScreen::draw()
 
     drawDeckEmptyPopup();
     drawHandLimitPopup();
+    drawFeintBlockedPopup();
 }
 
 void GameScreen::drawMap()
@@ -2318,7 +2347,7 @@ void GameScreen::drawLookButton()
 
     lookButton = Rectangle{
         (GetScreenWidth() - buttonWidth) / 2.0f,
-        mapY + mapHeight + 70.0f, // کمی پایین‌تر از نوار "Turn"
+        mapY + mapHeight + 110.0f, // کمی پایین‌تر از نوار "Turn"
         buttonWidth,
         buttonHeight};
 
@@ -2340,7 +2369,9 @@ void GameScreen::drawLookButton()
         Vector2{
             lookButton.x + (lookButton.width - textSize.x) / 2.0f,
             lookButton.y + (lookButton.height - textSize.y) / 2.0f},
-        fontSize, 1.5f, WHITE);
+        
+            fontSize,
+        1.5f, WHITE);
 }
 
 void GameScreen::drawCombatEffectText()
@@ -3149,5 +3180,50 @@ void GameScreen::drawSaveMenu()
                     2.0f},
         22.0f,
         1.5f,
+        WHITE);
+}
+void GameScreen::drawFeintBlockedPopup()
+{
+    if (!feintBlockedPopupOpen || assets == nullptr)
+    {
+        return;
+    }
+
+    Font font = assets->getGameFont();
+
+    const float fontSize = 22.0f;
+    const float spacing = 1.5f;
+
+    Vector2 textSize =
+        MeasureTextEx(font, feintBlockedMessage.c_str(), fontSize, spacing);
+
+    // بالای صفحه با کمی فاصله
+    float textY = 70.0f;
+    float textX = (GetScreenWidth() - textSize.x) / 2.0f;
+
+    Rectangle background{
+        textX - 20.0f,
+        textY - 10.0f,
+        textSize.x + 40.0f,
+        textSize.y + 20.0f};
+
+    DrawRectangleRounded(
+        background,
+        0.2f,
+        12,
+        Color{80, 20, 20, 220});
+
+    DrawRectangleRoundedLines(
+        background,
+        0.2f,
+        12,
+        Color{220, 100, 100, 255});
+
+    DrawTextEx(
+        font,
+        feintBlockedMessage.c_str(),
+        Vector2{textX, textY},
+        fontSize,
+        spacing,
         WHITE);
 }

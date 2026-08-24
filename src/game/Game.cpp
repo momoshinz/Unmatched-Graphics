@@ -1894,3 +1894,21 @@ void Game::beginTurns()
               << youngerPlayer->getHero()->getName()
               << std::endl;
 }
+
+void Game::setFeintBlocked(const std::string &message)
+{
+    feintBlockedFlag = true;
+    feintBlockedMessage = message;
+}
+
+bool Game::consumeFeintBlockedFlag(std::string &outMessage)
+{
+    if (!feintBlockedFlag)
+    {
+        return false;
+    }
+
+    feintBlockedFlag = false;
+    outMessage = feintBlockedMessage;
+    return true;
+}

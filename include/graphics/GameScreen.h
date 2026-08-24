@@ -94,6 +94,13 @@ private:
     Rectangle newSaveButton;
     Rectangle saveMenuBackButton;
 
+    bool feintBlockedPopupOpen = false;
+    std::string feintBlockedMessage;
+    Rectangle feintBlockedOkButton{};
+
+    float feintBlockedPopupTimer = 0.0f;
+    const float feintBlockedPopupDuration = 8.0f;
+
 public:
     GameScreen(AssetManager *assets, Game *game);
 
@@ -129,6 +136,7 @@ public:
     void drawSaveMenu();
     void updateSaveMenu();
     void refreshSaveFiles();
+    void drawFeintBlockedPopup();
 };
 
 #endif
