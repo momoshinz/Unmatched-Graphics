@@ -199,6 +199,12 @@ int main()
                         std::cout
                             << "Main Menu music stopped.\n";
                     }
+
+                    // =========================================
+                    // RESET PLAYER PANEL TEXT ANIMATION
+                    // =========================================
+
+                    gameScreen.resetPlayerPanelAnimations();
                 }
 
                 transition.finishSwitch();

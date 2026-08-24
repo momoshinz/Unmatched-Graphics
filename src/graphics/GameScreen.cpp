@@ -842,18 +842,68 @@ void GameScreen::drawMap()
     float mapWidth;
     float mapHeight;
 
-    calculateMapTransform(mapX, mapY, scale, mapWidth, mapHeight);
+    calculateMapTransform(
+        mapX,
+        mapY,
+        scale,
+        mapWidth,
+        mapHeight);
 
-    Rectangle source{0.0f, 0.0f,
-                     static_cast<float>(map.width),
-                     static_cast<float>(map.height)};
+    Rectangle source{
+        0.0f,
+        0.0f,
+        static_cast<float>(map.width),
+        static_cast<float>(map.height)};
 
-    Rectangle destination{mapX, mapY, mapWidth, mapHeight};
-    DrawTexturePro(map, source, destination, Vector2{0.0f, 0.0f}, 0.0f, WHITE);
+    Rectangle destination{
+        mapX,
+        mapY,
+        mapWidth,
+        mapHeight};
+
+    DrawTexturePro(
+        map,
+        source,
+        destination,
+        Vector2{0.0f, 0.0f},
+        0.0f,
+        WHITE);
+
+    // =====================================
+    // ROYAL CREAM MAP BORDERS
+    // =====================================
+
+    const Color royalCream = {
+        218, 204, 174, 255};
+
+    const float offset = 6.0f;
+
+    // TOP LINE
+    DrawLineEx(
+        Vector2{
+            mapX,
+            mapY - offset},
+        Vector2{
+            mapX + mapWidth,
+            mapY - offset},
+        2.5f,
+        royalCream);
+
+    // BOTTOM LINE
+    DrawLineEx(
+        Vector2{
+            mapX,
+            mapY + mapHeight + offset},
+        Vector2{
+            mapX + mapWidth,
+            mapY + mapHeight + offset},
+        2.5f,
+        royalCream);
 
     // =====================================
     // DRAW SPACE CIRCLES + NUMBERS
     // =====================================
+
     drawSpaces();
     drawPlacedFighters();
     drawFogs();
@@ -914,63 +964,139 @@ void GameScreen::drawTopButtons()
 
     const float buttonGap = 15.0f;
 
-    const float totalWidth = 3.0f * buttonWidth + 2.0f * buttonGap;
+    const float totalWidth =
+        3.0f * buttonWidth +
+        2.0f * buttonGap;
 
-    const float startX = (GetScreenWidth() - totalWidth) / 2.0f;
+    const float startX =
+        (GetScreenWidth() - totalWidth) / 2.0f;
+
     const float buttonY = 12.0f;
 
     // =========================================
     // Button rectangles
     // =========================================
 
-    Rectangle exitButton{startX, buttonY, buttonWidth, buttonHeight};
+    Rectangle exitButton{
+        startX,
+        buttonY,
+        buttonWidth,
+        buttonHeight};
 
-    Rectangle saveButton{startX + buttonWidth + buttonGap, buttonY, buttonWidth, buttonHeight};
+    Rectangle saveButton{
+        startX + buttonWidth + buttonGap,
+        buttonY,
+        buttonWidth,
+        buttonHeight};
 
-    Rectangle guideButton{startX + 2.0f * (buttonWidth + buttonGap),
-                          buttonY,
-                          buttonWidth,
-                          buttonHeight};
+    Rectangle guideButton{
+        startX + 2.0f * (buttonWidth + buttonGap),
+        buttonY,
+        buttonWidth,
+        buttonHeight};
 
     // =========================================
     // Mouse
     // =========================================
-    Vector2 mousePosition = GetMousePosition();
+
+    Vector2 mousePosition =
+        GetMousePosition();
 
     // =========================================
     // Colors
     // =========================================
-    Color normalColor{25, 25, 25, 190};
-    Color hoverColor{65, 65, 65, 210};
+
+    Color normalColor{
+        25,
+        25,
+        25,
+        190};
+
+    Color hoverColor{
+        65,
+        65,
+        65,
+        210};
 
     // =========================================
     // EXIT
     // =========================================
 
-    Color exitColor = CheckCollisionPointRec(mousePosition, exitButton) ? hoverColor : normalColor;
+    Color exitColor =
+        CheckCollisionPointRec(
+            mousePosition,
+            exitButton)
+            ? hoverColor
+            : normalColor;
 
-    DrawRectangleRounded(exitButton, 1.0f, 32, exitColor);
+    DrawRectangleRounded(
+        exitButton,
+        1.0f,
+        32,
+        exitColor);
+
+    // White rounded border
+    DrawRectangleRoundedLinesEx(
+        exitButton,
+        1.0f,
+        32,
+        1.5f,
+        WHITE);
 
     // =========================================
     // SAVE GAME
     // =========================================
 
-    Color saveColor = CheckCollisionPointRec(mousePosition, saveButton) ? hoverColor : normalColor;
+    Color saveColor =
+        CheckCollisionPointRec(
+            mousePosition,
+            saveButton)
+            ? hoverColor
+            : normalColor;
 
-    DrawRectangleRounded(saveButton, 1.0f, 32, saveColor);
+    DrawRectangleRounded(
+        saveButton,
+        1.0f,
+        32,
+        saveColor);
+
+    // White rounded border
+    DrawRectangleRoundedLinesEx(
+        saveButton,
+        1.0f,
+        32,
+        1.5f,
+        WHITE);
 
     // =========================================
     // GUIDE
     // =========================================
 
-    Color guideColor = CheckCollisionPointRec(mousePosition, guideButton)
-                           ? hoverColor
-                           : normalColor;
+    Color guideColor =
+        CheckCollisionPointRec(
+            mousePosition,
+            guideButton)
+            ? hoverColor
+            : normalColor;
 
-    DrawRectangleRounded(guideButton, 1.0, 32, guideColor);
+    DrawRectangleRounded(
+        guideButton,
+        1.0f,
+        32,
+        guideColor);
+
+    // White rounded border
+    DrawRectangleRoundedLinesEx(
+        guideButton,
+        1.0f,
+        32,
+        1.5f,
+        WHITE);
+
     // =========================================
     // Text
     // =========================================
+
     const float fontSize = 26.0f;
     const float spacing = 2.0f;
 
@@ -981,40 +1107,96 @@ void GameScreen::drawTopButtons()
     // =========================================
     // Measure text
     // =========================================
-    Vector2 exitTextSize = MeasureTextEx(font, exitText, fontSize, spacing);
-    Vector2 saveTextSize = MeasureTextEx(font, saveText, fontSize, spacing);
-    Vector2 guideTextSize = MeasureTextEx(font, guideText, fontSize, spacing);
+
+    Vector2 exitTextSize =
+        MeasureTextEx(
+            font,
+            exitText,
+            fontSize,
+            spacing);
+
+    Vector2 saveTextSize =
+        MeasureTextEx(
+            font,
+            saveText,
+            fontSize,
+            spacing);
+
+    Vector2 guideTextSize =
+        MeasureTextEx(
+            font,
+            guideText,
+            fontSize,
+            spacing);
 
     // =========================================
     // EXIT text
     // =========================================
 
-    DrawTextEx(font, exitText, Vector2{exitButton.x + (exitButton.width - exitTextSize.x) / 2.0f,
+    DrawTextEx(
+        font,
+        exitText,
 
-                                       exitButton.y + (exitButton.height - exitTextSize.y) / 2.0f},
-               fontSize,
-               spacing,
-               WHITE);
+        Vector2{
+            exitButton.x +
+                (exitButton.width -
+                 exitTextSize.x) /
+                    2.0f,
+
+            exitButton.y +
+                (exitButton.height -
+                 exitTextSize.y) /
+                    2.0f},
+
+        fontSize,
+        spacing,
+        WHITE);
 
     // =========================================
     // SAVE GAME text
     // =========================================
 
-    DrawTextEx(font, saveText, Vector2{saveButton.x + (saveButton.width - saveTextSize.x) / 2.0f,
+    DrawTextEx(
+        font,
+        saveText,
 
-                                       saveButton.y + (saveButton.height - saveTextSize.y) / 2.0f},
-               fontSize,
-               spacing,
-               WHITE);
+        Vector2{
+            saveButton.x +
+                (saveButton.width -
+                 saveTextSize.x) /
+                    2.0f,
+
+            saveButton.y +
+                (saveButton.height -
+                 saveTextSize.y) /
+                    2.0f},
+
+        fontSize,
+        spacing,
+        WHITE);
+
     // =========================================
     // GUIDE text
     // =========================================
-    DrawTextEx(font, guideText, Vector2{guideButton.x + (guideButton.width - guideTextSize.x) / 2.0f,
 
-                                        guideButton.y + (guideButton.height - guideTextSize.y) / 2.0f},
-               fontSize,
-               spacing,
-               WHITE);
+    DrawTextEx(
+        font,
+        guideText,
+
+        Vector2{
+            guideButton.x +
+                (guideButton.width -
+                 guideTextSize.x) /
+                    2.0f,
+
+            guideButton.y +
+                (guideButton.height -
+                 guideTextSize.y) /
+                    2.0f},
+
+        fontSize,
+        spacing,
+        WHITE);
 }
 
 void GameScreen::drawGuidePopup()
@@ -1220,7 +1402,6 @@ void GameScreen::drawGuidePopup()
         spacing,
         WHITE);
 
-    
     // =========================================
     // BACK BUTTON
     // =========================================
@@ -3266,4 +3447,10 @@ void GameScreen::drawFeintBlockedPopup()
         fontSize,
         spacing,
         WHITE);
+}
+
+void GameScreen::resetPlayerPanelAnimations()
+{
+    leftPlayerPanel.resetTextAnimation();
+    rightPlayerPanel.resetTextAnimation();
 }

@@ -18,17 +18,18 @@ private:
     std::string getHeroTextureKey(
         const Hero *hero) const;
 
-    std::string getSidekickTextureKey(
-        const Player *player) const;
+    std::string getSidekickTextureKey(const Player *player) const;
+
+    float textAnimationTimer;
+    bool textAnimationFinished;
+    float charRevealDelay;
 
 public:
-    PlayerPanel(
-        AssetManager *assets);
+    PlayerPanel(AssetManager *assets);
 
     void setBounds(Rectangle bounds);
 
-    void draw(
-        const Player *player) const;
+    void draw(const Player *player);
 
     void drawWrappedText(
         Font font,
@@ -39,6 +40,9 @@ public:
         float fontSize,
         float spacing,
         float lineHeight) const;
+
+    void resetTextAnimation();
+    bool isTextAnimationFinished() const;
 };
 
 #endif

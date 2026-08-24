@@ -137,6 +137,8 @@ public:
     void updateSaveMenu();
     void refreshSaveFiles();
     void drawFeintBlockedPopup();
+
+    void resetPlayerPanelAnimations();
 };
 
 #endif
