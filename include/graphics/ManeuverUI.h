@@ -23,27 +23,6 @@ enum class ManeuverState
 
 class ManeuverUI
 {
-public:
-    explicit ManeuverUI(AssetManager *assets);
-
-    void open(Player *player);
-    void update();
-    void draw();
-
-    bool isOpen() const;
-    bool isSelectingSpace() const;
-
-    bool needsAvailableMoves() const;
-    Fighter *getFighterNeedingMoves() const;
-    int getMovementBudget() const;
-    void beginSpaceSelection(const std::vector<Space *> &moves);
-
-    Fighter *getSelectedFighter() const;
-    const std::vector<Space *> &getAvailableMoves() const;
-
-    void finishAfterMove();
-    bool consumeReadyToFinalize();
-
 private:
     AssetManager *assets;
     ManeuverState state = ManeuverState::CLOSED;
@@ -68,8 +47,31 @@ private:
 
     static std::string getCardTextureKey(const Card *card, const std::string &heroName);
 
+public:
+    explicit ManeuverUI(AssetManager *assets);
+
+    void open(Player *player);
+    void update();
+    void draw();
+
+    bool isOpen() const;
+    bool isSelectingSpace() const;
+
+    bool needsAvailableMoves() const;
+    Fighter *getFighterNeedingMoves() const;
+    int getMovementBudget() const;
+    void beginSpaceSelection(const std::vector<Space *> &moves);
+
+    Fighter *getSelectedFighter() const;
+    const std::vector<Space *> &getAvailableMoves() const;
+
     void layoutAskButtons();
     void layoutFighterSelection();
     void layoutBurnCardWindow();
     void burnSelectedCard();
+
+    void finishAfterMove();
+    bool consumeReadyToFinalize();
+
+    void reset();
 };

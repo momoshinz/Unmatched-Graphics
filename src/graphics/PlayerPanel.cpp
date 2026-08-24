@@ -3,9 +3,248 @@
 #include "player/Player.h"
 #include "fighter/Hero.h"
 #include "fighter/Sidekick.h"
-
 #include <string>
 #include <vector>
+
+// ============================================================
+// GOTHIC PANEL
+// ============================================================
+
+static void DrawGothicPanel(Rectangle bounds)
+{
+    // ========================================================
+    // OUTER SHADOW
+    // ========================================================
+
+    Rectangle shadow = {
+        bounds.x + 6.0f,
+        bounds.y + 6.0f,
+        bounds.width,
+        bounds.height};
+
+    DrawRectangle(
+        static_cast<int>(shadow.x),
+        static_cast<int>(shadow.y),
+        static_cast<int>(shadow.width),
+        static_cast<int>(shadow.height),
+        Color{0, 0, 0, 150});
+
+    // ========================================================
+    // OUTER PANEL
+    // ========================================================
+
+    DrawRectangle(
+        static_cast<int>(bounds.x),
+        static_cast<int>(bounds.y),
+        static_cast<int>(bounds.width),
+        static_cast<int>(bounds.height),
+        Color{18, 14, 14, 170});
+
+    // ========================================================
+    // OUTER FRAME
+    // ========================================================
+
+    DrawRectangleLinesEx(
+        bounds,
+        4.0f,
+        Color{105, 82, 48, 255});
+
+    // ========================================================
+    // SECOND FRAME
+    // ========================================================
+
+    Rectangle innerFrame = {
+        bounds.x + 10.0f,
+        bounds.y + 10.0f,
+        bounds.width - 20.0f,
+        bounds.height - 20.0f};
+
+    DrawRectangleLinesEx(
+        innerFrame,
+        2.0f,
+        Color{160, 125, 70, 220});
+
+    // ========================================================
+    // INNER DARK AREA
+    // ========================================================
+
+    Rectangle contentFrame = {
+        bounds.x + 17.0f,
+        bounds.y + 17.0f,
+        bounds.width - 34.0f,
+        bounds.height - 34.0f};
+
+    DrawRectangleLinesEx(
+        contentFrame,
+        1.5f,
+        Color{75, 58, 40, 220});
+
+    // ========================================================
+    // GOTHIC CORNER SIZE
+    // ========================================================
+
+    const float c = 28.0f;
+
+    // ========================================================
+    // TOP LEFT
+    // ========================================================
+
+    DrawLineEx(
+        Vector2{bounds.x, bounds.y + c},
+        Vector2{bounds.x + c, bounds.y},
+        4.0f,
+        Color{160, 125, 70, 255});
+
+    DrawLineEx(
+        Vector2{bounds.x + 7, bounds.y + c - 5},
+        Vector2{bounds.x + c - 5, bounds.y + 7},
+        2.0f,
+        Color{90, 70, 45, 255});
+
+    // ========================================================
+    // TOP RIGHT
+    // ========================================================
+
+    DrawLineEx(
+        Vector2{bounds.x + bounds.width - c, bounds.y},
+        Vector2{bounds.x + bounds.width, bounds.y + c},
+        4.0f,
+        Color{160, 125, 70, 255});
+
+    DrawLineEx(
+        Vector2{
+            bounds.x + bounds.width - c + 5,
+            bounds.y + 7},
+        Vector2{
+            bounds.x + bounds.width - 7,
+            bounds.y + c - 5},
+        2.0f,
+        Color{90, 70, 45, 255});
+
+    // ========================================================
+    // BOTTOM LEFT
+    // ========================================================
+
+    DrawLineEx(
+        Vector2{
+            bounds.x,
+            bounds.y + bounds.height - c},
+        Vector2{
+            bounds.x + c,
+            bounds.y + bounds.height},
+        4.0f,
+        Color{160, 125, 70, 255});
+
+    DrawLineEx(
+        Vector2{
+            bounds.x + 7,
+            bounds.y + bounds.height - c + 5},
+        Vector2{
+            bounds.x + c - 5,
+            bounds.y + bounds.height - 7},
+        2.0f,
+        Color{90, 70, 45, 255});
+
+    // ========================================================
+    // BOTTOM RIGHT
+    // ========================================================
+
+    DrawLineEx(
+        Vector2{
+            bounds.x + bounds.width - c,
+            bounds.y + bounds.height},
+        Vector2{
+            bounds.x + bounds.width,
+            bounds.y + bounds.height - c},
+        4.0f,
+        Color{160, 125, 70, 255});
+
+    DrawLineEx(
+        Vector2{
+            bounds.x + bounds.width - c + 5,
+            bounds.y + bounds.height - 7},
+        Vector2{
+            bounds.x + bounds.width - 7,
+            bounds.y + bounds.height - c + 5},
+        2.0f,
+        Color{90, 70, 45, 255});
+
+    // ========================================================
+    // TOP CENTER ORNAMENT
+    // ========================================================
+
+    Vector2 topCenter = {
+        bounds.x + bounds.width / 2.0f,
+        bounds.y};
+
+    DrawTriangle(
+        Vector2{
+            topCenter.x,
+            topCenter.y + 2.0f},
+
+        Vector2{
+            topCenter.x - 15.0f,
+            topCenter.y + 18.0f},
+
+        Vector2{
+            topCenter.x + 15.0f,
+            topCenter.y + 18.0f},
+
+        Color{105, 82, 48, 255});
+
+    DrawTriangle(
+        Vector2{
+            topCenter.x,
+            topCenter.y + 5.0f},
+
+        Vector2{
+            topCenter.x - 7.0f,
+            topCenter.y + 13.0f},
+
+        Vector2{
+            topCenter.x + 7.0f,
+            topCenter.y + 13.0f},
+
+        Color{190, 150, 85, 255});
+
+    // ========================================================
+    // BOTTOM CENTER ORNAMENT
+    // ========================================================
+
+    Vector2 bottomCenter = {
+        bounds.x + bounds.width / 2.0f,
+        bounds.y + bounds.height};
+
+    DrawTriangle(
+        Vector2{
+            bottomCenter.x,
+            bottomCenter.y - 2.0f},
+
+        Vector2{
+            bottomCenter.x - 15.0f,
+            bottomCenter.y - 18.0f},
+
+        Vector2{
+            bottomCenter.x + 15.0f,
+            bottomCenter.y - 18.0f},
+
+        Color{105, 82, 48, 255});
+
+    DrawTriangle(
+        Vector2{
+            bottomCenter.x,
+            bottomCenter.y - 5.0f},
+
+        Vector2{
+            bottomCenter.x - 7.0f,
+            bottomCenter.y - 13.0f},
+
+        Vector2{
+            bottomCenter.x + 7.0f,
+            bottomCenter.y - 13.0f},
+
+        Color{190, 150, 85, 255});
+}
 
 PlayerPanel::PlayerPanel(AssetManager *assets)
     : assets(assets),
@@ -73,7 +312,7 @@ void PlayerPanel::draw(const Player *player) const
     // GENERAL PANEL SETTINGS
     // ========================================================
 
-    const float padding = 22.0f;
+    const float padding = 28.0f;
 
     const float contentX =
         bounds.x + padding;
@@ -88,22 +327,14 @@ void PlayerPanel::draw(const Player *player) const
     // PANEL
     // ========================================================
 
-    DrawRectangleRounded(
-        bounds,
-        0.12f,
-        30,
-        Color{
-            0,
-            0,
-            0,
-            180});
+    DrawGothicPanel(bounds);
 
     // ========================================================
     // CURRENT Y
     // ========================================================
 
     float currentY =
-        bounds.y + 15.0f;
+        bounds.y + 30.0f;
 
     // ========================================================
     // HERO

@@ -661,3 +661,25 @@ void ManeuverUI::draw()
         return;
     }
 }
+
+void ManeuverUI::reset()
+{
+    state = ManeuverState::CLOSED;
+
+    player = nullptr;
+
+    selectableFighters.clear();
+    fighterBoxes.clear();
+    selectedFighter = nullptr;
+
+    burnableCards.clear();
+    burnCardBoxes.clear();
+    burnSelectedIndex = -1;
+
+    boostAmount = 0;
+
+    availableMoves.clear();
+    waitingForMoves = false;
+
+    readyToFinalize = false;
+}

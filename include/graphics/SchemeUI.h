@@ -37,4 +37,6 @@ public:
     bool isConfirmed() const;
     void resetConfirmed();
     Card *getSelectedCard() const;
+
+    void reset();
 };

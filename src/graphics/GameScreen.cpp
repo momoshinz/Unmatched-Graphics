@@ -60,7 +60,7 @@ int GameScreen::update()
     // =========================================
 
     // needs to be first due to the priority it has
-    if (!draculaAbilityUI.isOpen() && game->getTurnManager().getTurnJustStarted())
+    if (!guideOpen && !draculaAbilityUI.isOpen() && game->getTurnManager().getTurnJustStarted())
     {
         if (game->getTurnManager().consumeTurnStart())
         {
@@ -238,6 +238,16 @@ int GameScreen::update()
         if (CheckCollisionPointRec(mousePosition, guideButton))
         {
             guideOpen = true;
+
+            // بستن تمام UIهای موقتی بازی
+            attackUI.reset();
+            schemeUI.resetConfirmed();
+            maneuverUI.reset();
+            effectUI.reset();
+
+            combatShowLookButton = false;
+            combatEffectRequested = false;
+
             return 0;
         }
 
@@ -714,9 +724,19 @@ void GameScreen::draw()
     {
         DrawTexturePro(
             background,
-            Rectangle{0.0f, 0.0f, static_cast<float>(background.width), static_cast<float>(background.height)},
-            Rectangle{0.0f, 0.0f, static_cast<float>(GetScreenWidth()), static_cast<float>(GetScreenHeight())},
-            Vector2{0.0f, 0.0f}, 0.0f, WHITE);
+            Rectangle{
+                0.0f,
+                0.0f,
+                static_cast<float>(background.width),
+                static_cast<float>(background.height)},
+            Rectangle{
+                0.0f,
+                0.0f,
+                static_cast<float>(GetScreenWidth()),
+                static_cast<float>(GetScreenHeight())},
+            Vector2{0.0f, 0.0f},
+            0.0f,
+            WHITE);
     }
     else
     {
@@ -734,20 +754,26 @@ void GameScreen::draw()
         return;
     }
 
-    if (!deckEmptyPopupOpen && !handLimitPopupOpen && !feintBlockedPopupOpen)
+    // ========================================================
+    // NORMAL GAME UI
+    // ========================================================
+
+    if (!deckEmptyPopupOpen &&
+        !handLimitPopupOpen &&
+        !feintBlockedPopupOpen &&
+        !guideOpen)
     {
         drawCombatEffectText();
         drawResultRevealButton();
         drawLookButton();
 
-        if (!maneuverUI.isOpen() && !combatInProgress && !draculaAbilityUI.isOpen())
+        if (!maneuverUI.isOpen() &&
+            !combatInProgress &&
+            !draculaAbilityUI.isOpen())
         {
             drawActionButtons();
         }
-        if (guideOpen)
-        {
-            drawGuidePopup();
-        }
+
         if (attackUI.isOpen())
         {
             attackUI.draw();
@@ -779,9 +805,22 @@ void GameScreen::draw()
         }
     }
 
+    // ========================================================
+    // OTHER POPUPS
+    // ========================================================
+
     drawDeckEmptyPopup();
     drawHandLimitPopup();
     drawFeintBlockedPopup();
+
+    // ========================================================
+    // GUIDE - ALWAYS ON TOP
+    // ========================================================
+
+    if (guideOpen)
+    {
+        drawGuidePopup();
+    }
 }
 
 void GameScreen::drawMap()
@@ -937,7 +976,7 @@ void GameScreen::drawTopButtons()
 
     const char *exitText = "EXIT";
     const char *saveText = "SAVE GAME";
-    const char *guideText = "GUIDE";
+    const char *guideText = "HELP";
 
     // =========================================
     // Measure text
@@ -1040,12 +1079,12 @@ void GameScreen::drawGuidePopup()
     DrawTextEx(font, "[ ACTIONS ]", Vector2{x, y}, textSize, spacing, WHITE);
     y += lineHeight;
 
-    DrawTextEx(font, "Attack   ->  Attack an enemy fighter.", Vector2{x, y}, textSize,
+    DrawTextEx(font, "Attack   ->>  Attack an enemy fighter.", Vector2{x, y}, textSize,
                spacing,
                WHITE);
     y += lineHeight;
 
-    DrawTextEx(font, "Maneuver ->  Move a fighter and draw a card.", Vector2{x, y},
+    DrawTextEx(font, "Maneuver ->>  Move a fighter and draw a card.", Vector2{x, y},
                textSize,
                spacing,
                WHITE);
@@ -1053,7 +1092,7 @@ void GameScreen::drawGuidePopup()
 
     DrawTextEx(
         font,
-        "Scheme   ->  Play a Scheme card.",
+        "Scheme   ->>  Play a Scheme card.",
         Vector2{x, y},
         textSize,
         spacing,
@@ -1077,7 +1116,7 @@ void GameScreen::drawGuidePopup()
 
     DrawTextEx(
         font,
-        "[o] Each turn you have 2 actions.",
+        "[*] The younger player chooses the fighter and steps",
         Vector2{x, y},
         textSize,
         spacing,
@@ -1087,7 +1126,27 @@ void GameScreen::drawGuidePopup()
 
     DrawTextEx(
         font,
-        "[o] Every Hero card carries a unique effect,",
+        "    onto the field first.",
+        Vector2{x, y},
+        textSize,
+        spacing,
+        WHITE);
+
+    y += lineHeight;
+
+    DrawTextEx(
+        font,
+        "[*] Each turn you have 2 actions.",
+        Vector2{x, y},
+        textSize,
+        spacing,
+        WHITE);
+
+    y += lineHeight;
+
+    DrawTextEx(
+        font,
+        "[*] Every Hero card carries a unique effect,",
         Vector2{x, y},
         textSize,
         spacing,
@@ -1117,7 +1176,7 @@ void GameScreen::drawGuidePopup()
 
     DrawTextEx(
         font,
-        "[o] Your hand must never exceed 7 cards.",
+        "[*] Your hand must never exceed 7 cards.",
         Vector2{x, y},
         textSize,
         spacing,
@@ -1126,7 +1185,7 @@ void GameScreen::drawGuidePopup()
     y += lineHeight;
 
     DrawTextEx(
-        font, "[o] Heroes enter the battlefield alongside their",
+        font, "[*] Fighters can move directly between the marked",
         Vector2{x, y},
         textSize,
         spacing,
@@ -1135,7 +1194,7 @@ void GameScreen::drawGuidePopup()
     y += lineHeight;
 
     DrawTextEx(
-        font, "    Sidekicks, NEVER ALONE.",
+        font, "    spaces, which are hidden passages.",
         Vector2{x, y},
         textSize,
         spacing,
@@ -1145,7 +1204,7 @@ void GameScreen::drawGuidePopup()
 
     DrawTextEx(
         font,
-        "[o] Through tactical moves in each turn, your goal",
+        "[*] Through tactical moves in each turn, your goal",
         Vector2{x, y},
         textSize,
         spacing,
@@ -1161,26 +1220,7 @@ void GameScreen::drawGuidePopup()
         spacing,
         WHITE);
 
-    y += lineHeight;
-
-    DrawTextEx(
-        font,
-        "[o] The younger player chooses the fighter and steps",
-        Vector2{x, y},
-        textSize,
-        spacing,
-        WHITE);
-
-    y += lineHeight;
-
-    DrawTextEx(
-        font,
-        "    onto the field first.",
-        Vector2{x, y},
-        textSize,
-        spacing,
-        WHITE);
-
+    
     // =========================================
     // BACK BUTTON
     // =========================================
@@ -2369,8 +2409,8 @@ void GameScreen::drawLookButton()
         Vector2{
             lookButton.x + (lookButton.width - textSize.x) / 2.0f,
             lookButton.y + (lookButton.height - textSize.y) / 2.0f},
-        
-            fontSize,
+
+        fontSize,
         1.5f, WHITE);
 }
 

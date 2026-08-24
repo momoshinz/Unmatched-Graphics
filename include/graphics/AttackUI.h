@@ -75,6 +75,8 @@ public:
 
     bool isAttackConfirmed() const;
     void resetAttackConfirmed();
+
+    void reset();
 };
 
 #endif

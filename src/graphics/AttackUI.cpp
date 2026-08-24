@@ -1829,3 +1829,43 @@ void AttackUI::resetAttackConfirmed()
 {
     attackConfirmed = false;
 }
+
+void AttackUI::reset()
+{
+    open = false;
+
+    game = nullptr;
+    attackPlayer = nullptr;
+
+    selectableFighters.clear();
+    fighterBoxes.clear();
+
+    selectableAttackCards.clear();
+    attackCardBoxes.clear();
+
+    selectableTargets.clear();
+    targetBoxes.clear();
+
+    selectableDefenseCards.clear();
+    defenseCardBoxes.clear();
+
+    selectedAttacker = nullptr;
+    selectedTarget = nullptr;
+
+    selectedAttackCard = nullptr;
+    selectedDefenseCard = nullptr;
+
+    selectedAttackCardIndex = -1;
+
+    confirmedAttackCard = false;
+    defenseChoiceMade = false;
+    wantsDefenseCard = false;
+
+    attackConfirmed = false;
+
+    showError = false;
+    errorMessage.clear();
+    errorIsDefenseless = false;
+
+    phase = AttackPhase::SelectAttacker;
+}

@@ -421,3 +421,19 @@ Card *SchemeUI::getSelectedCard() const
 
     return selectableCards[selectedIndex];
 }
+
+void SchemeUI::reset()
+{
+    open = false;
+
+    selectableCards.clear();
+    cardBoxes.clear();
+
+    selectedIndex = -1;
+    confirmed = false;
+
+    emptyMessage = false;
+
+    backButton = Rectangle{0, 0, 0, 0};
+    playButton = Rectangle{0, 0, 0, 0};
+}
