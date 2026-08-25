@@ -74,7 +74,7 @@ void LoadingScreen::draw()
         (GetScreenWidth() - textSize.x) / 2.0f;
 
     float textY =
-        (GetScreenHeight() - textSize.y) / 1.5f;
+        (GetScreenHeight() - textSize.y) / 1.8f;
 
     DrawTextEx(
         font,

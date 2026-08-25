@@ -924,7 +924,7 @@ void MainMenu::drawPlayerInput(
     // ENTER MESSAGE
     // =====================================
 
-    const char *enterMessage = "> Please Enter To Confirm Your Information.";
+    const char *enterMessage = "> press Enter To Confirm Your Information.";
 
     Vector2 enterMessageSize =
         MeasureTextEx(

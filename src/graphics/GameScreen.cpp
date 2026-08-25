@@ -873,6 +873,7 @@ void GameScreen::drawMap()
     // ROYAL CREAM MAP BORDERS
     // =====================================
 
+    
     const Color royalCream = {
         218, 204, 174, 255};
 

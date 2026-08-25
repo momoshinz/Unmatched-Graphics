@@ -74,7 +74,7 @@ int main()
 
     LoadingScreen loadingScreen(
         assets,
-        5.0f);
+        20.0f);
 
     while (
         !WindowShouldClose() &&
