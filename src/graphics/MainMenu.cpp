@@ -55,9 +55,12 @@ void loadSaveFiles(std::vector<std::string> &saveFiles)
     while (true)
     {
         std::string filename =
-            "saves/save" + std::to_string(slot) + ".json";
+            "save" + std::to_string(slot) + ".json";
 
-        std::ifstream file(filename);
+        std::string path =
+            "saves/" + filename;
+
+        std::ifstream file(path);
 
         if (!file)
             break;
@@ -1219,7 +1222,19 @@ int MainMenu::handleInput()
                 {
                     selectedSave = i;
 
-                    return 2;
+                    SaveManager saveManager;
+
+                    try
+                    {
+                        saveManager.loadGame(game, saveFiles[i]);
+
+                        return 5;
+                    }
+                    catch (const std::exception &e)
+                    {
+                        std::cout << "Load failed: " << e.what() << std::endl;
+                        return 0;
+                    }
                 }
             }
 

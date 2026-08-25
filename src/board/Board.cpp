@@ -15,11 +15,7 @@ Board::Board()
 
 Board::~Board()
 {
-    for (Space *space : spaces)
-    {
-        delete space;
-    }
-    spaces.clear();
+    clear();
 }
 
 const vector<Space *> &Board::getSpaces() const
@@ -583,4 +579,14 @@ vector<Space*> Board::getAvailableFogMoves(Fog* fog,int maxStep) const
         }
     }
     return result;
+}
+
+void Board::clear()
+{
+    for (Space *space : spaces)
+    {
+        delete space;
+    }
+
+    spaces.clear();
 }

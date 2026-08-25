@@ -14,6 +14,8 @@ public:
     Board();
     ~Board();
 
+    void clear();
+
     const vector<Space *> &getSpaces() const;
 
     vector<Space *> findSpacesByZone(ZoneType zone) const;
