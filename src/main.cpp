@@ -250,22 +250,6 @@ int main()
                 {
                     std::cout
                         << "LOAD GAME selected.\n";
-
-                    try
-                    {
-                        if (game.loadMenu())
-                        {
-                            game.run(true);
-                        }
-                    }
-                    catch (
-                        const std::exception &e)
-                    {
-                        std::cout
-                            << "\n[!] ERROR: "
-                            << e.what()
-                            << "\n";
-                    }
                 }
 
                 // =============================================
@@ -312,6 +296,27 @@ int main()
                     // -----------------------------------------
                     // Transition
                     // -----------------------------------------
+
+                    transition.start(
+                        TransitionType::Fade,
+                        1.0f,
+                        2.5f);
+                }
+
+                // =============================================
+                // LOAD GAME → RESUME (بدون beginTurns)
+                // =============================================
+
+                else if (result == 5)
+                {
+                    std::cout
+                        << "Game loaded, resuming...\n";
+
+                    nextScreen =
+                        Screen::GAME;
+
+                    transition.setText(
+                        "GET READY FIGHTERS . . .");
 
                     transition.start(
                         TransitionType::Fade,

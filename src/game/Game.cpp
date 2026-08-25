@@ -1109,7 +1109,7 @@ void Game::run(bool loaded)
     {
         if (!loaded)
         {
-            // initialize();
+            //initialize();
         }
 
         while (!isGameOver())
@@ -1435,6 +1435,7 @@ void Game::loadGame(const string &filename)
     }
 
     players.clear();
+    board.clear();
     board.setupMap();
 
     for (const auto &playerJson : j["Players"])
@@ -1482,12 +1483,12 @@ void Game::loadGame(const string &filename)
 
             Sidekick *sidekick = nullptr;
 
-            if (type == "Sister 1" || type == "Sister 2" || type == "Sister 3")
+            if (type == "* Sister 1" || type == "* Sister 2" || type == "* Sister 3" || type == "Sister 3")
             {
                 int id = sidekickJson["ID"];
                 sidekick = new Sisters(id);
             }
-            else if (type == "Dr. Watson")
+            else if (type == "* Dr. Watson")
             {
                 sidekick = new Watson();
             }
