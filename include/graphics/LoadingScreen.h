@@ -1,5 +1,4 @@
-#ifndef LOADING_SCREEN_H
-#define LOADING_SCREEN_H
+#pragma once
 #include <raylib.h>
 #include "graphics/AssetManager.h"
 
@@ -20,5 +19,3 @@ public:
     bool isFinished() const;
     void reset();
 };
-
-#endif

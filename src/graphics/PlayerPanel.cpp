@@ -867,22 +867,54 @@ void PlayerPanel::draw(
 
         if (sidekickTexture.id != 0)
         {
-            const float sidekickImageHeight =
-                190.0f;
+            const float maxImageWidth =
+                bounds.width - 98.0f;
+
+            float maxImageHeight = 168.0f;
+
+    
+            const float textureWidth =
+                static_cast<float>(sidekickTexture.width);
+
+            const float textureHeight =
+                static_cast<float>(sidekickTexture.height);
+
+            const float scaleX =
+                maxImageWidth / textureWidth;
+
+            const float scaleY =
+                maxImageHeight / textureHeight;
+
+            // کوچک‌ترین scale را انتخاب می‌کنیم
+            // تا تصویر کاملاً داخل محدوده جا شود
+            const float scale =
+                std::min(scaleX, scaleY);
+
+            const float imageWidth =
+                textureWidth * scale;
+
+            const float imageHeight =
+                textureHeight * scale;
+
+            // وسط‌چین کردن تصویر داخل پنل
+            const float imageX =
+                bounds.x +
+                (bounds.width - imageWidth) / 2.0f;
+
+            const float imageY =
+                currentY;
 
             Rectangle source{
                 0.0f,
                 0.0f,
-                static_cast<float>(
-                    sidekickTexture.width),
-                static_cast<float>(
-                    sidekickTexture.height)};
+                textureWidth,
+                textureHeight};
 
             Rectangle destination{
-                bounds.x + 45.0f,
-                currentY,
-                bounds.width - 90.0f,
-                sidekickImageHeight};
+                imageX,
+                imageY,
+                imageWidth,
+                imageHeight};
 
             DrawTexturePro(
                 sidekickTexture,
@@ -893,7 +925,7 @@ void PlayerPanel::draw(
                 WHITE);
 
             currentY +=
-                sidekickImageHeight + 7.0f;
+                imageHeight + 7.0f;
         }
 
         // ====================================================

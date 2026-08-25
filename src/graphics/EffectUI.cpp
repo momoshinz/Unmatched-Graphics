@@ -14,10 +14,6 @@
 #include <algorithm>
 #include <unordered_map>
 
-// ============================================================
-// اسم فایتر -> کلید تکسچر کاراکتر در AssetManager
-// ============================================================
-
 static Texture2D getFighterTextureForEffectUI(AssetManager *assets, Fighter *fighter)
 {
     if (assets == nullptr || fighter == nullptr)
@@ -26,22 +22,18 @@ static Texture2D getFighterTextureForEffectUI(AssetManager *assets, Fighter *fig
     }
 
     std::string name = fighter->getName();
-
     if (name == "DRACULA")
     {
         return assets->getCharacter("dracula");
     }
-
     if (name == "* Sister 1")
     {
         return assets->getCharacter("sister1");
     }
-
     if (name == "* Sister 2")
     {
         return assets->getCharacter("sister2");
     }
-
     if (name == "* Sister 3")
     {
         return assets->getCharacter("sister3");
@@ -51,7 +43,6 @@ static Texture2D getFighterTextureForEffectUI(AssetManager *assets, Fighter *fig
     {
         return assets->getCharacter("sherlock_art");
     }
-
     if (name == "* Dr. Watson")
     {
         return assets->getCharacter("drwatson");
@@ -68,10 +59,6 @@ EffectUI::EffectUI(AssetManager *assets)
     : assets(assets)
 {
 }
-
-// ============================================================
-// اسم کارت -> کلید تکسچر
-// ============================================================
 
 std::string EffectUI::getCardTextureKey(const Card *card, const std::string &heroName)
 {
@@ -121,18 +108,12 @@ std::string EffectUI::getCardTextureKey(const Card *card, const std::string &her
         {"Step Lightly", "StepLightly"}};
 
     auto it = nameToKey.find(name);
-
     if (it == nameToKey.end())
     {
         return "";
     }
-
     return it->second;
 }
-
-// ============================================================
-// OPEN
-// ============================================================
 
 void EffectUI::open(Game *game, Effect *effect, Fighter *fighter, Fighter *target)
 {
@@ -250,10 +231,6 @@ void EffectUI::finalizeReady()
     ready = true;
 }
 
-// ============================================================
-// SETUP: کارت‌های ساده (از قبل داشتیم)
-// ============================================================
-
 void EffectUI::setupChooseAdjacentEmptySpace()
 {
     candidateSpaces.clear();
@@ -343,10 +320,6 @@ void EffectUI::setupChooseEnemyFighter()
     }
 }
 
-// ============================================================
-// SETUP: CodedNotes
-// ============================================================
-
 void EffectUI::setupChooseTwoCardsAndOrder()
 {
     subPhase = 0;
@@ -354,9 +327,7 @@ void EffectUI::setupChooseTwoCardsAndOrder()
     if (actingPlayer == nullptr)
         return;
 
-    // کشیدن ۳ کارت همینجا (قبل از نمایش انتخاب)
     actingPlayer->drawCards(3);
-    std::cout << "[+] Invisible Man drew 3 cards." << std::endl;
 
     candidateCards.clear();
     for (Card *card : actingPlayer->getHand().getCards())
@@ -367,25 +338,18 @@ void EffectUI::setupChooseTwoCardsAndOrder()
     layoutCardWindow(candidateCards);
 }
 
-// ============================================================
-// SETUP: IntoThinAir
-// ============================================================
-
 void EffectUI::setupChooseFighterMoveThenFogMove()
 {
-    // ------------------------------------------------
-    // Into Thin Air
-    //
-    // subPhase 0:
-    // انتخاب مستقیم مقصد Invisible Man روی نقشه
-    //
-    // subPhase 2:
-    // انتخاب Fog از پنجره
-    //
-    // subPhase 3:
-    // انتخاب مقصد Fog روی نقشه
-    // ------------------------------------------------
+    /* Into Thin Air
+     subPhase 0:
+     Directly select Invisible Man's destination on the map
 
+    subPhase 2:
+     Select a Fog from the window
+
+    subPhase 3:
+     Select the Fog's destination
+    */
     subPhase = 0;
 
     candidateSpaces.clear();
@@ -397,50 +361,15 @@ void EffectUI::setupChooseFighterMoveThenFogMove()
     if (fighter == nullptr || game == nullptr || effect == nullptr)
         return;
 
-    // ---------------------------------------------
-    // مرحله اول:
-    // خانه‌هایی که Invisible Man می‌تواند به آن‌ها برود
-    // ---------------------------------------------
+    candidateSpaces = game->getBoard().getAvailableMoves(fighter, effect->getMoveRange());
 
-    candidateSpaces =
-        game->getBoard().getAvailableMoves(
-            fighter,
-            effect->getMoveRange());
-
-    std::cout << "[Into Thin Air] Invisible Man movement options: "
-              << candidateSpaces.size() << std::endl;
-
-    for (Space *space : candidateSpaces)
-    {
-        if (space != nullptr)
-        {
-            std::cout << "  -> Space "
-                      << space->getId()
-                      << std::endl;
-        }
-    }
-
-    // اگر هیچ خانه‌ای برای Invisible Man وجود ندارد
+    // if there is no space for fog
     if (candidateSpaces.empty())
     {
-        std::cout
-            << "[!] Invisible Man has no valid destination."
-            << std::endl;
-
         finalizeReady();
         return;
     }
-
-    // ---------------------------------------------
-    // مهم:
-    // دیگر layoutYesNo نداریم.
-    // مستقیماً وارد انتخاب روی نقشه می‌شویم.
-    // ---------------------------------------------
 }
-
-// ============================================================
-// SETUP: Lurking
-// ============================================================
 
 void EffectUI::setupChooseLurkingOption()
 {
@@ -448,17 +377,12 @@ void EffectUI::setupChooseLurkingOption()
     layoutTwoOptions("MOVE TO A FOG TOKEN", "MOVE A FOG TOKEN");
 }
 
-// ============================================================
-// SETUP: RollingFog
-// ============================================================
-
 void EffectUI::setupChooseFogSourceAndDestination()
 {
     subPhase = 0;
 
     candidateFogs.clear();
     candidateSpaces.clear();
-
     selectedFog = nullptr;
     fogSourceSpace = nullptr;
 
@@ -475,22 +399,11 @@ void EffectUI::setupChooseFogSourceAndDestination()
 
     if (candidateFogs.empty())
     {
-        std::cout << "[!] No Fog tokens available." << std::endl;
         finalizeReady();
         return;
     }
-
-    std::cout
-        << "[Rolling Fog] Available Fog tokens: "
-        << candidateFogs.size()
-        << std::endl;
-
     layoutFogWindow();
 }
-
-// ============================================================
-// SETUP: SlipAway
-// ============================================================
 
 void EffectUI::setupChooseFogAndDestination()
 {
@@ -510,10 +423,6 @@ void EffectUI::setupChooseFogAndDestination()
         layoutFogWindow();
     }
 }
-
-// ============================================================
-// SETUP: StepLightly
-// ============================================================
 
 void EffectUI::setupChooseEnemyAndFogDestination()
 {
@@ -542,7 +451,6 @@ void EffectUI::setupChooseEnemyAndFogDestination()
     }
     else
     {
-        // بدون دشمن مجاور، مستقیم برو به مرحله‌ی فاگ
         subPhase = 1;
 
         candidateFogs.clear();
@@ -565,10 +473,6 @@ void EffectUI::setupChooseEnemyAndFogDestination()
         }
     }
 }
-
-// ============================================================
-// LAYOUT HELPERS
-// ============================================================
 
 void EffectUI::layoutCardWindow(const std::vector<Card *> &cards)
 {
@@ -605,10 +509,8 @@ void EffectUI::layoutCardWindow(const std::vector<Card *> &cards)
     const float confirmHeight = 55.0f;
     float lastRowBottom = startY + rowCount * (boxHeight + gapY);
 
-    confirmButton = Rectangle{
-        (GetScreenWidth() - confirmWidth) / 2.0f,
-        lastRowBottom + 15.0f,
-        confirmWidth, confirmHeight};
+    confirmButton = Rectangle{(GetScreenWidth() - confirmWidth) / 2.0f, lastRowBottom + 15.0f,
+                              confirmWidth, confirmHeight};
 }
 
 void EffectUI::layoutFighterWindow(const std::vector<Fighter *> &fighters)
@@ -693,15 +595,10 @@ void EffectUI::beginFogDestinationStage(int range, bool excludeSource)
 
     if (excludeSource && fogSourceSpace != nullptr)
     {
-        candidateSpaces.erase(
-            std::remove(candidateSpaces.begin(), candidateSpaces.end(), fogSourceSpace),
-            candidateSpaces.end());
+        candidateSpaces.erase(std::remove(candidateSpaces.begin(), candidateSpaces.end(), fogSourceSpace),
+                              candidateSpaces.end());
     }
 }
-
-// ============================================================
-// UPDATE
-// ============================================================
 
 void EffectUI::update()
 {
@@ -709,7 +606,7 @@ void EffectUI::update()
         return;
 
     if (isChoosingSpace())
-        return; // GameScreen کلیک روی نقشه رو پردازش می‌کنه
+        return;
 
     if (!IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
         return;
@@ -718,7 +615,6 @@ void EffectUI::update()
 
     if (inputKind == EffectInputKind::ChooseDefeatedSisterAndZoneSpace)
     {
-        // مرحله اول: انتخاب Sister
         if (subPhase == 0)
         {
             for (size_t i = 0; i < fighterBoxes.size(); i++)
@@ -726,18 +622,12 @@ void EffectUI::update()
                 if (CheckCollisionPointRec(mouse, fighterBoxes[i]))
                 {
                     choice.selectedFighter = candidateFighters[i];
-
                     subPhase = 1;
-
                     candidateSpaces.clear();
 
-                    // Zone دراکولا را پیدا کن
-                    if (fighter != nullptr &&
-                        fighter->getPosition() != nullptr)
+                    if (fighter != nullptr && fighter->getPosition() != nullptr)
                     {
-                        const vector<ZoneType> &draculaZones =
-                            fighter->getPosition()->getZones();
-
+                        const vector<ZoneType> &draculaZones = fighter->getPosition()->getZones();
                         for (Space *space : game->getBoard().getSpaces())
                         {
                             if (space == nullptr)
@@ -746,8 +636,7 @@ void EffectUI::update()
                             if (space->isOccupied())
                                 continue;
 
-                            const vector<ZoneType> &zones =
-                                space->getZones();
+                            const vector<ZoneType> &zones = space->getZones();
 
                             bool sameZone = false;
 
@@ -774,22 +663,15 @@ void EffectUI::update()
                     }
 
                     if (candidateSpaces.empty())
-                    {
                         finalizeReady();
-                    }
 
                     return;
                 }
             }
-
             return;
         }
-
-        // مرحله دوم توسط selectSpace انجام می‌شود
         return;
     }
-
-    // -------------------- کارت‌های ساده --------------------
 
     if (inputKind == EffectInputKind::ChooseOpponentCardToBurn)
     {
@@ -812,7 +694,6 @@ void EffectUI::update()
 
     if (inputKind == EffectInputKind::ChooseFighterAndReachableSpace)
     {
-        // مرحله اول: انتخاب Fighter
         if (subPhase == 0)
         {
             for (size_t i = 0; i < fighterBoxes.size(); i++)
@@ -820,32 +701,22 @@ void EffectUI::update()
                 if (CheckCollisionPointRec(mouse, fighterBoxes[i]))
                 {
                     choice.selectedFighter = candidateFighters[i];
-
                     subPhase = 1;
-
                     candidateSpaces.clear();
 
-                    if (game != nullptr &&
-                        choice.selectedFighter != nullptr)
+                    if (game != nullptr && choice.selectedFighter != nullptr)
                     {
-                        candidateSpaces =
-                            game->getBoard().getAvailableMoves(
-                                choice.selectedFighter,
-                                2);
+                        candidateSpaces = game->getBoard().getAvailableMoves(choice.selectedFighter, 2);
                     }
 
                     if (candidateSpaces.empty())
-                    {
                         finalizeReady();
-                    }
 
                     return;
                 }
             }
-
             return;
         }
-
         return;
     }
 
@@ -866,64 +737,42 @@ void EffectUI::update()
     if (inputKind == EffectInputKind::ShowOpponentHand)
     {
         if (CheckCollisionPointRec(mouse, confirmButton))
-        {
             finalizeReady();
-        }
+
         return;
     }
 
-    // -------------------- Beastform --------------------
-
     if (inputKind == EffectInputKind::ChooseCardsToDiscard)
     {
-        // -------------------------
-        // انتخاب / لغو انتخاب کارت
-        // -------------------------
-
         for (size_t i = 0; i < cardBoxes.size(); i++)
         {
             if (CheckCollisionPointRec(mouse, cardBoxes[i]))
             {
                 int index = static_cast<int>(i);
 
-                auto it = std::find(
-                    choice.selectedCardIndices.begin(),
-                    choice.selectedCardIndices.end(),
-                    index);
+                auto it = std::find(choice.selectedCardIndices.begin(),
+                                    choice.selectedCardIndices.end(),
+                                    index);
 
                 if (it != choice.selectedCardIndices.end())
                 {
-                    // لغو انتخاب
                     choice.selectedCardIndices.erase(it);
                 }
                 else
                 {
-                    // انتخاب کارت
                     choice.selectedCardIndices.push_back(index);
                 }
-
                 return;
             }
         }
 
-        // -------------------------
-        // DONE
-        // -------------------------
-
         if (CheckCollisionPointRec(mouse, confirmButton))
         {
-            std::cout
-                << "[+] BeastForm card selection finished."
-                << std::endl;
-
             finalizeReady();
             return;
         }
-
         return;
     }
-
-    // -------------------- CodedNotes --------------------
 
     if (inputKind == EffectInputKind::ChooseTwoCardsAndOrder)
     {
@@ -973,26 +822,12 @@ void EffectUI::update()
         return;
     }
 
-    // -------------------- IntoThinAir --------------------
-
     if (inputKind == EffectInputKind::ChooseFighterMoveThenFogMove)
     {
-        // ------------------------------------------------
-        // subPhase 0:
-        // Invisible Man باید مستقیماً روی نقشه حرکت کند.
-        // کلیک روی نقشه توسط GameScreen -> selectSpace()
-        // مدیریت می‌شود.
-        // ------------------------------------------------
-
         if (subPhase == 0)
         {
             return;
         }
-
-        // ------------------------------------------------
-        // subPhase 2:
-        // انتخاب Fog از پنجره
-        // ------------------------------------------------
 
         if (subPhase == 2)
         {
@@ -1004,42 +839,21 @@ void EffectUI::update()
                         return;
 
                     selectedFog = candidateFogs[i];
-
-                    choice.selectedFogId =
-                        static_cast<int>(i);
-
+                    choice.selectedFogId = static_cast<int>(i);
                     subPhase = 3;
 
-                    beginFogDestinationStage(
-                        effect->getFogMoveRange(),
-                        false);
+                    beginFogDestinationStage(effect->getFogMoveRange(), false);
 
                     if (candidateSpaces.empty())
-                    {
-                        std::cout
-                            << "[!] No destination for Fog."
-                            << std::endl;
-
                         finalizeReady();
-                    }
 
                     return;
                 }
             }
-
             return;
         }
-
-        // ------------------------------------------------
-        // subPhase 3:
-        // انتخاب مقصد Fog روی نقشه
-        // توسط selectSpace() انجام می‌شود.
-        // ------------------------------------------------
-
         return;
     }
-
-    // -------------------- Lurking --------------------
 
     if (inputKind == EffectInputKind::ChooseLurkingOption)
     {
@@ -1064,7 +878,6 @@ void EffectUI::update()
 
                 if (candidateSpaces.empty())
                 {
-                    std::cout << "[!] No Fog token on the board." << std::endl;
                     finalizeReady();
                 }
             }
@@ -1112,8 +925,6 @@ void EffectUI::update()
         return;
     }
 
-    // -------------------- SlipAway --------------------
-
     if (inputKind == EffectInputKind::ChooseFogAndDestination)
     {
         if (subPhase == 0)
@@ -1139,9 +950,8 @@ void EffectUI::update()
                     }
 
                     if (candidateSpaces.empty())
-                    {
                         finalizeReady();
-                    }
+
                     return;
                 }
             }
@@ -1152,11 +962,6 @@ void EffectUI::update()
 
     if (inputKind == EffectInputKind::ChooseFogSourceAndDestination)
     {
-        // ========================================================
-        // مرحله 0:
-        // انتخاب Fog
-        // ========================================================
-
         if (subPhase == 0)
         {
             for (size_t i = 0; i < fogBoxes.size(); i++)
@@ -1169,11 +974,9 @@ void EffectUI::update()
 
                 selectedFog = candidateFogs[i];
 
-                choice.selectedFogId =
-                    static_cast<int>(i);
+                choice.selectedFogId = static_cast<int>(i);
 
-                fogSourceSpace =
-                    selectedFog->getPosition();
+                fogSourceSpace = selectedFog->getPosition();
 
                 if (fogSourceSpace == nullptr)
                 {

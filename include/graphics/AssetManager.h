@@ -40,7 +40,6 @@ class AssetManager
         Font getTitleFont() const;
         Font getLoadingFont() const;
         Font getGuideFont() const;
-
         Texture2D getCharacter(const std::string &name) const;
         Texture2D getCard(const std::string &name) const;
         Texture2D getActionIcons() const;

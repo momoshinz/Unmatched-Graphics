@@ -7,16 +7,10 @@
 #include "board/Board.h"
 #include "board/Space.h"
 
-#include <iostream>
-
 DraculaAbilityUI::DraculaAbilityUI(AssetManager *assets)
     : assets(assets)
 {
 }
-
-// ============================================================
-// اسم فایتر -> کلید تکسچر کاراکتر
-// ============================================================
 
 static Texture2D getFighterTextureForDraculaUI(AssetManager *assets, Fighter *fighter)
 {
@@ -45,10 +39,6 @@ static Texture2D getFighterTextureForDraculaUI(AssetManager *assets, Fighter *fi
     return {};
 }
 
-// ============================================================
-// OPEN
-// ============================================================
-
 void DraculaAbilityUI::open(Game *game, Hero *dracula, Player *player)
 {
     this->game = game;
@@ -71,10 +61,6 @@ void DraculaAbilityUI::open(Game *game, Hero *dracula, Player *player)
     layoutAskButtons();
 }
 
-// ============================================================
-// LAYOUT
-// ============================================================
-
 void DraculaAbilityUI::layoutAskButtons()
 {
     const float buttonWidth = 160.0f;
@@ -94,11 +80,9 @@ void DraculaAbilityUI::layoutNoTargetMessage()
     const float buttonWidth = 140.0f;
     const float buttonHeight = 48.0f;
 
-    backButton = Rectangle{
-        (GetScreenWidth() - buttonWidth) / 2.0f,
-        GetScreenHeight() - 80.0f,
-        buttonWidth,
-        buttonHeight};
+    backButton = Rectangle{(GetScreenWidth() - buttonWidth) / 2.0f, GetScreenHeight() - 80.0f,
+                           buttonWidth,
+                           buttonHeight};
 }
 
 void DraculaAbilityUI::layoutTargetSelection()
@@ -117,28 +101,17 @@ void DraculaAbilityUI::layoutTargetSelection()
 
     for (int i = 0; i < count; i++)
     {
-        Rectangle box{
-            startX + i * (boxWidth + gapX),
-            startY,
-            boxWidth,
-            boxHeight};
-
+        Rectangle box{startX + i * (boxWidth + gapX), startY, boxWidth, boxHeight};
         fighterBoxes.push_back(box);
     }
 
     const float confirmWidth = 220.0f;
     const float confirmHeight = 60.0f;
 
-    confirmButton = Rectangle{
-        (GetScreenWidth() - confirmWidth) / 2.0f,
-        startY + boxHeight + 25.0f,
-        confirmWidth,
-        confirmHeight};
+    confirmButton = Rectangle{(GetScreenWidth() - confirmWidth) / 2.0f, startY + boxHeight + 25.0f,
+                              confirmWidth,
+                              confirmHeight};
 }
-
-// ============================================================
-// UPDATE
-// ============================================================
 
 void DraculaAbilityUI::update()
 {
@@ -223,7 +196,6 @@ void DraculaAbilityUI::update()
         if (selectedIndex != -1 && CheckCollisionPointRec(mouse, confirmButton))
         {
             applyAbility(candidateFighters[selectedIndex]);
-
             state = DraculaAbilityState::CLOSED;
             finished = true;
         }
@@ -232,10 +204,6 @@ void DraculaAbilityUI::update()
     }
 }
 
-// ============================================================
-// APPLY
-// ============================================================
-
 void DraculaAbilityUI::applyAbility(Fighter *target)
 {
     if (target == nullptr || player == nullptr)
@@ -243,18 +211,9 @@ void DraculaAbilityUI::applyAbility(Fighter *target)
         return;
     }
 
-    std::cout << "\n[+] Dracula uses his SPECIAL ABILITY!" << std::endl;
-
     target->takeDamage(1);
-
-    std::cout << "[-] " << target->getName() << " took 1 damage!" << std::endl;
-
     player->drawCardToHand();
 }
-
-// ============================================================
-// DRAW
-// ============================================================
 
 void DraculaAbilityUI::draw()
 {
@@ -273,12 +232,9 @@ void DraculaAbilityUI::draw()
 
         Vector2 questionTextSize = MeasureTextEx(font, question, questionSize, 1.5f);
 
-        DrawTextEx(
-            font, question,
-            Vector2{
-                (GetScreenWidth() - questionTextSize.x) / 2.0f,
-                GetScreenHeight() - 170.0f},
-            questionSize, 1.5f, WHITE);
+        DrawTextEx(font, question,
+                   Vector2{(GetScreenWidth() - questionTextSize.x) / 2.0f, GetScreenHeight() - 170.0f},
+                   questionSize, 1.5f, WHITE);
 
         bool yesHovered = CheckCollisionPointRec(mouse, yesButton);
         DrawRectangleRounded(yesButton, 1.0f, 20, yesHovered ? Color{75, 75, 75, 245} : Color{35, 35, 35, 235});
@@ -308,11 +264,7 @@ void DraculaAbilityUI::draw()
         float textX = (GetScreenWidth() - textSize.x) / 2.0f;
         float textY = GetScreenHeight() - 135.0f;
 
-        Rectangle background{
-            textX - 20.0f,
-            textY - 10.0f,
-            textSize.x + 40.0f,
-            textSize.y + 20.0f};
+        Rectangle background{textX - 20.0f, textY - 10.0f, textSize.x + 40.0f, textSize.y + 20.0f};
 
         DrawRectangleRounded(background, 0.2f, 12, Color{80, 20, 20, 220});
         DrawRectangleRoundedLines(background, 0.2f, 12, Color{220, 100, 100, 255});
@@ -328,12 +280,11 @@ void DraculaAbilityUI::draw()
         const char *backText = "OK";
         Vector2 backTextSize = MeasureTextEx(font, backText, 22.0f, 1.5f);
 
-        DrawTextEx(
-            font, backText,
-            Vector2{
-                backButton.x + (backButton.width - backTextSize.x) / 2.0f,
-                backButton.y + (backButton.height - backTextSize.y) / 2.0f},
-            22.0f, 1.5f, WHITE);
+        DrawTextEx(font, backText,
+                   Vector2{
+                       backButton.x + (backButton.width - backTextSize.x) / 2.0f,
+                       backButton.y + (backButton.height - backTextSize.y) / 2.0f},
+                   22.0f, 1.5f, WHITE);
 
         return;
     }
@@ -347,10 +298,9 @@ void DraculaAbilityUI::draw()
 
         Vector2 titleTextSize = MeasureTextEx(font, title, titleSize, 2.0f);
 
-        DrawTextEx(
-            font, title,
-            Vector2{(GetScreenWidth() - titleTextSize.x) / 2.0f, 70.0f},
-            titleSize, 2.0f, WHITE);
+        DrawTextEx(font, title,
+                   Vector2{(GetScreenWidth() - titleTextSize.x) / 2.0f, 70.0f},
+                   titleSize, 2.0f, WHITE);
 
         for (size_t i = 0; i < candidateFighters.size(); i++)
         {
@@ -377,16 +327,13 @@ void DraculaAbilityUI::draw()
             {
                 const float imagePadding = 15.0f;
 
-                Rectangle source{
-                    0.0f, 0.0f,
-                    static_cast<float>(texture.width),
-                    static_cast<float>(texture.height)};
+                Rectangle source{0.0f, 0.0f,
+                                 static_cast<float>(texture.width),
+                                 static_cast<float>(texture.height)};
 
-                Rectangle destination{
-                    box.x + imagePadding,
-                    box.y + imagePadding,
-                    box.width - 2.0f * imagePadding,
-                    220.0f};
+                Rectangle destination{box.x + imagePadding, box.y + imagePadding,
+                                      box.width - 2.0f * imagePadding,
+                                      220.0f};
 
                 DrawTexturePro(texture, source, destination, Vector2{0.0f, 0.0f}, 0.0f, WHITE);
             }
@@ -394,18 +341,16 @@ void DraculaAbilityUI::draw()
             std::string name = candidate->getName();
             Vector2 nameSize = MeasureTextEx(font, name.c_str(), 22.0f, 1.0f);
 
-            DrawTextEx(
-                font, name.c_str(),
-                Vector2{box.x + (box.width - nameSize.x) / 2.0f, box.y + 245.0f},
-                22.0f, 1.0f, WHITE);
+            DrawTextEx(font, name.c_str(),
+                       Vector2{box.x + (box.width - nameSize.x) / 2.0f, box.y + 245.0f},
+                       22.0f, 1.0f, WHITE);
 
-            std::string hpText = "HP: " + std::to_string(candidate->getHealth());
+            std::string hpText = "HP : " + std::to_string(candidate->getHealth());
             Vector2 hpSize = MeasureTextEx(font, hpText.c_str(), 18.0f, 1.0f);
 
-            DrawTextEx(
-                font, hpText.c_str(),
-                Vector2{box.x + (box.width - hpSize.x) / 2.0f, box.y + 270.0f},
-                18.0f, 1.0f, WHITE);
+            DrawTextEx(font, hpText.c_str(),
+                       Vector2{box.x + (box.width - hpSize.x) / 2.0f, box.y + 270.0f},
+                       18.0f, 1.0f, WHITE);
         }
 
         bool confirmEnabled = (selectedIndex != -1);
@@ -424,21 +369,15 @@ void DraculaAbilityUI::draw()
         const char *confirmText = "CONFIRM";
         Vector2 confirmTextSize = MeasureTextEx(font, confirmText, 26.0f, 1.5f);
 
-        DrawTextEx(
-            font, confirmText,
-            Vector2{
-                confirmButton.x + (confirmButton.width - confirmTextSize.x) / 2.0f,
-                confirmButton.y + (confirmButton.height - confirmTextSize.y) / 2.0f},
-            26.0f, 1.5f,
-            confirmEnabled ? WHITE : Color{150, 150, 150, 150});
+        DrawTextEx(font, confirmText,
+                   Vector2{
+                       confirmButton.x + (confirmButton.width - confirmTextSize.x) / 2.0f,
+                       confirmButton.y + (confirmButton.height - confirmTextSize.y) / 2.0f},
+                   26.0f, 1.5f, confirmEnabled ? WHITE : Color{150, 150, 150, 150});
 
         return;
     }
 }
-
-// ============================================================
-// GETTERS
-// ============================================================
 
 bool DraculaAbilityUI::isOpen() const
 {
@@ -451,7 +390,6 @@ bool DraculaAbilityUI::consumeFinished()
     {
         return false;
     }
-
     finished = false;
     return true;
 }

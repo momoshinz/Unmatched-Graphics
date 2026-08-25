@@ -67,5 +67,7 @@ public:
 
     void setFeintBlocked(const std::string &message);
     bool consumeFeintBlockedFlag(std::string &outMessage);
+
+    void resetGame(); // to start a new game after exiting one
 };
 #endif

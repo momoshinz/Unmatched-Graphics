@@ -1,5 +1,4 @@
-#ifndef GAMESCREEN_H
-#define GAMESCREEN_H
+#pragma once
 #include <raylib.h>
 #include "graphics/AssetManager.h"
 #include "game/Game.h"
@@ -25,14 +24,6 @@ private:
 
     bool guideOpen = false;
 
-    void drawMap();
-    void drawPlayerPanels();
-    void drawTopButtons();
-    void drawGuidePopup();
-    void drawSpaces();
-    void drawPlacedFighters();
-
-    Vector2 mapImageToScreen(Vector2 imagePosition) const;
     enum class ActionChoice
     {
         NONE,
@@ -107,6 +98,7 @@ public:
     int update();
     void draw();
 
+    Vector2 mapImageToScreen(Vector2 imagePosition) const;
     void calculateMapTransform(
         float &mapX,
         float &mapY,
@@ -114,6 +106,13 @@ public:
         float &mapWidth,
         float &mapHeight) const;
 
+    void drawMap();
+    void drawPlayerPanels();
+    void drawTopButtons();
+    void drawGuidePopup();
+    void drawSpaces();
+    void drawPlacedFighters();
+    
     int getClickedSpaceId();
     void drawFogs();
     void drawActionButtons();
@@ -128,7 +127,6 @@ public:
     void drawCombatResultPopup();
 
     void drawDeckEmptyPopup();
-
     void checkHandLimit();
     void openHandLimitPopup(Player *player);
     void drawHandLimitPopup();
@@ -136,9 +134,8 @@ public:
     void drawSaveMenu();
     void updateSaveMenu();
     void refreshSaveFiles();
+
     void drawFeintBlockedPopup();
 
     void resetPlayerPanelAnimations();
 };
-
-#endif

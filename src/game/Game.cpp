@@ -1109,7 +1109,7 @@ void Game::run(bool loaded)
     {
         if (!loaded)
         {
-            //initialize();
+            // initialize();
         }
 
         while (!isGameOver())
@@ -1912,4 +1912,28 @@ bool Game::consumeFeintBlockedFlag(std::string &outMessage)
     feintBlockedFlag = false;
     outMessage = feintBlockedMessage;
     return true;
+}
+
+void Game::resetGame()
+{
+    for (Player *player : players)
+    {
+        delete player;
+    }
+
+    players.clear();
+
+    youngerPlayer = nullptr;
+    olderPlayer = nullptr;
+
+    isMapSetUp = false;
+
+    turnManager = TurnManager();
+    combatSystem = CombatSystem();
+
+    board = Board(); // اگه Board کپی/assignment داشته باشه؛ وگرنه board.reset() یا مشابه بسازید
+
+    // اگه فلگ‌های جدیدی که با هم اضافه کردیم (مثل feintBlockedFlag) هم هست، ریست کنید:
+    feintBlockedFlag = false;
+    feintBlockedMessage.clear();
 }

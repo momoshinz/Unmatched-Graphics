@@ -1,5 +1,4 @@
-#ifndef ATTACKUI_H
-#define ATTACKUI_H
+#pragma once
 #include "card/Card.h"
 #include "card/Deck.h"
 #include <raylib.h>
@@ -17,7 +16,6 @@ private:
 
     Fighter *selectedAttacker = nullptr;
     Fighter *selectedTarget = nullptr;
-
     std::vector<Fighter *> selectableFighters;
     std::vector<Rectangle> fighterBoxes;
 
@@ -31,31 +29,24 @@ private:
     };
 
     AttackPhase phase = AttackPhase::SelectAttacker;
-
     std::vector<Card *> selectableAttackCards;
     std::vector<Rectangle> attackCardBoxes;
-
     Card *selectedAttackCard = nullptr;
-
     Player *attackPlayer = nullptr;
     int selectedAttackCardIndex = -1;
     bool confirmedAttackCard = false;
 
     std::vector<Fighter *> selectableTargets;
     std::vector<Rectangle> targetBoxes;
-
     Card *selectedDefenseCard = nullptr;
-
     std::vector<Card *> selectableDefenseCards;
     std::vector<Rectangle> defenseCardBoxes;
-
     bool defenseChoiceMade = false;
     bool wantsDefenseCard = false;
     Rectangle playButton;
 
     bool showError = false;
     std::string errorMessage;
-
     bool attackConfirmed = false;
     bool errorIsDefenseless = false;
 
@@ -78,5 +69,3 @@ public:
 
     void reset();
 };
-
-#endif

@@ -1,5 +1,4 @@
 #include "graphics/AssetManager.h"
-#include <iostream>
 using namespace std;
 
 AssetManager::AssetManager()
@@ -22,8 +21,6 @@ bool AssetManager::isTextureValid(const Texture2D &texture) const
 
 bool AssetManager::load()
 {
-    cout << "loading assets...\n";
-
     mainMenuBackground = LoadTexture("Unmatched_Assets/main_menu.png");
     loadingBackground = LoadTexture("Unmatched_Assets/loading.png");
     gameMap = LoadTexture("Unmatched_Assets/board.png");
@@ -35,7 +32,7 @@ bool AssetManager::load()
     guideFont = LoadFont("Unmatched_Assets/fonts/guide.TTF");
 
     gameMusic = LoadMusicStream("Unmatched_Assets/sounds/MainMusic.mp3");
-    SetMusicVolume(gameMusic, 0.4f);
+    SetMusicVolume(gameMusic, 0.5f);
     gameMusic.looping = true;
 
     characterTextures["dracula"] = LoadTexture("Unmatched_Assets/dracula/DracArtTran.png");
@@ -128,7 +125,6 @@ bool AssetManager::load()
         return false;
     }
     loaded = true;
-    cout << "all assets loaded.\n";
     return true;
 }
 
