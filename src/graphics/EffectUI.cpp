@@ -10,7 +10,6 @@
 #include "board/Space.h"
 #include "card/Hand.h"
 #include "card/Card.h"
-#include <iostream>
 #include <algorithm>
 #include <unordered_map>
 
@@ -973,82 +972,28 @@ void EffectUI::update()
                     return;
 
                 selectedFog = candidateFogs[i];
-
                 choice.selectedFogId = static_cast<int>(i);
-
                 fogSourceSpace = selectedFog->getPosition();
 
                 if (fogSourceSpace == nullptr)
                 {
-                    std::cout
-                        << "[!] Selected Fog is not on the board."
-                        << std::endl;
-
                     return;
                 }
 
-                choice.selectedSpace =
-                    fogSourceSpace;
-
-                std::cout
-                    << "[Rolling Fog] Selected Fog "
-                    << selectedFog->getID()
-                    << " at Space "
-                    << fogSourceSpace->getId()
-                    << std::endl;
-
-                // =================================================
-                // ساخت خانه‌های مقصد
-                // =================================================
-
-                beginUnlimitedFogDestinationStage(
-                    fogSourceSpace);
-
-                std::cout
-                    << "[Rolling Fog] Valid destinations: "
-                    << candidateSpaces.size()
-                    << std::endl;
-
-                for (Space *space : candidateSpaces)
-                {
-                    if (space != nullptr)
-                    {
-                        std::cout
-                            << "  -> Space "
-                            << space->getId()
-                            << std::endl;
-                    }
-                }
-
-                // حالا وارد مرحله انتخاب مقصد می‌شویم
+                choice.selectedSpace = fogSourceSpace;
+                beginUnlimitedFogDestinationStage(fogSourceSpace);
                 subPhase = 1;
 
                 if (candidateSpaces.empty())
                 {
-                    std::cout
-                        << "[!] No valid destination for Fog."
-                        << std::endl;
-
                     finalizeReady();
                 }
-
                 return;
             }
-
             return;
         }
-
-        // ========================================================
-        // مرحله 1:
-        // انتخاب مقصد روی نقشه
-        //
-        // این قسمت توسط selectSpace() انجام می‌شود.
-        // ========================================================
-
         return;
     }
-
-    // -------------------- StepLightly --------------------
 
     if (inputKind == EffectInputKind::ChooseEnemyAndFogDestination)
     {
@@ -1091,9 +1036,8 @@ void EffectUI::update()
                     beginFogDestinationStage(effect->getFogMoveRange(), false);
 
                     if (candidateSpaces.empty())
-                    {
                         finalizeReady();
-                    }
+
                     return;
                 }
             }
@@ -1102,10 +1046,6 @@ void EffectUI::update()
         return;
     }
 }
-
-// ============================================================
-// SELECT SPACE (صدا زده می‌شه از GameScreen وقتی روی نقشه کلیک می‌شه)
-// ============================================================
 
 void EffectUI::selectSpace(Space *space)
 {
@@ -1126,81 +1066,40 @@ void EffectUI::selectSpace(Space *space)
     if (!valid)
         return;
 
-    // ============================================================
-    // انواع تک‌مرحله‌ای
-    // ============================================================
-
     if (inputKind == EffectInputKind::ChooseAdjacentEmptySpace ||
         inputKind == EffectInputKind::ChooseReachableSpace ||
         inputKind == EffectInputKind::ChooseAnyEmptySpace ||
         inputKind == EffectInputKind::ChooseTargetAdjacentEmptySpace)
     {
         choice.selectedSpace = space;
-
         finalizeReady();
         return;
     }
-
-    // ============================================================
-    // ChooseFighterAndReachableSpace
-    // ============================================================
 
     if (inputKind == EffectInputKind::ChooseFighterAndReachableSpace)
     {
         if (subPhase == 1)
         {
             choice.selectedSpace = space;
-
             finalizeReady();
             return;
         }
-
         return;
     }
 
-    // ============================================================
-    // Into Thin Air
-    //
-    // subPhase 0:
-    //      Invisible Man -> انتخاب مقصد روی نقشه
-    //
-    // subPhase 2:
-    //      انتخاب Fog از پنجره
-    //
-    // subPhase 3:
-    //      Fog -> انتخاب مقصد روی نقشه
-    // ============================================================
-
     if (inputKind == EffectInputKind::ChooseFighterMoveThenFogMove)
     {
-        // --------------------------------------------------------
-        // مرحله اول:
-        // حرکت Invisible Man
-        // --------------------------------------------------------
-
         if (subPhase == 0)
         {
             choice.selectedSpace = space;
-
             if (game != nullptr && fighter != nullptr)
             {
                 game->getBoard().moveFighter(fighter, space);
             }
 
-            std::cout
-                << "[+] Invisible Man destination selected: Space "
-                << space->getId()
-                << std::endl;
-
-            // ----------------------------------------------------
-            // حالا باید Fog انتخاب شود
-            // ----------------------------------------------------
-
             subPhase = 2;
-
             candidateSpaces.clear();
             candidateFogs.clear();
-
             selectedFog = nullptr;
             fogSourceSpace = nullptr;
 
@@ -1215,59 +1114,31 @@ void EffectUI::selectSpace(Space *space)
                 }
             }
 
-            std::cout
-                << "[Into Thin Air] Available Fog tokens: "
-                << candidateFogs.size()
-                << std::endl;
-
-            // ----------------------------------------------------
-            // اگر Fog داریم، پنجره انتخاب Fog باز می‌شود
-            // ----------------------------------------------------
-
             if (!candidateFogs.empty())
             {
                 layoutFogWindow();
             }
             else
             {
-                // هیچ Fogی برای حرکت وجود ندارد
                 finalizeReady();
             }
-
             return;
         }
-
-        // --------------------------------------------------------
-        // مرحله سوم:
-        // انتخاب مقصد Fog
-        // --------------------------------------------------------
 
         if (subPhase == 3)
         {
             choice.secondSpace = space;
-
-            std::cout
-                << "[+] Fog destination selected: Space "
-                << space->getId()
-                << std::endl;
-
             finalizeReady();
             return;
         }
-
         return;
     }
-
-    // ============================================================
-    // Lurking
-    // ============================================================
 
     if (inputKind == EffectInputKind::ChooseLurkingOption)
     {
         if (subPhase == 1)
         {
             choice.selectedSpace = space;
-
             finalizeReady();
             return;
         }
@@ -1275,86 +1146,56 @@ void EffectUI::selectSpace(Space *space)
         if (subPhase == 3)
         {
             choice.secondSpace = space;
-
             finalizeReady();
             return;
         }
-
         return;
     }
-
-    // ============================================================
-    // RollingFog
-    // ============================================================
 
     if (inputKind == EffectInputKind::ChooseFogSourceAndDestination)
     {
         if (subPhase == 1)
         {
             choice.secondSpace = space;
-
             finalizeReady();
             return;
         }
-
         return;
     }
-
-    // ============================================================
-    // SlipAway
-    // ============================================================
 
     if (inputKind == EffectInputKind::ChooseFogAndDestination)
     {
         if (subPhase == 1)
         {
             choice.selectedSpace = space;
-
             finalizeReady();
             return;
         }
-
         return;
     }
-
-    // ============================================================
-    // StepLightly
-    // ============================================================
 
     if (inputKind == EffectInputKind::ChooseEnemyAndFogDestination)
     {
         if (subPhase == 2)
         {
             choice.secondSpace = space;
-
             finalizeReady();
             return;
         }
-
         return;
     }
-
-    // ============================================================
-    // Defeated Sister
-    // ============================================================
 
     if (inputKind == EffectInputKind::ChooseDefeatedSisterAndZoneSpace)
     {
         if (subPhase == 1)
         {
             choice.selectedSpace = space;
-
             finalizeReady();
             return;
         }
-
         return;
     }
 }
-
-// ============================================================
-// DRAW
-// ============================================================
 
 void EffectUI::draw()
 {
@@ -1363,8 +1204,6 @@ void EffectUI::draw()
 
     Font font = assets->getGameFont();
     Vector2 mouse = GetMousePosition();
-
-    // -------------------- انتخاب روی نقشه (بدون overlay تیره) --------------------
 
     if (isChoosingSpace())
     {
@@ -1387,41 +1226,26 @@ void EffectUI::draw()
         }
 
         const float titleSize = 28.0f;
+        Vector2 titleTextSize = MeasureTextEx(font, title, titleSize, 1.5f);
 
-        Vector2 titleTextSize =
-            MeasureTextEx(
-                font,
-                title,
-                titleSize,
-                1.5f);
-
-        DrawTextEx(
-            font,
-            title,
-            Vector2{
-                (GetScreenWidth() - titleTextSize.x) / 2.0f,
-                72.0f},
-            titleSize,
-            1.5f,
-            WHITE);
+        DrawTextEx(font, title, Vector2{(GetScreenWidth() - titleTextSize.x) / 2.0f, 72.0f},
+                   titleSize,
+                   1.5f,
+                   WHITE);
 
         return;
     }
-    // -------------------- بقیه: overlay تیره --------------------
 
     DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), Color{0, 0, 0, 190});
 
-    // ---- دو گزینه (Lurking subPhase 0 / CodedNotes subPhase 2) ----
-    bool showTwoOptions =
-        (inputKind == EffectInputKind::ChooseLurkingOption && subPhase == 0) ||
-        (inputKind == EffectInputKind::ChooseTwoCardsAndOrder && subPhase == 2);
+    bool showTwoOptions = (inputKind == EffectInputKind::ChooseLurkingOption && subPhase == 0) ||
+                          (inputKind == EffectInputKind::ChooseTwoCardsAndOrder && subPhase == 2);
 
     if (showTwoOptions)
     {
-        const char *title =
-            (inputKind == EffectInputKind::ChooseLurkingOption)
-                ? "CHOOSE ONE EFFECT"
-                : "WHICH CARD ON TOP?";
+        const char *title = (inputKind == EffectInputKind::ChooseLurkingOption)
+                                ? "CHOOSE ONE EFFECT"
+                                : "WHICH CARD ON TOP?";
 
         Vector2 titleSize = MeasureTextEx(font, title, 30.0f, 2.0f);
         DrawTextEx(font, title,
@@ -1444,21 +1268,18 @@ void EffectUI::draw()
         return;
     }
 
-    // ---- لیست فاگ‌ها ----
-    bool showFogList =
-        !fogBoxes.empty() &&
-        ((inputKind == EffectInputKind::ChooseFighterMoveThenFogMove && subPhase == 2) ||
-         (inputKind == EffectInputKind::ChooseLurkingOption && subPhase == 2) ||
-         (inputKind == EffectInputKind::ChooseFogAndDestination && subPhase == 0) ||
-         (inputKind == EffectInputKind::ChooseEnemyAndFogDestination && subPhase == 1) ||
-         (inputKind == EffectInputKind::ChooseFogSourceAndDestination && subPhase == 0)); // <-- خط جدید
+    bool showFogList = !fogBoxes.empty() &&
+                       ((inputKind == EffectInputKind::ChooseFighterMoveThenFogMove && subPhase == 2) ||
+                        (inputKind == EffectInputKind::ChooseLurkingOption && subPhase == 2) ||
+                        (inputKind == EffectInputKind::ChooseFogAndDestination && subPhase == 0) ||
+                        (inputKind == EffectInputKind::ChooseEnemyAndFogDestination && subPhase == 1) ||
+                        (inputKind == EffectInputKind::ChooseFogSourceAndDestination && subPhase == 0));
 
     if (showFogList)
     {
         const char *title = "CHOOSE A FOG TOKEN";
         Vector2 titleSize = MeasureTextEx(font, title, 32.0f, 2.0f);
-        DrawTextEx(font, title,
-                   Vector2{(GetScreenWidth() - titleSize.x) / 2.0f, 70.0f},
+        DrawTextEx(font, title, Vector2{(GetScreenWidth() - titleSize.x) / 2.0f, 70.0f},
                    32.0f, 2.0f, WHITE);
 
         for (size_t i = 0; i < candidateFogs.size(); i++)
@@ -1483,13 +1304,11 @@ void EffectUI::draw()
         return;
     }
 
-    // ---- لیست فایترها (دشمن / دشمن مجاور / خواهر شکست‌خورده) ----
-    bool showFighterList =
-        !fighterBoxes.empty() &&
-        (inputKind == EffectInputKind::ChooseEnemyFighter ||
-         (inputKind == EffectInputKind::ChooseEnemyAndFogDestination && subPhase == 0) ||
-         (inputKind == EffectInputKind::ChooseDefeatedSisterAndZoneSpace && subPhase == 0) ||
-         inputKind == EffectInputKind::ChooseFighterAndReachableSpace);
+    bool showFighterList = !fighterBoxes.empty() &&
+                           (inputKind == EffectInputKind::ChooseEnemyFighter ||
+                            (inputKind == EffectInputKind::ChooseEnemyAndFogDestination && subPhase == 0) ||
+                            (inputKind == EffectInputKind::ChooseDefeatedSisterAndZoneSpace && subPhase == 0) ||
+                            inputKind == EffectInputKind::ChooseFighterAndReachableSpace);
 
     if (showFighterList)
     {
@@ -1508,18 +1327,12 @@ void EffectUI::draw()
             title = "CHOOSE A FIGHTER";
         }
 
-        Vector2 titleSize =
-            MeasureTextEx(font, title, 32.0f, 2.0f);
+        Vector2 titleSize = MeasureTextEx(font, title, 32.0f, 2.0f);
 
-        DrawTextEx(
-            font,
-            title,
-            Vector2{
-                (GetScreenWidth() - titleSize.x) / 2.0f,
-                70.0f},
-            32.0f,
-            2.0f,
-            WHITE);
+        DrawTextEx(font, title, Vector2{(GetScreenWidth() - titleSize.x) / 2.0f, 70.0f},
+                   32.0f,
+                   2.0f,
+                   WHITE);
 
         for (size_t i = 0; i < candidateFighters.size(); i++)
         {
@@ -1530,27 +1343,14 @@ void EffectUI::draw()
 
             Rectangle box = fighterBoxes[i];
 
-            bool hovered =
-                CheckCollisionPointRec(mouse, box);
+            bool hovered = CheckCollisionPointRec(mouse, box);
 
-            Color boxColor =
-                hovered
-                    ? Color{75, 75, 75, 245}
-                    : Color{35, 35, 35, 235};
+            Color boxColor = hovered
+                                 ? Color{75, 75, 75, 245}
+                                 : Color{35, 35, 35, 235};
 
-            DrawRectangleRounded(
-                box,
-                0.15f,
-                15,
-                boxColor);
-
-            (
-                box,
-                0.15f,
-                15,
-                hovered
-                    ? WHITE
-                    : Color{150, 150, 150, 255});
+            DrawRectangleRounded(box, 0.15f, 15, boxColor);
+            (box, 0.15f, 15, hovered ? WHITE : Color{150, 150, 150, 255});
 
             if (inputKind != EffectInputKind::ChooseFighterAndReachableSpace)
             {
@@ -1560,103 +1360,64 @@ void EffectUI::draw()
                 {
                     const float imagePadding = 15.0f;
 
-                    Rectangle source{
-                        0.0f, 0.0f,
-                        static_cast<float>(texture.width),
-                        static_cast<float>(texture.height)};
+                    Rectangle source{0.0f, 0.0f,
+                                     static_cast<float>(texture.width),
+                                     static_cast<float>(texture.height)};
 
-                    Rectangle destination{
-                        box.x + imagePadding,
-                        box.y + imagePadding,
-                        box.width - 2.0f * imagePadding,
-                        220.0f};
+                    Rectangle destination{box.x + imagePadding, box.y + imagePadding,
+                                          box.width - 2.0f * imagePadding,
+                                          220.0f};
 
-                    DrawTexturePro(
-                        texture, source, destination,
-                        Vector2{0.0f, 0.0f}, 0.0f, WHITE);
+                    DrawTexturePro(texture, source, destination, Vector2{0.0f, 0.0f}, 0.0f, WHITE);
                 }
             }
             std::string name = candidate->getName();
-            // ====================================================
-            // Ravening Seduction:
-            // کادر 180x80 است، پس اسم باید وسط همان کادر باشد.
-            // ====================================================
 
             if (inputKind == EffectInputKind::ChooseFighterAndReachableSpace)
             {
-                Vector2 nameSize =
-                    MeasureTextEx(
-                        font,
-                        name.c_str(),
-                        20.0f,
-                        1.0f);
+                Vector2 nameSize = MeasureTextEx(font, name.c_str(), 20.0f, 1.0f);
 
-                DrawTextEx(
-                    font,
-                    name.c_str(),
-                    Vector2{
-                        box.x + (box.width - nameSize.x) / 2.0f,
-                        box.y + (box.height - nameSize.y) / 2.0f},
-                    20.0f,
-                    1.0f,
-                    WHITE);
+                DrawTextEx(font, name.c_str(),
+                           Vector2{
+                               box.x + (box.width - nameSize.x) / 2.0f,
+                               box.y + (box.height - nameSize.y) / 2.0f},
+                           20.0f,
+                           1.0f,
+                           WHITE);
             }
 
-            // ====================================================
-            // بقیه Effectها:
-            // همان ظاهر قبلی با اسم + HP
-            // ====================================================
             else
             {
-                Vector2 nameSize =
-                    MeasureTextEx(
-                        font,
-                        name.c_str(),
-                        22.0f,
-                        1.0f);
+                Vector2 nameSize = MeasureTextEx(font, name.c_str(), 22.0f, 1.0f);
 
-                DrawTextEx(
-                    font,
-                    name.c_str(),
-                    Vector2{
-                        box.x + (box.width - nameSize.x) / 2.0f,
-                        box.y + 245.0f},
-                    22.0f,
-                    1.0f,
-                    WHITE);
+                DrawTextEx(font, name.c_str(),
+                           Vector2{
+                               box.x + (box.width - nameSize.x) / 2.0f,
+                               box.y + 245.0f},
+                           22.0f,
+                           1.0f,
+                           WHITE);
 
-                std::string hpText =
-                    "HP: " + std::to_string(candidate->getHealth());
+                std::string hpText = "HP: " + std::to_string(candidate->getHealth());
+                Vector2 hpSize = MeasureTextEx(font, hpText.c_str(), 18.0f, 1.0f);
 
-                Vector2 hpSize =
-                    MeasureTextEx(
-                        font,
-                        hpText.c_str(),
-                        18.0f,
-                        1.0f);
-
-                DrawTextEx(
-                    font,
-                    hpText.c_str(),
-                    Vector2{
-                        box.x + (box.width - hpSize.x) / 2.0f,
-                        box.y + 270.0f},
-                    18.0f,
-                    1.0f,
-                    WHITE);
+                DrawTextEx(font, hpText.c_str(),
+                           Vector2{
+                               box.x + (box.width - hpSize.x) / 2.0f,
+                               box.y + 270.0f},
+                           18.0f,
+                           1.0f,
+                           WHITE);
             }
         }
-
         return;
     }
 
-    // ---- لیست کارت‌ها (سوزوندن حریف / انتخاب برای CodedNotes / دور ریختن / نمایش دست حریف) ----
-    bool showCardList =
-        !cardBoxes.empty() &&
-        (inputKind == EffectInputKind::ChooseOpponentCardToBurn ||
-         inputKind == EffectInputKind::ChooseTwoCardsAndOrder ||
-         inputKind == EffectInputKind::ChooseCardsToDiscard ||
-         inputKind == EffectInputKind::ShowOpponentHand);
+    bool showCardList = !cardBoxes.empty() &&
+                        (inputKind == EffectInputKind::ChooseOpponentCardToBurn ||
+                         inputKind == EffectInputKind::ChooseTwoCardsAndOrder ||
+                         inputKind == EffectInputKind::ChooseCardsToDiscard ||
+                         inputKind == EffectInputKind::ShowOpponentHand);
 
     if (showCardList)
     {
@@ -1680,14 +1441,12 @@ void EffectUI::draw()
         }
 
         Vector2 titleSize = MeasureTextEx(font, title, 32.0f, 2.0f);
-        DrawTextEx(font, title,
-                   Vector2{(GetScreenWidth() - titleSize.x) / 2.0f, 70.0f},
+        DrawTextEx(font, title, Vector2{(GetScreenWidth() - titleSize.x) / 2.0f, 70.0f},
                    32.0f, 2.0f, WHITE);
 
-        std::string heroName =
-            (actingPlayer != nullptr && actingPlayer->getHero() != nullptr)
-                ? actingPlayer->getHero()->getName()
-                : "";
+        std::string heroName = (actingPlayer != nullptr && actingPlayer->getHero() != nullptr)
+                                   ? actingPlayer->getHero()->getName()
+                                   : "";
 
         for (size_t i = 0; i < candidateCards.size(); i++)
         {
@@ -1703,10 +1462,9 @@ void EffectUI::draw()
                  static_cast<int>(i) == pendingFirstCardIndex) ||
 
                 (inputKind == EffectInputKind::ChooseCardsToDiscard &&
-                 std::find(
-                     choice.selectedCardIndices.begin(),
-                     choice.selectedCardIndices.end(),
-                     static_cast<int>(i)) != choice.selectedCardIndices.end());
+                 std::find(choice.selectedCardIndices.begin(),
+                           choice.selectedCardIndices.end(),
+                           static_cast<int>(i)) != choice.selectedCardIndices.end());
 
             Color boxColor;
             if (selected)
@@ -1739,16 +1497,13 @@ void EffectUI::draw()
                        20.0f, 1.0f, WHITE);
         }
 
-        // ---- دکمه‌ی پایین: BURN / CONFIRM / CLOSE (بسته به نوع) ----
         if (inputKind == EffectInputKind::ChooseOpponentCardToBurn ||
             inputKind == EffectInputKind::ChooseCardsToDiscard ||
             inputKind == EffectInputKind::ShowOpponentHand)
         {
-            bool confirmEnabled =
-                (inputKind == EffectInputKind::ChooseOpponentCardToBurn)
-                    ? (selectedCardIndex != -1)
-                    : true; // ChooseCardsToDiscard و ShowOpponentHand همیشه فعال
-
+            bool confirmEnabled = (inputKind == EffectInputKind::ChooseOpponentCardToBurn)
+                                      ? (selectedCardIndex != -1)
+                                      : true;
             bool confirmHovered = CheckCollisionPointRec(mouse, confirmButton);
 
             Color confirmColor;
@@ -1777,9 +1532,6 @@ void EffectUI::draw()
         return;
     }
 }
-// ============================================================
-// GETTERS
-// ============================================================
 
 bool EffectUI::isOpen() const { return open_; }
 bool EffectUI::isReady() const { return ready; }
@@ -1819,9 +1571,6 @@ bool EffectUI::isChoosingSpace() const
         return true;
 
     case EffectInputKind::ChooseFighterMoveThenFogMove:
-        // Into Thin Air:
-        // subPhase 0 = انتخاب مقصد Invisible Man
-        // subPhase 3 = انتخاب مقصد Fog
         return subPhase == 0 || subPhase == 3;
 
     case EffectInputKind::ChooseLurkingOption:
@@ -1850,7 +1599,6 @@ bool EffectUI::isChoosingSpace() const
 void EffectUI::setupChooseCardsToDiscard()
 {
     subPhase = 0;
-
     candidateCards.clear();
 
     if (actingPlayer == nullptr)
@@ -1862,10 +1610,7 @@ void EffectUI::setupChooseCardsToDiscard()
             candidateCards.push_back(card);
     }
 
-    // حتی اگر دست خالی باشد، UI باز می‌شود
-    // و کاربر می‌تواند با CONFIRM بدون انتخاب کارت ادامه دهد.
     layoutCardWindow(candidateCards);
-
     choice.selectedCardIndices.clear();
 }
 
@@ -1879,31 +1624,25 @@ void EffectUI::setupChooseDefeatedSisterAndZoneSpace()
     if (actingPlayer == nullptr || game == nullptr)
         return;
 
-    // پیدا کردن Sisterهای شکست‌خورده
     for (Sidekick *sidekick : actingPlayer->getSideKicks())
     {
-        if (sidekick != nullptr &&
-            sidekick->isSister() &&
-            !sidekick->isAlive())
+        if (sidekick != nullptr && sidekick->isSister() && !sidekick->isAlive())
         {
             candidateFighters.push_back(sidekick);
         }
     }
 
-    // اگر Sister شکست‌خورده نداریم
     if (candidateFighters.empty())
     {
         finalizeReady();
         return;
     }
-
     layoutFighterWindow(candidateFighters);
 }
 
 void EffectUI::setupChooseAnyEmptySpace()
 {
     candidateSpaces.clear();
-
     if (game == nullptr)
         return;
 
@@ -1947,7 +1686,6 @@ void EffectUI::setupChooseFighterAndReachableSpace()
         finalizeReady();
         return;
     }
-
     layoutRaveningFighters();
 }
 
@@ -1993,7 +1731,6 @@ void EffectUI::setupShowOpponentHand()
         if (candidateCards.size() >= 7)
             break;
     }
-
     layoutCardWindow(candidateCards);
 }
 
@@ -2002,7 +1739,6 @@ void EffectUI::finishCardSelection()
     if (inputKind != EffectInputKind::ChooseCardsToDiscard)
         return;
 
-    // انتخاب کارت‌ها همین الان داخل selectedCardIndices است
     finalizeReady();
 }
 
@@ -2021,35 +1757,20 @@ void EffectUI::layoutRaveningFighters()
     const float startY = 170.0f;
 
     int count = static_cast<int>(candidateFighters.size());
-
     int rowCount = (count + maxPerRow - 1) / maxPerRow;
 
     for (int row = 0; row < rowCount; row++)
     {
-        int fightersInThisRow =
-            std::min(maxPerRow, count - row * maxPerRow);
-
-        float rowWidth =
-            fightersInThisRow * boxWidth +
-            (fightersInThisRow - 1) * gapX;
-
-        float startX =
-            (GetScreenWidth() - rowWidth) / 2.0f;
+        int fightersInThisRow = std::min(maxPerRow, count - row * maxPerRow);
+        float rowWidth = fightersInThisRow * boxWidth + (fightersInThisRow - 1) * gapX;
+        float startX = (GetScreenWidth() - rowWidth) / 2.0f;
 
         for (int col = 0; col < fightersInThisRow; col++)
         {
-            float x =
-                startX + col * (boxWidth + gapX);
+            float x = startX + col * (boxWidth + gapX);
+            float y = startY + row * (boxHeight + gapY);
 
-            float y =
-                startY + row * (boxHeight + gapY);
-
-            fighterBoxes.push_back(
-                Rectangle{
-                    x,
-                    y,
-                    boxWidth,
-                    boxHeight});
+            fighterBoxes.push_back(Rectangle{x, y, boxWidth, boxHeight});
         }
     }
 }

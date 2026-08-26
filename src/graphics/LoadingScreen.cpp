@@ -1,12 +1,8 @@
 #include "graphics/LoadingScreen.h"
 #include <iostream>
 
-LoadingScreen::LoadingScreen(
-    AssetManager &assets,
-    float duration)
-    : assets(assets),
-      elapsedTime(0.0f),
-      duration(duration)
+LoadingScreen::LoadingScreen(AssetManager &assets, float duration)
+    : assets(assets), elapsedTime(0.0f), duration(duration)
 {
 }
 
@@ -17,77 +13,41 @@ void LoadingScreen::update()
 
 void LoadingScreen::draw()
 {
-    // =========================================
-    // Loading background
-    // =========================================
-
-    Texture2D background =
-        assets.getLoadingBackground();
+    Texture2D background = assets.getLoadingBackground();
 
     if (background.id != 0)
     {
-        DrawTexturePro(
-            background,
+        DrawTexturePro(background,
+                       Rectangle{
+                           0.0f,
+                           0.0f,
+                           static_cast<float>(background.width),
+                           static_cast<float>(background.height)},
 
-            Rectangle{
-                0.0f,
-                0.0f,
-                static_cast<float>(background.width),
-                static_cast<float>(background.height)},
+                       Rectangle{
+                           0.0f,
+                           0.0f,
+                           static_cast<float>(GetScreenWidth()),
+                           static_cast<float>(GetScreenHeight())},
 
-            Rectangle{
-                0.0f,
-                0.0f,
-                static_cast<float>(GetScreenWidth()),
-                static_cast<float>(GetScreenHeight())},
+                       Vector2{0.0f, 0.0f},
 
-            Vector2{
-                0.0f,
-                0.0f},
-
-            0.0f,
-
-            WHITE);
+                       0.0f,
+                       WHITE);
     }
-
-    // =========================================
-    // Loading text
-    // =========================================
 
     const char *text = "Loading . . .";
 
-    Font font =
-        assets.getLoadingFont();
+    Font font = assets.getLoadingFont();
 
     float fontSize = 40.0f;
     float spacing = 2.0f;
 
-    
-    Vector2 textSize =
-        MeasureTextEx(
-            font,
-            text,
-            fontSize,
-            spacing);
+    Vector2 textSize = MeasureTextEx(font, text, fontSize, spacing);
+    float textX = (GetScreenWidth() - textSize.x) / 2.0f;
+    float textY = (GetScreenHeight() - textSize.y) / 1.8f;
 
-    float textX =
-        (GetScreenWidth() - textSize.x) / 2.0f;
-
-    float textY =
-        (GetScreenHeight() - textSize.y) / 1.8f;
-
-    DrawTextEx(
-        font,
-        text,
-
-        Vector2{
-            textX,
-            textY},
-
-        fontSize,
-        spacing,
-
-        WHITE);
+    DrawTextEx(font, text, Vector2{textX, textY}, fontSize, spacing, WHITE);
 }
 
 bool LoadingScreen::isFinished() const

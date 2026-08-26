@@ -3,64 +3,28 @@
 #include "player/Player.h"
 #include "fighter/Hero.h"
 #include "fighter/Sidekick.h"
-
 #include <raylib.h>
-
 #include <string>
 #include <vector>
 #include <sstream>
 #include <algorithm>
 
-PlayerPanel::PlayerPanel(
-    AssetManager *assets)
-    : assets(assets),
-      bounds{0, 0, 0, 0},
-      textAnimationTimer(0.0f),
-      textAnimationFinished(false),
+PlayerPanel::PlayerPanel(AssetManager *assets)
+    : assets(assets), bounds{0, 0, 0, 0}, textAnimationTimer(0.0f), textAnimationFinished(false),
       charRevealDelay(0.03f)
 {
 }
 
-// ============================================================
-// GOTHIC / ROYAL CLASSIC PANEL
-// ============================================================
-
-// ============================================================
-// GOTHIC / ROYAL CLASSIC PANEL
-// ============================================================
-
 static void DrawGothicPanel(Rectangle bounds)
 {
-    // ========================================================
-    // COLORS
-    // ========================================================
-
     const Color shadowColor = {0, 0, 0, 165};
+    const Color panelColor = {18, 14, 14, 175};
+    const Color darkGold = {92, 67, 35, 255};
+    const Color gold = {155, 116, 60, 255};
+    const Color brightGold = {205, 165, 95, 255};
+    const Color deepFrame = {65, 47, 30, 255};
 
-    const Color panelColor = {
-        18, 14, 14, 175};
-
-    const Color darkGold = {
-        92, 67, 35, 255};
-
-    const Color gold = {
-        155, 116, 60, 255};
-
-    const Color brightGold = {
-        205, 165, 95, 255};
-
-    const Color deepFrame = {
-        65, 47, 30, 255};
-
-    // ========================================================
-    // OUTER SHADOW
-    // ========================================================
-
-    Rectangle shadow = {
-        bounds.x + 7.0f,
-        bounds.y + 7.0f,
-        bounds.width,
-        bounds.height};
+    Rectangle shadow = {bounds.x + 7.0f, bounds.y + 7.0f, bounds.width, bounds.height};
 
     DrawRectangle(
         static_cast<int>(shadow.x),
@@ -69,10 +33,6 @@ static void DrawGothicPanel(Rectangle bounds)
         static_cast<int>(shadow.height),
         shadowColor);
 
-    // ========================================================
-    // MAIN PANEL
-    // ========================================================
-
     DrawRectangle(
         static_cast<int>(bounds.x),
         static_cast<int>(bounds.y),
@@ -80,292 +40,74 @@ static void DrawGothicPanel(Rectangle bounds)
         static_cast<int>(bounds.height),
         panelColor);
 
-    // ========================================================
-    // OUTER ROYAL FRAME
-    // ========================================================
+    DrawRectangleLinesEx(bounds, 5.0f, darkGold);
 
-    DrawRectangleLinesEx(
-        bounds,
-        5.0f,
-        darkGold);
+    Rectangle frame1 = {bounds.x + 5.0f, bounds.y + 5.0f, bounds.width - 10.0f, bounds.height - 10.0f};
+    DrawRectangleLinesEx(frame1, 2.5f, gold);
 
-    Rectangle frame1 = {
-        bounds.x + 5.0f,
-        bounds.y + 5.0f,
-        bounds.width - 10.0f,
-        bounds.height - 10.0f};
+    Rectangle frame2 = {bounds.x + 11.0f, bounds.y + 11.0f, bounds.width - 22.0f, bounds.height - 22.0f};
+    DrawRectangleLinesEx(frame2, 1.5f, deepFrame);
 
-    DrawRectangleLinesEx(
-        frame1,
-        2.5f,
-        gold);
-
-    Rectangle frame2 = {
-        bounds.x + 11.0f,
-        bounds.y + 11.0f,
-        bounds.width - 22.0f,
-        bounds.height - 22.0f};
-
-    DrawRectangleLinesEx(
-        frame2,
-        1.5f,
-        deepFrame);
-
-    Rectangle frame3 = {
-        bounds.x + 17.0f,
-        bounds.y + 17.0f,
-        bounds.width - 34.0f,
-        bounds.height - 34.0f};
-
-    DrawRectangleLinesEx(
-        frame3,
-        1.0f,
-        darkGold);
-
-    // ========================================================
-    // ROYAL CORNERS
-    // ========================================================
+    Rectangle frame3 = {bounds.x + 17.0f, bounds.y + 17.0f, bounds.width - 34.0f, bounds.height - 34.0f};
+    DrawRectangleLinesEx(frame3, 1.0f, darkGold);
 
     const float c = 38.0f;
 
-    // --------------------------------------------------------
-    // TOP LEFT
-    // --------------------------------------------------------
+    Vector2 tl = {bounds.x, bounds.y};
+    DrawLineEx(Vector2{tl.x, tl.y + c}, Vector2{tl.x + c, tl.y}, 4.0f, gold);
 
-    Vector2 tl = {
-        bounds.x,
-        bounds.y};
+    DrawLineEx(Vector2{tl.x + 6.0f, tl.y + c - 6.0f}, Vector2{tl.x + c - 6.0f, tl.y + 6.0f}, 2.0f, brightGold);
 
-    // Main diagonal
-    DrawLineEx(
-        Vector2{
-            tl.x,
-            tl.y + c},
-        Vector2{
-            tl.x + c,
-            tl.y},
-        4.0f,
-        gold);
+    DrawLineEx(Vector2{tl.x + 8.0f, tl.y + 4.0f}, Vector2{tl.x + 8.0f, tl.y + 19.0f}, 2.0f, gold);
 
-    // Inner diagonal
-    DrawLineEx(
-        Vector2{
-            tl.x + 6.0f,
-            tl.y + c - 6.0f},
-        Vector2{
-            tl.x + c - 6.0f,
-            tl.y + 6.0f},
-        2.0f,
-        brightGold);
+    DrawLineEx(Vector2{tl.x + 4.0f, tl.y + 8.0f}, Vector2{tl.x + 19.0f, tl.y + 8.0f}, 2.0f, gold);
 
-    // Vertical ornamental extension
-    DrawLineEx(
-        Vector2{
-            tl.x + 8.0f,
-            tl.y + 4.0f},
-        Vector2{
-            tl.x + 8.0f,
-            tl.y + 19.0f},
-        2.0f,
-        gold);
+    DrawLineEx(Vector2{tl.x + 2.0f, tl.y + 26.0f}, Vector2{tl.x + 26.0f, tl.y + 2.0f}, 1.5f, darkGold);
 
-    // Horizontal ornamental extension
-    DrawLineEx(
-        Vector2{
-            tl.x + 4.0f,
-            tl.y + 8.0f},
-        Vector2{
-            tl.x + 19.0f,
-            tl.y + 8.0f},
-        2.0f,
-        gold);
+    DrawPoly(Vector2{tl.x + 15.0f, tl.y + 15.0f}, 4, 8.0f, 45.0f, brightGold);
 
-    // Outer decorative lines
-    DrawLineEx(
-        Vector2{
-            tl.x + 2.0f,
-            tl.y + 26.0f},
-        Vector2{
-            tl.x + 26.0f,
-            tl.y + 2.0f},
-        1.5f,
-        darkGold);
+    DrawPoly(Vector2{tl.x + 15.0f, tl.y + 15.0f}, 4, 4.0f, 45.0f, darkGold);
 
-    // Central diamond
-    DrawPoly(
-        Vector2{
-            tl.x + 15.0f,
-            tl.y + 15.0f},
-        4,
-        8.0f,
-        45.0f,
-        brightGold);
+    Vector2 tr = {bounds.x + bounds.width, bounds.y};
 
-    DrawPoly(
-        Vector2{
-            tl.x + 15.0f,
-            tl.y + 15.0f},
-        4,
-        4.0f,
-        45.0f,
-        darkGold);
+    DrawLineEx(Vector2{tr.x - c, tr.y}, Vector2{tr.x, tr.y + c}, 4.0f, gold);
 
-    // --------------------------------------------------------
-    // TOP RIGHT
-    // --------------------------------------------------------
+    DrawLineEx(Vector2{tr.x - c + 6.0f, tr.y + 6.0f}, Vector2{tr.x - 6.0f, tr.y + c - 6.0f}, 2.0f, brightGold);
 
-    Vector2 tr = {
-        bounds.x + bounds.width,
-        bounds.y};
+    DrawLineEx(Vector2{tr.x - 8.0f, tr.y + 4.0f}, Vector2{tr.x - 8.0f, tr.y + 19.0f}, 2.0f, gold);
 
-    DrawLineEx(
-        Vector2{
-            tr.x - c,
-            tr.y},
-        Vector2{
-            tr.x,
-            tr.y + c},
-        4.0f,
-        gold);
+    DrawLineEx(Vector2{tr.x - 4.0f, tr.y + 8.0f}, Vector2{tr.x - 19.0f, tr.y + 8.0f}, 2.0f, gold);
 
-    DrawLineEx(
-        Vector2{
-            tr.x - c + 6.0f,
-            tr.y + 6.0f},
-        Vector2{
-            tr.x - 6.0f,
-            tr.y + c - 6.0f},
-        2.0f,
-        brightGold);
+    DrawLineEx(Vector2{tr.x - 2.0f, tr.y + 26.0f}, Vector2{tr.x - 26.0f, tr.y + 2.0f}, 1.5f, darkGold);
 
-    DrawLineEx(
-        Vector2{
-            tr.x - 8.0f,
-            tr.y + 4.0f},
-        Vector2{
-            tr.x - 8.0f,
-            tr.y + 19.0f},
-        2.0f,
-        gold);
+    DrawPoly(Vector2{tr.x - 15.0f, tr.y + 15.0f}, 4, 8.0f, 45.0f, brightGold);
 
-    DrawLineEx(
-        Vector2{
-            tr.x - 4.0f,
-            tr.y + 8.0f},
-        Vector2{
-            tr.x - 19.0f,
-            tr.y + 8.0f},
-        2.0f,
-        gold);
+    DrawPoly(Vector2{tr.x - 15.0f, tr.y + 15.0f}, 4, 4.0f, 45.0f, darkGold);
 
-    DrawLineEx(
-        Vector2{
-            tr.x - 2.0f,
-            tr.y + 26.0f},
-        Vector2{
-            tr.x - 26.0f,
-            tr.y + 2.0f},
-        1.5f,
-        darkGold);
+    Vector2 bl = {bounds.x, bounds.y + bounds.height};
 
-    DrawPoly(
-        Vector2{
-            tr.x - 15.0f,
-            tr.y + 15.0f},
-        4,
-        8.0f,
-        45.0f,
-        brightGold);
+    DrawLineEx(Vector2{bl.x, bl.y - c}, Vector2{bl.x + c, bl.y}, 4.0f, gold);
 
-    DrawPoly(
-        Vector2{
-            tr.x - 15.0f,
-            tr.y + 15.0f},
-        4,
-        4.0f,
-        45.0f,
-        darkGold);
+    DrawLineEx(Vector2{bl.x + 6.0f, bl.y - c + 6.0f}, Vector2{bl.x + c - 6.0f, bl.y - 6.0f},
+               2.0f,
+               brightGold);
 
-    // --------------------------------------------------------
-    // BOTTOM LEFT
-    // --------------------------------------------------------
+    DrawLineEx(Vector2{bl.x + 8.0f, bl.y - 4.0f}, Vector2{bl.x + 8.0f, bl.y - 19.0f},
+               2.0f,
+               gold);
 
-    Vector2 bl = {
-        bounds.x,
-        bounds.y + bounds.height};
+    DrawLineEx(Vector2{bl.x + 4.0f, bl.y - 8.0f}, Vector2{bl.x + 19.0f, bl.y - 8.0f},
+               2.0f,
+               gold);
 
-    DrawLineEx(
-        Vector2{
-            bl.x,
-            bl.y - c},
-        Vector2{
-            bl.x + c,
-            bl.y},
-        4.0f,
-        gold);
+    DrawLineEx(Vector2{bl.x + 2.0f, bl.y - 26.0f}, Vector2{bl.x + 26.0f, bl.y - 2.0f},
+               1.5f,
+               darkGold);
 
-    DrawLineEx(
-        Vector2{
-            bl.x + 6.0f,
-            bl.y - c + 6.0f},
-        Vector2{
-            bl.x + c - 6.0f,
-            bl.y - 6.0f},
-        2.0f,
-        brightGold);
+    DrawPoly(Vector2{bl.x + 15.0f, bl.y - 15.0f}, 4, 8.0f, 45.0f, brightGold);
 
-    DrawLineEx(
-        Vector2{
-            bl.x + 8.0f,
-            bl.y - 4.0f},
-        Vector2{
-            bl.x + 8.0f,
-            bl.y - 19.0f},
-        2.0f,
-        gold);
-
-    DrawLineEx(
-        Vector2{
-            bl.x + 4.0f,
-            bl.y - 8.0f},
-        Vector2{
-            bl.x + 19.0f,
-            bl.y - 8.0f},
-        2.0f,
-        gold);
-
-    DrawLineEx(
-        Vector2{
-            bl.x + 2.0f,
-            bl.y - 26.0f},
-        Vector2{
-            bl.x + 26.0f,
-            bl.y - 2.0f},
-        1.5f,
-        darkGold);
-
-    DrawPoly(
-        Vector2{
-            bl.x + 15.0f,
-            bl.y - 15.0f},
-        4,
-        8.0f,
-        45.0f,
-        brightGold);
-
-    DrawPoly(
-        Vector2{
-            bl.x + 15.0f,
-            bl.y - 15.0f},
-        4,
-        4.0f,
-        45.0f,
-        darkGold);
-
-    // --------------------------------------------------------
-    // BOTTOM RIGHT
-    // --------------------------------------------------------
-
+    DrawPoly(Vector2{bl.x + 15.0f, bl.y - 15.0f}, 4, 4.0f, 45.0f, darkGold);
+//kkskkkakslllllllllllllllllllllllllasa;;;;;;;;;;;;;;;;
     Vector2 br = {
         bounds.x + bounds.width,
         bounds.y + bounds.height};
@@ -872,7 +614,6 @@ void PlayerPanel::draw(
 
             float maxImageHeight = 168.0f;
 
-    
             const float textureWidth =
                 static_cast<float>(sidekickTexture.width);
 
@@ -977,127 +718,45 @@ void PlayerPanel::draw(
                 spacing,
                 WHITE);
         }
+// ksksallllllllllllllllllllllllllllllllllllasaa;
+        consumedCharacters += static_cast<int>(heroName.length());
+        currentY +=  heroNameSize + 10.0f;
 
-        consumedCharacters +=
-            static_cast<int>(
-                heroName.length());
+        std::string heroHandText = "CARDS: " + std::to_string(player->getHand().getSize());
+        drawLine(heroHandText, Vector2{contentX, currentY}, heroInfoSize);
+        currentY += heroInfoSize + 8.0f;
 
-        currentY +=
-            heroNameSize + 10.0f;
+        std::string heroHealthText = "HP: " + std::to_string(hero->getHealth()) +
+                                     " / " +
+                                     std::to_string(
+                                         hero->getMaxHealth());
 
-        // ====================================================
-        // HERO HAND
-        // ====================================================
+        drawLine(heroHealthText, Vector2{contentX, currentY}, heroInfoSize);
+        currentY += heroInfoSize + 5.0f;
 
-        std::string heroHandText =
-            "CARDS: " +
-            std::to_string(
-                player->getHand().getSize());
+        std::string heroAttackTypeText = getAttackTypeText(hero->getAttackType());
+        drawLine(heroAttackTypeText, Vector2{contentX, currentY}, heroInfoSize);
+        currentY += heroInfoSize + 5.0f;
 
-        drawLine(
-            heroHandText,
-            Vector2{
-                contentX,
-                currentY},
-            heroInfoSize);
+        std::string heroMovementText = "MOVEMENT: " + std::to_string(hero->getMovement());
+        drawLine(heroMovementText, Vector2{contentX, currentY}, heroInfoSize);
+        currentY += heroInfoSize + 20.0f;
 
-        currentY +=
-            heroInfoSize + 8.0f;
-
-        // ====================================================
-        // HERO HP
-        // ====================================================
-
-        std::string heroHealthText =
-            "HP: " +
-            std::to_string(
-                hero->getHealth()) +
-            " / " +
-            std::to_string(
-                hero->getMaxHealth());
-
-        drawLine(
-            heroHealthText,
-            Vector2{
-                contentX,
-                currentY},
-            heroInfoSize);
-
-        currentY +=
-            heroInfoSize + 5.0f;
-
-        // ====================================================
-        // HERO ATTACK TYPE
-        // ====================================================
-
-        std::string heroAttackTypeText =
-            getAttackTypeText(
-                hero->getAttackType());
-
-        drawLine(
-            heroAttackTypeText,
-            Vector2{
-                contentX,
-                currentY},
-            heroInfoSize);
-
-        currentY +=
-            heroInfoSize + 5.0f;
-
-        // ====================================================
-        // HERO MOVEMENT
-        // ====================================================
-
-        std::string heroMovementText =
-            "MOVEMENT: " +
-            std::to_string(
-                hero->getMovement());
-
-        drawLine(
-            heroMovementText,
-            Vector2{
-                contentX,
-                currentY},
-            heroInfoSize);
-
-        currentY +=
-            heroInfoSize + 20.0f;
-
-        // ====================================================
-        // SPECIAL ABILITY TITLE
-        // ====================================================
-
-        drawLine(
-            "SPECIAL ABILITY:",
-            Vector2{
-                contentX,
-                currentY},
-            abilityTitleSize);
-
-        currentY +=
-            abilityTitleSize + 5.0f;
-
-        // ====================================================
-        // SPECIAL ABILITY
-        // ====================================================
-
-        std::string abilityText =
-            hero->getAbilityDescription();
+        drawLine("SPECIAL ABILITY:", Vector2{contentX, currentY}, abilityTitleSize);
+        currentY += abilityTitleSize + 5.0f;
+        std::string abilityText = hero->getAbilityDescription();
 
         if (!abilityText.empty())
         {
-            const float lineHeight =
-                20.0f;
-
+            const float lineHeight = 20.0f;
             const int maxLines = 4;
 
-            std::vector<std::string> lines =
-                WrapText(
-                    font,
-                    abilityText,
-                    abilityTextSize,
-                    spacing,
-                    contentWidth);
+            std::vector<std::string> lines = WrapText(
+                font,
+                abilityText,
+                abilityTextSize,
+                spacing,
+                contentWidth);
 
             int linesDrawn = 0;
 
@@ -1108,206 +767,88 @@ void PlayerPanel::draw(
                     break;
                 }
 
-                drawLine(
-                    line,
-                    Vector2{
-                        contentX,
-                        currentY},
-                    abilityTextSize);
+                drawLine(line, Vector2{contentX, currentY}, abilityTextSize);
 
-                currentY +=
-                    lineHeight;
-
+                currentY += lineHeight;
                 linesDrawn++;
             }
         }
-
         currentY += 20.0f;
     }
 
-    // ========================================================
-    // SIDEKICKS TITLE
-    // ========================================================
-
-    drawLine(
-        "SIDEKICKS",
-        Vector2{
-            contentX,
-            currentY},
-        sidekickTitleSize);
-
-    currentY +=
-        sidekickTitleSize + 6.0f;
-
-    // ========================================================
-    // SIDEKICKS
-    // ========================================================
-
-    const std::vector<Sidekick *> &sidekicks =
-        player->getSideKicks();
-
-    // ========================================================
-    // NO SIDEKICKS
-    // ========================================================
+    drawLine("SIDEKICKS", Vector2{contentX, currentY}, sidekickTitleSize);
+    currentY += sidekickTitleSize + 6.0f;
+    const std::vector<Sidekick *> &sidekicks = player->getSideKicks();
 
     if (sidekicks.empty())
     {
-        if (currentY +
-                sidekickInfoSize <=
-            bottom)
+        if (currentY + sidekickInfoSize <= bottom)
         {
-            drawLine(
-                "NO SIDEKICKS",
-                Vector2{
-                    contentX,
-                    currentY},
-                sidekickInfoSize);
+            drawLine("NO SIDEKICKS", Vector2{contentX, currentY}, sidekickInfoSize);
         }
 
-        if (visibleCharacters >=
-            consumedCharacters)
+        if (visibleCharacters >= consumedCharacters)
         {
             textAnimationFinished = true;
         }
-
         return;
     }
 
-    // ========================================================
-    // SIDEKICK INFORMATION
-    // ========================================================
-
-    for (size_t i = 0;
-         i < sidekicks.size();
-         ++i)
+    for (size_t i = 0; i < sidekicks.size(); ++i)
     {
-        Sidekick *sidekick =
-            sidekicks[i];
+        Sidekick *sidekick = sidekicks[i];
 
         if (sidekick == nullptr)
         {
             continue;
         }
 
-        const float requiredHeight =
-            sidekickNameSize +
-            5.0f +
-            sidekickInfoSize +
-            5.0f +
-            sidekickInfoSize +
-            5.0f +
-            sidekickInfoSize +
-            8.0f;
+        const float requiredHeight = sidekickNameSize + 5.0f + sidekickInfoSize +
+                                     5.0f +
+                                     sidekickInfoSize +
+                                     5.0f +
+                                     sidekickInfoSize +
+                                     8.0f;
 
-        if (currentY +
-                requiredHeight >
-            bottom)
+        if (currentY + requiredHeight > bottom)
         {
             break;
         }
 
-        // ====================================================
-        // SIDEKICK NAME
-        // ====================================================
+        std::string sidekickName = sidekick->getName();
+        drawLine(sidekickName, Vector2{contentX, currentY}, sidekickNameSize);
+        currentY += sidekickNameSize + 10.0f;
 
-        std::string sidekickName =
-            sidekick->getName();
+        std::string sidekickHealthText = "HP: " + std::to_string(sidekick->getHealth()) +
+                                         " / " +
+                                         std::to_string(sidekick->getMaxHealth());
 
-        drawLine(
-            sidekickName,
-            Vector2{
-                contentX,
-                currentY},
-            sidekickNameSize);
+        drawLine(sidekickHealthText, Vector2{contentX, currentY}, sidekickInfoSize);
+        currentY += sidekickInfoSize + 5.0f;
 
-        currentY +=
-            sidekickNameSize + 10.0f;
+        std::string sidekickAttackTypeText = getAttackTypeText(sidekick->getAttackType());
+        drawLine(sidekickAttackTypeText, Vector2{contentX, currentY}, sidekickInfoSize);
+        currentY += sidekickInfoSize + 5.0f;
 
-        // ====================================================
-        // SIDEKICK HP
-        // ====================================================
-
-        std::string sidekickHealthText =
-            "HP: " +
-            std::to_string(
-                sidekick->getHealth()) +
-            " / " +
-            std::to_string(
-                sidekick->getMaxHealth());
-
-        drawLine(
-            sidekickHealthText,
-            Vector2{
-                contentX,
-                currentY},
-            sidekickInfoSize);
-
-        currentY +=
-            sidekickInfoSize + 5.0f;
-
-        // ====================================================
-        // SIDEKICK ATTACK TYPE
-        // ====================================================
-
-        std::string sidekickAttackTypeText =
-            getAttackTypeText(
-                sidekick->getAttackType());
-
-        drawLine(
-            sidekickAttackTypeText,
-            Vector2{
-                contentX,
-                currentY},
-            sidekickInfoSize);
-
-        currentY +=
-            sidekickInfoSize + 5.0f;
-
-        // ====================================================
-        // SIDEKICK MOVEMENT
-        // ====================================================
-
-        std::string sidekickMovementText =
-            "MOVEMENT: " +
-            std::to_string(
-                sidekick->getMovement());
-
-        drawLine(
-            sidekickMovementText,
-            Vector2{
-                contentX,
-                currentY},
-            sidekickInfoSize);
-
-        currentY +=
-            sidekickInfoSize + 8.0f;
+        std::string sidekickMovementText = "MOVEMENT: " + std::to_string(sidekick->getMovement());
+        drawLine(sidekickMovementText, Vector2{contentX, currentY}, sidekickInfoSize);
+        currentY += sidekickInfoSize + 8.0f;
     }
 
-    // ========================================================
-    // FINISH ANIMATION
-    // ========================================================
-
-    if (visibleCharacters >=
-        consumedCharacters)
+    if (visibleCharacters >= consumedCharacters)
     {
         textAnimationFinished = true;
     }
 }
 
-// ============================================================
-// HERO TEXTURE KEY
-// ============================================================
-
-std::string PlayerPanel::getHeroTextureKey(
-    const Hero *hero) const
+std::string PlayerPanel::getHeroTextureKey(const Hero *hero) const
 {
     if (hero == nullptr)
     {
         return "";
     }
 
-    const std::string name =
-        hero->getName();
+    const std::string name = hero->getName();
 
     if (name == "DRACULA")
     {
@@ -1323,26 +864,17 @@ std::string PlayerPanel::getHeroTextureKey(
     {
         return "invisible_man";
     }
-
     return "";
 }
 
-// ============================================================
-// SIDEKICK TEXTURE KEY
-// ============================================================
-
-std::string PlayerPanel::getSidekickTextureKey(
-    const Player *player) const
+std::string PlayerPanel::getSidekickTextureKey(const Player *player) const
 {
-    if (player == nullptr ||
-        player->getHero() == nullptr)
+    if (player == nullptr || player->getHero() == nullptr)
     {
         return "";
     }
 
-    const std::string heroName =
-        player->getHero()->getName();
-
+    const std::string heroName = player->getHero()->getName();
     if (heroName == "DRACULA")
     {
         return "sisters";
@@ -1357,6 +889,5 @@ std::string PlayerPanel::getSidekickTextureKey(
     {
         return "foggy";
     }
-
     return "";
 }

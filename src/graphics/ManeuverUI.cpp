@@ -6,7 +6,6 @@
 #include "fighter/Sidekick.h"
 #include "card/Hand.h"
 #include "card/Card.h"
-#include <iostream>
 #include <algorithm>
 #include <unordered_map>
 
@@ -14,10 +13,6 @@ ManeuverUI::ManeuverUI(AssetManager *assets)
     : assets(assets)
 {
 }
-
-// ============================================================
-// اسم نمایشی کارت -> کلید تکسچر در AssetManager (تمام کارت‌ها)
-// ============================================================
 
 std::string ManeuverUI::getCardTextureKey(const Card *card, const std::string &heroName)
 {
@@ -28,7 +23,6 @@ std::string ManeuverUI::getCardTextureKey(const Card *card, const std::string &h
 
     const std::string &name = card->getName();
 
-    // "Feint" بین دراکولا و شرلوک مشترکه؛ با هیرو تفکیک می‌کنیم
     if (name == "Feint")
     {
         return (heroName == "DRACULA") ? "FeintDracula" : "FeintSherlock";
@@ -68,18 +62,12 @@ std::string ManeuverUI::getCardTextureKey(const Card *card, const std::string &h
         {"Step Lightly", "StepLightly"}};
 
     auto it = nameToKey.find(name);
-
     if (it == nameToKey.end())
     {
         return "";
     }
-
     return it->second;
 }
-
-// ============================================================
-// OPEN
-// ============================================================
 
 void ManeuverUI::open(Player *player)
 {
@@ -108,10 +96,6 @@ void ManeuverUI::open(Player *player)
     layoutAskButtons();
 }
 
-// ============================================================
-// LAYOUT HELPERS
-// ============================================================
-
 void ManeuverUI::layoutAskButtons()
 {
     const float buttonWidth = 160.0f;
@@ -137,7 +121,6 @@ void ManeuverUI::layoutFighterSelection()
     }
 
     Hero *hero = player->getHero();
-
     if (hero != nullptr && hero->isAlive())
     {
         selectableFighters.push_back(hero);
@@ -157,20 +140,14 @@ void ManeuverUI::layoutFighterSelection()
 
     int count = static_cast<int>(selectableFighters.size());
 
-    const float totalWidth =
-        count * boxWidth + (count > 0 ? (count - 1) : 0) * gap;
+    const float totalWidth = count * boxWidth + (count > 0 ? (count - 1) : 0) * gap;
 
     const float startX = (GetScreenWidth() - totalWidth) / 2.0f;
     const float boxY = GetScreenHeight() - 110.0f;
 
     for (int i = 0; i < count; i++)
     {
-        Rectangle box{
-            startX + i * (boxWidth + gap),
-            boxY,
-            boxWidth,
-            boxHeight};
-
+        Rectangle box{startX + i * (boxWidth + gap), boxY, boxWidth, boxHeight};
         fighterBoxes.push_back(box);
     }
 }
@@ -220,12 +197,7 @@ void ManeuverUI::layoutBurnCardWindow()
 
         for (int col = 0; col < cardsInRow; col++)
         {
-            Rectangle box{
-                rowStartX + col * (boxWidth + gapX),
-                rowY,
-                boxWidth,
-                boxHeight};
-
+            Rectangle box{rowStartX + col * (boxWidth + gapX), rowY, boxWidth, boxHeight};
             burnCardBoxes.push_back(box);
             index++;
         }
@@ -235,21 +207,14 @@ void ManeuverUI::layoutBurnCardWindow()
     const float burnHeight = 55.0f;
     float lastRowBottom = startY + rowCount * (boxHeight + gapY);
 
-    burnButton = Rectangle{
-        (GetScreenWidth() - burnWidth) / 2.0f,
-        lastRowBottom + 15.0f,
-        burnWidth,
-        burnHeight};
+    burnButton = Rectangle{(GetScreenWidth() - burnWidth) / 2.0f, lastRowBottom + 15.0f,
+                           burnWidth,
+                           burnHeight};
 }
-
-// ============================================================
-// UPDATE
-// ============================================================
 
 void ManeuverUI::update()
 {
-    if (state == ManeuverState::CLOSED ||
-        state == ManeuverState::AWAITING_MOVES ||
+    if (state == ManeuverState::CLOSED || state == ManeuverState::AWAITING_MOVES ||
         state == ManeuverState::SELECT_SPACE)
     {
         return;
@@ -274,7 +239,6 @@ void ManeuverUI::update()
             state = ManeuverState::CLOSED;
             readyToFinalize = true;
         }
-
         return;
     }
 
@@ -286,16 +250,11 @@ void ManeuverUI::update()
             {
                 selectedFighter = selectableFighters[i];
 
-                std::cout << "Fighter selected for maneuver: "
-                          << selectedFighter->getName()
-                          << std::endl;
-
                 state = ManeuverState::ASK_BOOST;
                 layoutAskButtons();
                 return;
             }
         }
-
         return;
     }
 
@@ -305,8 +264,6 @@ void ManeuverUI::update()
         {
             if (player != nullptr && player->getHand().isEmpty())
             {
-                std::cout << "[!] No cards in hand to burn for boost." << std::endl;
-
                 boostAmount = 0;
                 state = ManeuverState::AWAITING_MOVES;
                 waitingForMoves = true;
@@ -323,7 +280,6 @@ void ManeuverUI::update()
             state = ManeuverState::AWAITING_MOVES;
             waitingForMoves = true;
         }
-
         return;
     }
 
@@ -334,32 +290,23 @@ void ManeuverUI::update()
             if (CheckCollisionPointRec(mouse, burnCardBoxes[i]))
             {
                 burnSelectedIndex = static_cast<int>(i);
-
-                std::cout << "Boost card selected: "
-                          << burnableCards[i]->getName()
-                          << std::endl;
-
                 return;
             }
         }
 
-        if (burnSelectedIndex != -1 &&
-            CheckCollisionPointRec(mouse, burnButton))
+        if (burnSelectedIndex != -1 && CheckCollisionPointRec(mouse, burnButton))
         {
             burnSelectedCard();
-
             state = ManeuverState::AWAITING_MOVES;
             waitingForMoves = true;
         }
-
         return;
     }
 }
 
 void ManeuverUI::burnSelectedCard()
 {
-    if (player == nullptr ||
-        burnSelectedIndex < 0 ||
+    if (player == nullptr || burnSelectedIndex < 0 ||
         burnSelectedIndex >= static_cast<int>(burnableCards.size()))
     {
         return;
@@ -375,24 +322,12 @@ void ManeuverUI::burnSelectedCard()
         if (cards[i] == chosen)
         {
             Card *removed = hand.removeCard(i);
-
             boostAmount = removed->getBoost();
-
             player->getDiscardPile().addCard(removed);
-
-            std::cout << "[.] Boost card burned: "
-                      << removed->getName()
-                      << " (+" << boostAmount << " movement)"
-                      << std::endl;
-
             break;
         }
     }
 }
-
-// ============================================================
-// GETTERS / STATE TRANSITIONS
-// ============================================================
 
 bool ManeuverUI::isOpen() const
 {
@@ -420,7 +355,6 @@ int ManeuverUI::getMovementBudget() const
     {
         return 0;
     }
-
     return selectedFighter->getMovement() + boostAmount;
 }
 
@@ -460,10 +394,6 @@ bool ManeuverUI::consumeReadyToFinalize()
     return true;
 }
 
-// ============================================================
-// DRAW
-// ============================================================
-
 void ManeuverUI::draw()
 {
     if (assets == nullptr)
@@ -476,26 +406,20 @@ void ManeuverUI::draw()
 
     if (state == ManeuverState::ASK_MOVE || state == ManeuverState::ASK_BOOST)
     {
-        const char *question =
-            (state == ManeuverState::ASK_MOVE)
-                ? "Do you want to move a fighter?"
-                : "Do you want to use a boost card?";
+        const char *question = (state == ManeuverState::ASK_MOVE)
+                                   ? "Do you want to move a fighter?"
+                                   : "Do you want to use a boost card?";
 
         const float questionSize = 26.0f;
-
-        Vector2 questionTextSize =
-            MeasureTextEx(font, question, questionSize, 1.5f);
-
-        DrawTextEx(
-            font, question,
-            Vector2{
-                (GetScreenWidth() - questionTextSize.x) / 2.0f,
-                GetScreenHeight() - 145.0f},
-            questionSize, 1.5f, WHITE);
+        Vector2 questionTextSize = MeasureTextEx(font, question, questionSize, 1.5f);
+        DrawTextEx(font, question,
+                   Vector2{
+                       (GetScreenWidth() - questionTextSize.x) / 2.0f,
+                       GetScreenHeight() - 145.0f},
+                   questionSize, 1.5f, WHITE);
 
         bool yesHovered = CheckCollisionPointRec(mouse, yesButton);
-        DrawRectangleRounded(yesButton, 1.0f, 20,
-                             yesHovered ? Color{75, 75, 75, 245} : Color{35, 35, 35, 235});
+        DrawRectangleRounded(yesButton, 1.0f, 20, yesHovered ? Color{75, 75, 75, 245} : Color{35, 35, 35, 235});
 
         Vector2 yesTextSize = MeasureTextEx(font, "YES", 24.0f, 1.5f);
         DrawTextEx(font, "YES",
@@ -505,8 +429,7 @@ void ManeuverUI::draw()
                    24.0f, 1.5f, WHITE);
 
         bool noHovered = CheckCollisionPointRec(mouse, noButton);
-        DrawRectangleRounded(noButton, 1.0f, 20,
-                             noHovered ? Color{75, 75, 75, 245} : Color{35, 35, 35, 235});
+        DrawRectangleRounded(noButton, 1.0f, 20, noHovered ? Color{75, 75, 75, 245} : Color{35, 35, 35, 235});
 
         Vector2 noTextSize = MeasureTextEx(font, "NO", 24.0f, 1.5f);
         DrawTextEx(font, "NO",
@@ -522,39 +445,30 @@ void ManeuverUI::draw()
     {
         const char *title = "CHOOSE A FIGHTER TO MOVE";
         const float titleSize = 26.0f;
-
         Vector2 titleTextSize = MeasureTextEx(font, title, titleSize, 1.5f);
-
-        DrawTextEx(
-            font, title,
-            Vector2{
-                (GetScreenWidth() - titleTextSize.x) / 2.0f,
-                GetScreenHeight() - 150.0f},
-            titleSize, 1.5f, WHITE);
+        DrawTextEx(font, title,
+                   Vector2{
+                       (GetScreenWidth() - titleTextSize.x) / 2.0f,
+                       GetScreenHeight() - 150.0f},
+                   titleSize, 1.5f, WHITE);
 
         for (size_t i = 0; i < selectableFighters.size(); i++)
         {
             Rectangle box = fighterBoxes[i];
             bool hovered = CheckCollisionPointRec(mouse, box);
 
-            DrawRectangleRounded(box, 1.0f, 20,
-                                 hovered ? Color{75, 75, 75, 245} : Color{35, 35, 35, 235});
+            DrawRectangleRounded(box, 1.0f, 20, hovered ? Color{75, 75, 75, 245} : Color{35, 35, 35, 235});
 
-            DrawRectangleRoundedLines(box, 1.0f, 20,
-                                      hovered ? WHITE : Color{150, 150, 150, 255});
+            DrawRectangleRoundedLines(box, 1.0f, 20, hovered ? WHITE : Color{150, 150, 150, 255});
 
             std::string name = selectableFighters[i]->getName();
-
             Vector2 nameSize = MeasureTextEx(font, name.c_str(), 20.0f, 1.0f);
-
-            DrawTextEx(
-                font, name.c_str(),
-                Vector2{
-                    box.x + (box.width - nameSize.x) / 2.0f,
-                    box.y + (box.height - nameSize.y) / 2.0f},
-                20.0f, 1.0f, WHITE);
+            DrawTextEx(font, name.c_str(),
+                       Vector2{
+                           box.x + (box.width - nameSize.x) / 2.0f,
+                           box.y + (box.height - nameSize.y) / 2.0f},
+                       20.0f, 1.0f, WHITE);
         }
-
         return;
     }
 
@@ -564,18 +478,14 @@ void ManeuverUI::draw()
 
         const char *title = "CHOOSE A CARD TO BURN FOR BOOST";
         const float titleSize = 32.0f;
-
         Vector2 titleTextSize = MeasureTextEx(font, title, titleSize, 2.0f);
+        DrawTextEx(font, title,
+                   Vector2{(GetScreenWidth() - titleTextSize.x) / 2.0f, 70.0f},
+                   titleSize, 2.0f, WHITE);
 
-        DrawTextEx(
-            font, title,
-            Vector2{(GetScreenWidth() - titleTextSize.x) / 2.0f, 70.0f},
-            titleSize, 2.0f, WHITE);
-
-        std::string heroName =
-            (player != nullptr && player->getHero() != nullptr)
-                ? player->getHero()->getName()
-                : "";
+        std::string heroName = (player != nullptr && player->getHero() != nullptr)
+                                   ? player->getHero()->getName()
+                                   : "";
 
         for (size_t i = 0; i < burnableCards.size(); i++)
         {
@@ -598,40 +508,33 @@ void ManeuverUI::draw()
                                       (hovered || selected) ? WHITE : Color{150, 150, 150, 255});
 
             std::string textureKey = getCardTextureKey(card, heroName);
-
             if (!textureKey.empty())
             {
                 Texture2D texture = assets->getCard(textureKey);
-
                 if (texture.id != 0)
                 {
                     const float padding = 10.0f;
 
-                    Rectangle source{
-                        0.0f, 0.0f,
-                        static_cast<float>(texture.width),
-                        static_cast<float>(texture.height)};
+                    Rectangle source{0.0f, 0.0f,
+                                     static_cast<float>(texture.width),
+                                     static_cast<float>(texture.height)};
 
-                    Rectangle destination{
-                        box.x + padding,
-                        box.y + padding,
-                        box.width - 2.0f * padding,
-                        box.height - 55.0f};
+                    Rectangle destination{box.x + padding, box.y + padding,
+                                          box.width - 2.0f * padding,
+                                          box.height - 55.0f};
 
-                    DrawTexturePro(texture, source, destination,
-                                   Vector2{0.0f, 0.0f}, 0.0f, WHITE);
+                    DrawTexturePro(texture, source, destination, Vector2{0.0f, 0.0f}, 0.0f, WHITE);
                 }
             }
 
             std::string name = card->getName();
             Vector2 nameSize = MeasureTextEx(font, name.c_str(), 18.0f, 1.0f);
 
-            DrawTextEx(
-                font, name.c_str(),
-                Vector2{
-                    box.x + (box.width - nameSize.x) / 2.0f,
-                    box.y + box.height - 32.0f},
-                18.0f, 1.0f, WHITE);
+            DrawTextEx(font, name.c_str(),
+                       Vector2{
+                           box.x + (box.width - nameSize.x) / 2.0f,
+                           box.y + box.height - 32.0f},
+                       18.0f, 1.0f, WHITE);
         }
 
         bool burnEnabled = (burnSelectedIndex != -1);
@@ -650,13 +553,12 @@ void ManeuverUI::draw()
         const char *burnText = "BURN";
         Vector2 burnTextSize = MeasureTextEx(font, burnText, 26.0f, 1.5f);
 
-        DrawTextEx(
-            font, burnText,
-            Vector2{
-                burnButton.x + (burnButton.width - burnTextSize.x) / 2.0f,
-                burnButton.y + (burnButton.height - burnTextSize.y) / 2.0f},
-            26.0f, 1.5f,
-            burnEnabled ? WHITE : Color{150, 150, 150, 150});
+        DrawTextEx(font, burnText,
+                   Vector2{
+                       burnButton.x + (burnButton.width - burnTextSize.x) / 2.0f,
+                       burnButton.y + (burnButton.height - burnTextSize.y) / 2.0f},
+                   26.0f, 1.5f,
+                   burnEnabled ? WHITE : Color{150, 150, 150, 150});
 
         return;
     }
