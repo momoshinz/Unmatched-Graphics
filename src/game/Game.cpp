@@ -194,49 +194,6 @@ void Game::initialize(int age1, int age2)
             olderPlayer = player1;
         }
     }
-
-    cout << "Player 1 age : "
-         << player1->getAge()
-         << '\n';
-
-    cout << "Player 2 age : "
-         << player2->getAge()
-         << '\n';
-
-    if (age1 == age2)
-    {
-        cout << "\nBoth players have the same age.\n";
-
-        cout << "Player "
-             << (youngerPlayer == player1 ? "1" : "2")
-             << " was randomly selected to play first.\n";
-    }
-
-    cout << "\nFirst player : "
-         << (youngerPlayer == player1
-                 ? "Player 1"
-                 : "Player 2")
-         << '\n';
-
-    cout << "Second player : "
-         << (olderPlayer == player1
-                 ? "Player 1"
-                 : "Player 2")
-         << '\n';
-
-    cout << "========================================\n";
-
-    // =========================================
-    // IMPORTANT
-    // =========================================
-    // DO NOT:
-    // - ask for hero choice here
-    // - use cin here
-    // - create hero decks here
-    // - draw cards here
-    //
-    // Hero selection is handled by MainMenu
-    // through the graphical interface.
 }
 
 const vector<Player *> &Game::getPlayers() const
@@ -336,24 +293,6 @@ Fighter *Game::selectTarget(Player &currentPlayer, Fighter *user)
         return nullptr;
     }
 
-    for (size_t i = 0; i < targets.size(); i++)
-    {
-        cout << i + 1
-             << ". "
-             << targets[i]->getName();
-
-        if (targets[i]->isHero())
-        {
-            cout << " { Hero }";
-        }
-        else
-        {
-            cout << " { Sidekick }";
-        }
-
-        cout << endl;
-    }
-
     int choice;
     cout << "~~> ";
 
@@ -375,16 +314,6 @@ void Game::processPlayerAction()
     {
         throw runtime_error("\n[!] ERROR : Current player not found!\n");
     }
-
-    cout << "\nCurrent Player : "
-         << currentPlayer->getHero()->getName()
-         << endl;
-
-    cout << "\n[o] Choose an action :\n";
-    cout << "1. Maneuver\n";
-    cout << "2. Attack\n";
-    cout << "3. Play Scheme\n";
-    cout << "4. Save Game\n ~~> ";
 
     int choice;
     cin >> choice;
@@ -429,16 +358,12 @@ void Game::processTurn()
 
         ui.renderScreen(*this);
 
-        cout << "\nTURN : " << currentPlayer->getHero()->getName() << endl;
-
         Hero *hero = currentPlayer->getHero();
 
         if (turnManager.consumeTurnStart())
         {
             if (dynamic_cast<Dracula *>(hero) != nullptr)
             {
-                cout << "\n[*] Dracula may use his special ability.\n";
-
                 try
                 {
                     hero->useAbility(*this, *currentPlayer);
@@ -460,7 +385,6 @@ void Game::processTurn()
             catch (const exception &e)
             {
                 cerr << "\n[!] Error in action : " << e.what() << endl;
-                cout << "\nPlease try again.\n";
             }
         }
         try
@@ -511,7 +435,6 @@ void Game::maneuver()
     }
 
     currentPlayer->drawCardToHand();
-    cout << "\n[+] Drew one card.\n";
 
     unordered_map<Fighter *, int> movedDistance;
 
@@ -522,20 +445,6 @@ void Game::maneuver()
 
     while (true)
     {
-        cout << "\n==========< Choose Fighter To Move >==========\n\n";
-
-        for (int i = 0; i < fighters.size(); i++)
-        {
-            cout << i + 1 << ". " << fighters[i]->getName();
-
-            if (movedDistance[fighters[i]] >= fighters[i]->getMovement())
-                cout << " { Movement Finished }";
-
-            cout << endl;
-        }
-
-        cout << "0. Finish Maneuver\n";
-
         int fighterChoice;
         cout << "~~> ";
         cin >> fighterChoice;
@@ -545,7 +454,6 @@ void Game::maneuver()
 
         if (fighterChoice < 1 || fighterChoice > fighters.size())
         {
-            cout << "\n[!] Invalid choice! :<\n";
             continue;
         }
 
@@ -553,9 +461,6 @@ void Game::maneuver()
 
         if (movedDistance[fighter] >= fighter->getMovement())
         {
-            cout << "\n[!] "
-                 << fighter->getName()
-                 << " has already used ALL of its movement in this maneuver.. :)\n";
             continue;
         }
 
@@ -563,14 +468,6 @@ void Game::maneuver()
 
         while (answer < 1 || answer > 2)
         {
-            cout << "\n[?] Move "
-                 << fighter->getName()
-                 << " ?\n";
-
-            cout << "1. Yes\n";
-            cout << "2. No\n";
-            cout << "~~> ";
-
             cin >> answer;
         }
 
@@ -587,23 +484,15 @@ void Game::maneuver()
 
             while (boostAnswer < 1 || boostAnswer > 2)
             {
-                cout << "\n[?] Use BOOST card?\n";
-                cout << "1. Yes\n";
-                cout << "2. No\n";
-                cout << "~~> ";
-
                 cin >> boostAnswer;
             }
 
             if (boostAnswer == 1)
             {
-                cout << "\n========== HAND ==========\n";
-
                 int cardIndex = 0;
 
                 while (cardIndex < 1 || cardIndex > currentPlayer->getHand().getSize())
                 {
-                    cout << "> Choose a card to burn : ";
                     cin >> cardIndex;
                 }
 
@@ -612,11 +501,6 @@ void Game::maneuver()
                 if (discardedCard != nullptr)
                 {
                     totalMovement += discardedCard->getBoost();
-
-                    cout << "\n[+] BOOST = "
-                         << discardedCard->getBoost()
-                         << endl;
-
                     currentPlayer->getDiscardPile().addCard(discardedCard);
                 }
             }
@@ -626,25 +510,7 @@ void Game::maneuver()
 
         if (availableMoves.empty())
         {
-            cout << "\n[!] No available movement. :<\n";
             continue;
-        }
-
-        cout << "\n========== Available Homes ==========\n\n";
-
-        for (int i = 0; i < availableMoves.size(); i++)
-        {
-            cout << i + 1
-                 << ". Home "
-                 << availableMoves[i].first->getId()
-                 << " { "
-                 << availableMoves[i].second
-                 << " step";
-
-            if (availableMoves[i].second > 1)
-                cout << "s";
-
-            cout << " }\n";
         }
 
         int choice = 0;
@@ -665,21 +531,6 @@ void Game::maneuver()
 
         ui.renderScreen(*this);
 
-        cout << "\n[+] "
-             << fighter->getName()
-             << " moved successfully.\n";
-
-        if (fighter->getMovement() - movedDistance[fighter] < 0)
-        {
-            cout << "[*] Remaining movement : 0" << endl;
-        }
-
-        else
-        {
-            cout << "[*] Remaining movement : "
-                 << fighter->getMovement() - movedDistance[fighter]
-                 << endl;
-        }
     }
 
     turnManager.useAction();
@@ -717,19 +568,12 @@ void Game::playSchemeCard()
     int fighterChoice = 0;
     while (true)
     {
-        cout << "\n========== Choose Fighter ==========\n";
-        for (int i = 0; i < fighters.size(); i++)
-        {
-            cout << i + 1 << ". " << fighters[i]->getName() << endl;
-        }
-        cout << "~~>  ";
         cin >> fighterChoice;
 
         if (cin.fail())
         {
             cin.clear();
             cin.ignore(1000, '\n');
-            cout << "[!] Please enter a number!\n";
             continue;
         }
 
@@ -737,7 +581,6 @@ void Game::playSchemeCard()
         {
             break;
         }
-        cout << "[!] Invalid choice! :( Try again.\n";
     }
 
     Fighter *fighter = fighters[fighterChoice - 1];
@@ -747,8 +590,6 @@ void Game::playSchemeCard()
     while (true)
     {
         vector<int> playableSchemes;
-
-        cout << "\n========== Playable Scheme Cards ==========\n";
 
         int displayIndex = 1;
 
@@ -772,21 +613,18 @@ void Game::playSchemeCard()
 
         if (playableSchemes.empty())
         {
-            cout << "\n[!] This fighter has no playable Scheme card.\n";
             return;
         }
 
         int choice = 0;
         while (true)
         {
-            cout << "\n> Choose Scheme Card (1 to " << playableSchemes.size() << ") : ";
             cin >> choice;
 
             if (cin.fail())
             {
                 cin.clear();
                 cin.ignore(1000, '\n');
-                cout << "[!] Please enter a number!\n";
                 continue;
             }
 
@@ -794,7 +632,6 @@ void Game::playSchemeCard()
             {
                 break;
             }
-            cout << "[!] Invalid choice! :( Try again.\n";
         }
 
         int handIndex = playableSchemes[choice - 1];
@@ -820,7 +657,6 @@ void Game::playSchemeCard()
 
             ui.renderScreen(*this);
 
-            cout << "\n[+] Scheme card played successfully.\n";
             turnManager.useAction();
             return;
         }
@@ -856,14 +692,6 @@ void Game::attack()
 
     while (fighterChoice < 1 || fighterChoice > fighters.size())
     {
-        cout << "\n==========< Choose Fighter >==========\n";
-
-        for (int i = 0; i < fighters.size(); i++)
-        {
-            cout << i + 1 << ". " << fighters[i]->getName() << endl;
-        }
-
-        cout << "~~> ";
         cin >> fighterChoice;
 
         if (fighterChoice < 1 || fighterChoice > fighters.size())
@@ -876,7 +704,6 @@ void Game::attack()
 
     if (defender == nullptr)
     {
-        cerr << "\n[!] ERROR : No target available! :<\n";
         return;
     }
 
@@ -893,7 +720,6 @@ void Game::attack()
 
     if (!hasAttackCard)
     {
-        cout << "\n[!] " << attacker->getName() << " has no playable Attack card. :<\n";
         return;
     }
 
@@ -903,16 +729,12 @@ void Game::attack()
 
     while (true)
     {
-        cout << "\n========== * Attacker's Hand * ==========\n";
-
         int attackIndex;
 
-        cout << "~~> ";
         cin >> attackIndex;
 
         if (attackIndex < 1 || attackIndex > currentPlayer->getHand().getSize())
         {
-            cout << "[!] Invalid choice!\n";
             continue;
         }
 
@@ -920,13 +742,11 @@ void Game::attack()
 
         if (!(selected->isAttack() || selected->isVersatile()))
         {
-            cout << "\n[!] This card cannot be used for attack! :<\n";
             continue;
         }
 
         if (!selected->isPlayableBy(*attacker))
         {
-            cout << "\n[!] " << attacker->getName() << " cannot play this card! :<\n";
             continue;
         }
 
@@ -938,21 +758,6 @@ void Game::attack()
     Card *defenceCard = nullptr;
 
     int answer = 0;
-
-    while (answer != 1 && answer != 2)
-    {
-        cout << "\n[?] Does defender want to defend?\n";
-        cout << "1. Yes\n";
-        cout << "2. No\n";
-        cout << "~~> ";
-
-        cin >> answer;
-
-        if (answer != 1 && answer != 2)
-        {
-            cout << "[!] Invalid choice!\n";
-        }
-    }
 
     if (answer == 1)
     {
@@ -975,16 +780,12 @@ void Game::attack()
         {
             while (true)
             {
-                cout << "\n========== * Defender's Hand * ==========\n";
-
                 int defenceIndex;
 
-                cout << "~~> ";
                 cin >> defenceIndex;
 
                 if (defenceIndex < 1 || defenceIndex > opponent->getHand().getSize())
                 {
-                    cout << "[!] Invalid choice!\n";
                     continue;
                 }
 
@@ -992,13 +793,11 @@ void Game::attack()
 
                 if (!(selected->isDefense() || selected->isVersatile()))
                 {
-                    cout << "\n[!] This card cannot be used for defense! :<\n";
                     continue;
                 }
 
                 if (!selected->isPlayableBy(*defender))
                 {
-                    cout << "\n[!] " << defender->getName() << " cannot play this card! :<\n";
                     continue;
                 }
 
@@ -1027,10 +826,6 @@ void Game::discardUntilHandLimit()
 
     while (turnManager.checkHandLimit())
     {
-        cout << "[!] Your hand contains MORE THAN 7 cards!\n";
-
-        cout << "[o] Choose one card to discard.\n";
-
         int choice = ui.chooseCard(*currentPlayer);
 
         if (choice < 1 || choice > currentPlayer->getHand().getSize())
@@ -1041,10 +836,6 @@ void Game::discardUntilHandLimit()
         Card *discarded = currentPlayer->getHand().removeCard(choice - 1);
 
         currentPlayer->getDiscardPile().addCard(discarded);
-
-        cout << "\n[+] "
-             << discarded->getName()
-             << " discarded successfully.\n\n";
     }
 }
 
@@ -1129,15 +920,6 @@ void Game::endGame()
     {
         ui.showWinner(*players[1]);
     }
-    else
-    {
-        cout << "\n __________________________________________";
-        cout << "\n|                GAME OVER                 |";
-        cout << "\n ------------------------------------------";
-        cout << "\n| * o * . * O * . * o * . * O * . * o * O  |";
-        cout << "\n|    ~~~>THE GAME ENDED IN A DRAW! :[<~~~  |";
-        cout << "\n ------------------------------------------\n";
-    }
 }
 
 const TurnManager &Game::getTurnManager() const
@@ -1168,10 +950,6 @@ void Game::placeFog(Fog *fog)
 
         vector<Space *> validSpaces;
 
-        cout << "\nPlace Fog " << fog->getID() << endl;
-        cout << "Available homes :\n";
-        cout << "======================================\n";
-
         for (Space *space : board.getSpaces())
         {
             if (space->hasFogToken())
@@ -1180,14 +958,7 @@ void Game::placeFog(Fog *fog)
             }
 
             validSpaces.push_back(space);
-
-            cout << validSpaces.size()
-                 << ". Home "
-                 << space->getId()
-                 << endl;
         }
-
-        cout << "\n> Choose a home : ";
 
         int choice;
         cin >> choice;
@@ -1196,8 +967,6 @@ void Game::placeFog(Fog *fog)
         {
             cin.clear();
             cin.ignore(1000, '\n');
-
-            cout << "\n[!] Please enter a number!\n";
             continue;
         }
 
@@ -1545,14 +1314,10 @@ void Game::loadGame(const string &filename)
     turnManager.setTurnNumber(turnNumber);
 
     turnManager.setTurnJustStarted(j["Turn"]["TurnJustStarted"]);
-
-    cout << "\n[+] Game Loaded Successfully!\n";
 }
 
 void Game::saveMenu()
 {
-    cout << "\n========== Save Game ==========\n";
-
     int slot = 1;
     while (true)
     {
