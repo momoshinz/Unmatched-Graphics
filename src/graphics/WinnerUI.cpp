@@ -124,6 +124,44 @@ void WinnerUI::draw()
     Font titleFont = assets->getTitleFont();
 
     // ========================================================
+    // WINNER BACKGROUND
+    // ========================================================
+
+    Texture2D winnerBackground =
+        assets->getWinnerBackground();
+
+    if (winnerBackground.id != 0)
+    {
+        Rectangle source{
+            0.0f,
+            0.0f,
+            static_cast<float>(winnerBackground.width),
+            static_cast<float>(winnerBackground.height)
+        };
+
+        Rectangle destination{
+            0.0f,
+            0.0f,
+            static_cast<float>(GetScreenWidth()),
+            static_cast<float>(GetScreenHeight())
+        };
+
+        DrawTexturePro(
+            winnerBackground,
+            source,
+            destination,
+            Vector2{0.0f, 0.0f},
+            0.0f,
+            WHITE
+        );
+    }
+    else
+    {
+        ClearBackground(BLACK);
+    }
+
+
+    // ========================================================
     // WINNER POPUP
     // ========================================================
 
@@ -134,36 +172,52 @@ void WinnerUI::draw()
         (GetScreenWidth() - popupWidth) / 2.0f,
         (GetScreenHeight() - popupHeight) / 2.0f - 30.0f,
         popupWidth,
-        popupHeight};
+        popupHeight
+    };
 
-    // Background
+
+    // ========================================================
+    // POPUP BACKGROUND
+    // ========================================================
+
     DrawRectangleRounded(
         popup,
         0.06f,
         20,
-        Color{25, 20, 18, 245});
+        Color{25, 20, 18, 245}
+    );
 
-    // Border
+
+    // ========================================================
+    // POPUP BORDER
+    // ========================================================
+
     DrawRectangleRoundedLines(
         popup,
         0.06f,
         20,
-        Color{200, 170, 90, 255});
+        Color{200, 170, 90, 255}
+    );
+
 
     // ========================================================
     // HERO IMAGE
     // ========================================================
 
     Texture2D texture =
-        getHeroTextureForWinnerUI(assets, winnerHero);
+        getHeroTextureForWinnerUI(
+            assets,
+            winnerHero
+        );
 
     const float imagePadding = 30.0f;
 
-    // Maximum area available for the hero image.
     const float maxImageWidth =
         popup.width - 2.0f * imagePadding;
 
-    const float maxImageHeight = 330.0f;
+    const float maxImageHeight =
+        330.0f;
+
 
     if (texture.id != 0 &&
         texture.width > 0 &&
@@ -174,6 +228,7 @@ void WinnerUI::draw()
 
         const float textureHeight =
             static_cast<float>(texture.height);
+
 
         // ----------------------------------------------------
         // KEEP ORIGINAL ASPECT RATIO
@@ -186,13 +241,17 @@ void WinnerUI::draw()
             maxImageHeight / textureHeight;
 
         float scale =
-            (scaleX < scaleY) ? scaleX : scaleY;
+            (scaleX < scaleY)
+                ? scaleX
+                : scaleY;
+
 
         float drawWidth =
             textureWidth * scale;
 
         float drawHeight =
             textureHeight * scale;
+
 
         // ----------------------------------------------------
         // CENTER IMAGE
@@ -204,6 +263,7 @@ void WinnerUI::draw()
         float imageAreaY =
             popup.y + imagePadding;
 
+
         float drawX =
             imageAreaX +
             (maxImageWidth - drawWidth) / 2.0f;
@@ -212,17 +272,22 @@ void WinnerUI::draw()
             imageAreaY +
             (maxImageHeight - drawHeight) / 2.0f;
 
+
         Rectangle source{
             0.0f,
             0.0f,
             textureWidth,
-            textureHeight};
+            textureHeight
+        };
+
 
         Rectangle destination{
             drawX,
             drawY,
             drawWidth,
-            drawHeight};
+            drawHeight
+        };
+
 
         DrawTexturePro(
             texture,
@@ -230,8 +295,10 @@ void WinnerUI::draw()
             destination,
             Vector2{0.0f, 0.0f},
             0.0f,
-            WHITE);
+            WHITE
+        );
     }
+
 
     // ========================================================
     // HERO NAME
@@ -243,12 +310,15 @@ void WinnerUI::draw()
     const float nameFontSize = 34.0f;
     const float nameSpacing = 2.0f;
 
+
     Vector2 nameSize =
         MeasureTextEx(
             titleFont,
             heroName.c_str(),
             nameFontSize,
-            nameSpacing);
+            nameSpacing
+        );
+
 
     float nameY =
         popup.y +
@@ -256,19 +326,23 @@ void WinnerUI::draw()
         maxImageHeight +
         25.0f;
 
+
     DrawTextEx(
         titleFont,
         heroName.c_str(),
         Vector2{
             popup.x +
                 (popup.width - nameSize.x) / 2.0f,
-            nameY},
+            nameY
+        },
         nameFontSize,
         nameSpacing,
-        Color{255, 215, 120, 255});
+        Color{255, 215, 120, 255}
+    );
+
 
     // ========================================================
-    // "IS THE WINNER"
+    // IS THE WINNER
     // ========================================================
 
     const char *subtitle =
@@ -277,17 +351,21 @@ void WinnerUI::draw()
     const float subtitleFontSize = 24.0f;
     const float subtitleSpacing = 1.5f;
 
+
     Vector2 subtitleSize =
         MeasureTextEx(
             font,
             subtitle,
             subtitleFontSize,
-            subtitleSpacing);
+            subtitleSpacing
+        );
+
 
     float subtitleY =
         nameY +
         nameSize.y +
         15.0f;
+
 
     DrawTextEx(
         font,
@@ -295,10 +373,13 @@ void WinnerUI::draw()
         Vector2{
             popup.x +
                 (popup.width - subtitleSize.x) / 2.0f,
-            subtitleY},
+            subtitleY
+        },
         subtitleFontSize,
         subtitleSpacing,
-        WHITE);
+        WHITE
+    );
+
 
     // ========================================================
     // RETURN TO MAIN MENU
@@ -310,45 +391,60 @@ void WinnerUI::draw()
     const float returnFontSize = 25.0f;
     const float returnSpacing = 1.5f;
 
+
     Vector2 returnTextSize =
         MeasureTextEx(
             font,
             returnText,
             returnFontSize,
-            returnSpacing);
+            returnSpacing
+        );
+
 
     float returnX =
         (GetScreenWidth() - returnTextSize.x) / 2.0f;
+
 
     float returnY =
         popup.y +
         popup.height +
         25.0f;
 
+
     returnTextBounds = Rectangle{
         returnX - 10.0f,
         returnY - 8.0f,
         returnTextSize.x + 20.0f,
-        returnTextSize.y + 16.0f};
+        returnTextSize.y + 16.0f
+    };
+
 
     Vector2 mouse =
         GetMousePosition();
 
+
     bool hovered =
         CheckCollisionPointRec(
             mouse,
-            returnTextBounds);
+            returnTextBounds
+        );
+
 
     Color textColor =
         hovered
             ? Color{255, 215, 120, 255}
             : Color{200, 200, 200, 255};
 
+
     DrawTextEx(
         font,
         returnText,
-        Vector2{returnX, returnY},
+        Vector2{
+            returnX,
+            returnY
+        },
         returnFontSize,
         returnSpacing,
-        textColor);
+        textColor
+    );
 }

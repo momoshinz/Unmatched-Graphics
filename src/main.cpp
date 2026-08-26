@@ -350,17 +350,7 @@ int main()
                             // Winner text
                             // -----------------------------------------
 
-                            std::string winnerText =
-                                winnerHero != nullptr
-                                    ? winnerHero->getName() + " IS THE WINNER"
-                                    : "GAME OVER";
-
-                            // -----------------------------------------
-                            // Fade to black
-                            // -----------------------------------------
-
-                            transition.setText(
-                                winnerText);
+                            transition.setText("GAME OVER");
 
                             nextScreen =
                                 Screen::WINNER;

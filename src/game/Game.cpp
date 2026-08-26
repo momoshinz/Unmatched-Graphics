@@ -194,7 +194,6 @@ void Game::initialize(int age1, int age2)
             olderPlayer = player1;
         }
     }
-<<<<<<< HEAD
 
     cout << "Player 1 age : "
          << player1->getAge()
@@ -238,8 +237,6 @@ void Game::initialize(int age1, int age2)
     //
     // Hero selection is handled by MainMenu
     // through the graphical interface.
-=======
->>>>>>> 429acd6b4681f44a7ce55a11eebf7cad28606375
 }
 
 const vector<Player *> &Game::getPlayers() const
