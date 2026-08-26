@@ -149,10 +149,6 @@ void Game::addPlayer(Player *player)
 
 void Game::initialize(int age1, int age2)
 {
-    // =========================================
-    // VALIDATE AGES
-    // =========================================
-
     if (age1 <= 0 || age2 <= 0)
     {
         throw invalid_argument(
@@ -165,26 +161,14 @@ void Game::initialize(int age1, int age2)
             "\n[!] ERROR : Age cannot be greater than 100!\n");
     }
 
-    // =========================================
-    // CREATE PLAYERS
-    // =========================================
-
     Player *player1 = new Player(age1);
     Player *player2 = new Player(age2);
 
     addPlayer(player1);
     addPlayer(player2);
 
-    // =========================================
-    // SETUP BOARD
-    // =========================================
-
     board.setupMap();
     isMapSetUp = true;
-
-    // =========================================
-    // DETERMINE PLAYER ORDER
-    // =========================================
 
     if (age1 < age2)
     {
@@ -198,7 +182,6 @@ void Game::initialize(int age1, int age2)
     }
     else
     {
-        // Same age -> random first player
 
         if (GetRandomValue(0, 1) == 0)
         {
@@ -211,14 +194,6 @@ void Game::initialize(int age1, int age2)
             olderPlayer = player1;
         }
     }
-
-    // =========================================
-    // INFORMATION
-    // =========================================
-
-    cout << "\n========================================\n";
-    cout << "         GAME INITIALIZED\n";
-    cout << "========================================\n";
 
     cout << "Player 1 age : "
          << player1->getAge()
@@ -1730,10 +1705,6 @@ Player *Game::getOlderPlayer() const
 
 bool Game::assignHero(int playerIndex, const std::string &heroName)
 {
-    // =========================================
-    // VALIDATE PLAYER INDEX
-    // =========================================
-
     if (playerIndex < 1 ||
         playerIndex > static_cast<int>(players.size()))
     {
