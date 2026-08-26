@@ -5,16 +5,14 @@
 #include <iostream>
 #include <unordered_map>
 #include <algorithm>
+#include <string>
+using namespace std;
 
 SchemeUI::SchemeUI(AssetManager *assets)
     : assets(assets)
 {
 }
 
-// ============================================================
-// اسم نمایشی کارت -> کلید تکسچر در AssetManager
-// (فقط کارت‌های Scheme، چون این پنجره فقط اونا رو نشون می‌ده)
-// ============================================================
 
 std::string SchemeUI::getCardTextureKey(const Card *card)
 {
@@ -44,10 +42,6 @@ std::string SchemeUI::getCardTextureKey(const Card *card)
 
     return it->second;
 }
-
-// ============================================================
-// OPEN SCHEME
-// ============================================================
 
 void SchemeUI::openScheme(const Hand &hand)
 {
@@ -95,10 +89,6 @@ void SchemeUI::openScheme(const Hand &hand)
         return;
     }
 
-    // ========================================================
-    // چیدمان Grid: حداکثر ۳ کارت در هر ردیف
-    // ========================================================
-
     const int maxPerRow = 4;
 
     const float boxWidth = 220.0f;
@@ -117,53 +107,32 @@ void SchemeUI::openScheme(const Hand &hand)
     {
         int cardsInRow = std::min(maxPerRow, totalCards - cardIndex);
 
-        float rowWidth =
-            cardsInRow * boxWidth +
-            (cardsInRow - 1) * gapX;
+        float rowWidth = cardsInRow * boxWidth + (cardsInRow - 1) * gapX;
 
-        float rowStartX =
-            (GetScreenWidth() - rowWidth) / 2.0f;
+        float rowStartX = (GetScreenWidth() - rowWidth) / 2.0f;
 
-        float rowY =
-            startY + row * (boxHeight + gapY);
+        float rowY = startY + row * (boxHeight + gapY);
 
         for (int col = 0; col < cardsInRow; col++)
         {
-            Rectangle box{
-                rowStartX + col * (boxWidth + gapX),
-                rowY,
-                boxWidth,
-                boxHeight};
-
+            Rectangle box{rowStartX + col * (boxWidth + gapX), rowY, boxWidth, boxHeight};
             cardBoxes.push_back(box);
             cardIndex++;
         }
     }
 
-    // ========================================================
-    // دکمه‌ی Play (زیر آخرین ردیف)
-    // ========================================================
-
     const float playWidth = 220.0f;
     const float playHeight = 60.0f;
 
-    float lastRowBottom =
-        startY + rowCount * (boxHeight + gapY);
+    float lastRowBottom = startY + rowCount * (boxHeight + gapY);
 
-    playButton = Rectangle{
-        (GetScreenWidth() - playWidth) / 2.0f,
-        lastRowBottom + 15.0f,
-        playWidth,
-        playHeight};
+    playButton = Rectangle{(GetScreenWidth() - playWidth) / 2.0f, lastRowBottom + 15.0f, playWidth, playHeight};
 
     open = true;
 
-    std::cout << "Scheme UI opened." << std::endl;
+    cout << "Scheme UI opened." << endl;
 }
 
-// ============================================================
-// UPDATE
-// ============================================================
 
 void SchemeUI::update()
 {
@@ -189,22 +158,18 @@ void SchemeUI::update()
         return;
     }
 
-    // انتخاب / تعویض کارت
     for (size_t i = 0; i < cardBoxes.size(); i++)
     {
         if (CheckCollisionPointRec(mouse, cardBoxes[i]))
         {
             selectedIndex = static_cast<int>(i);
 
-            std::cout << "Scheme card selected: "
-                      << selectableCards[i]->getName()
-                      << std::endl;
+            cout << "Scheme card selected: " << selectableCards[i]->getName() << endl;
 
             return;
         }
     }
 
-    // دکمه‌ی Play (فقط وقتی کارتی انتخاب شده)
     if (selectedIndex != -1 &&
         CheckCollisionPointRec(mouse, playButton))
     {
@@ -213,9 +178,6 @@ void SchemeUI::update()
     }
 }
 
-// ============================================================
-// DRAW
-// ============================================================
 
 void SchemeUI::draw()
 {
@@ -226,75 +188,50 @@ void SchemeUI::draw()
 
     Font font = assets->getGameFont();
 
-    // Overlay تیره
-    DrawRectangle(
-        0, 0,
-        GetScreenWidth(), GetScreenHeight(),
-        Color{0, 0, 0, 190});
+    DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), Color{0, 0, 0, 190});
 
     if (emptyMessage)
     {
         const char *message = "HERO HAS NO SCHEME CARD IN HAND!";
         const float messageSize = 36.0f;
 
-        Vector2 messageTextSize =
-            MeasureTextEx(font, message, messageSize, 2.0f);
+        Vector2 messageTextSize = MeasureTextEx(font, message, messageSize, 2.0f);
 
-        DrawTextEx(
-            font, message,
-            Vector2{
-                (GetScreenWidth() - messageTextSize.x) / 2.0f,
-                (GetScreenHeight() - messageTextSize.y) / 2.0f - 40.0f},
+        DrawTextEx(font, message, 
+            Vector2{(GetScreenWidth() - messageTextSize.x) / 2.0f, (GetScreenHeight() - messageTextSize.y) / 2.0f - 40.0f},
             messageSize, 2.0f, WHITE);
 
-        // دکمه‌ی Back کپسولی
         Vector2 mouse = GetMousePosition();
         bool hovered = CheckCollisionPointRec(mouse, backButton);
 
-        Color backColor =
-            hovered
-                ? Color{75, 75, 75, 245}
-                : Color{35, 35, 35, 235};
+        Color backColor = hovered ? Color{75, 75, 75, 245} : Color{35, 35, 35, 235};
 
         DrawRectangleRounded(backButton, 1.0f, 20, backColor);
 
-        DrawRectangleRoundedLines(
-            backButton, 1.0f, 20,
-            hovered ? WHITE : Color{150, 150, 150, 255});
+        DrawRectangleRoundedLines(backButton, 1.0f, 20, hovered ? WHITE : Color{150, 150, 150, 255});
 
         const char *backText = "BACK";
         const float backFontSize = 24.0f;
 
-        Vector2 backTextSize =
-            MeasureTextEx(font, backText, backFontSize, 1.5f);
+        Vector2 backTextSize = MeasureTextEx(font, backText, backFontSize, 1.5f);
 
-        DrawTextEx(
-            font, backText,
-            Vector2{
-                backButton.x + (backButton.width - backTextSize.x) / 2.0f,
-                backButton.y + (backButton.height - backTextSize.y) / 2.0f},
-            backFontSize, 1.5f, WHITE);
+        DrawTextEx(font, backText,
+            Vector2{backButton.x + (backButton.width - backTextSize.x) / 2.0f,
+                backButton.y + (backButton.height - backTextSize.y) / 2.0f}, backFontSize, 1.5f, WHITE);
 
         return;
     }
 
-    // Title
     const char *title = "CHOOSE YOUR SCHEME CARD";
     const float titleSize = 38.0f;
 
-    Vector2 titleMeasure =
-        MeasureTextEx(font, title, titleSize, 2.0f);
+    Vector2 titleMeasure = MeasureTextEx(font, title, titleSize, 2.0f);
 
-    DrawTextEx(
-        font, title,
-        Vector2{
-            (GetScreenWidth() - titleMeasure.x) / 2.0f,
-            70.0f},
-        titleSize, 2.0f, WHITE);
+    DrawTextEx(font, title,
+        Vector2{(GetScreenWidth() - titleMeasure.x) / 2.0f, 70.0f}, titleSize, 2.0f, WHITE);
 
     Vector2 mouse = GetMousePosition();
 
-    // کارت‌ها
     for (size_t i = 0; i < selectableCards.size(); i++)
     {
         Card *card = selectableCards[i];
@@ -305,20 +242,22 @@ void SchemeUI::draw()
 
         Color boxColor;
         if (selected)
+        {
             boxColor = Color{120, 85, 40, 245};
+        }
         else if (hovered)
+        {
             boxColor = Color{75, 75, 75, 245};
+        }
         else
+        {
             boxColor = Color{35, 35, 35, 235};
+        }
 
         DrawRectangleRounded(box, 0.08f, 20, boxColor);
 
-        DrawRectangleRoundedLines(
-            box, 0.08f, 20,
-            (hovered || selected) ? WHITE : Color{150, 150, 150, 255});
+        DrawRectangleRoundedLines(box, 0.08f, 20, (hovered || selected) ? WHITE : Color{150, 150, 150, 255});
 
-        // تصویر کارت
-        // تصویر کارت
         std::string textureKey = getCardTextureKey(card);
 
         if (!textureKey.empty())
@@ -329,71 +268,53 @@ void SchemeUI::draw()
             {
                 const float padding = 14.0f;
 
-                Rectangle source{
-                    0.0f, 0.0f,
-                    static_cast<float>(texture.width),
-                    static_cast<float>(texture.height)};
+                Rectangle source{0.0f, 0.0f, static_cast<float>(texture.width), static_cast<float>(texture.height)};
 
-                Rectangle destination{
-                    box.x + padding,
-                    box.y + padding,
-                    box.width - 2.0f * padding,
-                    box.height - 65.0f}; // بزرگ‌تر، جا برای اسم زیرش
+                Rectangle destination{box.x + padding, box.y + padding, box.width - 2.0f * padding, box.height - 65.0f};
 
-                DrawTexturePro(
-                    texture, source, destination,
-                    Vector2{0.0f, 0.0f}, 0.0f, WHITE);
+                DrawTexturePro( texture, source, destination, Vector2{0.0f, 0.0f}, 0.0f, WHITE);
             }
         }
 
-        // اسم کارت زیر عکس (فونت بزرگ‌تر)
-        std::string name = card->getName();
+        string name = card->getName();
 
         const float nameFontSize = 20.0f;
 
-        Vector2 nameSize =
-            MeasureTextEx(font, name.c_str(), nameFontSize, 1.0f);
+        Vector2 nameSize = MeasureTextEx(font, name.c_str(), nameFontSize, 1.0f);
 
-        DrawTextEx(
-            font, name.c_str(),
-            Vector2{
-                box.x + (box.width - nameSize.x) / 2.0f,
-                box.y + box.height - 40.0f},
-            nameFontSize, 1.0f, WHITE);
+        DrawTextEx(font, name.c_str(),
+            Vector2{box.x + (box.width - nameSize.x) / 2.0f, box.y + box.height - 40.0f}, nameFontSize, 1.0f, WHITE);
     }
 
-    // دکمه‌ی Play
     bool playEnabled = (selectedIndex != -1);
     bool playHovered = CheckCollisionPointRec(mouse, playButton);
 
     Color playColor;
     if (!playEnabled)
+    {
         playColor = Color{30, 30, 30, 120};
+    }
     else if (playHovered)
+    {
         playColor = Color{75, 75, 75, 245};
+    }
     else
+    {
         playColor = Color{35, 35, 35, 235};
-
+    }
     DrawRectangleRounded(playButton, 1.0f, 20, playColor);
 
     const char *playText = "PLAY";
     const float playFontSize = 26.0f;
 
-    Vector2 playTextSize =
-        MeasureTextEx(font, playText, playFontSize, 1.5f);
+    Vector2 playTextSize = MeasureTextEx(font, playText, playFontSize, 1.5f);
 
-    DrawTextEx(
-        font, playText,
-        Vector2{
-            playButton.x + (playButton.width - playTextSize.x) / 2.0f,
-            playButton.y + (playButton.height - playTextSize.y) / 2.0f},
-        playFontSize, 1.5f,
-        playEnabled ? WHITE : Color{150, 150, 150, 150});
+    DrawTextEx(font, playText,
+        Vector2{playButton.x + (playButton.width - playTextSize.x) / 2.0f,
+            playButton.y + (playButton.height - playTextSize.y) / 2.0f}, playFontSize, 1.5f,
+            playEnabled ? WHITE : Color{150, 150, 150, 150});
 }
 
-// ============================================================
-// GETTERS
-// ============================================================
 
 bool SchemeUI::isOpen() const
 {

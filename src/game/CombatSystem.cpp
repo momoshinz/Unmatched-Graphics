@@ -717,17 +717,74 @@ void CombatSystem::provideEffectChoice(const EffectChoice &choice)
         break;
 
     case CombatPhase::DuringCombatAttacker:
-        // ApplyDamage یک Phase نیست.
-        // اینجا مستقیماً Damage را اعمال می‌کنیم
-        if (currentGame != nullptr &&
-            attacker != nullptr &&
-            defender != nullptr)
+    {
+        if (attackCard == nullptr ||
+            attacker == nullptr ||
+            defender == nullptr)
         {
-            applyDamage(lastDamage, *defender);
+            return;
         }
 
-        phase = CombatPhase::AwaitingResultReveal;
+        int attackValue;
+
+        if (defender->shouldUseOpponentBoostValue())
+        {
+            attackValue = attackCard->getBoost();
+        }
+        else
+        {
+            attackValue =
+                calculateFinalAttackValue(
+                    *attackCard,
+                    *attacker);
+        }
+
+        int defenceValue = 0;
+
+        if (defenceCard != nullptr)
+        {
+            if (attacker->shouldUseOpponentBoostValue())
+            {
+                defenceValue = defenceCard->getBoost();
+            }
+            else
+            {
+                defenceValue =
+                    calculateFinalDefenseValue(
+                        *defenceCard,
+                        *defender);
+            }
+
+            InvisibleMan *invisible =
+                dynamic_cast<InvisibleMan *>(defender);
+
+            if (invisible != nullptr &&
+                invisible->isOnFog())
+            {
+                defenceValue++;
+            }
+        }
+
+        pendingAttackValue = attackValue;
+        pendingDefenceValue = defenceValue;
+
+        lastDamage =
+            calculateDamage(
+                attackValue,
+                defenceValue);
+
+        attackerWon =
+            (lastDamage > 0);
+
+        applyDamage(
+            lastDamage,
+            *defender);
+
+        phase =
+            CombatPhase::AwaitingResultReveal;
+
         break;
+    }
 
     case CombatPhase::AfterCombatDefender:
         phase = CombatPhase::AfterCombatAttacker;

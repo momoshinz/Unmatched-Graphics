@@ -7,6 +7,8 @@
 #include "graphics/MapCoordinates.h"
 #include "graphics/GameScreen.h"
 #include <iostream>
+#include <string>
+#include <vector>
 using namespace std;
 
 MainMenu::MainMenu(AssetManager *assets, Game *game)
@@ -54,13 +56,11 @@ void loadSaveFiles(std::vector<std::string> &saveFiles)
 
     while (true)
     {
-        std::string filename =
-            "save" + std::to_string(slot) + ".json";
+        string filename = "save" + std::to_string(slot) + ".json";
 
-        std::string path =
-            "saves/" + filename;
+        string path = "saves/" + filename;
 
-        std::ifstream file(path);
+        ifstream file(path);
 
         if (!file)
             break;
@@ -188,17 +188,16 @@ void MainMenu::draw()
 
     if (background.id != 0)
     {
-        DrawTexturePro(
-            background,
+        DrawTexturePro(background,
             Rectangle{0, 0,
                       static_cast<float>(background.width),
                       static_cast<float>(background.height)},
             Rectangle{0, 0,
                       static_cast<float>(GetScreenWidth()),
                       static_cast<float>(GetScreenHeight())},
-            Vector2{0, 0},
-            0.0f,
-            WHITE);
+                      Vector2{0, 0},
+                      0.0f,
+                      WHITE);
     }
 
     if (state != State::LOAD_GAME)
@@ -207,25 +206,13 @@ void MainMenu::draw()
         const float titleSize = 58.0f;
         const float titleSpacing = 10.0f;
 
-        Vector2 titleTextSize =
-            MeasureTextEx(
-                titleFont,
-                title,
-                titleSize,
-                titleSpacing);
+        Vector2 titleTextSize = MeasureTextEx(titleFont, title, titleSize, titleSpacing);
 
-        const float titleX =
-            (GetScreenWidth() - titleTextSize.x) / 2.0f;
+        const float titleX = (GetScreenWidth() - titleTextSize.x) / 2.0f;
 
         const float titleY = 100.0f;
 
-        DrawTextEx(
-            titleFont,
-            title,
-            Vector2{titleX, titleY},
-            titleSize,
-            titleSpacing,
-            WHITE);
+        DrawTextEx(titleFont, title, Vector2{titleX, titleY}, titleSize, titleSpacing, WHITE);
     }
 
     if (state == State::MAIN_MENU)
@@ -241,12 +228,10 @@ void MainMenu::draw()
         Rectangle newGameButton{buttonX, firstButtonY, buttonWidth, buttonHeight};
 
         Rectangle loadGameButton{buttonX, firstButtonY + buttonHeight + buttonGap,
-                                 buttonWidth,
-                                 buttonHeight};
+                                 buttonWidth, buttonHeight};
 
         Rectangle exitButton{buttonX, firstButtonY + 2.0f * (buttonHeight + buttonGap),
-                             buttonWidth,
-                             buttonHeight};
+                             buttonWidth, buttonHeight};
 
         Vector2 mousePosition = GetMousePosition();
 
@@ -254,39 +239,17 @@ void MainMenu::draw()
 
         Color hoverColor{60, 60, 60, 235};
 
-        // -----------------------------
-        // New Game
-        // -----------------------------
-
         Color newGameColor = CheckCollisionPointRec(mousePosition, newGameButton) ? hoverColor : normalColor;
 
         DrawRectangleRounded(newGameButton, 1.0f, 32, newGameColor);
 
-        // -----------------------------
-        // Load Game
-        // -----------------------------
-
-        Color loadGameColor = CheckCollisionPointRec(mousePosition, loadGameButton)
-                                  ? hoverColor
-                                  : normalColor;
+        Color loadGameColor = CheckCollisionPointRec(mousePosition, loadGameButton) ? hoverColor : normalColor;
 
         DrawRectangleRounded(loadGameButton, 1.0f, 32, loadGameColor);
 
-        // -----------------------------
-        // Exit
-        // -----------------------------
-
         Color exitColor = CheckCollisionPointRec(mousePosition, exitButton) ? hoverColor : normalColor;
 
-        DrawRectangleRounded(
-            exitButton,
-            1.0f,
-            32,
-            exitColor);
-
-        // -----------------------------
-        // Button Text
-        // -----------------------------
+        DrawRectangleRounded(exitButton, 1.0f, 32, exitColor);
 
         const float buttonFontSize = 35.0f;
         const float buttonSpacing = 2.0f;
@@ -303,27 +266,18 @@ void MainMenu::draw()
         DrawTextEx(font, newGameText,
                    Vector2{newGameButton.x + (newGameButton.width - newGameTextSize.x) / 2.0f,
                            newGameButton.y + (newGameButton.height - newGameTextSize.y) / 2.0f},
-                   buttonFontSize,
-                   buttonSpacing,
-                   WHITE);
+                           buttonFontSize, buttonSpacing, WHITE);
 
         DrawTextEx(font, loadGameText,
                    Vector2{loadGameButton.x + (loadGameButton.width - loadGameTextSize.x) / 2.0f,
                            loadGameButton.y + (loadGameButton.height - loadGameTextSize.y) / 2.0f},
-                   buttonFontSize, buttonSpacing,
-                   WHITE);
+                           buttonFontSize, buttonSpacing, WHITE);
 
         DrawTextEx(font, exitText,
                    Vector2{exitButton.x + (exitButton.width - exitTextSize.x) / 2.0f,
                            exitButton.y + (exitButton.height - exitTextSize.y) / 2.0f},
-                   buttonFontSize,
-                   buttonSpacing,
-                   WHITE);
+                           buttonFontSize, buttonSpacing, WHITE);
     }
-
-    // =====================================
-    // PLAYER 1 INPUT
-    // =====================================
 
     if (state == State::PLAYER_1_INPUT)
     {
@@ -337,10 +291,6 @@ void MainMenu::draw()
             "NEXT");
     }
 
-    // =====================================
-    // PLAYER 2 INPUT
-    // =====================================
-
     if (state == State::PLAYER_2_INPUT)
     {
         drawPlayerInput(
@@ -353,10 +303,6 @@ void MainMenu::draw()
             "FINISH");
     }
 
-    // =====================================
-    // LOAD GAME
-    // =====================================
-
     if (state == State::LOAD_GAME)
     {
         const char *loadTitle = "SAVED GAMES";
@@ -364,14 +310,7 @@ void MainMenu::draw()
         Vector2 loadTitleSize = MeasureTextEx(titleFont, loadTitle, 50.0f, 2.0f);
 
         DrawTextEx(titleFont, loadTitle,
-                   Vector2{(GetScreenWidth() - loadTitleSize.x) / 2.0f, 80.0f},
-                   50.0f,
-                   2.0f,
-                   WHITE);
-
-        // -----------------------------
-        // Save files
-        // -----------------------------
+                   Vector2{(GetScreenWidth() - loadTitleSize.x) / 2.0f, 80.0f}, 50.0f, 2.0f, WHITE);
 
         float startY = 200.0f;
         const float buttonWidth = 400.0f;
@@ -384,21 +323,13 @@ void MainMenu::draw()
 
         for (int i = 0; i < saveFiles.size(); i++)
         {
-            Rectangle saveButton{
-                buttonX,
-                startY + i * (buttonHeight + buttonGap),
-                buttonWidth,
-                buttonHeight};
+            Rectangle saveButton{buttonX, startY + i * (buttonHeight + buttonGap), buttonWidth, buttonHeight};
 
             Color normalColor{30, 30, 30, 220};
 
             Color hoverColor{60, 60, 60, 235};
 
-            Color buttonColor = CheckCollisionPointRec(
-                                    mousePosition,
-                                    saveButton)
-                                    ? hoverColor
-                                    : normalColor;
+            Color buttonColor = CheckCollisionPointRec(mousePosition, saveButton) ? hoverColor : normalColor;
 
             DrawRectangleRounded(saveButton, 1.0f, 32, buttonColor);
 
@@ -407,118 +338,40 @@ void MainMenu::draw()
             Vector2 saveTextSize = MeasureTextEx(font, saveText.c_str(), 25.0f, 2.0f);
 
             DrawTextEx(font, saveText.c_str(),
-
-                       Vector2{
-                           saveButton.x +
-                               (saveButton.width -
-                                saveTextSize.x) /
-                                   2.0f,
-
-                           saveButton.y +
-                               (saveButton.height -
-                                saveTextSize.y) /
-                                   2.0f},
-
-                       25.0f,
-                       2.0f,
-                       WHITE);
+                        Vector2{saveButton.x + (saveButton.width - saveTextSize.x) / 2.0f,
+                        saveButton.y + (saveButton.height - saveTextSize.y) / 2.0f}, 25.0f, 2.0f, WHITE);
         }
-
-        // -----------------------------
-        // No saves
-        // -----------------------------
 
         if (saveFiles.empty())
         {
             const char *noSaveText = "No Saved Games Found!";
 
-            Vector2 textSize =
-                MeasureTextEx(
-                    font,
-                    noSaveText,
-                    38.0f,
-                    2.0f);
+            Vector2 textSize =MeasureTextEx(font, noSaveText, 38.0f, 2.0f);
 
-            DrawTextEx(
-                font,
-                noSaveText,
+            DrawTextEx(font, noSaveText,
 
-                Vector2{
-                    (GetScreenWidth() -
-                     textSize.x) /
-                        2.0f,
-
-                    500.0f},
-
-                38.0f,
-                2.0f,
-                WHITE);
+                Vector2{(GetScreenWidth() - textSize.x) / 2.0f, 500.0f}, 38.0f, 2.0f, WHITE);
         }
 
-        // -----------------------------
-        // Back
-        // -----------------------------
+        Rectangle backButton{40.0f, GetScreenHeight() - 90.0f, 190.0f, 60.0f};
 
-        Rectangle backButton{
-            40.0f,
-            GetScreenHeight() - 90.0f,
-            190.0f,
-            60.0f};
+        Color backColor = CheckCollisionPointRec(mousePosition, backButton) ? Color{60, 60, 60, 235} : Color{30, 30, 30, 220};
 
-        Color backColor =
-            CheckCollisionPointRec(
-                mousePosition,
-                backButton)
-                ? Color{60, 60, 60, 235}
-                : Color{30, 30, 30, 220};
-
-        DrawRectangleRounded(
-            backButton,
-            1.0f,
-            32,
-            backColor);
+        DrawRectangleRounded(backButton, 1.0f, 32, backColor);
 
         const char *backText = "BACK";
 
-        Vector2 backTextSize =
-            MeasureTextEx(
-                font,
-                backText,
-                30.0f,
-                2.0f);
+        Vector2 backTextSize = MeasureTextEx(font, backText, 30.0f, 2.0f);
 
-        DrawTextEx(
-            font,
-            backText,
-
-            Vector2{
-                backButton.x +
-                    (backButton.width -
-                     backTextSize.x) /
-                        2.0f,
-
-                backButton.y +
-                    (backButton.height -
-                     backTextSize.y) /
-                        2.0f},
-
-            30.f,
-            2.0f,
-            WHITE);
+        DrawTextEx(font, backText,
+            Vector2{backButton.x + (backButton.width - backTextSize.x) / 2.0f,
+                    backButton.y + (backButton.height - backTextSize.y) / 2.0f}, 30.f, 2.0f, WHITE);
     }
-    // =====================================
-    // READY
-    // =====================================
 
     if (state == State::READY)
     {
-        // -----------------------------
-        // Player information
-        // -----------------------------
-
         const float infoX = GetScreenWidth() - 420.0f;
 
-        // فاصله بیشتر بین دو Player
         const float player1Y = 180.0f;
         const float player2Y = 430.0f;
 
@@ -526,148 +379,49 @@ void MainMenu::draw()
         const float playerInfoSize = 32.0f;
         const float textSpacing = 2.0f;
 
-        // -----------------------------
-        // Player 1
-        // -----------------------------
 
-        DrawTextEx(
-            font,
-            "PLAYER 1",
+        DrawTextEx(font, "PLAYER 1", Vector2{infoX, player1Y}, playerTitleSize, textSpacing, WHITE);
 
-            Vector2{
-                infoX,
-                player1Y},
+        string player1Info = "Name: " + player1Name + "\nAge: " + player1Age;
 
-            playerTitleSize,
-            textSpacing,
-            WHITE);
+        DrawTextEx(font, player1Info.c_str(),
+            Vector2{infoX, player1Y + 55.0f}, playerInfoSize, textSpacing, WHITE);
 
-        std::string player1Info =
-            "Name: " +
-            player1Name +
-            "\nAge: " +
-            player1Age;
+        DrawTextEx(font, "PLAYER 2",
+            Vector2{infoX, player2Y}, playerTitleSize, textSpacing, WHITE);
 
-        DrawTextEx(
-            font,
-            player1Info.c_str(),
+        string player2Info = "Name: " + player2Name + "\nAge: " + player2Age;
 
-            Vector2{
-                infoX,
-                player1Y + 55.0f},
-
-            playerInfoSize,
-            textSpacing,
-            WHITE);
-
-        // -----------------------------
-        // Player 2
-        // -----------------------------
-
-        DrawTextEx(
-            font,
-            "PLAYER 2",
-
-            Vector2{
-                infoX,
-                player2Y},
-
-            playerTitleSize,
-            textSpacing,
-            WHITE);
-
-        std::string player2Info =
-            "Name: " +
-            player2Name +
-            "\nAge: " +
-            player2Age;
-
-        DrawTextEx(
-            font,
-            player2Info.c_str(),
-
-            Vector2{
-                infoX,
-                player2Y + 55.0f},
-
-            playerInfoSize,
-            textSpacing,
-            WHITE);
-
-        // -----------------------------
-        // START BUTTON
-        // -----------------------------
+        DrawTextEx(font, player2Info.c_str(),
+            Vector2{infoX, player2Y + 55.0f}, playerInfoSize, textSpacing, WHITE);
 
         const float startButtonWidth = 300.0f;
         const float startButtonHeight = 75.0f;
 
-        const float startButtonX =
-            (GetScreenWidth() - startButtonWidth) / 2.0f;
+        const float startButtonX = (GetScreenWidth() - startButtonWidth) / 2.0f;
 
-        const float startButtonY =
-            (GetScreenHeight() - startButtonHeight) / 2.0f;
+        const float startButtonY = (GetScreenHeight() - startButtonHeight) / 2.0f;
 
-        Rectangle startButton{
-            startButtonX,
-            startButtonY,
-            startButtonWidth,
-            startButtonHeight};
+        Rectangle startButton{startButtonX, startButtonY, startButtonWidth, startButtonHeight};
 
         Vector2 mousePosition = GetMousePosition();
 
-        Color normalStartColor{
-            30,
-            30,
-            30,
-            220};
+        Color normalStartColor{30, 30, 30, 220};
 
-        Color hoverStartColor{
-            60,
-            60,
-            60,
-            235};
+        Color hoverStartColor{60, 60, 60, 235};
 
-        Color startButtonColor =
-            CheckCollisionPointRec(
-                mousePosition,
-                startButton)
-                ? hoverStartColor
-                : normalStartColor;
+        Color startButtonColor = CheckCollisionPointRec(mousePosition, startButton) ? hoverStartColor : normalStartColor;
 
-        DrawRectangleRounded(
-            startButton,
-            1.0f,
-            32,
-            startButtonColor);
+        DrawRectangleRounded(startButton, 1.0f, 32, startButtonColor);
 
         const char *startText = "START ?";
         const float startFontSize = 35.0f;
 
-        Vector2 startTextSize =
-            MeasureTextEx(
-                font,
-                startText,
-                startFontSize,
-                textSpacing);
+        Vector2 startTextSize = MeasureTextEx(font, startText, startFontSize, textSpacing);
 
-        DrawTextEx(
-            font,
-            startText,
-
-            Vector2{
-                startButton.x +
-                    (startButton.width -
-                     startTextSize.x) /
-                        2.0f,
-
-                startButton.y +
-                    (startButton.height -
-                     startTextSize.y) /
-                        2.0f},
-
-            startFontSize,
-            textSpacing,
-            WHITE);
+        DrawTextEx(font, startText,
+            Vector2{startButton.x + (startButton.width - startTextSize.x) / 2.0f,
+                    startButton.y + (startButton.height - startTextSize.y) / 2.0f}, startFontSize, textSpacing, WHITE);
     }
 
     if (state == State::HERO_SELECTION)
@@ -680,24 +434,13 @@ void MainMenu::draw()
     }
 }
 
-// =========================================
-// PLAYER INPUT DRAW
-// =========================================
-
-void MainMenu::drawPlayerInput(
-    Font font,
-    const char *playerTitle,
-    const std::string &name,
-    const std::string &age,
-    bool enteringName,
-    bool enteringAge,
-    const char *buttonText)
+void MainMenu::drawPlayerInput(Font font, const char *playerTitle, const std::string &name, const std::string &age,
+                               bool enteringName, bool enteringAge, const char *buttonText)
 {
     const float boxWidth = 450.0f;
     const float boxHeight = 60.0f;
 
-    const float boxX =
-        (GetScreenWidth() - boxWidth) / 2.0f;
+    const float boxX = (GetScreenWidth() - boxWidth) / 2.0f;
 
     const float nameY = 330.0f;
     const float ageY = 470.0f;
@@ -705,172 +448,55 @@ void MainMenu::drawPlayerInput(
     const float buttonWidth = 300.0f;
     const float buttonHeight = 70.0f;
 
-    const float buttonX =
-        (GetScreenWidth() - buttonWidth) / 2.0f;
+    const float buttonX = (GetScreenWidth() - buttonWidth) / 2.0f;
 
     const float buttonY = 600.0f;
 
-    // =====================================
-    // Player title
-    // =====================================
     const float firstButtonY = 370.0f;
     const float buttonGap = 20.0f;
-    Rectangle newGameButton{
-        buttonX,
-        firstButtonY,
-        buttonWidth,
-        buttonHeight};
+    Rectangle newGameButton{buttonX, firstButtonY, buttonWidth, buttonHeight};
 
-    Vector2 playerTitleSize =
-        MeasureTextEx(
-            font,
-            playerTitle,
-            35.0f,
-            2.0f);
+    Vector2 playerTitleSize = MeasureTextEx(font, playerTitle, 35.0f, 2.0f);
 
-    DrawTextEx(
-        font,
-        playerTitle,
+    DrawTextEx(font, playerTitle,
+        Vector2{(GetScreenWidth() - playerTitleSize.x) / 2.0f, 220.0f}, 35.0f, 2.0f, WHITE);
 
-        Vector2{
-            (GetScreenWidth() -
-             playerTitleSize.x) /
-                2.0f,
+    DrawTextEx(font, "PLAYER NAME:",
+        Vector2{ boxX, nameY - 40.0f}, 25.0f, 2.0f, WHITE);
 
-            220.0f},
+    Rectangle nameBox{boxX, nameY, boxWidth, boxHeight};
 
-        35.0f,
-        2.0f,
-        WHITE);
+    Color nameColor = enteringName ? Color{60, 60, 60, 240} : Color{30, 30, 30, 220};
 
-    // =====================================
-    // NAME LABEL
-    // =====================================
+    DrawRectangleRounded(nameBox, 0.35f, 32, nameColor);
 
-    DrawTextEx(
-        font,
-        "PLAYER NAME:",
+    DrawTextEx(font, name.c_str(),
+        Vector2{nameBox.x + 20.0f, nameBox.y + 15.0f}, 25.0f, 2.0f, WHITE);
 
-        Vector2{
-            boxX,
-            nameY - 40.0f},
 
-        25.0f,
-        2.0f,
-        WHITE);
+    DrawTextEx(font, "PLAYER AGE:",
+        Vector2{boxX, ageY - 40.0f}, 25.0f, 2.0f, WHITE);
 
-    // =====================================
-    // NAME BOX
-    // =====================================
+    Rectangle ageBox{boxX, ageY, boxWidth, boxHeight};
 
-    Rectangle nameBox{
-        boxX,
-        nameY,
-        boxWidth,
-        boxHeight};
+    Color ageColor = enteringAge ? Color{60, 60, 60, 240} : Color{30, 30, 30, 220};
 
-    Color nameColor =
-        enteringName
-            ? Color{60, 60, 60, 240}
-            : Color{30, 30, 30, 220};
+    DrawRectangleRounded(ageBox, 0.35f, 32, ageColor);
 
-    DrawRectangleRounded(
-        nameBox,
-        0.35f,
-        32,
-        nameColor);
+    DrawTextEx(font, age.c_str(),
+        Vector2{ageBox.x + 20.0f, ageBox.y + 15.0f}, 25.0f, 2.0f, WHITE);
 
-    DrawTextEx(
-        font,
-        name.c_str(),
+    bool complete = !name.empty() && !age.empty();
 
-        Vector2{
-            nameBox.x + 20.0f,
-            nameBox.y + 15.0f},
+    Vector2 mousePosition = GetMousePosition();
 
-        25.0f,
-        2.0f,
-        WHITE);
+    Rectangle actionButton{buttonX, buttonY, buttonWidth, buttonHeight};
 
-    // =====================================
-    // AGE LABEL
-    // =====================================
+    Color normalButtonColor{30, 30, 30, 230};
 
-    DrawTextEx(
-        font,
-        "PLAYER AGE:",
+    Color hoverButtonColor{60, 60, 60, 235};
 
-        Vector2{
-            boxX,
-            ageY - 40.0f},
-
-        25.0f,
-        2.0f,
-        WHITE);
-
-    // =====================================
-    // AGE BOX
-    // =====================================
-
-    Rectangle ageBox{
-        boxX,
-        ageY,
-        boxWidth,
-        boxHeight};
-
-    Color ageColor =
-        enteringAge
-            ? Color{60, 60, 60, 240}
-            : Color{30, 30, 30, 220};
-
-    DrawRectangleRounded(
-        ageBox,
-        0.35f,
-        32,
-        ageColor);
-
-    DrawTextEx(
-        font,
-        age.c_str(),
-
-        Vector2{
-            ageBox.x + 20.0f,
-            ageBox.y + 15.0f},
-
-        25.0f,
-        2.0f,
-        WHITE);
-
-    bool complete =
-        !name.empty() &&
-        !age.empty();
-
-    Vector2 mousePosition =
-        GetMousePosition();
-
-    Rectangle actionButton{
-        buttonX,
-        buttonY,
-        buttonWidth,
-        buttonHeight};
-
-    Color normalButtonColor{
-        30,
-        30,
-        30,
-        230};
-
-    Color hoverButtonColor{
-        60,
-        60,
-        60,
-        235};
-
-    Color disabledButtonColor{
-        30,
-        30,
-        30,
-        100};
+    Color disabledButtonColor{30, 30, 30, 100};
 
     Color buttonColor;
 
@@ -878,9 +504,7 @@ void MainMenu::drawPlayerInput(
     {
         buttonColor = disabledButtonColor;
     }
-    else if (CheckCollisionPointRec(
-                 mousePosition,
-                 actionButton))
+    else if (CheckCollisionPointRec(mousePosition, actionButton))
     {
         buttonColor = hoverButtonColor;
     }
@@ -889,70 +513,23 @@ void MainMenu::drawPlayerInput(
         buttonColor = normalButtonColor;
     }
 
-    DrawRectangleRounded(
-        actionButton,
-        1.0f, 32,
-        buttonColor);
+    DrawRectangleRounded(actionButton, 1.0f, 32, buttonColor);
 
-    Vector2 buttonTextSize =
-        MeasureTextEx(
-            font,
-            buttonText,
-            35.0f,
-            2.0f);
+    Vector2 buttonTextSize = MeasureTextEx(font, buttonText, 35.0f, 2.0f);
 
-    DrawTextEx(
-        font,
-        buttonText,
-
-        Vector2{
-            buttonX +
-                (buttonWidth -
-                 buttonTextSize.x) /
-                    2.0f,
-
-            buttonY +
-                (buttonHeight -
-                 buttonTextSize.y) /
-                    2.0f},
-
-        35.0f,
-        2.0f,
-
-        complete
-            ? WHITE
-            : Color{150, 150, 150, 150});
-
-    // =====================================
-    // ENTER MESSAGE
-    // =====================================
+    DrawTextEx(font, buttonText,
+        Vector2{buttonX + (buttonWidth - buttonTextSize.x) / 2.0f,
+        buttonY + (buttonHeight - buttonTextSize.y) / 2.0f}, 35.0f, 2.0f,
+        complete ? WHITE : Color{150, 150, 150, 150});
 
     const char *enterMessage = "> press Enter To Confirm Your Information.";
 
-    Vector2 enterMessageSize =
-        MeasureTextEx(
-            font,
-            enterMessage,
-            25.0f,
-            1.0f);
+    Vector2 enterMessageSize = MeasureTextEx(font, enterMessage, 25.0f, 1.0f);
 
-    DrawTextEx(
-        font,
-        enterMessage,
-
-        Vector2{
-            GetScreenWidth() - enterMessageSize.x - 20.0f,
-            GetScreenHeight() - enterMessageSize.y - 15.0f},
-
-        25.0f,
-        1.0f,
-
-        WHITE);
+    DrawTextEx(font, enterMessage,
+        Vector2{GetScreenWidth() - enterMessageSize.x - 20.0f, GetScreenHeight() - 
+        enterMessageSize.y - 15.0f}, 25.0f, 1.0f, WHITE);
 }
-
-// =========================================
-// HANDLE INPUT
-// =========================================
 
 int MainMenu::handleInput()
 {
@@ -960,9 +537,6 @@ int MainMenu::handleInput()
     {
         return 0;
     }
-    // =========================================
-    // PLACEMENT
-    // =========================================
 
     if (state == State::PLACEMENT)
     {
@@ -983,90 +557,39 @@ int MainMenu::handleInput()
     const float buttonWidth = 300.0f;
     const float buttonHeight = 60.0f;
 
-    const float buttonX =
-        (GetScreenWidth() - buttonWidth) / 2.0f;
+    const float buttonX = (GetScreenWidth() - buttonWidth) / 2.0f;
 
     const float firstButtonY = 500.0f;
     const float buttonGap = 20.0f;
 
-    // =========================================
-    // Button areas
-    // =========================================
+    Rectangle newGameButton{buttonX, firstButtonY, buttonWidth, buttonHeight};
 
-    Rectangle newGameButton{
-        buttonX,
-        firstButtonY,
-        buttonWidth,
-        buttonHeight};
+    Rectangle loadGameButton{buttonX, firstButtonY + buttonHeight + buttonGap, buttonWidth, buttonHeight};
 
-    Rectangle loadGameButton{
-        buttonX,
-        firstButtonY + buttonHeight + buttonGap,
-        buttonWidth,
-        buttonHeight};
+    Rectangle exitButton{buttonX, firstButtonY + 2.0f * (buttonHeight + buttonGap), buttonWidth, buttonHeight};
 
-    Rectangle exitButton{
-        buttonX,
-        firstButtonY + 2.0f * (buttonHeight + buttonGap),
-        buttonWidth,
-        buttonHeight};
-
-    // =========================================
-    // Mouse
-    // =========================================
-
-    Vector2 mousePosition =
-        GetMousePosition();
-
-    // =====================================
-    // MAIN MENU
-    // =====================================
+    Vector2 mousePosition = GetMousePosition();
 
     if (state == State::MAIN_MENU)
     {
         const float buttonWidth = 300.0f;
         const float buttonHeight = 75.0f;
 
-        const float buttonX =
-            (GetScreenWidth() - buttonWidth) / 2.0f;
+        const float buttonX = (GetScreenWidth() - buttonWidth) / 2.0f;
 
         const float firstButtonY = 390.0f;
         const float buttonGap = 25.0f;
 
-        Rectangle newGameButton{
-            buttonX,
-            firstButtonY,
-            buttonWidth,
-            buttonHeight};
+        Rectangle newGameButton{buttonX, firstButtonY, buttonWidth, buttonHeight};
 
-        Rectangle loadGameButton{
-            buttonX,
-            firstButtonY +
-                buttonHeight +
-                buttonGap,
-            buttonWidth,
-            buttonHeight};
+        Rectangle loadGameButton{buttonX, firstButtonY + buttonHeight + buttonGap, buttonWidth, buttonHeight};
 
-        Rectangle exitButton{
-            buttonX,
-            firstButtonY +
-                2.0f *
-                    (buttonHeight + buttonGap),
-            buttonWidth,
-            buttonHeight};
+        Rectangle exitButton{buttonX, firstButtonY + 2.0f * (buttonHeight + buttonGap), buttonWidth, buttonHeight};
 
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
         {
-            // -----------------------------
-            // NEW GAME
-            // -----------------------------
-
-            if (CheckCollisionPointRec(
-                    mousePosition,
-                    newGameButton))
+            if (CheckCollisionPointRec(mousePosition, newGameButton))
             {
-                // پاک کردن اطلاعات قبلی
-                // در صورت شروع دوباره
                 player1Name.clear();
                 player1Age.clear();
 
@@ -1076,16 +599,10 @@ int MainMenu::handleInput()
                 enteringName = true;
                 enteringAge = false;
 
-                // رفتن به صفحه Player 1
                 state = State::PLAYER_1_INPUT;
 
                 return 1;
             }
-
-            // -----------------------------
-            // LOAD GAME
-            // فعلاً کاری نمی‌کنیم
-            // -----------------------------
 
             if (CheckCollisionPointRec(mousePosition, loadGameButton))
             {
@@ -1098,10 +615,6 @@ int MainMenu::handleInput()
                 return 2;
             }
 
-            // -----------------------------
-            // EXIT
-            // -----------------------------
-
             if (CheckCollisionPointRec(
                     mousePosition,
                     exitButton))
@@ -1111,33 +624,22 @@ int MainMenu::handleInput()
         }
     }
 
-    // =====================================
-    // PLAYER 1
-    // =====================================
 
     if (state == State::PLAYER_1_INPUT)
     {
         const float buttonWidth = 300.0f;
         const float buttonHeight = 70.0f;
 
-        const float buttonX =
-            (GetScreenWidth() - buttonWidth) / 2.0f;
+        const float buttonX = (GetScreenWidth() - buttonWidth) / 2.0f;
 
         const float buttonY = 600.0f;
 
-        Rectangle nextButton{
-            buttonX,
-            buttonY,
-            buttonWidth,
-            buttonHeight};
+        Rectangle nextButton{buttonX, buttonY, buttonWidth, buttonHeight};
 
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
         {
-            if (CheckCollisionPointRec(
-                    mousePosition,
-                    nextButton))
+            if (CheckCollisionPointRec(mousePosition, nextButton))
             {
-                // فقط اگر هر دو اطلاعات وارد شده باشند
                 if (isPlayer1Complete())
                 {
                     enteringName = true;
@@ -1149,31 +651,20 @@ int MainMenu::handleInput()
         }
     }
 
-    // =====================================
-    // PLAYER 2
-    // =====================================
-
     if (state == State::PLAYER_2_INPUT)
     {
         const float buttonWidth = 300.0f;
         const float buttonHeight = 70.0f;
 
-        const float buttonX =
-            (GetScreenWidth() - buttonWidth) / 2.0f;
+        const float buttonX = (GetScreenWidth() - buttonWidth) / 2.0f;
 
         const float buttonY = 600.0f;
 
-        Rectangle finishButton{
-            buttonX,
-            buttonY,
-            buttonWidth,
-            buttonHeight};
+        Rectangle finishButton{buttonX, buttonY, buttonWidth, buttonHeight};
 
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
         {
-            if (CheckCollisionPointRec(
-                    mousePosition,
-                    finishButton))
+            if (CheckCollisionPointRec(mousePosition, finishButton))
             {
                 if (isPlayer2Complete())
                 {
@@ -1187,9 +678,6 @@ int MainMenu::handleInput()
             }
         }
     }
-    // =====================================
-    // LOAD GAME
-    // =====================================
 
     if (state == State::LOAD_GAME)
     {
@@ -1204,21 +692,12 @@ int MainMenu::handleInput()
 
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
         {
-            // -----------------------------
-            // Save buttons
-            // -----------------------------
 
             for (int i = 0; i < saveFiles.size(); i++)
             {
-                Rectangle saveButton{
-                    buttonX,
-                    startY + i * (buttonHeight + buttonGap),
-                    buttonWidth,
-                    buttonHeight};
+                Rectangle saveButton{buttonX, startY + i * (buttonHeight + buttonGap), buttonWidth, buttonHeight};
 
-                if (CheckCollisionPointRec(
-                        mousePosition,
-                        saveButton))
+                if (CheckCollisionPointRec(mousePosition, saveButton))
                 {
                     selectedSave = i;
 
@@ -1232,24 +711,15 @@ int MainMenu::handleInput()
                     }
                     catch (const std::exception &e)
                     {
-                        std::cout << "Load failed: " << e.what() << std::endl;
+                        cout << "Load failed: " << e.what() << endl;
                         return 0;
                     }
                 }
             }
 
-            // -----------------------------
-            // Back
-            // -----------------------------
+            Rectangle backButton{40.0f, GetScreenHeight() - 80.0f, 160.0f, 50.0f};
 
-            Rectangle backButton{
-                40.0f, GetScreenHeight() - 80.0f,
-                160.0f,
-                50.0f};
-
-            if (CheckCollisionPointRec(
-                    mousePosition,
-                    backButton))
+            if (CheckCollisionPointRec(mousePosition, backButton))
             {
                 state = State::MAIN_MENU;
                 selectedSave = -1;
@@ -1264,23 +734,15 @@ int MainMenu::handleInput()
         const float startButtonWidth = 300.0f;
         const float startButtonHeight = 75.0f;
 
-        const float startButtonX =
-            (GetScreenWidth() - startButtonWidth) / 2.0f;
+        const float startButtonX = (GetScreenWidth() - startButtonWidth) / 2.0f;
 
-        const float startButtonY =
-            (GetScreenHeight() - startButtonHeight) / 2.0f;
+        const float startButtonY = (GetScreenHeight() - startButtonHeight) / 2.0f;
 
-        Rectangle startButton{
-            startButtonX,
-            startButtonY,
-            startButtonWidth,
-            startButtonHeight};
+        Rectangle startButton{startButtonX, startButtonY, startButtonWidth, startButtonHeight};
 
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
         {
-            if (CheckCollisionPointRec(
-                    mousePosition,
-                    startButton))
+            if (CheckCollisionPointRec(mousePosition, startButton))
             {
                 startHeroSelection();
                 return 0;
@@ -1288,115 +750,67 @@ int MainMenu::handleInput()
         }
     }
 
-    // =========================================
-    // HERO SELECTION
-    // =========================================
-
     if (state == State::HERO_SELECTION)
     {
         const float boxWidth = 250.0f;
         const float boxHeight = 300.0f;
         const float gap = 35.0f;
 
-        const float totalWidth =
-            3.0f * boxWidth +
-            2.0f * gap;
+        const float totalWidth = 3.0f * boxWidth + 2.0f * gap;
 
-        const float startX =
-            (GetScreenWidth() - totalWidth) / 2.0f;
+        const float startX = (GetScreenWidth() - totalWidth) / 2.0f;
 
         const float boxY = 300.0f;
 
-        Rectangle draculaBox{
-            startX,
-            boxY,
-            boxWidth,
-            boxHeight};
+        Rectangle draculaBox{startX, boxY, boxWidth, boxHeight};
 
-        Rectangle sherlockBox{
-            startX + boxWidth + gap,
-            boxY,
-            boxWidth,
-            boxHeight};
+        Rectangle sherlockBox{startX + boxWidth + gap, boxY, boxWidth, boxHeight};
 
-        Rectangle invisibleBox{
-            startX +
-                2.0f * (boxWidth + gap),
-
-            boxY,
-            boxWidth,
-            boxHeight};
+        Rectangle invisibleBox{ startX + 2.0f * (boxWidth + gap), boxY, boxWidth, boxHeight};
 
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
         {
-            if (CheckCollisionPointRec(
-                    mousePosition,
-                    draculaBox))
+            if (CheckCollisionPointRec(mousePosition, draculaBox))
             {
                 selectHero("dracula");
             }
 
-            if (CheckCollisionPointRec(
-                    mousePosition,
-                    sherlockBox))
+            if (CheckCollisionPointRec(mousePosition, sherlockBox))
             {
                 selectHero("sherlock");
             }
 
-            if (CheckCollisionPointRec(
-                    mousePosition,
-                    invisibleBox))
+            if (CheckCollisionPointRec(mousePosition, invisibleBox))
             {
                 selectHero("invisible_man");
             }
         }
-
-        // =====================================
-        // Enter
-        // =====================================
 
         if (IsKeyPressed(KEY_ENTER))
         {
-            if (CheckCollisionPointRec(
-                    mousePosition,
-                    draculaBox))
+            if (CheckCollisionPointRec(mousePosition, draculaBox))
             {
                 selectHero("dracula");
             }
 
-            if (CheckCollisionPointRec(
-                    mousePosition,
-                    sherlockBox))
+            if (CheckCollisionPointRec(mousePosition, sherlockBox))
             {
                 selectHero("sherlock");
             }
 
-            if (CheckCollisionPointRec(
-                    mousePosition,
-                    invisibleBox))
+            if (CheckCollisionPointRec(mousePosition, invisibleBox))
             {
                 selectHero("invisible_man");
             }
         }
 
-        // =====================================
-        // FINISH
-        // =====================================
-
-        Rectangle finishButton{
-            (GetScreenWidth() - 300.0f) / 2.0f,
-            700.0f,
-            300.0f,
-            70.0f};
+        Rectangle finishButton{(GetScreenWidth() - 300.0f) / 2.0f, 700.0f, 300.0f, 70.0f};
 
         if (bothHeroesSelected())
         {
-            if (IsMouseButtonPressed(
-                    MOUSE_BUTTON_LEFT))
+            if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
             {
-                if (CheckCollisionPointRec(
-                        mousePosition,
-                        finishButton))
+                if (CheckCollisionPointRec(mousePosition, finishButton))
                 {
                     game->startGame();
                     startPlacement();
@@ -1435,16 +849,14 @@ void MainMenu::startHeroSelection()
 
     game->initialize(age1, age2);
 
-    Player *younger =
-        game->getYoungerPlayer();
+    Player *younger = game->getYoungerPlayer();
 
     if (younger == nullptr)
     {
         return;
     }
 
-    const std::vector<Player *> &players =
-        game->getPlayers();
+    const vector<Player *> &players = game->getPlayers();
 
     if (players.size() < 2)
     {
@@ -1453,13 +865,11 @@ void MainMenu::startHeroSelection()
 
     if (younger == players[0])
     {
-        currentHeroPlayer =
-            HeroSelectionPlayer::PLAYER_1;
+        currentHeroPlayer = HeroSelectionPlayer::PLAYER_1;
     }
     else
     {
-        currentHeroPlayer =
-            HeroSelectionPlayer::PLAYER_2;
+        currentHeroPlayer = HeroSelectionPlayer::PLAYER_2;
     }
 
     player1Hero.clear();
@@ -1473,14 +883,9 @@ void MainMenu::startHeroSelection()
 
 void MainMenu::drawHeroSelection(Font font)
 {
-    // =====================================
-    // Player name
-    // =====================================
+    string playerName;
 
-    std::string playerName;
-
-    if (currentHeroPlayer ==
-        HeroSelectionPlayer::PLAYER_1)
+    if (currentHeroPlayer == HeroSelectionPlayer::PLAYER_1)
     {
         playerName = player1Name;
     }
@@ -1489,342 +894,142 @@ void MainMenu::drawHeroSelection(Font font)
         playerName = player2Name;
     }
 
-    // =====================================
-    // Instruction
-    // =====================================
-
     if (!bothHeroesSelected())
     {
-        std::string instruction =
-            playerName +
-            ", CHOOSE YOUR HERO";
+        string instruction = playerName + ", CHOOSE YOUR HERO";
 
-        Vector2 instructionSize =
-            MeasureTextEx(
-                font,
-                instruction.c_str(),
-                35.0f,
-                2.0f);
+        Vector2 instructionSize = MeasureTextEx(font, instruction.c_str(), 35.0f, 2.0f);
 
-        DrawTextEx(
-            font,
-            instruction.c_str(),
-
-            Vector2{
-                (GetScreenWidth() -
-                 instructionSize.x) /
-                    2.0f,
-
-                210.0f},
-
-            35.0f,
-            2.0f,
-            WHITE);
+        DrawTextEx(font, instruction.c_str(),
+            Vector2{(GetScreenWidth() - instructionSize.x) / 2.0f, 210.0f}, 35.0f, 2.0f, WHITE);
     }
-
-    // =====================================
-    // RANDOM SELECTION MESSAGE
-    // =====================================
 
     int age1 = std::stoi(player1Age);
     int age2 = std::stoi(player2Age);
 
     if (age1 == age2)
     {
-        const char *line1 =
-            "Both players are the same age!";
+        const char *line1 = "Both players are the same age!";
 
-        const char *line2 =
-            "Hero selection order was chosen randomly.";
+        const char *line2 = "Hero selection order was chosen randomly.";
 
         const float messageFontSize = 30.0f;
         const float messageSpacing = 1.0f;
         const float rightPadding = 35.0f;
 
-        Vector2 line1Size =
-            MeasureTextEx(
-                font,
-                line1,
-                messageFontSize,
-                messageSpacing);
+        Vector2 line1Size = MeasureTextEx(font, line1, messageFontSize, messageSpacing);
 
-        Vector2 line2Size =
-            MeasureTextEx(
-                font,
-                line2,
-                messageFontSize,
-                messageSpacing);
+        Vector2 line2Size = MeasureTextEx(font, line2, messageFontSize, messageSpacing);
 
-        DrawTextEx(
-            font,
-            line1,
+        DrawTextEx(font, line1, Vector2{ GetScreenWidth() - line1Size.x - rightPadding, 80.0f},
+                    messageFontSize, messageSpacing, WHITE);
 
-            Vector2{
-                GetScreenWidth() -
-                    line1Size.x -
-                    rightPadding,
-
-                80.0f},
-
-            messageFontSize,
-            messageSpacing,
-            WHITE);
-
-        DrawTextEx(
-            font,
-            line2,
-
-            Vector2{
-                GetScreenWidth() -
-                    line2Size.x -
-                    rightPadding,
-
-                108.0f},
-
-            messageFontSize,
-            messageSpacing,
-            WHITE);
+        DrawTextEx(font, line2,
+            Vector2{GetScreenWidth() - line2Size.x - rightPadding, 108.0f}, messageFontSize,
+            messageSpacing, WHITE);
     }
 
-    // =====================================
-    // Hero textures
-    // =====================================
+    Texture2D dracula = assets->getCharacter("dracula");
 
-    Texture2D dracula =
-        assets->getCharacter("dracula");
+    Texture2D sherlock = assets->getCharacter("sherlock");
 
-    Texture2D sherlock =
-        assets->getCharacter("sherlock");
-
-    Texture2D invisibleMan =
-        assets->getCharacter("invisible_man");
-
-    // =====================================
-    // Hero boxes
-    // =====================================
+    Texture2D invisibleMan = assets->getCharacter("invisible_man");
 
     const float boxWidth = 320.0f;
     const float boxHeight = 370.0f;
     const float gap = 35.0f;
 
-    const float totalWidth =
-        3.0f * boxWidth +
-        2.0f * gap;
+    const float totalWidth = 3.0f * boxWidth + 2.0f * gap;
 
-    const float startX =
-        (GetScreenWidth() - totalWidth) / 2.0f;
+    const float startX = (GetScreenWidth() - totalWidth) / 2.0f;
 
     const float boxY = 300.0f;
 
-    Rectangle draculaBox{
-        startX,
-        boxY,
-        boxWidth,
-        boxHeight};
+    Rectangle draculaBox{startX, boxY, boxWidth, boxHeight};
 
-    Rectangle sherlockBox{
-        startX + boxWidth + gap,
-        boxY,
-        boxWidth,
-        boxHeight};
+    Rectangle sherlockBox{startX + boxWidth + gap, boxY, boxWidth, boxHeight};
 
-    Rectangle invisibleBox{
-        startX +
-            2.0f * (boxWidth + gap),
+    Rectangle invisibleBox{startX + 2.0f * (boxWidth + gap), boxY, boxWidth, boxHeight};
 
-        boxY,
-        boxWidth,
-        boxHeight};
+    Vector2 mousePosition = GetMousePosition();
 
-    Vector2 mousePosition =
-        GetMousePosition();
+    Color normalColor{30, 30, 30, 220};
 
-    // =====================================
-    // Colors
-    // =====================================
+    Color hoverColor{70, 70, 70, 240};
 
-    Color normalColor{
-        30,
-        30,
-        30,
-        220};
+    Color selectedColor{100, 70, 30, 255};
 
-    Color hoverColor{
-        70,
-        70,
-        70,
-        240};
+    Color draculaColor = normalColor;
 
-    Color selectedColor{
-        100,
-        70,
-        30,
-        255};
-
-    // =====================================
-    // Dracula color
-    // =====================================
-
-    Color draculaColor =
-        normalColor;
-
-    if (player1Hero == "dracula" ||
-        player2Hero == "dracula")
+    if (player1Hero == "dracula" || player2Hero == "dracula")
     {
         draculaColor = selectedColor;
     }
-    else if (CheckCollisionPointRec(
-                 mousePosition,
-                 draculaBox))
+    else if (CheckCollisionPointRec(mousePosition, draculaBox))
     {
         draculaColor = hoverColor;
     }
 
-    // =====================================
-    // Sherlock color
-    // =====================================
+    Color sherlockColor = normalColor;
 
-    Color sherlockColor =
-        normalColor;
-
-    if (player1Hero == "sherlock" ||
-        player2Hero == "sherlock")
+    if (player1Hero == "sherlock" || player2Hero == "sherlock")
     {
         sherlockColor = selectedColor;
     }
-    else if (CheckCollisionPointRec(
-                 mousePosition,
-                 sherlockBox))
+    else if (CheckCollisionPointRec(mousePosition, sherlockBox))
     {
         sherlockColor = hoverColor;
     }
 
-    // =====================================
-    // Invisible Man color
-    // =====================================
+    Color invisibleColor = normalColor;
 
-    Color invisibleColor =
-        normalColor;
-
-    if (player1Hero == "invisible_man" ||
-        player2Hero == "invisible_man")
+    if (player1Hero == "invisible_man" || player2Hero == "invisible_man")
     {
         invisibleColor = selectedColor;
     }
-    else if (CheckCollisionPointRec(
-                 mousePosition,
-                 invisibleBox))
+    else if (CheckCollisionPointRec(mousePosition, invisibleBox))
     {
         invisibleColor = hoverColor;
     }
 
-    // =====================================
-    // Draw boxes
-    // =====================================
+    DrawRectangleRounded(draculaBox,0.15f, 32, draculaColor);
 
-    DrawRectangleRounded(
-        draculaBox,
-        0.15f,
-        32,
-        draculaColor);
+    DrawRectangleRounded(sherlockBox, 0.15f, 32, sherlockColor);
 
-    DrawRectangleRounded(
-        sherlockBox,
-        0.15f,
-        32,
-        sherlockColor);
+    DrawRectangleRounded(invisibleBox, 0.15f, 32, invisibleColor);
 
-    DrawRectangleRounded(
-        invisibleBox,
-        0.15f,
-        32,
-        invisibleColor);
+    drawHeroTexture(dracula, draculaBox);
 
-    // =====================================
-    // Draw hero images
-    // =====================================
+    drawHeroTexture(sherlock, sherlockBox);
 
-    drawHeroTexture(
-        dracula,
-        draculaBox);
+    drawHeroTexture(invisibleMan, invisibleBox);
 
-    drawHeroTexture(
-        sherlock,
-        sherlockBox);
+    drawCenteredText(font, "DRACULA", draculaBox.x, draculaBox.y + draculaBox.height - 45.0f,
+                     draculaBox.width, 25.0f);
 
-    drawHeroTexture(
-        invisibleMan,
-        invisibleBox);
+    drawCenteredText(font, "SHERLOCK HOLMES", sherlockBox.x, sherlockBox.y + sherlockBox.height - 45.0f,
+                     sherlockBox.width, 25.0f);
 
-    // =====================================
-    // Hero names
-    // =====================================
+    drawCenteredText(font, "INVISIBLE MAN", invisibleBox.x, invisibleBox.y + invisibleBox.height - 45.0f,
+                     invisibleBox.width, 25.0f);
 
-    drawCenteredText(
-        font,
-        "DRACULA",
-        draculaBox.x,
-        draculaBox.y + draculaBox.height - 45.0f,
-        draculaBox.width,
-        25.0f);
+    Rectangle finishButton{(GetScreenWidth() - 300.0f) / 2.0f, 700.0f, 300.0f, 70.0f};
 
-    drawCenteredText(
-        font,
-        "SHERLOCK HOLMES",
-        sherlockBox.x,
-        sherlockBox.y + sherlockBox.height - 45.0f,
-        sherlockBox.width,
-        25.0f);
+    bool bothSelected = player1HeroSelected && player2HeroSelected;
 
-    drawCenteredText(
-        font,
-        "INVISIBLE MAN",
-        invisibleBox.x,
-        invisibleBox.y + invisibleBox.height - 45.0f,
-        invisibleBox.width,
-        25.0f);
+    Color finishColor = bothSelected ? Color{30, 30, 30, 230} : Color{30, 30, 30, 100};
 
-    Rectangle finishButton{
-        (GetScreenWidth() - 300.0f) / 2.0f,
-        700.0f,
-        300.0f,
-        70.0f};
-
-    bool bothSelected =
-        player1HeroSelected &&
-        player2HeroSelected;
-
-    Color finishColor =
-        bothSelected
-            ? Color{30, 30, 30, 230}
-            : Color{30, 30, 30, 100};
-
-    if (bothSelected &&
-        CheckCollisionPointRec(
-            mousePosition,
-            finishButton))
+    if (bothSelected && CheckCollisionPointRec(mousePosition, finishButton))
     {
         finishColor = Color{60, 60, 60, 235};
     }
 
-    DrawRectangleRounded(
-        finishButton,
-        1.0f,
-        32,
-        finishColor);
+    DrawRectangleRounded(finishButton, 1.0f, 32, finishColor);
 
-    drawCenteredText(
-        font,
-        "FINISH",
-        finishButton.x,
-        finishButton.y + 17.0f,
-        finishButton.width,
-        35.0f);
+    drawCenteredText(font, "FINISH", finishButton.x, finishButton.y + 17.0f, finishButton.width, 35.0f);
 }
 
-void MainMenu::drawHeroTexture(
-    Texture2D texture,
-    Rectangle box)
+void MainMenu::drawHeroTexture(Texture2D texture, Rectangle box)
 {
     if (texture.id == 0)
     {
@@ -1833,65 +1038,25 @@ void MainMenu::drawHeroTexture(
 
     const float padding = 15.0f;
 
-    Rectangle source{
-        0,
-        0,
-        static_cast<float>(texture.width),
-        static_cast<float>(texture.height)};
+    Rectangle source{0, 0, static_cast<float>(texture.width), static_cast<float>(texture.height)};
 
-    Rectangle destination{
-        box.x + padding,
-        box.y + padding,
-        box.width - 2.0f * padding,
-        box.height - 70.0f};
+    Rectangle destination{box.x + padding, box.y + padding, box.width - 2.0f * padding, box.height - 70.0f};
 
-    DrawTexturePro(
-        texture,
-        source,
-        destination,
-        Vector2{0, 0},
-        0.0f,
-        WHITE);
+    DrawTexturePro(texture, source, destination, Vector2{0, 0}, 0.0f, WHITE);
 }
 
-void MainMenu::drawCenteredText(
-    Font font,
-    const char *text,
-    float x,
-    float y,
-    float width,
-    float fontSize)
+void MainMenu::drawCenteredText(Font font, const char *text, float x, float y, float width, float fontSize)
 {
-    Vector2 textSize =
-        MeasureTextEx(
-            font,
-            text,
-            fontSize,
-            2.0f);
+    Vector2 textSize = MeasureTextEx(font, text, fontSize, 2.0f);
 
-    DrawTextEx(
-        font,
-        text,
-
-        Vector2{
-            x + (width - textSize.x) / 2.0f,
-            y},
-
-        fontSize,
-        2.0f,
-        WHITE);
+    DrawTextEx(font, text, Vector2{x + (width - textSize.x) / 2.0f, y}, fontSize, 2.0f, WHITE);
 }
 
 void MainMenu::selectHero(const std::string &hero)
 {
-    // =========================================
-    // DETERMINE CURRENT PLAYER
-    // =========================================
-
     int playerIndex;
 
-    if (currentHeroPlayer ==
-        HeroSelectionPlayer::PLAYER_1)
+    if (currentHeroPlayer == HeroSelectionPlayer::PLAYER_1)
     {
         playerIndex = 1;
     }
@@ -1900,26 +1065,17 @@ void MainMenu::selectHero(const std::string &hero)
         playerIndex = 2;
     }
 
-    // =========================================
-    // ASK GAME TO ASSIGN HERO
-    // =========================================
-
     if (game == nullptr)
     {
         return;
     }
 
-    bool assigned =
-        game->assignHero(playerIndex, hero);
+    bool assigned = game->assignHero(playerIndex, hero);
 
     if (!assigned)
     {
         return;
     }
-
-    // =========================================
-    // SAVE MENU STATE
-    // =========================================
 
     if (playerIndex == 1)
     {
@@ -1932,22 +1088,15 @@ void MainMenu::selectHero(const std::string &hero)
         player2HeroSelected = true;
     }
 
-    // =========================================
-    // MOVE TO OTHER PLAYER
-    // =========================================
-
     if (!bothHeroesSelected())
     {
-        if (currentHeroPlayer ==
-            HeroSelectionPlayer::PLAYER_1)
+        if (currentHeroPlayer == HeroSelectionPlayer::PLAYER_1)
         {
-            currentHeroPlayer =
-                HeroSelectionPlayer::PLAYER_2;
+            currentHeroPlayer = HeroSelectionPlayer::PLAYER_2;
         }
         else
         {
-            currentHeroPlayer =
-                HeroSelectionPlayer::PLAYER_1;
+            currentHeroPlayer = HeroSelectionPlayer::PLAYER_1;
         }
     }
 }
@@ -1971,16 +1120,14 @@ void MainMenu::startPlacement()
         return;
     }
 
-    Player *younger =
-        game->getYoungerPlayer();
+    Player *younger = game->getYoungerPlayer();
 
     if (younger == nullptr)
     {
         return;
     }
 
-    const std::vector<Player *> &players =
-        game->getPlayers();
+    const vector<Player *> &players = game->getPlayers();
 
     if (players.size() < 2)
     {
@@ -2070,11 +1217,14 @@ bool MainMenu::placeHeroOnSpace(int spaceId)
 
     if (placement == Placement::YOUNGER_HERO)
     {
-        // Younger hero تمام شد، برو سراغ Older hero
         if (placementPlayer == 1)
+        {
             placementPlayer = 2;
+        }
         else
+        {
             placementPlayer = 1;
+        }
 
         placement = Placement::OLDER_HERO;
 
@@ -2088,17 +1238,14 @@ bool MainMenu::placeHeroOnSpace(int spaceId)
 
     if (placement == Placement::OLDER_HERO)
     {
-        const std::vector<Player *> &players =
-            game->getPlayers();
+        const vector<Player *> &players = game->getPlayers();
 
         bool hasFog = false;
         int fogPlayer = -1;
 
-        // پیدا کردن بازیکنی که Fog دارد
         for (int i = 0; i < static_cast<int>(players.size()); i++)
         {
-            if (players[i] != nullptr &&
-                !players[i]->getFogs().empty())
+            if (players[i] != nullptr && !players[i]->getFogs().empty())
             {
                 hasFog = true;
                 fogPlayer = i + 1;
@@ -2106,7 +1253,6 @@ bool MainMenu::placeHeroOnSpace(int spaceId)
             }
         }
 
-        // اگر Fog وجود دارد، وارد مرحله Fog شو
         if (hasFog)
         {
             placement = Placement::FOG;
@@ -2122,7 +1268,6 @@ bool MainMenu::placeHeroOnSpace(int spaceId)
             return true;
         }
 
-        // اگر Fog وجود ندارد، تمام
         placement = Placement::FINISHED;
 
         placementHeroPlaced = false;
@@ -2155,9 +1300,7 @@ bool MainMenu::isValidSidekickPlacement(Space *space) const
 
     const Board &gameBoard = game->getBoard();
 
-    if (!gameBoard.sameZone(
-            placementStartSpace,
-            space->getId()))
+    if (!gameBoard.sameZone(placementStartSpace, space->getId()))
     {
         return false;
     }
@@ -2186,8 +1329,7 @@ bool MainMenu::placeSidekickOnSpace(int spaceId)
         return false;
     }
 
-    const std::vector<Player *> &players =
-        game->getPlayers();
+    const vector<Player *> &players = game->getPlayers();
 
     if (players.size() < 2)
     {
@@ -2212,8 +1354,7 @@ bool MainMenu::placeSidekickOnSpace(int spaceId)
 
     std::vector<Sidekick *> sidekicks = player->getSideKicks();
 
-    if (placementSidekickIndex < 0 ||
-        placementSidekickIndex >= static_cast<int>(sidekicks.size()))
+    if (placementSidekickIndex < 0 || placementSidekickIndex >= static_cast<int>(sidekicks.size()))
     {
         return false;
     }
@@ -2239,10 +1380,6 @@ bool MainMenu::placeSidekickOnSpace(int spaceId)
 
 void MainMenu::finishPlacement()
 {
-    // =========================================
-    // YOUNGER SIDEKICKS FINISHED
-    // =========================================
-
     if (placement == Placement::YOUNGER_SIDEKICKS)
     {
         if (placementPlayer == 1)
@@ -2264,38 +1401,28 @@ void MainMenu::finishPlacement()
         return;
     }
 
-    // =========================================
-    // OLDER SIDEKICKS FINISHED
-    // =========================================
-
     if (placement == Placement::OLDER_SIDEKICKS)
     {
-        const std::vector<Player *> &players =
-            game->getPlayers();
+        const vector<Player *> &players = game->getPlayers();
 
         bool hasFog = false;
 
         for (Player *player : players)
         {
-            if (player != nullptr &&
-                !player->getFogs().empty())
+            if (player != nullptr && !player->getFogs().empty())
             {
                 hasFog = true;
                 break;
             }
         }
 
-        // اگر بازیکنی Fog دارد،
-        // وارد مرحله Fog شو
         if (hasFog)
         {
             placement = Placement::FOG;
 
-            // پیدا کردن بازیکنی که Fog دارد
             for (int i = 0; i < static_cast<int>(players.size()); i++)
             {
-                if (players[i] != nullptr &&
-                    !players[i]->getFogs().empty())
+                if (players[i] != nullptr && !players[i]->getFogs().empty())
                 {
                     placementPlayer = i + 1;
                     break;
@@ -2312,7 +1439,6 @@ void MainMenu::finishPlacement()
             return;
         }
 
-        // هیچ Fogای وجود ندارد
         placement = Placement::FINISHED;
 
         placementHeroPlaced = false;
@@ -2323,10 +1449,6 @@ void MainMenu::finishPlacement()
 
         return;
     }
-
-    // =========================================
-    // FOG FINISHED
-    // =========================================
 
     if (placement == Placement::FOG)
     {
@@ -2349,46 +1471,22 @@ void MainMenu::drawPlacement(Font font)
     if (map.id == 0)
         return;
 
-    // =========================================
-    // MAP
-    // =========================================
-
     float scale = getMapScale();
     Vector2 mapPosition = getMapPosition();
 
-    Rectangle source{
-        0.0f,
-        0.0f,
-        static_cast<float>(map.width),
-        static_cast<float>(map.height)};
+    Rectangle source{0.0f, 0.0f, static_cast<float>(map.width), static_cast<float>(map.height)};
 
-    Rectangle destination{
-        mapPosition.x,
-        mapPosition.y,
-        map.width * scale,
-        map.height * scale};
+    Rectangle destination{mapPosition.x, mapPosition.y, map.width * scale, map.height * scale};
 
-    DrawTexturePro(
-        map,
-        source,
-        destination,
-        Vector2{0, 0},
-        0.0f,
-        WHITE);
-
-    // =========================================
-    // HIGHLIGHT VALID SPACES (هایلایت کردن خانه‌های معتبر)
-    // =========================================
+    DrawTexturePro(map, source, destination, Vector2{0, 0}, 0.0f, WHITE);
 
     Vector2 mouse = GetMousePosition();
 
-    // ===== رنگ‌های هایلایت =====
-    Color hoverColor = Color{255, 255, 255, 90};    // زرد شفاف (ماوس روی خانه)
-    Color selectedColor = Color{140, 200, 255, 80}; // سبز (خانه انتخاب شده)
-    Color heroColor = Color{200, 160, 255, 80};     // قرمز (خانه قهرمان)
-    Color sidekickColor = Color{0, 0, 255, 150};    // آبی (خانه یاران)
+    Color hoverColor = Color{255, 255, 255, 90};   
+    Color selectedColor = Color{140, 200, 255, 80}; 
+    Color heroColor = Color{200, 160, 255, 80};     
+    Color sidekickColor = Color{0, 0, 255, 150};    
 
-    // ===== بررسی اینکه آیا خانه‌ای زیر ماوس است =====
     int hoveredSpace = -1;
 
     for (int i = 0; i < 32; i++)
@@ -2396,27 +1494,21 @@ void MainMenu::drawPlacement(Font font)
         Vector2 center = mapImageToScreen(SPACE_GRAPHICS[i].center);
         float radius = SPACE_GRAPHICS[i].radius * scale;
 
-        // ===== اگر ماوس روی خانه است =====
         if (CheckCollisionPointCircle(mouse, center, radius))
         {
             hoveredSpace = i + 1;
         }
 
-        // ===== هایلایت خانه‌های معتبر (برای Sidekickها) =====
-        if (placement == Placement::YOUNGER_SIDEKICKS ||
-            placement == Placement::OLDER_SIDEKICKS)
+        if (placement == Placement::YOUNGER_SIDEKICKS || placement == Placement::OLDER_SIDEKICKS)
         {
             Space *space = game->getBoard().getSpace(i + 1);
             if (space != nullptr && isValidSidekickPlacement(space))
             {
-                // خانه معتبر برای Sidekick
                 DrawCircleV(center, radius, Color{255, 220, 120, 120});
             }
         }
 
-        // ===== هایلایت خانه‌های ۷ و ۲۲ برای قهرمان =====
-        if (placement == Placement::YOUNGER_HERO ||
-            placement == Placement::OLDER_HERO)
+        if (placement == Placement::YOUNGER_HERO || placement == Placement::OLDER_HERO)
         {
             if (i + 1 == 7 || i + 1 == 22)
             {
@@ -2424,27 +1516,17 @@ void MainMenu::drawPlacement(Font font)
             }
         }
 
-        // =========================================
-        // FOG VALID SPACES
-        // =========================================
-
         if (placement == Placement::FOG)
         {
-            Space *space =
-                game->getBoard().getSpace(i + 1);
+            Space *space = game->getBoard().getSpace(i + 1);
 
-            if (space != nullptr &&
-                !space->isOccupied())
+            if (space != nullptr && !space->isOccupied())
             {
-                DrawCircleV(
-                    center,
-                    radius,
-                    Color{140, 200, 255, 120});
+                DrawCircleV(center, radius, Color{140, 200, 255, 120});
             }
         }
 
-        const std::vector<Player *> &players =
-            game->getPlayers();
+        const vector<Player *> &players = game->getPlayers();
 
         for (Player *player : players)
         {
@@ -2453,48 +1535,35 @@ void MainMenu::drawPlacement(Font font)
                 continue;
             }
 
-            const std::vector<Fog *> &fogs =
-                player->getFogs();
+            const vector<Fog *> &fogs = player->getFogs();
 
             for (Fog *fog : fogs)
             {
-                if (fog == nullptr ||
-                    fog->getPosition() == nullptr)
+                if (fog == nullptr || fog->getPosition() == nullptr)
                 {
                     continue;
                 }
 
-                int fogSpaceId =
-                    fog->getPosition()->getId();
+                int fogSpaceId = fog->getPosition()->getId();
 
-                if (fogSpaceId < 1 ||
-                    fogSpaceId > 32)
+                if (fogSpaceId < 1 || fogSpaceId > 32)
                 {
                     continue;
                 }
 
-                Vector2 fogCenter =
-                    mapImageToScreen(
-                        SPACE_GRAPHICS[fogSpaceId - 1].center);
+                Vector2 fogCenter = mapImageToScreen(SPACE_GRAPHICS[fogSpaceId - 1].center);
 
-                float fogRadius =
-                    SPACE_GRAPHICS[fogSpaceId - 1].radius *
-                    getMapScale();
+                float fogRadius = SPACE_GRAPHICS[fogSpaceId - 1].radius * getMapScale();
 
-                DrawCircleV(
-                    fogCenter,
-                    fogRadius,
-                    Color{180, 220, 255, 120});
+                DrawCircleV(fogCenter, fogRadius, Color{180, 220, 255, 120});
             }
         }
 
-        // ===== اگر خانه انتخاب شده باشد (قرمز یا آبی) =====
         if (i + 1 == placementStartSpace)
         {
             DrawCircleV(center, radius, heroColor);
         }
 
-        // ===== اگر ماوس روی خانه است =====
         if (i + 1 == hoveredSpace)
         {
             DrawCircleV(center, radius, hoverColor);
@@ -2502,101 +1571,67 @@ void MainMenu::drawPlacement(Font font)
         }
     }
 
-    // =========================================
-    // TITLE
-    // =========================================
-
     const char *title = "";
 
     if (placement == Placement::YOUNGER_HERO)
+    {
         title = "YOUNGER PLAYER - PLACE YOUR HERO";
+    }
 
     else if (placement == Placement::YOUNGER_SIDEKICKS)
+    {
         title = "YOUNGER PLAYER - PLACE YOUR SIDEKICKS";
-
+    }
     else if (placement == Placement::OLDER_HERO)
+    {
         title = "OLDER PLAYER - PLACE YOUR HERO";
-
+    }
     else if (placement == Placement::OLDER_SIDEKICKS)
+    {
         title = "OLDER PLAYER - PLACE YOUR SIDEKICKS";
-
+    }
     else if (placement == Placement::FOG)
+    {
         title = "INVISIBLE MAN - PLACE YOUR FOG";
-
+    }
     else
+    {
         return;
+    }
 
     float fontSize = 30.0f;
 
-    Vector2 titleSize =
-        MeasureTextEx(
-            font,
-            title,
-            fontSize,
-            2.0f);
+    Vector2 titleSize = MeasureTextEx(font, title, fontSize, 2.0f);
 
-    DrawTextEx(
-        font,
-        title,
-        Vector2{
-            (GetScreenWidth() - titleSize.x) / 2.0f,
-            20.0f},
-        fontSize,
-        2.0f,
-        WHITE);
-
-    // =========================================
-    // INSTRUCTION
-    // =========================================
+    DrawTextEx(font, title,
+        Vector2{(GetScreenWidth() - titleSize.x) / 2.0f, 20.0f}, fontSize, 2.0f, WHITE);
 
     const char *instruction = "";
 
-    if (placement == Placement::YOUNGER_HERO ||
-        placement == Placement::OLDER_HERO)
+    if (placement == Placement::YOUNGER_HERO || placement == Placement::OLDER_HERO)
     {
-        instruction =
-            "Choose Space 7 or Space 22 for your Hero";
+        instruction = "Choose Space 7 or Space 22 for your Hero";
     }
     else if (placement == Placement::FOG)
     {
-        instruction =
-            "Choose a valid Space for your Fog";
+        instruction = "Choose a valid Space for your Fog";
     }
     else
     {
-        instruction =
-            "Choose a valid Space for your Sidekick";
+        instruction = "Choose a valid Space for your Sidekick";
     }
 
     float instructionSize = 22.0f;
 
-    Vector2 instructionTextSize =
-        MeasureTextEx(
-            font,
-            instruction,
-            instructionSize,
-            1.5f);
+    Vector2 instructionTextSize = MeasureTextEx(font, instruction, instructionSize, 1.5f);
 
-    DrawTextEx(
-        font,
-        instruction,
-
-        Vector2{
-            (GetScreenWidth() -
-             instructionTextSize.x) /
-                2.0f,
-
-            55.0f},
-
-        instructionSize,
-        1.5f,
-        WHITE);
+    DrawTextEx(font, instruction,
+        Vector2{(GetScreenWidth() - instructionTextSize.x) / 2.0f, 55.0f}, instructionSize, 1.5f, WHITE);
 }
 
 float MainMenu::getMapScale() const
 {
-    Texture2D map =
-        assets->getGameMap();
+    Texture2D map = assets->getGameMap();
 
     if (map.id == 0)
     {
@@ -2607,26 +1642,15 @@ float MainMenu::getMapScale() const
     const float mapPadding = 15.0f;
     const float topSpace = 75.0f;
 
-    const float mapAreaWidth =
-        GetScreenWidth() -
-        2.0f * (panelWidth + mapPadding);
+    const float mapAreaWidth = GetScreenWidth() - 2.0f * (panelWidth + mapPadding);
 
-    const float mapAreaHeight =
-        GetScreenHeight() -
-        topSpace;
+    const float mapAreaHeight = GetScreenHeight() - topSpace;
 
-    float scaleX =
-        mapAreaWidth /
-        static_cast<float>(map.width);
+    float scaleX = mapAreaWidth / static_cast<float>(map.width);
 
-    float scaleY =
-        mapAreaHeight /
-        static_cast<float>(map.height);
+    float scaleY = mapAreaHeight / static_cast<float>(map.height);
 
-    float scale =
-        (scaleX < scaleY)
-            ? scaleX
-            : scaleY;
+    float scale = (scaleX < scaleY) ? scaleX : scaleY;
 
     scale *= 0.99f;
 
@@ -2635,8 +1659,7 @@ float MainMenu::getMapScale() const
 
 Vector2 MainMenu::getMapPosition() const
 {
-    Texture2D map =
-        assets->getGameMap();
+    Texture2D map = assets->getGameMap();
 
     if (map.id == 0)
     {
@@ -2647,71 +1670,44 @@ Vector2 MainMenu::getMapPosition() const
     const float mapPadding = 15.0f;
     const float topSpace = 75.0f;
 
-    const float mapAreaX =
-        panelWidth + mapPadding;
+    const float mapAreaX = panelWidth + mapPadding;
 
-    const float mapAreaWidth =
-        GetScreenWidth() -
-        2.0f * (panelWidth + mapPadding);
+    const float mapAreaWidth = GetScreenWidth() - 2.0f * (panelWidth + mapPadding);
 
-    const float mapAreaY =
-        topSpace;
+    const float mapAreaY = topSpace;
 
-    const float mapAreaHeight =
-        GetScreenHeight() -
-        topSpace;
+    const float mapAreaHeight = GetScreenHeight() - topSpace;
 
-    float scaleX =
-        mapAreaWidth /
-        static_cast<float>(map.width);
+    float scaleX = mapAreaWidth / static_cast<float>(map.width);
 
-    float scaleY =
-        mapAreaHeight /
-        static_cast<float>(map.height);
+    float scaleY = mapAreaHeight / static_cast<float>(map.height);
 
-    float scale =
-        (scaleX < scaleY)
-            ? scaleX
-            : scaleY;
+    float scale = (scaleX < scaleY) ? scaleX : scaleY;
 
     scale *= 0.99f;
 
-    float mapWidth =
-        map.width * scale;
+    float mapWidth = map.width * scale;
 
-    float mapHeight =
-        map.height * scale;
+    float mapHeight = map.height * scale;
 
-    float mapX =
-        mapAreaX +
-        (mapAreaWidth - mapWidth) / 2.0f;
+    float mapX = mapAreaX + (mapAreaWidth - mapWidth) / 2.0f;
 
-    float mapY =
-        mapAreaY +
-        (mapAreaHeight - mapHeight) / 2.0f;
+    float mapY = mapAreaY + (mapAreaHeight - mapHeight) / 2.0f;
 
     mapY -= 80.0f;
 
-    return Vector2{
-        mapX,
-        mapY};
+    return Vector2{mapX, mapY};
 }
 
-Vector2 MainMenu::mapImageToScreen(
-    Vector2 imagePosition) const
+Vector2 MainMenu::mapImageToScreen(Vector2 imagePosition) const
 {
-    float scale =
-        getMapScale();
+    float scale = getMapScale();
 
-    Vector2 mapPosition =
-        getMapPosition();
+    Vector2 mapPosition = getMapPosition();
 
-    return Vector2{
-        mapPosition.x +
-            imagePosition.x * scale,
+    return Vector2{ mapPosition.x + imagePosition.x * scale,
 
-        mapPosition.y +
-            imagePosition.y * scale};
+        mapPosition.y + imagePosition.y * scale};
 }
 
 void MainMenu::updatePlacement()
@@ -2728,60 +1724,31 @@ void MainMenu::updatePlacement()
 
     Vector2 mouse = GetMousePosition();
 
-    // =========================================================
-    // HERO PLACEMENT
-    // =========================================================
-
-    if (placement == Placement::YOUNGER_HERO ||
-        placement == Placement::OLDER_HERO)
+    if (placement == Placement::YOUNGER_HERO || placement == Placement::OLDER_HERO)
     {
-        // -------------------------
-        // Space 7
-        // -------------------------
+        Vector2 space7 = mapImageToScreen(SPACE_GRAPHICS[6].center);
 
-        Vector2 space7 =
-            mapImageToScreen(
-                SPACE_GRAPHICS[6].center);
+        float radius7 = SPACE_GRAPHICS[6].radius * getMapScale();
 
-        float radius7 =
-            SPACE_GRAPHICS[6].radius *
-            getMapScale();
-
-        if (CheckCollisionPointCircle(
-                mouse,
-                space7,
-                radius7))
+        if (CheckCollisionPointCircle(mouse, space7, radius7))
         {
             if (placeHeroOnSpace(7))
             {
-                std::cout << "Hero placed on Space 7"
-                          << std::endl;
+                cout << "Hero placed on Space 7" << std::endl;
             }
 
             return;
         }
 
-        // -------------------------
-        // Space 22
-        // -------------------------
+        Vector2 space22 = mapImageToScreen(SPACE_GRAPHICS[21].center);
 
-        Vector2 space22 =
-            mapImageToScreen(
-                SPACE_GRAPHICS[21].center);
+        float radius22 = SPACE_GRAPHICS[21].radius * getMapScale();
 
-        float radius22 =
-            SPACE_GRAPHICS[21].radius *
-            getMapScale();
-
-        if (CheckCollisionPointCircle(
-                mouse,
-                space22,
-                radius22))
+        if (CheckCollisionPointCircle(mouse, space22, radius22))
         {
             if (placeHeroOnSpace(22))
             {
-                std::cout << "Hero placed on Space 22"
-                          << std::endl;
+                cout << "Hero placed on Space 22" << std::endl;
             }
 
             return;
@@ -2790,33 +1757,19 @@ void MainMenu::updatePlacement()
         return;
     }
 
-    // =========================================================
-    // SIDEKICK PLACEMENT
-    // =========================================================
-
-    if (placement == Placement::YOUNGER_SIDEKICKS ||
-        placement == Placement::OLDER_SIDEKICKS)
+    if (placement == Placement::YOUNGER_SIDEKICKS || placement == Placement::OLDER_SIDEKICKS)
     {
         for (int i = 0; i < 32; i++)
         {
-            Vector2 center =
-                mapImageToScreen(
-                    SPACE_GRAPHICS[i].center);
+            Vector2 center = mapImageToScreen(SPACE_GRAPHICS[i].center);
 
-            float radius =
-                SPACE_GRAPHICS[i].radius *
-                getMapScale();
+            float radius = SPACE_GRAPHICS[i].radius * getMapScale();
 
-            if (CheckCollisionPointCircle(
-                    mouse,
-                    center,
-                    radius))
+            if (CheckCollisionPointCircle(mouse, center, radius))
             {
                 if (placeSidekickOnSpace(i + 1))
                 {
-                    std::cout << "Sidekick placed on Space "
-                              << i + 1
-                              << std::endl;
+                    cout << "Sidekick placed on Space " << i + 1 << endl;
                 }
 
                 return;
@@ -2824,33 +1777,19 @@ void MainMenu::updatePlacement()
         }
     }
 
-    // =========================================================
-    // FOG PLACEMENT
-    // =========================================================
-
     if (placement == Placement::FOG)
     {
         for (int i = 0; i < 32; i++)
         {
-            Vector2 center =
-                mapImageToScreen(
-                    SPACE_GRAPHICS[i].center);
+            Vector2 center = mapImageToScreen(SPACE_GRAPHICS[i].center);
 
-            float radius =
-                SPACE_GRAPHICS[i].radius *
-                getMapScale();
+            float radius = SPACE_GRAPHICS[i].radius * getMapScale();
 
-            if (CheckCollisionPointCircle(
-                    mouse,
-                    center,
-                    radius))
+            if (CheckCollisionPointCircle(mouse, center, radius))
             {
                 if (placeFogOnSpace(i + 1))
                 {
-                    std::cout
-                        << "Fog placed on Space "
-                        << i + 1
-                        << std::endl;
+                    cout << "Fog placed on Space " << i + 1 << endl;
                 }
 
                 return;
@@ -2873,48 +1812,39 @@ bool MainMenu::placeFogOnSpace(int spaceId)
 
     Board &board = game->getBoard();
 
-    Space *space =
-        board.getSpace(spaceId);
+    Space *space = board.getSpace(spaceId);
 
     if (space == nullptr)
     {
         return false;
     }
 
-    Fog *fog =
-        getCurrentFog();
+    Fog *fog = getCurrentFog();
 
     if (fog == nullptr)
     {
         return false;
     }
 
-    // اگر Fog قبلاً روی این Space قرار گرفته،
-    // دوباره همان Space انتخاب نشود.
-    const std::vector<Player *> &players =
-        game->getPlayers();
+    const vector<Player *> &players = game->getPlayers();
 
-    if (placementPlayer < 1 ||
-        placementPlayer > static_cast<int>(players.size()))
+    if (placementPlayer < 1 || placementPlayer > static_cast<int>(players.size()))
     {
         return false;
     }
 
-    Player *player =
-        players[placementPlayer - 1];
+    Player *player = players[placementPlayer - 1];
 
     if (player == nullptr)
     {
         return false;
     }
 
-    const std::vector<Fog *> &fogs =
-        player->getFogs();
+    const vector<Fog *> &fogs = player->getFogs();
 
     for (Fog *existingFog : fogs)
     {
-        if (existingFog != nullptr &&
-            existingFog->getPosition() == space)
+        if (existingFog != nullptr && existingFog->getPosition() == space)
         {
             return false;
         }
@@ -2924,9 +1854,7 @@ bool MainMenu::placeFogOnSpace(int spaceId)
     space->setFogToken(true);
     currentFogIndex++;
 
-    // همه Fogهای این بازیکن قرار گرفتند
-    if (currentFogIndex >=
-        static_cast<int>(fogs.size()))
+    if (currentFogIndex >= static_cast<int>(fogs.size()))
     {
         placement = Placement::FINISHED;
         currentFogIndex = 0;
@@ -2947,28 +1875,23 @@ Fog *MainMenu::getCurrentFog()
         return nullptr;
     }
 
-    const std::vector<Player *> &players =
-        game->getPlayers();
+    const vector<Player *> &players = game->getPlayers();
 
-    if (placementPlayer < 1 ||
-        placementPlayer > static_cast<int>(players.size()))
+    if (placementPlayer < 1 || placementPlayer > static_cast<int>(players.size()))
     {
         return nullptr;
     }
 
-    Player *player =
-        players[placementPlayer - 1];
+    Player *player = players[placementPlayer - 1];
 
     if (player == nullptr)
     {
         return nullptr;
     }
 
-    const std::vector<Fog *> &fogs =
-        player->getFogs();
+    const vector<Fog *> &fogs = player->getFogs();
 
-    if (currentFogIndex < 0 ||
-        currentFogIndex >= static_cast<int>(fogs.size()))
+    if (currentFogIndex < 0 || currentFogIndex >= static_cast<int>(fogs.size()))
     {
         return nullptr;
     }
