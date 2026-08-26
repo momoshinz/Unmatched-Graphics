@@ -41,9 +41,6 @@ void MistForm::apply(Game &game,
         throw runtime_error("\n[!] ERROR : Selected home is already OCCUPIED!\n");
     }
 
-    cout << "\n========================================\n";
-    cout << "-< MistForm >- ACTIVATED!\n";
-
     Space *currentSpace = fighter.getPosition();
 
     if (currentSpace != nullptr)
@@ -54,19 +51,7 @@ void MistForm::apply(Game &game,
     fighter.setPosition(chosenSpace);
     chosenSpace->setFighter(&fighter);
 
-    cout << "\n[+] "
-         << fighter.getName()
-         << " moved to home "
-         << chosenSpace->getId()
-         << "!\n";
-
     game.getTurnManager().addAction();
-
-    cout << "[+] "
-         << fighter.getName()
-         << " gained 1 extra action!\n";
-
-    cout << "========================================\n";
 }
 
 

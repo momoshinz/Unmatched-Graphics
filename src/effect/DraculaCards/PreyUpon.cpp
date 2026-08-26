@@ -66,28 +66,15 @@ void PreyUpon::apply(Game &game,
         return;
     }
 
-    cout << "\n========================================\n";
-    cout << "-< Prey Upon >- ACTIVATED!\n";
-
     int totalDamage = 0;
-
-    cout << "\n[o] Affected fighters :\n";
 
     for (Fighter *opponent : adjacentOpponents)
     {
         opponent->takeDamage(1);
         totalDamage++;
-
-        cout << "> " << opponent->getName() << " took 1 Damage!\n";
     }
 
     fighter.heal(totalDamage);
-
-    cout << "[-] Total damage amount : " << totalDamage << "\n";
-
-    cout << "[+] " << fighter.getName() << " recovered " << totalDamage << " health!\n";
-
-    cout << "========================================\n";
 }
 
 EffectInputKind PreyUpon::getInputKind() const

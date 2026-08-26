@@ -33,19 +33,10 @@ void LookIntoMyEyes::apply(Game &game,
         throw runtime_error("\n[!] ERROR : Opponent has no card!\n");
     }
 
-    cout << "\n========================================\n";
-    cout << "-< Look Into My Eyes >- ACTIVATED!\n";
-
     int opponentBoost = opponentCard->getBoost();
 
     fighter.enableOpponentBoostValue();
     fighter.setOpponentBoostValue(opponentBoost);
-
-    cout << "[+] Opponent's attack card boost: " << opponentBoost << "\n";
-
-    cout << "[+] Adding " << opponentBoost << " to defense value!\n";
-
-    cout << "========================================\n";
 }
 
 EffectInputKind LookIntoMyEyes::getInputKind() const

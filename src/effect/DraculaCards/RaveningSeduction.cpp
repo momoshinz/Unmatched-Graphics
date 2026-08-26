@@ -58,9 +58,6 @@ void RaveningSeduction::apply(Game &game,
         throw runtime_error("\n[!] ERROR : Selected destination is OCCUPIED!\n");
     }
 
-    cout << "\n========================================\n";
-    cout << "-< Ravening Seduction >- ACTIVATED!\n";
-
     game.getBoard().moveFighter(selected, destination);
 
     int damage = 0;
@@ -84,17 +81,11 @@ void RaveningSeduction::apply(Game &game,
     if (damage > 0)
     {
         selected->takeDamage(damage);
-
-        cout << "[-] " << selected->getName()
-             << " took " << damage
-             << " damage!\n";
     }
     else
     {
         cout << "[!] No adjacent Sister. No damage dealt.\n";
     }
-
-    cout << "========================================\n";
 }
 
 EffectInputKind RaveningSeduction::getInputKind() const

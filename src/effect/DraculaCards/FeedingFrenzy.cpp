@@ -82,16 +82,7 @@ void FeedingFrenzy::apply(Game &game,
         }
     }
 
-    cout << "\n========================================\n";
-    cout << "-< Feeding Frenzy >- ACTIVATED!\n";
-
     fighter.addTempAttackBoost(sisterCount);
-
-    cout << "[+] " << sisterCount << " Sister(s) in the same zone as the target!\n";
-
-    cout << "[+] Attack value increased by " << sisterCount << ".\n";
-
-    cout << "========================================\n";
 }
 
 EffectInputKind FeedingFrenzy::getInputKind() const

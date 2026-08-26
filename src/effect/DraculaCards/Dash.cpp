@@ -31,9 +31,6 @@ void Dash::apply(Game &game,
 
     Space *destination = choice.selectedSpace;
 
-    cout << "\n========================================\n";
-    cout << "-< Dash >- ACTIVATED!\n";
-
     if (game.getBoard().moveFighter(&fighter, destination))
     {
         cout << "[+] " << fighter.getName()

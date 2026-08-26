@@ -35,10 +35,6 @@ void FeintDracula::apply(Game &game,
         throw runtime_error("\n[!] ERROR : Opponent's card has no effect to cancel.\n");
     }
 
-    // --------------------------------------------------------
-    // چک ایمیونیتی: شرلوک و واتسون هرگز نمی‌تونن کنسل بشن
-    // --------------------------------------------------------
-
     Player *opponentPlayer = target.getOwner();
 
     if (opponentPlayer != nullptr)
@@ -61,14 +57,7 @@ void FeintDracula::apply(Game &game,
         }
     }
 
-    cout << "\n========================================\n";
-    cout << "-< Feint >- ACTIVATED!\n";
-
     opponentCard->cancelEffects();
-
-    cout << "[+] Effects of " << opponentCard->getName() << " have been canceled!\n";
-
-    cout << "========================================\n";
 }
 
 EffectInputKind FeintDracula::getInputKind() const

@@ -151,15 +151,12 @@ void CombatSystem::applyDamage(int damage, Fighter &defender)
     }
 
     defender.takeDamage(damage);
-
-    cout << "\n[-] " << defender.getName() << " takes " << damage << " damage!\n";
 }
 
 void CombatSystem::applyEffects(Timing timing, Fighter &user, Fighter &target, Card &card, bool didUserWin)
 {
     if (card.isEffectsCanceled())
     {
-        cout << "\n[!] Effects of " << card.getName() << " are canceled by the Feint!\n";
         return;
     }
 
@@ -217,16 +214,10 @@ void CombatSystem::resolveCombat(Game &game, Fighter &attacker, Fighter &defende
     this->defenceCard = defenceCard;
     this->combatResolved = false;
 
-    cout << "\n========== COMBAT INITIATED ==========\n";
-
     if (!isAttackValid())
     {
         throw logic_error("\n[!] ERROR : Invalid attack!\n");
     }
-
-    cout << "\n> Attacker : " << attacker.getName() << endl;
-
-    cout << "\n> Defender : " << defender.getName() << endl;
 
 
     if (defenceCard != nullptr && !defenceCard->isEffectsCanceled())
@@ -279,9 +270,6 @@ void CombatSystem::resolveCombat(Game &game, Fighter &attacker, Fighter &defende
             defenceValue++;
         }
     }
-    cout << "\n-> Attack Value : " << attackValue << endl;
-
-    cout << "-> Defense Value : " << defenceValue << endl;
 
     int damage = calculateDamage(attackValue, defenceValue);
     bool attackerWon = (damage > 0);
@@ -323,42 +311,12 @@ void CombatSystem::resolveCombat(Game &game, Fighter &attacker, Fighter &defende
         defenderPlayer->getDiscardPile().addCard(defenceCard);
     }
     combatResolved = true;
-
-    cout << "\n========== COMBAT FINISHED ==========\n";
-    cout << "\n[ - RESULT - ]\n";
-
-    cout << "[o] " << attacker.getName() << " DEALT " << damage << " damage to " << defender.getName() << ".\n";
-
-    cout << "[o] " << defender.getName() << " Health : " << defender.getHealth() << "/" << defender.getMaxHealth() << endl;
-
-    cout << "\n[ - WINNER - ]\n";
-    if (damage > 0)
-    {
-        cout << "[*] " << attacker.getName() << " WINS THE COMBAT!\n";
-    }
-
-    else
-    {
-        cout << "[*] " << defender.getName() << " WINS THE COMBAT!\n";
-    }
-
-    if (!defender.isAlive())
-    {
-        cout << "-{ " << defender.getName() << " has been DEFEATED! }-\n";
-    }
 }
-
-// ============================================================
-// tryApplyEffect
-// همون گاردهای applyEffects، ولی به‌جای اجرای بی‌قید افکت،
-// اگه تعاملی بود متوقف می‌شه و منتظر GameScreen/EffectUI می‌مونه.
-// ============================================================
 
 bool CombatSystem::tryApplyEffect(Timing timing, Fighter &user, Fighter &target, Card &card, bool didUserWin)
 {
     if (card.isEffectsCanceled())
     {
-        cout << "\n[!] Effects of " << card.getName() << " are canceled by the Feint!\n";
         return true;
     }
 
@@ -399,7 +357,6 @@ bool CombatSystem::tryApplyEffect(Timing timing, Fighter &user, Fighter &target,
         }
     }
 
-    // این افکت واقعاً قراره اجرا بشه - متنش رو برای نمایش زیر نقشه ثبت کن
     if (card.getEffect() != nullptr)
     {
         currentEffectDescription = card.getEffect()->getDescription();
@@ -427,10 +384,6 @@ bool CombatSystem::tryApplyEffect(Timing timing, Fighter &user, Fighter &target,
     return true;
 }
 
-// ============================================================
-// beginCombat
-// ============================================================
-
 void CombatSystem::beginCombat(Game &game, Fighter &attacker, Fighter &defender,
                                Card &attackCard, Card *defenceCard)
 {
@@ -450,25 +403,15 @@ void CombatSystem::beginCombat(Game &game, Fighter &attacker, Fighter &defender,
     lastDamage = 0;
     attackerWon = false;
 
-    cout << "\n========== COMBAT INITIATED ==========\n";
-
     if (!isAttackValid())
     {
         throw logic_error("\n[!] ERROR : Invalid attack!\n");
     }
 
-    cout << "\n> Attacker : " << attacker.getName() << endl;
-    cout << "\n> Defender : " << defender.getName() << endl;
-
     phase = CombatPhase::ImmediatelyDefender;
     advance();
 }
 
-// ============================================================
-// advance
-// تا جایی که می‌تونه فازها رو رد می‌کنه؛ اگه به ورودی تعاملی
-// نیاز پیدا کرد، متوقف می‌شه (waitingForInput = true).
-// ============================================================
 
 void CombatSystem::advance()
 {
@@ -558,9 +501,6 @@ void CombatSystem::advance()
                     }
                 }
 
-                cout << "\n-> Attack Value : " << attackValue << endl;
-                cout << "-> Defense Value : " << defenceValue << endl;
-
                 pendingAttackValue = attackValue;
                 pendingDefenceValue = defenceValue;
 
@@ -609,11 +549,6 @@ void CombatSystem::advance()
     }
 }
 
-// ============================================================
-// finalizeCombat
-// همون کارهای پایانی resolveCombat (cleanup + discard + لاگ نتیجه)
-// ============================================================
-
 void CombatSystem::finalizeCombat()
 {
     attackCard->clearTemporaryCombatValue();
@@ -646,34 +581,7 @@ void CombatSystem::finalizeCombat()
     }
 
     combatResolved = true;
-
-    cout << "\n========== COMBAT FINISHED ==========\n";
-    cout << "\n[ - RESULT - ]\n";
-
-    cout << "[o] " << attacker->getName() << " DEALT " << lastDamage << " damage to " << defender->getName() << ".\n";
-    cout << "[o] " << defender->getName() << " Health : " << defender->getHealth() << "/" << defender->getMaxHealth() << endl;
-
-    cout << "\n[ - WINNER - ]\n";
-    if (lastDamage > 0)
-    {
-        cout << "[*] " << attacker->getName() << " WINS THE COMBAT!\n";
-    }
-    else
-    {
-        cout << "[*] " << defender->getName() << " WINS THE COMBAT!\n";
-    }
-
-    if (!defender->isAlive())
-    {
-        cout << "-{ " << defender->getName() << " has been DEFEATED! }-\n";
-    }
 }
-
-// ============================================================
-// provideEffectChoice
-// وقتی EffectUI انتخاب کاربر رو آماده کرد، اینجا apply واقعی می‌شه
-// و state machine ادامه پیدا می‌کنه.
-// ============================================================
 
 void CombatSystem::provideEffectChoice(const EffectChoice &choice)
 {
@@ -682,7 +590,6 @@ void CombatSystem::provideEffectChoice(const EffectChoice &choice)
         return;
     }
 
-    // اجرای واقعی Effect با انتخاب کاربر
     pendingEffect->apply(
         *currentGame,
         *pendingUser,
@@ -692,7 +599,6 @@ void CombatSystem::provideEffectChoice(const EffectChoice &choice)
         pendingDidUserWin,
         choice);
 
-    // Effect تمام شد
     waitingForInput = false;
 
     pendingEffect = nullptr;
@@ -701,7 +607,6 @@ void CombatSystem::provideEffectChoice(const EffectChoice &choice)
     pendingCard = nullptr;
     pendingOpponentCard = nullptr;
 
-    // رفتن به Phase بعدی
     switch (phase)
     {
     case CombatPhase::ImmediatelyDefender:
@@ -802,9 +707,6 @@ void CombatSystem::provideEffectChoice(const EffectChoice &choice)
     advance();
 }
 
-// ============================================================
-// GETTERS جدید
-// ============================================================
 
 bool CombatSystem::isWaitingForEffectInput() const
 {

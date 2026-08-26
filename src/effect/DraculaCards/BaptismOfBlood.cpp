@@ -32,17 +32,10 @@ void BaptismOfBlood::apply(Game &game,
         throw runtime_error("\n[!] ERROR : Baptism Of Blood can only be used by Dracula!\n");
     }
 
-    cout << "\n========================================\n";
-    cout << "-< Baptism Of Blood >- ACTIVATED!\n";
-
     fighter.heal(2);
-
-    cout << "[+] " << fighter.getName() << " recovered 2 health!\n";
 
     if (choice.selectedFighter == nullptr)
     {
-        cout << "[o] No defeated Sister available.\n";
-        cout << "========================================\n";
         return;
     }
 
@@ -67,8 +60,7 @@ void BaptismOfBlood::apply(Game &game,
 
     if (selectedSpace == nullptr)
     {
-        throw runtime_error(
-            "\n[!] ERROR : No destination selected for Sister!\n");
+        throw runtime_error("\n[!] ERROR : No destination selected for Sister!\n");
     }
 
     if (selectedSpace->isOccupied())
@@ -110,24 +102,13 @@ void BaptismOfBlood::apply(Game &game,
 
     if (!sameZone)
     {
-        throw runtime_error(
-            "\n[!] ERROR : Selected home is NOT in Dracula's zone!\n");
+        throw runtime_error("\n[!] ERROR : Selected home is NOT in Dracula's zone!\n");
     }
 
     selectedSister->heal(selectedSister->getMaxHealth());
 
     selectedSister->setPosition(selectedSpace);
     selectedSpace->setFighter(selectedSister);
-
-    cout << "[+] "
-         << selectedSister->getName()
-         << " has been revived in Dracula's zone.\n";
-
-    cout << "[o] Sister moved to Home "
-         << selectedSpace->getId()
-         << "\n";
-
-    cout << "========================================\n";
 }
 
 EffectInputKind BaptismOfBlood::getInputKind() const

@@ -81,16 +81,7 @@ void ThirstForSustenance::apply(
         throw runtime_error("\n[!] ERROR : Selected destination is OCCUPIED!\n");
     }
 
-    cout << "\n========================================\n";
-    cout << "-< Thirst For Sustenance >- ACTIVATED!\n";
-
     game.getBoard().moveFighter(dracula, chosenSpace);
-
-    cout << "[+] Dracula moved next to "
-         << target.getName()
-         << ".\n";
-
-    cout << "========================================\n";
 }
 
 string ThirstForSustenance::getDescription() const
