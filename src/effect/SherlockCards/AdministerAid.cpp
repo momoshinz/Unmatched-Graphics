@@ -4,7 +4,6 @@
 #include "fighter/Sherlock.h"
 #include "fighter/DrWatson.h"
 #include "board/Space.h"
-#include <iostream>
 #include <vector>
 #include <stdexcept>
 
@@ -20,21 +19,18 @@ void AdministerAid::apply(Game &game, Fighter &fighter, Fighter &target,
     }
 
     Player *player = fighter.getOwner();
-
     if (player == nullptr)
     {
         throw runtime_error("\n[!] ERROR : Fighter has NO owner!\n");
     }
 
     Watson *watson = player->getWatson();
-
     if (watson == nullptr)
     {
         throw runtime_error("\n[!] ERROR : Dr. Watson NOT found!\n");
     }
 
     Hero *sherlock = player->getHero();
-
     if (sherlock == nullptr)
     {
         throw runtime_error("\n[!] ERROR : Sherlock NOT found!\n");
@@ -50,26 +46,8 @@ void AdministerAid::apply(Game &game, Fighter &fighter, Fighter &target,
         throw runtime_error("\n[!] ERROR : Selected home is already OCCUPIED!\n");
     }
 
-    cout << "\n========================================";
-    cout << "\n-< Administer Aid >- ACTIVATED!\n";
-
     watson->moveTo(choice.selectedSpace);
-
-    cout << "\n[o] Dr. Watson moved to Home " << choice.selectedSpace->getId() << endl;
-
     sherlock->heal(1);
-
-    cout << "[+] " << sherlock->getName() << " healed 1 health.\n";
-
-    if (player->drawCardToHand())
-    {
-        cout << "[+] Drew 1 card successfully.\n";
-    }
-    else
-    {
-        cout << "[!] Deck is empty. No card drawn.\n";
-    }
-    cout << "========================================\n";
 }
 
 EffectInputKind AdministerAid::getInputKind() const

@@ -226,18 +226,8 @@ void CombatSystem::resolveCombat(Game &game, Fighter &attacker, Fighter &defende
 
     cout << "\n> Attacker : " << attacker.getName() << endl;
 
-    attackCard.display();
-
     cout << "\n> Defender : " << defender.getName() << endl;
 
-    if (defenceCard != nullptr)
-    {
-        defenceCard->display();
-    }
-    else
-    {
-        cout << "[!] Defender chose NOT to defend!\n";
-    }
 
     if (defenceCard != nullptr && !defenceCard->isEffectsCanceled())
     {
@@ -468,18 +458,7 @@ void CombatSystem::beginCombat(Game &game, Fighter &attacker, Fighter &defender,
     }
 
     cout << "\n> Attacker : " << attacker.getName() << endl;
-    attackCard.display();
-
     cout << "\n> Defender : " << defender.getName() << endl;
-
-    if (defenceCard != nullptr)
-    {
-        defenceCard->display();
-    }
-    else
-    {
-        cout << "[!] Defender chose NOT to defend!\n";
-    }
 
     phase = CombatPhase::ImmediatelyDefender;
     advance();

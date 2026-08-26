@@ -5,7 +5,6 @@
 #include "fighter/Fog.h"
 #include "board/Board.h"
 #include "board/Space.h"
-#include <iostream>
 #include <stdexcept>
 using namespace std;
 
@@ -22,12 +21,8 @@ void SlipAway::apply(Game &game, Fighter &fighter, Fighter &target,
     vector<Fog *> fogs = player->getFogs();
     if (fogs.empty())
     {
-        cout << "\n[!] ERROR : No Fog tokens available.\n";
         return;
     }
-
-    cout << "\n========================================\n";
-    cout << "-< Slip Away >- ACTIVATED!\n";
 
     if (choice.selectedFogId < 0 || choice.selectedFogId >= static_cast<int>(fogs.size()))
     {
@@ -52,10 +47,6 @@ void SlipAway::apply(Game &game, Fighter &fighter, Fighter &target,
     destination->setFogToken(true);
 
     game.getBoard().moveFighter(&fighter, destination);
-
-    cout << "\n[+] Fog token moved.\n";
-    cout << "[+] Invisible Man moved to the same home.\n";
-    cout << "\n========================================\n";
 }
 
 EffectInputKind SlipAway::getInputKind() const

@@ -5,7 +5,6 @@
 #include "fighter/Sisters.h"
 #include "card/Card.h"
 #include "fighter/Fog.h"
-#include <iostream>
 #include <stdexcept>
 #include <iomanip>
 
@@ -28,7 +27,6 @@ Player::~Player()
     {
         delete sidekick;
     }
-
     sidekicks.clear();
 
     for (Fog *fog : fogs)
@@ -64,12 +62,10 @@ void Player::setHero(Hero *hero)
     {
         throw invalid_argument("\n[!] ERROR : Hero cannot be NULL!\n");
     }
-
     if (this->hero != nullptr)
     {
         throw logic_error("\n[!] ERROR : Hero has already been SELECTED!\n");
     }
-
     this->hero = hero;
     hero->setOwner(this);
 }
@@ -102,7 +98,6 @@ void Player::addFog(Fog *fog)
     {
         throw invalid_argument("\n[!] ERROR : Fog cannot be NULL!\n");
     }
-
     fogs.push_back(fog);
 }
 
@@ -138,9 +133,7 @@ Sidekick *Player::removeSideKick(int index)
     }
 
     Sidekick *removed = sidekicks[index];
-
     sidekicks.erase(sidekicks.begin() + index);
-
     return removed;
 }
 
@@ -150,8 +143,6 @@ bool Player::drawCardToHand()
 
     if (card == nullptr)
     {
-        cout << "\n[!] ERROR : Deck empty. All your fighters take 2 damage!\n";
-
         if (hero != nullptr && hero->isAlive())
         {
             hero->takeDamage(2);
@@ -163,18 +154,9 @@ bool Player::drawCardToHand()
                 sidekick->takeDamage(2);
             }
         }
-
-        lastDrawFailed = true; // <-- خط جدید
-
+        lastDrawFailed = true;
         return false;
     }
-
-    cout << "[DRAW] "
-         << hero->getName()
-         << " drew: "
-         << card->getName()
-         << endl;
-
     hand.addCard(card);
     return true;
 }

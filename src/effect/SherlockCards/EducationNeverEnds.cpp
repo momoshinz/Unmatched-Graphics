@@ -3,7 +3,7 @@
 #include "fighter/Fighter.h"
 #include "fighter/Hero.h"
 #include "card/Card.h"
-#include <iostream>
+#include <stdexcept>
 
 using namespace std;
 
@@ -11,31 +11,11 @@ void EducationNeverEnds::apply(Game &game, Fighter &fighter, Fighter &target,
                                const Card &self, Card *opponentCard, bool didUserWin,
                                const EffectChoice &choice)
 {
-    cout << "\n========================================\n";
-    cout << "-< Education Never Ends >- ACTIVATED!\n";
-
-    if (didUserWin)
+    Player *player = fighter.getOwner();
+    if (player == nullptr)
     {
-        bool ok = target.getOwner()->drawCardToHand();
-
-        if (ok)
-        {
-            cout << "[+] " << target.getOwner()->getHero()->getName() << " drew 1 card.\n";
-        }
+        throw runtime_error("\n[!] ERROR : Fighter has NO owner!\n");
     }
-    else
-    {
-        int drawn = 0;
-
-        if (fighter.getOwner()->drawCardToHand())
-            drawn++;
-
-        if (fighter.getOwner()->drawCardToHand())
-            drawn++;
-
-        cout << "[+] " << fighter.getName() << " drew " << drawn << " card" << (drawn == 1 ? "" : "s") << ".\n";
-    }
-    cout << "========================================\n";
 }
 
 string EducationNeverEnds::getDescription() const

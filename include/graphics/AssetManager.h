@@ -18,14 +18,13 @@ class AssetManager
         Font guideFont;
         Texture2D fogTexture{};
         Music gameMusic;
+        Texture2D winnerBackground;
 
         bool loaded;
 
         std::unordered_map<std::string, Texture2D> characterTextures;
         std::unordered_map<std::string, Texture2D> cardTextures;
         Texture2D gameMap;
-
-        bool isTextureValid(const Texture2D &texture) const;
 
     public:
         AssetManager();
@@ -47,6 +46,8 @@ class AssetManager
         Texture2D getMainPanelBackground() const;
         Texture2D getFogTexture() const;
         Music getGameMusic() const;
+        Texture2D getWinnerBackground() const;
 
         bool isLoaded() const;
+        bool isTextureValid(const Texture2D &texture) const;
 };

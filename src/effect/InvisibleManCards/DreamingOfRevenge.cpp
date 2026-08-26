@@ -5,7 +5,6 @@
 #include "fighter/Hero.h"
 #include "fighter/Sidekick.h"
 #include "board/Space.h"
-#include <iostream>
 #include <stdexcept>
 using namespace std;
 
@@ -27,7 +26,6 @@ void DreamingOfRevenge::apply(Game &game, Fighter &fighter, Fighter &target,
     Player *opponentPlayer = game.selectOpponent(*player);
     if (opponentPlayer == nullptr)
     {
-        cerr << "\n[!] ERROR : Opponent has NO owner!\n";
         return;
     }
 
@@ -39,13 +37,9 @@ void DreamingOfRevenge::apply(Game &game, Fighter &fighter, Fighter &target,
     }
     if (!mySpace->hasFogToken())
     {
-        cout << "\n[!] ERROR : Invisible Man is not on a Fog token. card has no effect!\n";
         return;
     }
-    cout << "\n========================================";
-    cout << "\n-< Dreaming Of Revenge >- ACTIVATED!\n";
 
-    int damaged = 0;
     for (Space *space : game.getBoard().getSpaces())
     {
         if (space == nullptr)
@@ -66,20 +60,6 @@ void DreamingOfRevenge::apply(Game &game, Fighter &fighter, Fighter &target,
             continue;
 
         enemy->takeDamage(1);
-        damaged++;
-
-        cout << "\n[-] "
-            << enemy->getName()
-            << " took 1 damage.\n";
-    }
-    if (damaged == 0)
-    {
-        cout << "\n[!] ERROR : No opposing fighter was on a Fog token!\n";
-    }
-    else
-    {
-        cout << "\n[+] Dreaming Of Revenge dealt damage to " << damaged << " fighter(s).\n";
-        cout << "\n========================================";
     }
 }
 

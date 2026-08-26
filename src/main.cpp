@@ -1,43 +1,35 @@
 #include <raylib.h>
 #include <iostream>
+#include <string>
 
 #include "graphics/AssetManager.h"
 #include "graphics/LoadingScreen.h"
 #include "graphics/MainMenu.h"
 #include "graphics/GameScreen.h"
 #include "graphics/Transition.h"
+#include "graphics/WinnerUI.h"
+#include "fighter/Hero.h"
 #include "game/Game.h"
 
 int main()
 {
+    // =========================================================
+    // WINDOW
+    // =========================================================
+
     const int screenWidth = 1630;
     const int screenHeight = 930;
-
-    // =========================================
-    // Window
-    // =========================================
 
     InitWindow(
         screenWidth,
         screenHeight,
         "UNMATCHED");
 
-    // =========================================
-    // Audio
-    // =========================================
-
     InitAudioDevice();
 
-    Image icon =
-        LoadImage(
-            "Unmatched_Assets/icon.png");
+    Image icon = LoadImage("Unmatched_Assets/icon.png");
 
-    if (icon.data == nullptr)
-    {
-        std::cout
-            << "Failed to load window icon!\n";
-    }
-    else
+    if (icon.data != nullptr)
     {
         SetWindowIcon(icon);
         UnloadImage(icon);
@@ -45,32 +37,22 @@ int main()
 
     SetTargetFPS(60);
 
-    std::cout
-        << "Window created.\n";
-
-    // =========================================
-    // Asset Manager
-    // =========================================
+    // =========================================================
+    // ASSETS
+    // =========================================================
 
     AssetManager assets;
 
     if (!assets.load())
     {
-        std::cout
-            << "ASSET LOADING FAILED!\n";
-
         CloseAudioDevice();
         CloseWindow();
-
         return 1;
     }
 
-    std::cout
-        << "ALL ASSETS LOADED!\n";
-
-    // =========================================
-    // Loading Screen
-    // =========================================
+    // =========================================================
+    // LOADING SCREEN
+    // =========================================================
 
     LoadingScreen loadingScreen(
         assets,
@@ -91,29 +73,20 @@ int main()
         EndDrawing();
     }
 
-    // =========================================
-    // START MAIN MENU MUSIC
-    // =========================================
+    // =========================================================
+    // MUSIC
+    // =========================================================
 
-    Music gameMusic =
-        assets.getGameMusic();
+    Music gameMusic = assets.getGameMusic();
 
     if (IsMusicValid(gameMusic))
     {
         PlayMusicStream(gameMusic);
-
-        std::cout
-            << "Main Menu music started.\n";
-    }
-    else
-    {
-        std::cout
-            << "Main Menu music is invalid!\n";
     }
 
-    // =========================================
-    // Game Objects
-    // =========================================
+    // =========================================================
+    // GAME OBJECTS
+    // =========================================================
 
     Game game;
 
@@ -125,71 +98,113 @@ int main()
         &assets,
         &game);
 
-    // =========================================
-    // Screen State
-    // =========================================
+    WinnerUI winnerUI(
+        &assets);
+
+    // =========================================================
+    // WINNER STATE
+    // =========================================================
+
+    Hero *pendingWinnerHero = nullptr;
+
+    bool winnerTransitionStarted = false;
+
+    // =========================================================
+    // SCREEN STATE
+    // =========================================================
 
     enum class Screen
     {
         MAIN_MENU,
-        GAME
+        GAME,
+        WINNER
     };
 
-    Screen currentScreen =
-        Screen::MAIN_MENU;
+    Screen currentScreen = Screen::MAIN_MENU;
+    Screen nextScreen = Screen::MAIN_MENU;
 
-    Screen nextScreen =
-        Screen::MAIN_MENU;
-
-    // =========================================
-    // Transition
-    // =========================================
+    // =========================================================
+    // TRANSITION
+    // =========================================================
 
     Transition transition;
 
     transition.setFont(
         assets.getLoadingFont());
 
-    // =========================================
-    // Helper: کاملاً برگرد به منوی اصلی
-    // (هم برای برگشت عادی، هم برای ریکاوری از خطا)
-    // =========================================
+    // =========================================================
+    // RETURN TO MAIN MENU
+    // =========================================================
 
     auto returnToMainMenu = [&]()
     {
+        // -----------------------------------------------------
+        // Reset game
+        // -----------------------------------------------------
+
         game.resetGame();
 
-        mainMenu = MainMenu(&assets, &game);
+        // -----------------------------------------------------
+        // Reset GameScreen
+        // -----------------------------------------------------
+
+        gameScreen.resetState();
+
+        // -----------------------------------------------------
+        // Recreate MainMenu
+        // -----------------------------------------------------
+
+        mainMenu =
+            MainMenu(
+                &assets,
+                &game);
+
+        // -----------------------------------------------------
+        // Restart music
+        // -----------------------------------------------------
 
         if (IsMusicValid(gameMusic))
         {
             StopMusicStream(gameMusic);
             PlayMusicStream(gameMusic);
-
-            std::cout
-                << "Main Menu music restarted.\n";
         }
+
+        // -----------------------------------------------------
+        // Reset winner state
+        // -----------------------------------------------------
+
+        winnerTransitionStarted = false;
+        pendingWinnerHero = nullptr;
+
+        // -----------------------------------------------------
+        // Reset screen
+        // -----------------------------------------------------
 
         currentScreen = Screen::MAIN_MENU;
         nextScreen = Screen::MAIN_MENU;
 
+        // -----------------------------------------------------
+        // Reset transition
+        // -----------------------------------------------------
+
         transition = Transition();
-        transition.setFont(assets.getLoadingFont());
+
+        transition.setFont(
+            assets.getLoadingFont());
     };
 
-    // =========================================
-    // Main Loop
-    // =========================================
+    // =========================================================
+    // MAIN LOOP
+    // =========================================================
 
     while (!WindowShouldClose())
     {
         try
         {
-            float deltaTime =
-                GetFrameTime();
+            float deltaTime = GetFrameTime();
 
             // =====================================================
-            // MUSIC UPDATE
+            // UPDATE MUSIC
             // =====================================================
 
             if (IsMusicValid(gameMusic))
@@ -198,25 +213,19 @@ int main()
             }
 
             // =====================================================
-            // TRANSITION UPDATE
+            // TRANSITION
             // =====================================================
 
             if (transition.isActive())
             {
                 transition.update(deltaTime);
 
-                // -------------------------------------------------
-                // Switch screen when the black part of the
-                // transition is finished.
-                // -------------------------------------------------
-
                 if (transition.shouldSwitch())
                 {
                     currentScreen = nextScreen;
 
                     // -------------------------------------------------
-                    // Entering Game Screen
-                    // Stop Main Menu music.
+                    // Entering GAME
                     // -------------------------------------------------
 
                     if (currentScreen == Screen::GAME)
@@ -224,22 +233,26 @@ int main()
                         if (IsMusicValid(gameMusic))
                         {
                             StopMusicStream(gameMusic);
-
-                            std::cout
-                                << "Main Menu music stopped.\n";
                         }
-
-                        // =========================================
-                        // RESET PLAYER PANEL TEXT ANIMATION
-                        // =========================================
 
                         gameScreen.resetPlayerPanelAnimations();
                     }
 
+                    // -------------------------------------------------
+                    // Finish transition
+                    // -------------------------------------------------
+
                     transition.finishSwitch();
 
-                    std::cout
-                        << "Screen switched.\n";
+                    // -------------------------------------------------
+                    // Entering WINNER
+                    // -------------------------------------------------
+
+                    if (currentScreen == Screen::WINNER)
+                    {
+                        winnerUI.open(
+                            pendingWinnerHero);
+                    }
                 }
             }
 
@@ -253,78 +266,34 @@ int main()
                 // MAIN MENU
                 // =================================================
 
-                if (currentScreen ==
-                    Screen::MAIN_MENU)
+                if (currentScreen == Screen::MAIN_MENU)
                 {
                     mainMenu.update();
 
                     int result =
                         mainMenu.handleInput();
 
-                    // =============================================
-                    // NEW GAME
-                    // =============================================
-
-                    if (result == 1)
-                    {
-                        std::cout
-                            << "NEW GAME selected.\n";
-                    }
-
-                    // =============================================
-                    // LOAD GAME
-                    // =============================================
-
-                    else if (result == 2)
-                    {
-                        std::cout
-                            << "LOAD GAME selected.\n";
-                    }
-
-                    // =============================================
+                    // -------------------------------------------------
                     // EXIT
-                    // =============================================
+                    // -------------------------------------------------
 
-                    else if (result == 3)
+                    if (result == 3)
                     {
                         break;
                     }
 
-                    // =============================================
-                    // START GAME
-                    // =============================================
+                    // -------------------------------------------------
+                    // START GAME - NORMAL
+                    // -------------------------------------------------
 
                     else if (result == 4)
                     {
-                        std::cout
-                            << "Placement finished.\n";
-
-                        // -----------------------------------------
-                        // Start game logic
-                        // -----------------------------------------
-
                         game.beginTurns();
 
-                        std::cout
-                            << "Starting transition to game...\n";
-
-                        // -----------------------------------------
-                        // Destination
-                        // -----------------------------------------
-
-                        nextScreen =
-                            Screen::GAME;
-
-                        // -----------------------------------------
-                        // Transition Text
-                        // -----------------------------------------
+                        nextScreen = Screen::GAME;
 
                         transition.setText(
                             "GET READY FIGHTERS . . .");
-
-                        // -----------------------------------------
-                        // Transition
-                        // -----------------------------------------
 
                         transition.start(
                             TransitionType::Fade,
@@ -332,17 +301,13 @@ int main()
                             2.5f);
                     }
 
-                    // =============================================
-                    // LOAD GAME → RESUME (بدون beginTurns)
-                    // =============================================
+                    // -------------------------------------------------
+                    // START GAME - OTHER
+                    // -------------------------------------------------
 
                     else if (result == 5)
                     {
-                        std::cout
-                            << "Game loaded, resuming...\n";
-
-                        nextScreen =
-                            Screen::GAME;
+                        nextScreen = Screen::GAME;
 
                         transition.setText(
                             "GET READY FIGHTERS . . .");
@@ -355,68 +320,144 @@ int main()
                 }
 
                 // =================================================
-                // GAME SCREEN
+                // GAME
                 // =================================================
 
-                else if (currentScreen ==
-                         Screen::GAME)
+                else if (currentScreen == Screen::GAME)
                 {
                     int result =
                         gameScreen.update();
 
-                    // =============================================
-                    // RETURN TO MAIN MENU
-                    // =============================================
+                    // -------------------------------------------------
+                    // CHECK GAME OVER
+                    // -------------------------------------------------
+
+                    if (!winnerTransitionStarted)
+                    {
+                        Hero *winnerHero = nullptr;
+
+                        if (
+                            gameScreen.consumeGameOver(
+                                winnerHero))
+                        {
+                            pendingWinnerHero =
+                                winnerHero;
+
+                            winnerTransitionStarted =
+                                true;
+
+                            // -----------------------------------------
+                            // Winner text
+                            // -----------------------------------------
+
+                            std::string winnerText =
+                                winnerHero != nullptr
+                                    ? winnerHero->getName() + " IS THE WINNER"
+                                    : "GAME OVER";
+
+                            // -----------------------------------------
+                            // Fade to black
+                            // -----------------------------------------
+
+                            transition.setText(
+                                winnerText);
+
+                            nextScreen =
+                                Screen::WINNER;
+
+                            transition.start(
+                                TransitionType::Fade,
+                                1.0f,
+                                2.0f);
+                        }
+                    }
+
+                    // -------------------------------------------------
+                    // EXIT GAME
+                    // -------------------------------------------------
 
                     if (result == 1)
                     {
-                        std::cout
-                            << "Returning to main menu...\n";
-
-                        // -----------------------------------------
-                        // Reset game state so a new game can
-                        // start cleanly next time
-                        // -----------------------------------------
-
                         game.resetGame();
 
-                        mainMenu = MainMenu(&assets, &game);
+                        gameScreen.resetState();
 
-                        // -----------------------------------------
-                        // Restart Main Menu music from the beginning
-                        // -----------------------------------------
+                        mainMenu =
+                            MainMenu(
+                                &assets,
+                                &game);
 
+                        // Restart music
                         if (IsMusicValid(gameMusic))
                         {
                             StopMusicStream(gameMusic);
                             PlayMusicStream(gameMusic);
-
-                            std::cout
-                                << "Main Menu music restarted.\n";
                         }
-
-                        // -----------------------------------------
-                        // Destination
-                        // -----------------------------------------
 
                         nextScreen =
                             Screen::MAIN_MENU;
 
-                        // -----------------------------------------
-                        // Change transition text
-                        // -----------------------------------------
-
                         transition.setText(
                             "LOADING . . .");
-
-                        // -----------------------------------------
-                        // Transition
-                        // -----------------------------------------
 
                         transition.start(
                             TransitionType::Fade,
                             1.0f,
                             1.5f);
+                    }
+                }
+
+                // =================================================
+                // WINNER
+                // =================================================
+
+                else if (currentScreen == Screen::WINNER)
+                {
+                    winnerUI.update();
+
+                    // -------------------------------------------------
+                    // Return to Main Menu
+                    // -------------------------------------------------
+
+                    if (
+                        winnerUI.consumeReturnToMenu())
+                    {
+                        game.resetGame();
+
+                        gameScreen.resetState();
+
+                        mainMenu =
+                            MainMenu(
+                                &assets,
+                                &game);
+
+                        // Restart music
+                        if (IsMusicValid(gameMusic))
+                        {
+                            StopMusicStream(gameMusic);
+                            PlayMusicStream(gameMusic);
+                        }
+
+                        // Reset winner state
+                        winnerTransitionStarted =
+                            false;
+
+                        pendingWinnerHero =
+                            nullptr;
+
+                        // Return to Main Menu
+                        currentScreen =
+                            Screen::MAIN_MENU;
+
+                        nextScreen =
+                            Screen::MAIN_MENU;
+
+                        // Reset transition
+                        transition =
+                            Transition();
+
+                        transition.setFont(
+                            assets.getLoadingFont());
                     }
                 }
             }
@@ -429,56 +470,73 @@ int main()
 
             ClearBackground(BLACK);
 
-            // =====================================================
-            // Current Screen
-            // =====================================================
+            // -----------------------------------------------------
+            // MAIN MENU
+            // -----------------------------------------------------
 
-            if (currentScreen ==
-                Screen::MAIN_MENU)
+            if (currentScreen == Screen::MAIN_MENU)
             {
                 mainMenu.draw();
             }
-            else if (currentScreen ==
-                     Screen::GAME)
+
+            // -----------------------------------------------------
+            // GAME
+            // -----------------------------------------------------
+
+            else if (currentScreen == Screen::GAME)
             {
                 gameScreen.draw();
             }
 
-            // =====================================================
-            // Transition
-            // =====================================================
+            // -----------------------------------------------------
+            // WINNER
+            // -----------------------------------------------------
+
+            else if (currentScreen == Screen::WINNER)
+            {
+                winnerUI.draw();
+            }
+
+            // -----------------------------------------------------
+            // TRANSITION
+            // -----------------------------------------------------
 
             transition.draw();
 
             EndDrawing();
         }
+
+        // =========================================================
+        // EXCEPTION HANDLING
+        // =========================================================
+
         catch (const std::exception &e)
         {
             std::cerr
-                << "\n[!] UNHANDLED ERROR: "
+                << "\n[!] UNHANDLED ERROR : "
                 << e.what()
-                << "\n[!] Returning to main menu to recover...\n";
+                << std::endl;
 
             returnToMainMenu();
         }
+
         catch (...)
         {
             std::cerr
                 << "\n[!] UNKNOWN UNHANDLED ERROR!"
-                << "\n[!] Returning to main menu to recover...\n";
+                << std::endl;
 
             returnToMainMenu();
         }
     }
 
-    // =========================================
-    // Cleanup
-    // =========================================
+    // =========================================================
+    // CLEANUP
+    // =========================================================
 
     assets.unload();
 
     CloseAudioDevice();
-
     CloseWindow();
 
     return 0;

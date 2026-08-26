@@ -3,7 +3,6 @@
 #include "fighter/Fighter.h"
 #include "board/Board.h"
 #include "card/Card.h"
-#include <iostream>
 #include <stdexcept>
 
 using namespace std;
@@ -30,17 +29,6 @@ void CounterPunch::apply(Game &game, Fighter &fighter, Fighter &target,
     if (fighter.isAdjacent(&target, game.getBoard()))
     {
         target.takeDamage(2);
-
-        cout << "\n========================================";
-        cout << "\n-< counter punch PUNCH >- ACTIVATED!\n";
-        cout << "[-] " << target.getName()
-             << " takes 2 damage.\n";
-        cout << "========================================\n";
-    }
-    else
-    {
-        cout << "\n[!] Counter Punch CNCELED.\n";
-        cout << fighter.getName() << " is not adjacent to " << target.getName() << "!\n";
     }
 }
 

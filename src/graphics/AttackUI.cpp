@@ -315,7 +315,7 @@ void AttackUI::update()
             {
                 showError = true;
                 errorMessage = "NO VALID TARGET FOR THIS ATTACKER!";
-                errorIsDefenseless = false; // <-- خط جدید
+                errorIsDefenseless = false;
                 return;
             }
 

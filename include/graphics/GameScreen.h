@@ -92,6 +92,8 @@ private:
     float feintBlockedPopupTimer = 0.0f;
     const float feintBlockedPopupDuration = 8.0f;
 
+    bool gameOverTriggered = false;
+
 public:
     GameScreen(AssetManager *assets, Game *game);
 
@@ -112,7 +114,7 @@ public:
     void drawGuidePopup();
     void drawSpaces();
     void drawPlacedFighters();
-    
+
     int getClickedSpaceId();
     void drawFogs();
     void drawActionButtons();
@@ -138,4 +140,7 @@ public:
     void drawFeintBlockedPopup();
 
     void resetPlayerPanelAnimations();
+
+    bool consumeGameOver(Hero *&outWinner);
+    void resetState();
 };

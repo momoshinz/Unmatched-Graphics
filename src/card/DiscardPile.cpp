@@ -1,6 +1,5 @@
 #include "card/DiscardPile.h"
 #include "card/Card.h"
-#include <iostream>
 #include <stdexcept>
 using namespace std;
 

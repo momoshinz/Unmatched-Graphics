@@ -25,6 +25,7 @@ bool AssetManager::load()
     loadingBackground = LoadTexture("Unmatched_Assets/loading.png");
     gameMap = LoadTexture("Unmatched_Assets/board.png");
     MainPanelBackground = LoadTexture("Unmatched_Assets/mainPanel.png");
+    winnerBackground = LoadTexture("Unmatched_Assets/loading.png");
 
     gameFont = LoadFont("Unmatched_Assets/fonts/Sweet Magic.ttf");
     titleFont = LoadFont("Unmatched_Assets/fonts/Lost Saloon.ttf");
@@ -196,6 +197,12 @@ void AssetManager::unload()
         meleeIcon = {};
     }
 
+    if (winnerBackground.id != 0)
+    {
+        UnloadTexture(winnerBackground);
+        winnerBackground = {};
+    }
+
     for (auto &[name, texture] : characterTextures)
     {
         if (texture.id != 0)
@@ -299,4 +306,9 @@ Texture2D AssetManager::getFogTexture() const
 Music AssetManager::getGameMusic() const
 {
     return gameMusic;
+}
+
+Texture2D AssetManager::getWinnerBackground() const
+{
+    return winnerBackground;
 }

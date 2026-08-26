@@ -4,7 +4,6 @@
 #include "fighter/Hero.h"
 #include "fighter/Fighter.h"
 #include "board/Board.h"
-#include <iostream>
 #include <stdexcept>
 
 using namespace std;
@@ -19,7 +18,6 @@ void MasterOfDisguise::apply(Game &game, Fighter &fighter, Fighter &target,
     }
 
     Player *myPlayer = fighter.getOwner();
-
     if (myPlayer == nullptr)
     {
         throw runtime_error("\n[!] ERROR : Fighter has NO owner!\n");
@@ -29,33 +27,17 @@ void MasterOfDisguise::apply(Game &game, Fighter &fighter, Fighter &target,
     {
         throw runtime_error("\n[!] ERROR : No opponent fighter selected!\n");
     }
-
     Fighter *selectedEnemy = choice.selectedFighter;
 
     Player *enemyOwner = selectedEnemy->getOwner();
-
     if (enemyOwner == nullptr)
     {
         throw runtime_error("Selected fighter has no owner! :<");
     }
 
     Hero *enemyHero = enemyOwner->getHero();
-
     game.getBoard().swapFighters(&fighter, enemyHero);
-
     enemyHero->takeDamage(1);
-
-    cout << "\n========================================\n";
-
-    cout << "-< Master Of Disguise >- ACTIVATED!\n";
-
-    cout << fighter.getName() << " swapped places with " << enemyHero->getName() << ".\n";
-
-    cout << enemyHero->getName() << " takes 1 damage!\n";
-
-    cout << enemyHero->getName() << "'s Health : " << enemyHero->getHealth() << "/" << enemyHero->getMaxHealth() << endl;
-
-    cout << "========================================\n";
 }
 
 EffectInputKind MasterOfDisguise::getInputKind() const

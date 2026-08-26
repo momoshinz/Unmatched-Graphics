@@ -1,6 +1,5 @@
 #include "graphics/SaveManager.h"
 #include "game/Game.h"
-
 #include <filesystem>
 #include <stdexcept>
 
@@ -33,7 +32,6 @@ vector<string> SaveManager::getSaveFiles() const
             saveFiles.push_back(entry.path().filename().string());
         }
     }
-
     return saveFiles;
 }
 
@@ -49,12 +47,10 @@ string SaveManager::createNewSaveName() const
     while (true)
     {
         string saveName = "save" + to_string(number) + ".json";
-
         if (!saveExists(saveName))
         {
             return saveName;
         }
-
         number++;
     }
 }
@@ -89,18 +85,15 @@ void SaveManager::loadGame(Game *game, const string &saveName)
     }
 
     string path = getSavePath(saveName);
-
     game->loadGame(path);
 }
 
 void SaveManager::deleteSave(const string &saveName)
 {
     string path = getSavePath(saveName);
-
     if (!saveExists(saveName))
     {
         throw runtime_error("Save file does not exist: " + saveName);
     }
-
     fs::remove(path);
 }

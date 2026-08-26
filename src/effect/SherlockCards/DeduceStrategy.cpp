@@ -3,7 +3,7 @@
 #include "fighter/Fighter.h"
 #include "board/Board.h"
 #include "card/Card.h"
-#include <iostream>
+#include <stdexcept>
 
 using namespace std;
 
@@ -17,12 +17,6 @@ void DeduceStrategy::apply(Game &game, Fighter &fighter, Fighter &target,
     }
 
     fighter.enableOpponentBoostValue();
-
-    cout << "\n========================================";
-    cout << "\n-< Deduce Strategy >- ACTIVATED!\n";
-    cout << "[+] Opponent's printed combat value is now replaced\n";
-    cout << "    by its BOOST value.\n";
-    cout << "========================================\n";
 }
 
 string DeduceStrategy::getDescription() const

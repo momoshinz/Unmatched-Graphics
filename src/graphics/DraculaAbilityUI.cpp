@@ -30,7 +30,7 @@ static Texture2D getFighterTextureForDraculaUI(AssetManager *assets, Fighter *fi
     if (name == "* Sister 3")
         return assets->getCharacter("sister3");
     if (name == "SHERLOCK HOLMES")
-        return assets->getCharacter("sherlock_art");
+        return assets->getCharacter("sherlock_transparent");
     if (name == "* Dr. Watson")
         return assets->getCharacter("drwatson");
     if (name == "INVISIBLE MAN")

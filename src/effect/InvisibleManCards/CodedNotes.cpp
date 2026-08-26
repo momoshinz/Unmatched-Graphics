@@ -4,7 +4,6 @@
 #include "card/Hand.h"
 #include "card/Deck.h"
 #include "card/Card.h"
-#include <iostream>
 #include <stdexcept>
 using namespace std;
 
@@ -23,9 +22,6 @@ void CodedNotes::apply(Game &game, Fighter &fighter, Fighter &target,
         throw runtime_error("\n[!] ERROR : Coded Notes can only be used by Invisible Man!\n");
     }
 
-    cout << "\n========================================\n";
-    cout << "-< Coded Notes >- ACTIVATED!\n";
-
     Hand &hand = player->getHand();
     Deck &deck = player->getDeck();
 
@@ -37,9 +33,7 @@ void CodedNotes::apply(Game &game, Fighter &fighter, Fighter &target,
     int idx1 = choice.selectedCardIndices[0];
     int idx2 = choice.selectedCardIndices[1];
 
-    if (idx1 < 0 || idx1 >= hand.getSize() ||
-        idx2 < 0 || idx2 >= hand.getSize() ||
-        idx1 == idx2)
+    if (idx1 < 0 || idx1 >= hand.getSize() || idx2 < 0 || idx2 >= hand.getSize() || idx1 == idx2)
     {
         throw out_of_range("\n[!] ERROR : Invalid card selection!\n");
     }
@@ -52,7 +46,6 @@ void CodedNotes::apply(Game &game, Fighter &fighter, Fighter &target,
     Card *firstCard;
     Card *secondCard;
 
-    // حذف با ایندکس بزرگ‌تر اول، تا ایندکس کوچیک‌تر جابه‌جا نشه
     if (idx1 > idx2)
     {
         firstCard = hand.removeCard(idx1);
@@ -74,9 +67,6 @@ void CodedNotes::apply(Game &game, Fighter &fighter, Fighter &target,
         deck.addToTop(firstCard);
         deck.addToTop(secondCard);
     }
-
-    cout << "\n[+] Cards placed on top of the deck successfully.\n";
-    cout << "\n========================================\n";
 }
 
 EffectInputKind CodedNotes::getInputKind() const

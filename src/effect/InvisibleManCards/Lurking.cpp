@@ -5,7 +5,6 @@
 #include "player/Player.h"
 #include "board/Board.h"
 #include "board/Space.h"
-#include <iostream>
 #include <stdexcept>
 using namespace std;
 
@@ -26,11 +25,7 @@ void Lurking::apply(Game &game, Fighter &fighter, Fighter &target,
 
     Board &board = game.getBoard();
 
-    cout << "\n========================================\n";
-    cout << "-< Lurking >- ACTIVATED!\n";
-
     player->drawCardToHand();
-    cout << "\n[+] Drew one card.\n";
 
     if (choice.selectedOptionIndex == 1)
     {
@@ -38,9 +33,7 @@ void Lurking::apply(Game &game, Fighter &fighter, Fighter &target,
         {
             throw runtime_error("\n[!] ERROR : No destination selected!\n");
         }
-
         board.moveFighter(&fighter, choice.selectedSpace);
-        cout << "\n[+] Invisible Man moved successfully.\n";
     }
     else if (choice.selectedOptionIndex == 2)
     {
@@ -64,9 +57,6 @@ void Lurking::apply(Game &game, Fighter &fighter, Fighter &target,
         }
         fog->setPosition(choice.secondSpace);
         choice.secondSpace->setFogToken(true);
-
-        cout << "\n[+] Fog moved successfully.\n";
-        cout << "\n========================================\n";
     }
     else
     {

@@ -194,6 +194,7 @@ void Game::initialize(int age1, int age2)
             olderPlayer = player1;
         }
     }
+<<<<<<< HEAD
 
     cout << "Player 1 age : "
          << player1->getAge()
@@ -237,6 +238,8 @@ void Game::initialize(int age1, int age2)
     //
     // Hero selection is handled by MainMenu
     // through the graphical interface.
+=======
+>>>>>>> 429acd6b4681f44a7ce55a11eebf7cad28606375
 }
 
 const vector<Player *> &Game::getPlayers() const
@@ -285,16 +288,6 @@ Player *Game::selectOpponent(Player &currentPlayer)
     if (opponents.size() == 1)
     {
         return opponents[0];
-    }
-
-    cout << "\n========== Choose Opponent ==========\n";
-
-    for (size_t i = 0; i < opponents.size(); i++)
-    {
-        cout << i + 1
-             << ". "
-             << opponents[i]->getHero()->getName()
-             << endl;
     }
 
     int choice;
@@ -611,7 +604,6 @@ void Game::maneuver()
             if (boostAnswer == 1)
             {
                 cout << "\n========== HAND ==========\n";
-                currentPlayer->getHand().display();
 
                 int cardIndex = 0;
 
@@ -781,9 +773,6 @@ void Game::playSchemeCard()
 
             playableSchemes.push_back(i);
 
-            cout << "\n{" << displayIndex << "}\n";
-            card->display();
-
             displayIndex++;
         }
 
@@ -921,7 +910,6 @@ void Game::attack()
     while (true)
     {
         cout << "\n========== * Attacker's Hand * ==========\n";
-        currentPlayer->getHand().display();
 
         int attackIndex;
 
@@ -994,7 +982,6 @@ void Game::attack()
             while (true)
             {
                 cout << "\n========== * Defender's Hand * ==========\n";
-                opponent->getHand().display();
 
                 int defenceIndex;
 
@@ -1049,8 +1036,6 @@ void Game::discardUntilHandLimit()
         cout << "[!] Your hand contains MORE THAN 7 cards!\n";
 
         cout << "[o] Choose one card to discard.\n";
-
-        currentPlayer->getHand().display();
 
         int choice = ui.chooseCard(*currentPlayer);
 
