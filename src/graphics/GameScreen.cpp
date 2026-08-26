@@ -42,7 +42,8 @@ GameScreen::GameScreen(AssetManager *assets, Game *game)
       schemeUI(assets),
       maneuverUI(assets),
       effectUI(assets),
-      draculaAbilityUI(assets)
+      draculaAbilityUI(assets),
+      handViewUI(assets)
 {
 }
 
@@ -54,6 +55,12 @@ int GameScreen::update()
     }
 
     Vector2 mousePosition = GetMousePosition();
+
+    if (handViewUI.isOpen())
+    {
+        handViewUI.update();
+        return 0;
+    }
 
     // =========================================
     // DRACULA START-OF-TURN ABILITY
@@ -262,6 +269,25 @@ int GameScreen::update()
             if (CheckCollisionPointRec(mousePosition, resultRevealButton))
             {
                 combatResultPopupOpen = true;
+                return 0;
+            }
+        }
+
+        if (!handViewUI.isOpen())
+        {
+            const auto &players = game->getPlayers();
+
+            if (players.size() > 0 &&
+                CheckCollisionPointRec(mousePosition, leftPlayerPanel.getShowHandButtonBounds()))
+            {
+                handViewUI.open(players[0]);
+                return 0;
+            }
+
+            if (players.size() > 1 &&
+                CheckCollisionPointRec(mousePosition, rightPlayerPanel.getShowHandButtonBounds()))
+            {
+                handViewUI.open(players[1]);
                 return 0;
             }
         }
@@ -758,50 +784,97 @@ void GameScreen::draw()
     // NORMAL GAME UI
     // ========================================================
 
+    // ========================================================
+    // NORMAL GAME UI
+    // ========================================================
+
     if (!deckEmptyPopupOpen &&
         !handLimitPopupOpen &&
         !feintBlockedPopupOpen &&
         !guideOpen)
     {
-        drawCombatEffectText();
-        drawResultRevealButton();
-        drawLookButton();
+        // ====================================================
+        // HAND VIEW
+        // ====================================================
 
-        if (!maneuverUI.isOpen() &&
-            !combatInProgress &&
-            !draculaAbilityUI.isOpen())
+        if (handViewUI.isOpen())
         {
-            drawActionButtons();
+            handViewUI.draw();
         }
-
-        if (attackUI.isOpen())
+        else
         {
-            attackUI.draw();
-        }
+            // =================================================
+            // NORMAL GAME UI
+            // =================================================
 
-        if (schemeUI.isOpen())
-        {
-            schemeUI.draw();
-        }
+            drawCombatEffectText();
+            drawResultRevealButton();
+            drawLookButton();
 
-        if (maneuverUI.isOpen())
-        {
-            maneuverUI.draw();
-        }
+            // -------------------------------------------------
+            // ACTION BUTTONS
+            // -------------------------------------------------
 
-        if (effectUI.isOpen())
-        {
-            effectUI.draw();
-        }
+            if (!maneuverUI.isOpen() &&
+                !combatInProgress &&
+                !draculaAbilityUI.isOpen())
+            {
+                drawActionButtons();
+            }
 
-        if (combatResultPopupOpen)
-        {
-            drawCombatResultPopup();
-        }
+            // -------------------------------------------------
+            // ATTACK UI
+            // -------------------------------------------------
 
-        if (draculaAbilityUI.isOpen())
-        {
-            draculaAbilityUI.draw();
+            if (attackUI.isOpen())
+            {
+                attackUI.draw();
+            }
+
+            // -------------------------------------------------
+            // SCHEME UI
+            // -------------------------------------------------
+
+            if (schemeUI.isOpen())
+            {
+                schemeUI.draw();
+            }
+
+            // -------------------------------------------------
+            // MANEUVER UI
+            // -------------------------------------------------
+
+            if (maneuverUI.isOpen())
+            {
+                maneuverUI.draw();
+            }
+
+            // -------------------------------------------------
+            // EFFECT UI
+            // -------------------------------------------------
+
+            if (effectUI.isOpen())
+            {
+                effectUI.draw();
+            }
+
+            // -------------------------------------------------
+            // COMBAT RESULT
+            // -------------------------------------------------
+
+            if (combatResultPopupOpen)
+            {
+                drawCombatResultPopup();
+            }
+
+            // -------------------------------------------------
+            // DRACULA ABILITY
+            // -------------------------------------------------
+
+            if (draculaAbilityUI.isOpen())
+            {
+                draculaAbilityUI.draw();
+            }
         }
     }
 

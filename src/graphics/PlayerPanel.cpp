@@ -439,6 +439,7 @@ void PlayerPanel::draw(const Player *player)
         {
             textAnimationFinished = true;
         }
+        drawShowHandButton(player);
         return;
     }
 
@@ -487,6 +488,7 @@ void PlayerPanel::draw(const Player *player)
     {
         textAnimationFinished = true;
     }
+    drawShowHandButton(player);
 }
 
 std::string PlayerPanel::getHeroTextureKey(const Hero *hero) const
@@ -538,4 +540,96 @@ std::string PlayerPanel::getSidekickTextureKey(const Player *player) const
         return "foggy";
     }
     return "";
+}
+
+void PlayerPanel::drawShowHandButton(const Player *player)
+{
+    if (assets == nullptr)
+    {
+        return;
+    }
+
+    Font font = assets->getGameFont();
+
+    // ========================================================
+    // SHOW HAND BUTTON SIZE
+    // ========================================================
+
+    const float buttonWidth = 136.0f;
+    const float buttonHeight = 34.0f;
+
+    showHandButtonBounds = Rectangle{
+        bounds.x + (bounds.width - buttonWidth) / 2.0f,
+        bounds.y + bounds.height - buttonHeight - 20.0f,
+        buttonWidth,
+        buttonHeight};
+
+    // ========================================================
+    // HOVER
+    // ========================================================
+
+    Vector2 mouse = GetMousePosition();
+
+    bool hovered =
+        CheckCollisionPointRec(
+            mouse,
+            showHandButtonBounds);
+
+    Color buttonColor =
+        hovered
+            ? Color{75, 60, 40, 245}
+            : Color{40, 32, 22, 235};
+
+    // ========================================================
+    // BUTTON
+    // ========================================================
+
+    DrawRectangleRounded(
+        showHandButtonBounds,
+        1.0f,
+        12,
+        buttonColor);
+
+    DrawRectangleRoundedLines(
+        showHandButtonBounds,
+        1.0f,
+        12,
+        hovered
+            ? Color{205, 165, 95, 255}
+            : Color{92, 67, 35, 255});
+
+    // ========================================================
+    // TEXT
+    // ========================================================
+
+    const char *text = "SHOW HAND";
+
+    const float fontSize = 22.0f;
+    const float textSpacing = 1.0f;
+
+    Vector2 textSize =
+        MeasureTextEx(
+            font,
+            text,
+            fontSize,
+            textSpacing);
+
+    DrawTextEx(
+        font,
+        text,
+        Vector2{
+            showHandButtonBounds.x +
+                (showHandButtonBounds.width - textSize.x) / 2.0f,
+
+            showHandButtonBounds.y +
+                (showHandButtonBounds.height - textSize.y) / 2.0f},
+
+        fontSize,
+        textSpacing,
+        WHITE);
+}
+
+Rectangle PlayerPanel::getShowHandButtonBounds() const
+{
+    return showHandButtonBounds;
 }

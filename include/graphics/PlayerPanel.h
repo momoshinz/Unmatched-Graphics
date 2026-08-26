@@ -15,14 +15,15 @@ private:
     AssetManager *assets;
     Rectangle bounds;
 
-    std::string getHeroTextureKey(
-        const Hero *hero) const;
+    std::string getHeroTextureKey(const Hero *hero) const;
 
     std::string getSidekickTextureKey(const Player *player) const;
 
     float textAnimationTimer;
     bool textAnimationFinished;
     float charRevealDelay;
+
+    Rectangle showHandButtonBounds{};
 
 public:
     PlayerPanel(AssetManager *assets);
@@ -43,6 +44,9 @@ public:
 
     void resetTextAnimation();
     bool isTextAnimationFinished() const;
+
+    Rectangle getShowHandButtonBounds() const;
+    void drawShowHandButton(const Player *player);
 };
 
 #endif

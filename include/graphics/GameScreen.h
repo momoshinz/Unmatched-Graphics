@@ -9,6 +9,7 @@
 #include "graphics/EffectUI.h"
 #include "graphics/SaveManager.h"
 #include "graphics/DraculaAbilityUI.h"
+#include "graphics/HandViewUI.h"
 
 class GameScreen
 {
@@ -21,6 +22,7 @@ private:
     EffectUI effectUI;
     Card *pendingSchemeCard = nullptr;
     DraculaAbilityUI draculaAbilityUI;
+    HandViewUI handViewUI;
 
     bool guideOpen = false;
 

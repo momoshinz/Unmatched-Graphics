@@ -123,6 +123,7 @@ set(SOURCES
     src/graphics/Transition.cpp
     src/graphics/DraculaAbilityUI.cpp
     src/graphics/WinnerUI.cpp
+    src/graphics/HandViewUI.cpp
     
     src/ui/TerminalUI.cpp
 )
