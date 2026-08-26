@@ -3,7 +3,6 @@
 #include "game/Game.h"
 #include "player/Player.h"
 #include "card/Card.h"
-#include <iostream>
 #include <stdexcept>
 using namespace std;
 
@@ -19,21 +18,14 @@ void FeintSherlock::apply(Game &game, Fighter &fighter, Fighter &target,
 
     if (opponentCard == nullptr)
     {
-        cerr << "\n[!] ERROR : Opponent has NO card to cancel.\n";
         return;
     }
 
     if (!opponentCard->hasEffect())
     {
-        cerr << "\n[!] ERROR : Opponent's card has NO effect to cancel.\n";
         return;
     }
-
     opponentCard->cancelEffects();
-    cout << "========================================";
-    cout << "\n-< feint >- ACTIVATED!\n";
-    cout << "\n[+] Effects of " << opponentCard->getName() << " have been CANCELED!\n";
-    cout << "========================================\n";
 }
 
 string FeintSherlock::getDescription() const

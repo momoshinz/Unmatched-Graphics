@@ -5,7 +5,6 @@
 #include "fighter/Fog.h"
 #include "board/Board.h"
 #include "board/Space.h"
-#include <iostream>
 #include <stdexcept>
 
 using namespace std;
@@ -20,26 +19,15 @@ void StepLightly::apply(Game &game, Fighter &fighter, Fighter &target,
         throw runtime_error("\n[!] ERROR : Fighter has NO owner!\n");
     }
 
-    cout << "\n========================================\n";
-    cout << "-< Step Lightly >- ACTIVATED!\n";
-
     if (choice.selectedFighter != nullptr)
     {
         int damage = 1;
-
         if (fighter.getPosition() != nullptr && fighter.getPosition()->hasFogToken())
         {
             damage = 3;
         }
 
         choice.selectedFighter->takeDamage(damage);
-
-        cout << "\n[+] " << choice.selectedFighter->getName()
-             << " took " << damage << " damage.\n";
-    }
-    else
-    {
-        cout << "\n[!] No adjacent enemy selected for damage.\n";
     }
 
     vector<Fog *> fogs = player->getFogs();
@@ -50,7 +38,6 @@ void StepLightly::apply(Game &game, Fighter &fighter, Fighter &target,
 
     if (choice.selectedFogId < 0 || choice.selectedFogId >= static_cast<int>(fogs.size()))
     {
-        cout << "\n[!] No Fog token selected.\n";
         return;
     }
 
@@ -58,7 +45,6 @@ void StepLightly::apply(Game &game, Fighter &fighter, Fighter &target,
 
     if (choice.secondSpace == nullptr)
     {
-        cout << "\n[!] No Fog destination selected.\n";
         return;
     }
 
@@ -69,9 +55,6 @@ void StepLightly::apply(Game &game, Fighter &fighter, Fighter &target,
 
     fog->setPosition(choice.secondSpace);
     choice.secondSpace->setFogToken(true);
-
-    cout << "\n[+] Fog moved successfully.\n";
-    cout << "\n========================================\n";
 }
 
 EffectInputKind StepLightly::getInputKind() const

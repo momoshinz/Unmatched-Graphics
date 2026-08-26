@@ -5,7 +5,6 @@
 #include "fighter/Fog.h"
 #include "board/Board.h"
 #include "board/Space.h"
-#include <iostream>
 #include <stdexcept>
 using namespace std;
 
@@ -24,12 +23,6 @@ void IntoThinAir::apply(Game &game, Fighter &fighter, Fighter &target,
         throw runtime_error("\n[!] ERROR : Into Thin Air can only be used by Invisible Man!\n");
     }
 
-    cout << "\n========================================\n";
-    cout << "-< Into Thin Air >- ACTIVATED!\n";
-
-    // نکته: جابه‌جایی Invisible Man از قبل توسط EffectUI انجام شده
-    // (برای بازخورد بصری آنی هنگام کلیک روی نقشه)
-
     vector<Fog *> fogs = player->getFogs();
     if (fogs.empty())
     {
@@ -45,7 +38,6 @@ void IntoThinAir::apply(Game &game, Fighter &fighter, Fighter &target,
 
     if (choice.secondSpace == nullptr)
     {
-        cout << "\n[!] No Fog destination selected.\n";
         return;
     }
 
@@ -55,9 +47,6 @@ void IntoThinAir::apply(Game &game, Fighter &fighter, Fighter &target,
     }
     fog->setPosition(choice.secondSpace);
     choice.secondSpace->setFogToken(true);
-
-    cout << "\n[+] Fog moved successfully.\n";
-    cout << "\n========================================\n";
 }
 
 EffectInputKind IntoThinAir::getInputKind() const

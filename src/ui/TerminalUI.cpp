@@ -520,7 +520,6 @@ void TerminalUI::clearScreen() const
 
 int TerminalUI::chooseCard(Player &player) const
 {
-    player.getHand().display();
     int choice;
     cout << "\nChoose card: ";
     cin >> choice;

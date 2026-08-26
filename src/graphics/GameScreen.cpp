@@ -873,7 +873,6 @@ void GameScreen::drawMap()
     // ROYAL CREAM MAP BORDERS
     // =====================================
 
-    
     const Color royalCream = {
         218, 204, 174, 255};
 
@@ -3454,4 +3453,137 @@ void GameScreen::resetPlayerPanelAnimations()
 {
     leftPlayerPanel.resetTextAnimation();
     rightPlayerPanel.resetTextAnimation();
+}
+
+bool GameScreen::consumeGameOver(Hero *&outWinner)
+{
+    if (gameOverTriggered || game == nullptr)
+    {
+        return false;
+    }
+
+    if (!game->isGameOver())
+    {
+        return false;
+    }
+
+    gameOverTriggered = true;
+
+    const std::vector<Player *> &players = game->getPlayers();
+
+    outWinner = nullptr;
+
+    if (players.size() == 2)
+    {
+        Hero *hero1 = players[0]->getHero();
+        Hero *hero2 = players[1]->getHero();
+
+        if (hero1 != nullptr && hero1->isAlive())
+        {
+            outWinner = hero1;
+        }
+        else if (hero2 != nullptr && hero2->isAlive())
+        {
+            outWinner = hero2;
+        }
+    }
+
+    return true;
+}
+
+void GameScreen::resetState()
+{
+    // ============================================
+    // GENERAL UI STATE
+    // ============================================
+
+    guideOpen = false;
+    selectedAction = ActionChoice::NONE;
+    pendingSchemeCard = nullptr;
+
+    // ============================================
+    // ATTACK STATE
+    // ============================================
+
+    attackPhase = AttackPhase::NONE;
+
+    attackFighter = nullptr;
+    attackTarget = nullptr;
+    selectedAttackCard = nullptr;
+
+    // ============================================
+    // COMBAT STATE
+    // ============================================
+
+    combatInProgress = false;
+    combatEffectRequested = false;
+    combatShowLookButton = false;
+
+    lookButton = Rectangle{};
+
+    combatResultPopupOpen = false;
+
+    resultRevealButton = Rectangle{};
+    resultBackButton = Rectangle{};
+
+    // ============================================
+    // DECK EMPTY POPUP
+    // ============================================
+
+    deckEmptyPopupOpen = false;
+    deckEmptyOkButton = Rectangle{};
+
+    // ============================================
+    // HAND LIMIT
+    // ============================================
+
+    handLimitPopupOpen = false;
+    handLimitPlayer = nullptr;
+
+    handLimitCards.clear();
+    handLimitCardBoxes.clear();
+
+    handLimitSelectedIndex = -1;
+
+    handLimitBurnButton = Rectangle{};
+
+    // ============================================
+    // EFFECT
+    // ============================================
+
+    pendingEffectFighter = nullptr;
+
+    // ============================================
+    // SAVE MENU
+    // ============================================
+
+    saveMenuOpen = false;
+
+    saveFiles.clear();
+    saveButtons.clear();
+
+    newSaveButton = Rectangle{};
+    saveMenuBackButton = Rectangle{};
+
+    // ============================================
+    // FEINT BLOCKED POPUP
+    // ============================================
+
+    feintBlockedPopupOpen = false;
+    feintBlockedMessage.clear();
+
+    feintBlockedOkButton = Rectangle{};
+    feintBlockedPopupTimer = 0.0f;
+
+    // ============================================
+    // GAME OVER
+    // ============================================
+
+    gameOverTriggered = false;
+
+    // ============================================
+    // PLAYER PANELS
+    // ============================================
+
+    resetPlayerPanelAnimations();
 }

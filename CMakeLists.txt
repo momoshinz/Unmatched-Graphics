@@ -122,6 +122,7 @@ set(SOURCES
     src/graphics/SaveManager.cpp
     src/graphics/Transition.cpp
     src/graphics/DraculaAbilityUI.cpp
+    src/graphics/WinnerUI.cpp
     
     src/ui/TerminalUI.cpp
 )

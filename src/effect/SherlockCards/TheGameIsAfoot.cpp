@@ -4,7 +4,6 @@
 #include "board/Space.h"
 #include "board/Board.h"
 #include "fighter/Fighter.h"
-#include <iostream>
 #include <stdexcept>
 using namespace std;
 
@@ -35,19 +34,6 @@ void TheGameIsAfoot::apply(Game &game, Fighter &fighter, Fighter &target,
     }
 
     Space *destination = choice.selectedSpace;
-
-    if (game.getBoard().moveFighter(&fighter, destination))
-    {
-        cout << "\n========================================\n";
-        cout << "-< The Game Is Afoot >- ACTIVATED!\n";
-        cout << "\n[+] " << fighter.getName() << " moved from home "
-             << currentPos->getId() << " to home " << destination->getId() << "!\n";
-        cout << "========================================\n";
-    }
-    else
-    {
-        cout << "\n[!] ERROR : FAILED to move Sherlock Holmes!\n";
-    }
 }
 
 EffectInputKind TheGameIsAfoot::getInputKind() const

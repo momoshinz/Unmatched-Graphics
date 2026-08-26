@@ -65,9 +65,6 @@ public:
     void clearTemporaryCombatValue();
     bool hasTemporaryCombatValue() const;
 
-    void display() const;
-    void printWrapped(const string &text, int width) const;
-
     static Card createFeedingFrenzy();
     static Card createBeastform();
     static Card createAmbush();

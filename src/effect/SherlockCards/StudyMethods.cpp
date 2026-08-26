@@ -3,7 +3,6 @@
 #include "player/Player.h"
 #include "fighter/Fighter.h"
 #include "card/Hand.h"
-#include <iostream>
 #include <stdexcept>
 
 using namespace std;
@@ -12,15 +11,11 @@ void StudyMethods::apply(Game &game, Fighter &fighter, Fighter &target,
                          const Card &self, Card *opponentCard, bool attackerWon,
                          const EffectChoice &choice)
 {
-    // اگه به اینجا رسیدیم یعنی shouldRequestInput از قبل تایید کرده
-    // که attackerWon == true بوده، پس دیگه لازم نیست دوباره چک کنیم.
-    // خود نمایش دست حریف رو EffectUI قبل از این apply انجام داده،
-    // پس اینجا کار خاصی لازم نیست انجام بشه.
-
-    cout << "\n========================================\n";
-    cout << "-< Study Methods >- ACTIVATED!\n";
-    cout << "[+] You looked at your opponent's hand.\n";
-    cout << "========================================\n";
+    Player *player = fighter.getOwner();
+    if (player == nullptr)
+    {
+        throw runtime_error("\n[!] ERROR : Fighter has NO owner!\n");
+    }
 }
 
 EffectInputKind StudyMethods::getInputKind() const

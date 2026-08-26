@@ -6,7 +6,7 @@
 #include "player/Player.h"
 #include "board/Board.h"
 #include "board/Space.h"
-#include <iostream>
+#include <stdexcept>
 
 using namespace std;
 
@@ -20,21 +20,18 @@ void FixedPoint::apply(Game &game, Fighter &fighter, Fighter &target,
     }
 
     Player *player = fighter.getOwner();
-
     if (player == nullptr)
     {
         throw runtime_error("\n[!] ERROR : Fighter has NO owner!\n");
     }
 
     Watson *watson = player->getWatson();
-
     if (watson == nullptr)
     {
         throw runtime_error("\n[!] ERROR : Watson NOT found!\n");
     }
 
     Hero *sherlock = player->getHero();
-
     if (sherlock == nullptr)
     {
         throw runtime_error("\n[!] ERROR : Sherlock NOT found!\n");
@@ -54,16 +51,6 @@ void FixedPoint::apply(Game &game, Fighter &fighter, Fighter &target,
     {
         watson->heal(1);
         sherlock->heal(1);
-
-        cout << "\n========================================\n";
-        cout << "-< Fixed Point >- ACTIVATED!\n";
-
-        cout << "[+] Watson and Sherlock each RECOVER +1 health!\n";
-        cout << "========================================\n";
-    }
-    else
-    {
-        cout << "\n[!] Watson is NOT adjacent to Sherlock. Effect CANCELED.\n";
     }
 }
 

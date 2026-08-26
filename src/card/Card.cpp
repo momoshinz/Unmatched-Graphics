@@ -2,9 +2,7 @@
 #include "fighter/Fighter.h"
 #include "game/Game.h"
 #include "player/Player.h"
-#include <iostream>
 #include <stdexcept>
-#include <iomanip>
 #include "effect/DraculaCards/Ambush.h"
 #include "effect/DraculaCards/BaptismOfBlood.h"
 #include "effect/DraculaCards/Beastform.h"
@@ -166,8 +164,6 @@ void Card::play(Fighter &fighter, Fighter &target, Game &game) const
     {
         throw runtime_error("\n[!] ERROR : This card cannot be played by " + fighter.getName());
     }
-    cout << "\n[.] " << fighter.getName() << " plays " << name << "!" << endl;
-    display();
 }
 
 void Card::cancelEffects()
@@ -200,163 +196,12 @@ bool Card::hasTemporaryCombatValue() const
     return temporaryCombatValue != -1;
 }
 
-void Card::printWrapped(const string &text, int width) const
-{
-    size_t start = 0;
-
-    while (start < text.size())
-    {
-        while (start < text.size() && text[start] == '\n')
-            start++;
-
-        if (start >= text.size())
-            break;
-
-        size_t end = start + width;
-
-        if (end >= text.size())
-        {
-            cout << "| "
-                 << left << setw(width)
-                 << text.substr(start)
-                 << "|\n";
-            break;
-        }
-
-        size_t newline = text.find('\n', start);
-        if (newline != string::npos && newline < end)
-        {
-            cout << "| "
-                 << left << setw(width)
-                 << text.substr(start, newline - start)
-                 << "|\n";
-
-            start = newline + 1;
-            continue;
-        }
-
-        size_t space = text.rfind(' ', end);
-
-        if (space == string::npos || space < start)
-            space = end;
-
-        cout << "| "
-             << left << setw(width)
-             << text.substr(start, space - start)
-             << "|\n";
-
-        start = space;
-
-        while (start < text.size() && text[start] == ' ')
-            start++;
-    }
-}
-
 bool Card::canBePlayedBy(const Fighter &fighter, CardType requiredType) const
 {
     if (!(isVersatile() || getCardType() == requiredType))
         return false;
 
     return isPlayableBy(fighter);
-}
-
-void Card::display() const
-{
-    const int WIDTH = 40;
-
-    auto line = [WIDTH](char c = '-')
-    {
-        cout << '+' << string(WIDTH, c) << "+\n";
-    };
-
-    auto row = [WIDTH](const string &text)
-    {
-        cout << "| "
-             << left << setw(WIDTH - 2)
-             << text
-             << "|\n";
-    };
-
-    string typeText;
-    switch (cardType)
-    {
-    case CardType::Attack:
-        typeText = "Attack";
-        break;
-
-    case CardType::Defense:
-        typeText = "Defense";
-        break;
-
-    case CardType::Versatile:
-        typeText = "Versatile";
-        break;
-
-    case CardType::Scheme:
-        typeText = "Scheme";
-        break;
-    }
-
-    string timingText;
-    switch (timing)
-    {
-    case Timing::None:
-        timingText = "None";
-        break;
-
-    case Timing::Immediately:
-        timingText = "Immediately";
-        break;
-
-    case Timing::DuringCombat:
-        timingText = "During Combat";
-        break;
-
-    case Timing::AfterCombat:
-        timingText = "After Combat";
-        break;
-    }
-
-    string ownerText;
-    switch (ownerType)
-    {
-    case OwnerType::Hero:
-        ownerText = "Hero";
-        break;
-
-    case OwnerType::Sidekick:
-        ownerText = "Sidekick";
-        break;
-
-    case OwnerType::Any:
-        ownerText = "Any";
-        break;
-    }
-
-    line();
-
-    row(name);
-
-    line();
-
-    row("Type   : " + typeText);
-    row("Amount : " + to_string(deckCount));
-    row("Value  : " + to_string(combatValue));
-    row("Boost  : " + to_string(boost));
-    row("Timing : " + timingText);
-    row("Owner  : " + ownerText);
-
-    line();
-
-    row("Effect :");
-
-    string effectText = hasEffect()
-                            ? effect->getDescription()
-                            : "None";
-
-    printWrapped(effectText, WIDTH - 2);
-
-    line();
 }
 
 Card Card::createFeedingFrenzy()

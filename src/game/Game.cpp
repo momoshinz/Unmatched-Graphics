@@ -211,57 +211,6 @@ void Game::initialize(int age1, int age2)
             olderPlayer = player1;
         }
     }
-
-    // =========================================
-    // INFORMATION
-    // =========================================
-
-    cout << "\n========================================\n";
-    cout << "         GAME INITIALIZED\n";
-    cout << "========================================\n";
-
-    cout << "Player 1 age : "
-         << player1->getAge()
-         << '\n';
-
-    cout << "Player 2 age : "
-         << player2->getAge()
-         << '\n';
-
-    if (age1 == age2)
-    {
-        cout << "\nBoth players have the same age.\n";
-
-        cout << "Player "
-             << (youngerPlayer == player1 ? "1" : "2")
-             << " was randomly selected to play first.\n";
-    }
-
-    cout << "\nFirst player : "
-         << (youngerPlayer == player1
-                 ? "Player 1"
-                 : "Player 2")
-         << '\n';
-
-    cout << "Second player : "
-         << (olderPlayer == player1
-                 ? "Player 1"
-                 : "Player 2")
-         << '\n';
-
-    cout << "========================================\n";
-
-    // =========================================
-    // IMPORTANT
-    // =========================================
-    // DO NOT:
-    // - ask for hero choice here
-    // - use cin here
-    // - create hero decks here
-    // - draw cards here
-    //
-    // Hero selection is handled by MainMenu
-    // through the graphical interface.
 }
 
 const vector<Player *> &Game::getPlayers() const
@@ -310,16 +259,6 @@ Player *Game::selectOpponent(Player &currentPlayer)
     if (opponents.size() == 1)
     {
         return opponents[0];
-    }
-
-    cout << "\n========== Choose Opponent ==========\n";
-
-    for (size_t i = 0; i < opponents.size(); i++)
-    {
-        cout << i + 1
-             << ". "
-             << opponents[i]->getHero()->getName()
-             << endl;
     }
 
     int choice;
@@ -636,7 +575,6 @@ void Game::maneuver()
             if (boostAnswer == 1)
             {
                 cout << "\n========== HAND ==========\n";
-                currentPlayer->getHand().display();
 
                 int cardIndex = 0;
 
@@ -806,9 +744,6 @@ void Game::playSchemeCard()
 
             playableSchemes.push_back(i);
 
-            cout << "\n{" << displayIndex << "}\n";
-            card->display();
-
             displayIndex++;
         }
 
@@ -946,7 +881,6 @@ void Game::attack()
     while (true)
     {
         cout << "\n========== * Attacker's Hand * ==========\n";
-        currentPlayer->getHand().display();
 
         int attackIndex;
 
@@ -1019,7 +953,6 @@ void Game::attack()
             while (true)
             {
                 cout << "\n========== * Defender's Hand * ==========\n";
-                opponent->getHand().display();
 
                 int defenceIndex;
 
@@ -1074,8 +1007,6 @@ void Game::discardUntilHandLimit()
         cout << "[!] Your hand contains MORE THAN 7 cards!\n";
 
         cout << "[o] Choose one card to discard.\n";
-
-        currentPlayer->getHand().display();
 
         int choice = ui.chooseCard(*currentPlayer);
 

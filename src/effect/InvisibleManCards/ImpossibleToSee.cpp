@@ -3,7 +3,6 @@
 #include "player/Player.h"
 #include "fighter/Fighter.h"
 #include "card/Card.h"
-#include <iostream>
 #include <stdexcept>
 using namespace std;
 
@@ -12,7 +11,6 @@ void ImpossibleToSee::apply(Game &game, Fighter &fighter, Fighter &target,
                             const EffectChoice &choice)
 {
     Player *player = fighter.getOwner();
-
     if (player == nullptr)
     {
         throw runtime_error("\n[!] ERROR : Fighter has NO owner!\n");
@@ -25,19 +23,9 @@ void ImpossibleToSee::apply(Game &game, Fighter &fighter, Fighter &target,
 
     if (opponentCard == nullptr)
     {
-        cout << "\n[!] Opponent has NO combat card.\n";
         return;
     }
-
-    cout << "\n========================================";
-    cout << "\n-< Impossible To See >- ACTIVATED!\n";
-
     opponentCard->setTemporaryCombatValue(0);
-
-    cout << "\n[+] Opponent combat value becomes 0.\n";
-    cout << "[!] Card effects are NOT canceled.\n";
-
-    cout << "\n========================================\n";
 }
 
 string ImpossibleToSee::getDescription() const

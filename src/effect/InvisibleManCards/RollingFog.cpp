@@ -5,7 +5,6 @@
 #include "fighter/Fog.h"
 #include "board/Board.h"
 #include "board/Space.h"
-#include <iostream>
 #include <stdexcept>
 using namespace std;
 
@@ -14,7 +13,6 @@ void RollingFog::apply(Game &game, Fighter &fighter, Fighter &target,
                        const EffectChoice &choice)
 {
     Player *player = fighter.getOwner();
-
     if (player == nullptr)
     {
         throw runtime_error("\n[!] ERROR : Fighter has NO owner!\n");
@@ -24,9 +22,6 @@ void RollingFog::apply(Game &game, Fighter &fighter, Fighter &target,
     {
         throw runtime_error("\n[!] ERROR : Rolling Fog can only be used by Invisible Man!\n");
     }
-
-    cout << "\n========================================";
-    cout << "\n-< Rolling Fog >- ACTIVATED!\n";
 
     vector<Fog *> fogs = player->getFogs();
 
@@ -43,7 +38,6 @@ void RollingFog::apply(Game &game, Fighter &fighter, Fighter &target,
     }
 
     Space *destination = choice.secondSpace;
-
     if (destination->hasFogToken())
     {
         throw runtime_error("\n[!] ERROR : Destination already has a Fog token!\n");
@@ -57,13 +51,7 @@ void RollingFog::apply(Game &game, Fighter &fighter, Fighter &target,
     fog->setPosition(destination);
     destination->setFogToken(true);
 
-    cout << "\n[+] Fog token moved to Home " << destination->getId() << ".\n";
-
     game.getTurnManager().addAction();
-
-    cout << "[+] Invisible Man gains 1 action.\n";
-
-    cout << "========================================\n";
 }
 
 EffectInputKind RollingFog::getInputKind() const

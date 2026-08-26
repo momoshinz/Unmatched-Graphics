@@ -17,7 +17,6 @@ Deck::~Deck()
     {
         delete card;
     }
-
     cards.clear();
 }
 
@@ -27,7 +26,6 @@ void Deck::addCard(Card *card)
     {
         throw invalid_argument("\n[!] ERROR : Card cannot be NULL!\n");
     }
-
     cards.push_back(card);
 }
 
@@ -39,9 +37,7 @@ Card *Deck::drawCard()
     }
 
     Card *topCard = cards.back();
-
     cards.pop_back();
-
     return topCard;
 }
 

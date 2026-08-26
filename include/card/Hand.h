@@ -22,7 +22,6 @@ class Hand
         int getSize() const;
 
         const vector<Card *> &getCards() const;
-        void display() const;
 };
 
 #endif

@@ -4,7 +4,6 @@
 #include "fighter/Fighter.h"
 #include "card/Card.h"
 #include "card/Hand.h"
-#include <iostream>
 #include <stdexcept>
 
 using namespace std;
@@ -19,44 +18,30 @@ void EliminateTheImpossible::apply(Game &game, Fighter &fighter, Fighter &target
     }
 
     Player *currentPlayer = fighter.getOwner();
-
     if (currentPlayer == nullptr)
     {
         throw runtime_error("\n[!] ERROR : Fighter has NO owner!\n");
     }
 
     Player *opponent = game.selectOpponent(*currentPlayer);
-
     if (opponent == nullptr)
     {
         throw runtime_error("\n[!] ERROR : NO opponent selected!\n");
     }
 
     Hand &opponentHand = opponent->getHand();
-
     if (opponentHand.isEmpty())
     {
-        cout << "\n[!] Opponent has NO cards in hand.\n";
         return;
     }
 
-    if (choice.selectedCardIndex < 0 ||
-        choice.selectedCardIndex >= opponentHand.getSize())
+    if (choice.selectedCardIndex < 0 || choice.selectedCardIndex >= opponentHand.getSize())
     {
         throw out_of_range("\n[!] ERROR : Invalid card selection!\n");
     }
 
-    cout << "\n========================================\n";
-    cout << "-< Eliminate The Impossible >- ACTIVATED!\n";
-
     Card *burnedCard = opponentHand.removeCard(choice.selectedCardIndex);
-
-    cout << "\n[-] " << burnedCard->getName() << " GOT BURNED!\n";
-
     delete burnedCard;
-
-    cout << "[+] Card removed successfully.\n";
-    cout << "========================================\n";
 }
 
 EffectInputKind EliminateTheImpossible::getInputKind() const
