@@ -748,13 +748,13 @@ void AttackUI::draw()
 
         bool noHovered = CheckCollisionPointRec(mouse, noButton);
 
-        DrawRectangleRounded(yesButton, 0.15f, 20, yesHovered ? Color{75, 75, 75, 245} : Color{35, 35, 35, 235});
+        DrawRectangleRounded(yesButton, 1.0f, 20, yesHovered ? Color{75, 75, 75, 245} : Color{35, 35, 35, 235});
 
-        DrawRectangleRoundedLines(yesButton, 0.15f, 20, yesHovered ? WHITE : Color{150, 150, 150, 255});
+        DrawRectangleRoundedLines(yesButton, 1.0f, 20, yesHovered ? WHITE : Color{150, 150, 150, 255});
 
-        DrawRectangleRounded(noButton, 0.15f, 20, noHovered ? Color{75, 75, 75, 245} : Color{35, 35, 35, 235});
+        DrawRectangleRounded(noButton, 1.0f, 20, noHovered ? Color{75, 75, 75, 245} : Color{35, 35, 35, 235});
 
-        DrawRectangleRoundedLines(noButton, 0.15f, 20, noHovered ? WHITE : Color{150, 150, 150, 255});
+        DrawRectangleRoundedLines(noButton, 1.0, 20, noHovered ? WHITE : Color{150, 150, 150, 255});
 
         const char *yesText = "YES";
 

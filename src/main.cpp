@@ -293,7 +293,7 @@ int main()
                         nextScreen = Screen::GAME;
 
                         transition.setText(
-                            "GET READY FIGHTERS . . .");
+                            "FIGHTERS, GET READY! . . .");
 
                         transition.start(
                             TransitionType::Fade,
@@ -310,7 +310,7 @@ int main()
                         nextScreen = Screen::GAME;
 
                         transition.setText(
-                            "GET READY FIGHTERS . . .");
+                            "FIGHTERS, GET READY! . . .");
 
                         transition.start(
                             TransitionType::Fade,
@@ -350,7 +350,7 @@ int main()
                             // Winner text
                             // -----------------------------------------
 
-                            transition.setText("GAME OVER");
+                            transition.setText("GAME OVER!");
 
                             nextScreen =
                                 Screen::WINNER;

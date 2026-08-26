@@ -346,9 +346,9 @@ void WinnerUI::draw()
     // ========================================================
 
     const char *subtitle =
-        "IS THE WINNER";
+        "SURVIVED THE BLOODY BATTLE";
 
-    const float subtitleFontSize = 24.0f;
+    const float subtitleFontSize = 26.0f;
     const float subtitleSpacing = 1.5f;
 
 
@@ -388,7 +388,7 @@ void WinnerUI::draw()
     const char *returnText =
         "RETURN TO MAIN MENU";
 
-    const float returnFontSize = 25.0f;
+    const float returnFontSize = 35.0f;
     const float returnSpacing = 1.5f;
 
 

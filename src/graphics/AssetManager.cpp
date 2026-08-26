@@ -25,7 +25,7 @@ bool AssetManager::load()
     loadingBackground = LoadTexture("Unmatched_Assets/loading.png");
     gameMap = LoadTexture("Unmatched_Assets/board.png");
     MainPanelBackground = LoadTexture("Unmatched_Assets/mainPanel.png");
-    winnerBackground = LoadTexture("Unmatched_Assets/loading.png");
+    winnerBackground = LoadTexture("Unmatched_Assets/gameOver.png");
 
     gameFont = LoadFont("Unmatched_Assets/fonts/Sweet Magic.ttf");
     titleFont = LoadFont("Unmatched_Assets/fonts/Lost Saloon.ttf");
@@ -33,7 +33,7 @@ bool AssetManager::load()
     guideFont = LoadFont("Unmatched_Assets/fonts/guide.TTF");
 
     gameMusic = LoadMusicStream("Unmatched_Assets/sounds/MainMusic.mp3");
-    SetMusicVolume(gameMusic, 0.5f);
+    SetMusicVolume(gameMusic, 0.6f);
     gameMusic.looping = true;
 
     characterTextures["dracula"] = LoadTexture("Unmatched_Assets/dracula/DracArtTran.png");
