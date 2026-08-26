@@ -8,14 +8,9 @@
 #include <iostream>
 #include <string>
 
-AttackUI::AttackUI(AssetManager *assets)
-    : assets(assets)
+AttackUI::AttackUI(AssetManager *assets) : assets(assets)
 {
 }
-
-// ============================================================
-// OPEN ATTACK
-// ============================================================
 
 void AttackUI::openAttack(Player *player, const std::vector<Fighter *> &fighters, Game *game)
 {
@@ -78,39 +73,22 @@ void AttackUI::openAttack(Player *player, const std::vector<Fighter *> &fighters
     const float gapX = 25.0f;
     const float gapY = 25.0f;
 
-    const float totalWidth = selectableFighters.size() * boxWidth +
-                             (selectableFighters.size() - 1) * gapX;
+    const float totalWidth = selectableFighters.size() * boxWidth + (selectableFighters.size() - 1) * gapX;
 
-    const float startX =
-        (GetScreenWidth() - totalWidth) / 2.0f;
+    const float startX = (GetScreenWidth() - totalWidth) / 2.0f;
 
     const float startY = 170.0f;
 
-    for (size_t i = 0;
-         i < selectableFighters.size();
-         i++)
+    for (size_t i = 0 ; i < selectableFighters.size(); i++)
     {
-        Rectangle box{
-            startX + i * (boxWidth + gapX),
-            startY,
-            boxWidth,
-            boxHeight};
-
+        Rectangle box{startX + i * (boxWidth + gapX), startY, boxWidth, boxHeight};
         fighterBoxes.push_back(box);
     }
     open = true;
-
-    std::cout << "Attack UI opened."
-              << std::endl;
+    std::cout << "Attack UI opened." << std::endl;
 }
 
-// ============================================================
-// GET CHARACTER TEXTURE
-// ============================================================
-
-static Texture2D getFighterTexture(
-    AssetManager *assets,
-    Fighter *fighter)
+static Texture2D getFighterTexture(AssetManager *assets, Fighter *fighter)
 {
     if (assets == nullptr ||
         fighter == nullptr)
@@ -118,21 +96,12 @@ static Texture2D getFighterTexture(
         return {};
     }
 
-    std::string name =
-        fighter->getName();
-
-    // -----------------------------
-    // Dracula
-    // -----------------------------
+    std::string name = fighter->getName();
 
     if (name == "DRACULA")
     {
         return assets->getCharacter("dracula");
     }
-
-    // -----------------------------
-    // Dracula Sisters
-    // -----------------------------
 
     if (name == "* Sister 1")
     {
@@ -149,27 +118,15 @@ static Texture2D getFighterTexture(
         return assets->getCharacter("sister3");
     }
 
-    // -----------------------------
-    // Sherlock
-    // -----------------------------
-
     if (name == "SHERLOCK HOLMES")
     {
         return assets->getCharacter("sherlock_transparent");
     }
 
-    // -----------------------------
-    // Doctor Watson
-    // -----------------------------
-
     if (name == "* Dr. Watson")
     {
         return assets->getCharacter("drwatson");
     }
-
-    // -----------------------------
-    // Invisible Man
-    // -----------------------------
 
     if (name == "INVISIBLE MAN")
     {
@@ -179,9 +136,6 @@ static Texture2D getFighterTexture(
     return {};
 }
 
-// ============================================================
-// UPDATE
-// ============================================================
 
 void AttackUI::update()
 {
@@ -199,23 +153,19 @@ void AttackUI::update()
 
     if (showError)
     {
-        Rectangle closeButton{
-            (GetScreenWidth() - 220.0f) / 2.0f,
-            350.0f,
-            220.0f,
-            60.0f};
+        Rectangle closeButton{(GetScreenWidth() - 220.0f) / 2.0f, 350.0f, 220.0f, 60.0f};
 
         if (CheckCollisionPointRec(mouse, closeButton))
         {
-            bool wasDefenseless = errorIsDefenseless; // <-- خط جدید
+            bool wasDefenseless = errorIsDefenseless;
 
             showError = false;
             errorMessage.clear();
-            errorIsDefenseless = false; // <-- خط جدید
+            errorIsDefenseless = false; 
 
             open = false;
 
-            if (wasDefenseless) // <-- بلوک جدید
+            if (wasDefenseless)
             {
                 attackConfirmed = true;
             }
@@ -226,58 +176,34 @@ void AttackUI::update()
         return;
     }
 
-    // ========================================================
-    // SELECT ATTACKER
-    // ========================================================
-
     if (phase == AttackPhase::SelectAttacker)
     {
-        for (size_t i = 0;
-             i < fighterBoxes.size();
-             i++)
+        for (size_t i = 0; i < fighterBoxes.size(); i++)
         {
-            if (CheckCollisionPointRec(
-                    mouse,
-                    fighterBoxes[i]))
+            if (CheckCollisionPointRec(mouse, fighterBoxes[i]))
             {
-                selectedAttacker =
-                    selectableFighters[i];
+                selectedAttacker = selectableFighters[i];
 
-                std::cout
-                    << "Attacker selected : "
-                    << selectedAttacker->getName()
-                    << std::endl;
-
-                // --------------------------------------------
-                // پیدا کردن کارت‌های قابل استفاده
-                // --------------------------------------------
+                std::cout << "Attacker selected : " << selectedAttacker->getName() << std::endl;
 
                 selectableAttackCards.clear();
                 attackCardBoxes.clear();
-
-                // این Player باید از openAttack ذخیره شده باشد
-                // پس player را به عنوان member در AttackUI نگه می‌داریم.
 
                 for (Card *card : attackPlayer->getHand().getCards())
                 {
                     if (card == nullptr)
                         continue;
 
-                    bool isAttackCard =
-                        card->isAttack();
+                    bool isAttackCard = card->isAttack();
 
-                    bool isVersatileCard =
-                        card->isVersatile();
+                    bool isVersatileCard = card->isVersatile();
 
-                    if (!isAttackCard &&
-                        !isVersatileCard)
+                    if (!isAttackCard && !isVersatileCard)
                     {
                         continue;
                     }
 
-                    if (!card->canBePlayedBy(
-                            *selectedAttacker,
-                            CardType::Attack))
+                    if (!card->canBePlayedBy(*selectedAttacker, CardType::Attack))
                     {
                         continue;
                     }
@@ -285,128 +211,71 @@ void AttackUI::update()
                     selectableAttackCards.push_back(card);
                 }
 
-                // --------------------------------------------
-                // اگر کارت مناسبی نداریم
-                // --------------------------------------------
-
                 if (selectableAttackCards.empty())
                 {
                     showError = true;
                     errorMessage = "THIS FIGHTER HAS NO PLAYABLE ATTACK CARD!";
-                    errorIsDefenseless = false; // <-- خط جدید
+                    errorIsDefenseless = false; 
                     return;
                 }
-
-                // --------------------------------------------
-                // محاسبه کارت‌ها
-                // --------------------------------------------
 
                 const float cardWidth = 220.0f;
                 const float cardHeight = 320.0f;
                 const float cardGap = 25.0f;
 
-                const float totalWidth =
-                    selectableAttackCards.size() * cardWidth +
+                const float totalWidth = selectableAttackCards.size() * cardWidth + 
                     (selectableAttackCards.size() - 1) * cardGap;
 
-                const float startX =
-                    (GetScreenWidth() - totalWidth) / 2.0f;
+                const float startX = (GetScreenWidth() - totalWidth) / 2.0f;
 
                 const float startY = 160.0f;
 
-                for (size_t j = 0;
-                     j < selectableAttackCards.size();
-                     j++)
+                for (size_t j = 0; j < selectableAttackCards.size(); j++)
                 {
-                    Rectangle box{
-                        startX +
-                            j * (cardWidth + cardGap),
-
-                        startY,
-
-                        cardWidth,
-                        cardHeight};
+                    Rectangle box{startX + j * (cardWidth + cardGap), startY, cardWidth, cardHeight};
 
                     attackCardBoxes.push_back(box);
                 }
 
-                // ========================================================
-                // PLAY BUTTON
-                // ========================================================
-
                 const float playWidth = 220.0f;
                 const float playHeight = 60.0f;
 
-                playButton = Rectangle{
-                    (GetScreenWidth() - playWidth) / 2.0f,
-                    startY + cardHeight + 25.0f,
-                    playWidth,
-                    playHeight};
+                playButton = Rectangle{(GetScreenWidth() - playWidth) / 2.0f, startY + cardHeight + 25.0f,
+                            playWidth, playHeight};
 
                 phase = AttackPhase::SelectAttackCard;
-
                 return;
             }
         }
     }
 
-    // ========================================================
-    // SELECT ATTACK CARD
-    // ========================================================
-
     if (phase == AttackPhase::SelectAttackCard)
     {
-        // --------------------------------------------
-        // انتخاب کارت
-        // --------------------------------------------
-
-        for (size_t i = 0;
-             i < attackCardBoxes.size();
-             i++)
+        for (size_t i = 0; i < attackCardBoxes.size(); i++)
         {
-            if (CheckCollisionPointRec(
-                    mouse,
-                    attackCardBoxes[i]))
+            if (CheckCollisionPointRec(mouse, attackCardBoxes[i]))
             {
-                selectedAttackCardIndex =
-                    static_cast<int>(i);
+                selectedAttackCardIndex = static_cast<int>(i);
 
-                std::cout
-                    << "Attack card selected: "
-                    << selectableAttackCards[i]->getName()
-                    << std::endl;
-
+                std::cout << "Attack card selected: " << selectableAttackCards[i]->getName() << std::endl;
                 return;
             }
         }
 
-        // --------------------------------------------
-        // دکمه PLAY
-        // --------------------------------------------
-
-        if (selectedAttackCardIndex != -1 &&
-            CheckCollisionPointRec(mouse, playButton))
+        if (selectedAttackCardIndex != -1 && CheckCollisionPointRec(mouse, playButton))
         {
-            selectedAttackCard =
-                selectableAttackCards[selectedAttackCardIndex];
+            selectedAttackCard = selectableAttackCards[selectedAttackCardIndex];
 
             confirmedAttackCard = true;
 
-            std::cout
-                << "Attack card confirmed: "
-                << selectedAttackCard->getName()
-                << std::endl;
-
-            // ========================================
-            // حالا Targetها را آماده می‌کنیم
-            // ========================================
+            std::cout << "Attack card confirmed: " << selectedAttackCard->getName() << std::endl;
 
             selectableTargets.clear();
             targetBoxes.clear();
 
             for (Player *other : game->getPlayers())
             {
-                if (other == nullptr || other == attackPlayer) // فقط حریف‌ها
+                if (other == nullptr || other == attackPlayer) 
                     continue;
 
                 Hero *enemyHero = other->getHero();
@@ -414,10 +283,14 @@ void AttackUI::update()
                 {
                     bool inRange = selectedAttacker->isAdjacent(enemyHero, game->getBoard());
                     if (!inRange && selectedAttacker->isRanged())
+                    {
                         inRange = selectedAttacker->isInSameZone(enemyHero, game->getBoard());
+                    }
 
                     if (inRange)
+                    {
                         selectableTargets.push_back(enemyHero);
+                    }
                 }
 
                 for (Sidekick *enemySidekick : other->getSideKicks())
@@ -427,10 +300,14 @@ void AttackUI::update()
 
                     bool inRange = selectedAttacker->isAdjacent(enemySidekick, game->getBoard());
                     if (!inRange && selectedAttacker->isRanged())
+                    {
                         inRange = selectedAttacker->isInSameZone(enemySidekick, game->getBoard());
+                    }
 
                     if (inRange)
+                    {
                         selectableTargets.push_back(enemySidekick);
+                    }
                 }
             }
 
@@ -442,35 +319,19 @@ void AttackUI::update()
                 return;
             }
 
-            // ========================================
-            // Target boxes
-            // ========================================
-
             const float boxWidth = 220.0f;
             const float boxHeight = 320.0f;
             const float gapX = 25.0f;
 
-            const float totalWidth =
-                selectableTargets.size() * boxWidth +
-                (selectableTargets.size() - 1) * gapX;
+            const float totalWidth = selectableTargets.size() * boxWidth + (selectableTargets.size() - 1) * gapX;
 
-            const float startX =
-                (GetScreenWidth() - totalWidth) / 2.0f;
+            const float startX = (GetScreenWidth() - totalWidth) / 2.0f;
 
             const float startY = 170.0f;
 
-            for (size_t j = 0;
-                 j < selectableTargets.size();
-                 j++)
+            for (size_t j = 0; j < selectableTargets.size(); j++)
             {
-                Rectangle box{
-                    startX +
-                        j * (boxWidth + gapX),
-
-                    startY,
-
-                    boxWidth,
-                    boxHeight};
+                Rectangle box{startX + j * (boxWidth + gapX), startY, boxWidth, boxHeight};
 
                 targetBoxes.push_back(box);
             }
@@ -481,31 +342,15 @@ void AttackUI::update()
         }
     }
 
-    // ========================================================
-    // SELECT TARGET
-    // ========================================================
-
     if (phase == AttackPhase::SelectTarget)
     {
-        for (size_t i = 0;
-             i < targetBoxes.size();
-             i++)
+        for (size_t i = 0; i < targetBoxes.size(); i++)
         {
-            if (CheckCollisionPointRec(
-                    mouse,
-                    targetBoxes[i]))
+            if (CheckCollisionPointRec(mouse, targetBoxes[i]))
             {
-                selectedTarget =
-                    selectableTargets[i];
+                selectedTarget = selectableTargets[i];
 
-                std::cout
-                    << "Target selected : "
-                    << selectedTarget->getName()
-                    << std::endl;
-
-                // ========================================================
-                // بعد از انتخاب Target → پرسیدن از Defender
-                // ========================================================
+                std::cout << "Target selected : " << selectedTarget->getName() << std::endl;
 
                 phase = AttackPhase::AskDefenseCard;
 
@@ -513,25 +358,12 @@ void AttackUI::update()
             }
         }
     }
-    // ========================================================
-    // ASK DEFENDER
-    // ========================================================
 
     if (phase == AttackPhase::AskDefenseCard)
     {
-        // YES
-        Rectangle yesButton{
-            GetScreenWidth() / 2.0f - 230.0f,
-            430.0f,
-            200.0f,
-            70.0f};
+        Rectangle yesButton{GetScreenWidth() / 2.0f - 230.0f, 430.0f, 200.0f, 70.0f};
 
-        // NO
-        Rectangle noButton{
-            GetScreenWidth() / 2.0f + 30.0f,
-            430.0f,
-            200.0f,
-            70.0f};
+        Rectangle noButton{GetScreenWidth() / 2.0f + 30.0f, 430.0f, 200.0f, 70.0f};
 
         if (CheckCollisionPointRec(mouse, yesButton))
         {
@@ -541,51 +373,35 @@ void AttackUI::update()
             selectableDefenseCards.clear();
             defenseCardBoxes.clear();
 
-            // --------------------------------------------
-            // پیدا کردن کارت‌های دفاعی مدافع
-            // --------------------------------------------
-
             if (selectedTarget == nullptr)
             {
-                std::cout
-                    << "[!] No defender selected."
-                    << std::endl;
-
+                std::cout << "[!] No defender selected." << std::endl;
                 open = false;
                 return;
             }
 
-            Player *defenderPlayer =
-                selectedTarget->getOwner();
+            Player *defenderPlayer = selectedTarget->getOwner();
 
             if (defenderPlayer == nullptr)
             {
-                std::cout
-                    << "[!] Defender has no owner."
-                    << std::endl;
-
+                std::cout << "[!] Defender has no owner." << std::endl;
                 open = false;
                 return;
             }
 
-            for (Card *card :
-                 defenderPlayer->getHand().getCards())
+            for (Card *card : defenderPlayer->getHand().getCards())
             {
                 if (card == nullptr)
                     continue;
 
-                bool isDefense =
-                    card->isDefense();
+                bool isDefense = card->isDefense();
 
-                bool isVersatile =
-                    card->isVersatile();
+                bool isVersatile = card->isVersatile();
 
                 if (!isDefense && !isVersatile)
                     continue;
 
-                if (!card->canBePlayedBy(
-                        *selectedTarget,
-                        CardType::Defense))
+                if (!card->canBePlayedBy(*selectedTarget, CardType::Defense))
                 {
                     continue;
                 }
@@ -593,56 +409,33 @@ void AttackUI::update()
                 selectableDefenseCards.push_back(card);
             }
 
-            // اگر مدافع کارت دفاعی قابل استفاده ندارد
             if (selectableDefenseCards.empty())
             {
                 showError = true;
                 errorMessage = "DEFENDER HAS NO PLAYABLE DEFEND CARD!";
-                errorIsDefenseless = true; // <-- خط جدید
+                errorIsDefenseless = true; 
                 return;
             }
-
-            // --------------------------------------------
-            // چیدمان کارت‌ها
-            // --------------------------------------------
 
             const float cardWidth = 220.0f;
             const float cardHeight = 320.0f;
             const float cardGap = 25.0f;
 
-            const float totalWidth =
-                selectableDefenseCards.size() * cardWidth +
+            const float totalWidth = selectableDefenseCards.size() * cardWidth +
                 (selectableDefenseCards.size() - 1) * cardGap;
 
-            const float startX =
-                (GetScreenWidth() - totalWidth) / 2.0f;
+            const float startX = (GetScreenWidth() - totalWidth) / 2.0f;
 
             const float startY = 170.0f;
 
-            for (size_t i = 0;
-                 i < selectableDefenseCards.size();
-                 i++)
+            for (size_t i = 0; i < selectableDefenseCards.size(); i++)
             {
-                Rectangle box{
-                    startX +
-                        i * (cardWidth + cardGap),
-
-                    startY,
-
-                    cardWidth,
-                    cardHeight};
-
+                Rectangle box{startX + i * (cardWidth + cardGap), startY, cardWidth, cardHeight};
                 defenseCardBoxes.push_back(box);
             }
-
             phase = AttackPhase::SelectDefenseCard;
-
             return;
         }
-
-        // --------------------------------------------
-        // NO
-        // --------------------------------------------
 
         if (CheckCollisionPointRec(mouse, noButton))
         {
@@ -651,39 +444,22 @@ void AttackUI::update()
 
             selectedDefenseCard = nullptr;
 
-            std::cout
-                << "Defender chose NOT to play a defense card."
-                << std::endl;
-
+            std::cout << "Defender chose NOT to play a defense card." << std::endl;
             open = false;
             attackConfirmed = true;
-
             return;
         }
     }
 
-    // ========================================================
-    // SELECT DEFENSE CARD
-    // ========================================================
-
     if (phase == AttackPhase::SelectDefenseCard)
     {
-        for (size_t i = 0;
-             i < defenseCardBoxes.size();
-             i++)
+        for (size_t i = 0; i < defenseCardBoxes.size(); i++)
         {
-            if (CheckCollisionPointRec(
-                    mouse,
-                    defenseCardBoxes[i]))
+            if (CheckCollisionPointRec(mouse, defenseCardBoxes[i]))
             {
-                selectedDefenseCard =
-                    selectableDefenseCards[i];
+                selectedDefenseCard = selectableDefenseCards[i];
 
-                std::cout
-                    << "Defense card selected : "
-                    << selectedDefenseCard->getName()
-                    << std::endl;
-
+                std::cout << "Defense card selected : " << selectedDefenseCard->getName() << std::endl;
                 open = false;
                 attackConfirmed = true;
 
@@ -692,10 +468,6 @@ void AttackUI::update()
         }
     }
 }
-
-// ============================================================
-// DRAW
-// ============================================================
 
 void AttackUI::draw()
 {
@@ -708,142 +480,45 @@ void AttackUI::draw()
 
     if (showError)
     {
-        DrawRectangle(
-            0,
-            0,
-            GetScreenWidth(),
-            GetScreenHeight(),
-            Color{0, 0, 0, 220});
+        DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), Color{0, 0, 0, 220});
         const float messageSize = 32.0f;
 
-        Vector2 messageSizeVec =
-            MeasureTextEx(
-                font,
-                errorMessage.c_str(),
-                messageSize,
-                2.0f);
+        Vector2 messageSizeVec = MeasureTextEx(font, errorMessage.c_str(), messageSize, 2.0f);
 
-        DrawTextEx(
-            font,
-            errorMessage.c_str(),
+        DrawTextEx(font, errorMessage.c_str(),
 
-            Vector2{
-                (GetScreenWidth() -
-                 messageSizeVec.x) /
-                    2.0f,
-                250.0f},
+            Vector2{(GetScreenWidth() - messageSizeVec.x) / 2.0f, 250.0f}, messageSize, 2.0f, WHITE);
 
-            messageSize,
-            2.0f,
-            WHITE);
+        Rectangle closeButton{(GetScreenWidth() - 220.0f) / 2.0f, 350.0f, 220.0f, 60.0f};
 
-        // ====================================================
-        // CLOSE BUTTON
-        // ====================================================
+        Vector2 mouse = GetMousePosition();
 
-        Rectangle closeButton{
-            (GetScreenWidth() - 220.0f) / 2.0f,
-            350.0f,
-            220.0f,
-            60.0f};
+        bool hovered = CheckCollisionPointRec(mouse,closeButton);
 
-        Vector2 mouse =
-            GetMousePosition();
+        DrawRectangleRounded(closeButton, 1.0f, 20, hovered ? Color{75, 75, 75, 245} : Color{35, 35, 35, 235});
 
-        bool hovered =
-            CheckCollisionPointRec(
-                mouse,
-                closeButton);
-
-        DrawRectangleRounded(
-            closeButton,
-            1.0f,
-            20,
-            hovered
-                ? Color{75, 75, 75, 245}
-                : Color{35, 35, 35, 235});
-
-        DrawRectangleRoundedLines(
-            closeButton,
-            1.0f,
-            20,
-            hovered
-                ? WHITE
-                : Color{150, 150, 150, 255});
+        DrawRectangleRoundedLines(closeButton, 1.0f, 20, hovered ? WHITE : Color{150, 150, 150, 255});
 
         const char *text = "CLOSE";
 
-        Vector2 textSize =
-            MeasureTextEx(
-                font,
-                text,
-                26.0f,
-                1.5f);
+        Vector2 textSize = MeasureTextEx(font, text, 26.0f, 1.5f);
 
-        DrawTextEx(
-            font,
-            text,
-
-            Vector2{
-                closeButton.x +
-                    (closeButton.width -
-                     textSize.x) /
-                        2.0f,
-
-                closeButton.y +
-                    (closeButton.height -
-                     textSize.y) /
-                        2.0f},
-
-            26.0f,
-            1.5f,
-            WHITE);
-
+        DrawTextEx(font, text, Vector2{closeButton.x +(closeButton.width - textSize.x) / 2.0f,
+                closeButton.y + (closeButton.height - textSize.y) / 2.0f}, 26.0f, 1.5f, WHITE);
         return;
     }
 
-    // ========================================================
-    // Dark overlay
-    // ========================================================
-
-    DrawRectangle(
-        0,
-        0,
-        GetScreenWidth(),
-        GetScreenHeight(),
-        Color{0, 0, 0, 190});
-
-    // ========================================================
-    // SELECT ATTACK CARD
-    // ========================================================
+    DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), Color{0, 0, 0, 190});
 
     if (phase == AttackPhase::SelectAttackCard)
     {
-        const char *title =
-            "CHOOSE ATTACK CARD";
+        const char *title = "CHOOSE ATTACK CARD";
 
         const float titleSize = 38.0f;
 
-        Vector2 titleMeasure =
-            MeasureTextEx(
-                font,
-                title,
-                titleSize,
-                2.0f);
+        Vector2 titleMeasure = MeasureTextEx(font, title, titleSize, 2.0f);
 
-        DrawTextEx(
-            font,
-            title,
-
-            Vector2{
-                (GetScreenWidth() -
-                 titleMeasure.x) /
-                    2.0f,
-                60.0f},
-
-            titleSize,
-            2.0f,
-            WHITE);
+        DrawTextEx(font, title, Vector2{(GetScreenWidth() - titleMeasure.x) / 2.0f, 60.0f}, titleSize, 2.0f, WHITE);
 
         Vector2 mouse = GetMousePosition();
 
@@ -853,41 +528,28 @@ void AttackUI::draw()
 
             Rectangle box = attackCardBoxes[i];
 
-            bool hovered =
-                CheckCollisionPointRec(mouse, box);
+            bool hovered = CheckCollisionPointRec(mouse, box);
 
-            bool selected =
-                (static_cast<int>(i) == selectedAttackCardIndex);
-
-            // ------------------------------------------------
-            // Card box
-            // ------------------------------------------------
+            bool selected = (static_cast<int>(i) == selectedAttackCardIndex);
 
             Color boxColor;
 
             if (selected)
+            {
                 boxColor = Color{120, 85, 40, 245};
+            }
             else if (hovered)
+            {
                 boxColor = Color{75, 75, 75, 245};
+            }
             else
+            {
                 boxColor = Color{35, 35, 35, 235};
+            }
 
-            DrawRectangleRounded(
-                box,
-                0.08f,
-                20,
-                boxColor);
-            // ------------------------------------------------
-            // Border
-            // ------------------------------------------------
+            DrawRectangleRounded(box, 0.08f, 20, boxColor);
 
-            DrawRectangleRoundedLines(
-                box,
-                0.08f,
-                20,
-                (hovered || selected)
-                    ? WHITE
-                    : Color{150, 150, 150, 255});
+            DrawRectangleRoundedLines(box, 0.08f, 20, (hovered || selected) ? WHITE : Color{150, 150, 150, 255});
 
             Texture2D texture = getCardTexture(assets, card);
 
@@ -895,70 +557,28 @@ void AttackUI::draw()
             {
                 const float padding = 14.0f;
 
-                Rectangle source{
-                    0.0f,
-                    0.0f,
-                    static_cast<float>(texture.width),
-                    static_cast<float>(texture.height)};
+                Rectangle source{0.0f,  0.0f, static_cast<float>(texture.width), static_cast<float>(texture.height)};
 
-                Rectangle destination{
-                    box.x + padding,
-                    box.y + padding,
-                    box.width - 2.0f * padding,
+                Rectangle destination{box.x + padding, box.y + padding, box.width - 2.0f * padding,
                     box.height - 65.0f};
 
-                DrawTexturePro(
-                    texture,
-                    source,
-                    destination,
-                    Vector2{0.0f, 0.0f},
-                    0.0f,
-                    WHITE);
+                DrawTexturePro(texture, source, destination, Vector2{0.0f, 0.0f}, 0.0f, WHITE);
             }
-
-            // ------------------------------------------------
-            // Card name
-            // ------------------------------------------------
 
             std::string name = card->getName();
 
             const float nameFontSize = 20.0f;
 
-            Vector2 nameSize =
-                MeasureTextEx(
-                    font,
-                    name.c_str(),
-                    nameFontSize,
-                    1.0f);
+            Vector2 nameSize = MeasureTextEx(font, name.c_str(), nameFontSize, 1.0f);
 
-            DrawTextEx(
-                font,
-                name.c_str(),
+            DrawTextEx(font, name.c_str(),
 
-                Vector2{
-                    box.x +
-                        (box.width - nameSize.x) / 2.0f,
-
-                    box.y +
-                        box.height -
-                        40.0f},
-
-                nameFontSize,
-                1.0f,
-                WHITE);
+                Vector2{box.x + (box.width - nameSize.x) / 2.0f, box.y + box.height - 40.0f}, nameFontSize, 1.0f, WHITE);
         }
 
-        // ========================================================
-        // PLAY BUTTON
-        // ========================================================
+        bool playEnabled = (selectedAttackCardIndex != -1);
 
-        bool playEnabled =
-            (selectedAttackCardIndex != -1);
-
-        bool playHovered =
-            CheckCollisionPointRec(
-                mouse,
-                playButton);
+        bool playHovered = CheckCollisionPointRec(mouse, playButton);
 
         Color playColor;
 
@@ -975,714 +595,239 @@ void AttackUI::draw()
             playColor = Color{35, 35, 35, 235};
         }
 
-        DrawRectangleRounded(
-            playButton,
-            1.0f,
-            20,
-            playColor);
+        DrawRectangleRounded(playButton, 1.0f, 20, playColor);
 
-        DrawRectangleRoundedLines(
-            playButton,
-            1.0f,
-            20,
-            playHovered
-                ? WHITE
-                : Color{150, 150, 150, 255});
+        DrawRectangleRoundedLines(playButton, 1.0f, 20, playHovered ? WHITE : Color{150, 150, 150, 255});
 
         const char *playText = "PLAY";
 
         const float playFontSize = 26.0f;
 
-        Vector2 playTextSize =
-            MeasureTextEx(
-                font,
-                playText,
-                playFontSize,
-                1.5f);
+        Vector2 playTextSize = MeasureTextEx(font, playText, playFontSize, 1.5f);
 
-        DrawTextEx(
-            font,
-            playText,
-
-            Vector2{
-                playButton.x +
-                    (playButton.width -
-                     playTextSize.x) /
-                        2.0f,
-
-                playButton.y +
-                    (playButton.height -
-                     playTextSize.y) /
-                        2.0f},
-
-            playFontSize,
-            1.5f,
-
-            playEnabled
-                ? WHITE
-                : Color{150, 150, 150, 150});
+        DrawTextEx(font, playText, Vector2{playButton.x + (playButton.width - playTextSize.x) / 2.0f,
+                playButton.y + (playButton.height - playTextSize.y) / 2.0f}, playFontSize, 1.5f,
+                playEnabled ? WHITE : Color{150, 150, 150, 150});
 
         return;
     }
 
-    // ========================================================
-    // SELECT ATTACKER
-    // ========================================================
     if (phase == AttackPhase::SelectAttacker)
     {
         const char *title = "CHOOSE YOUR ATTACKER";
 
-        const float titleSize =
-            38.0f;
+        const float titleSize = 38.0f;
 
-        Vector2 titleMeasure =
-            MeasureTextEx(
-                font,
-                title,
-                titleSize,
-                2.0f);
+        Vector2 titleMeasure = MeasureTextEx(font, title, titleSize, 2.0f);
 
-        DrawTextEx(
-            font,
-            title,
-
-            Vector2{
-                (GetScreenWidth() -
-                 titleMeasure.x) /
-                    2.0f,
-
-                70.0f},
-
-            titleSize,
-            2.0f,
-            WHITE);
+        DrawTextEx(font, title, Vector2{(GetScreenWidth() - titleMeasure.x) / 2.0f, 70.0f}, titleSize, 2.0f, WHITE);
     }
 
     if (phase == AttackPhase::SelectAttacker)
     {
-        // ========================================================
-        // Fighter boxes
-        // ========================================================
+        Vector2 mouse = GetMousePosition();
 
-        Vector2 mouse =
-            GetMousePosition();
-
-        for (size_t i = 0;
-             i < selectableFighters.size();
-             i++)
+        for (size_t i = 0; i < selectableFighters.size(); i++)
         {
-            Fighter *fighter =
-                selectableFighters[i];
+            Fighter *fighter = selectableFighters[i];
 
             if (fighter == nullptr)
             {
                 continue;
             }
 
-            Rectangle box =
-                fighterBoxes[i];
+            Rectangle box = fighterBoxes[i];
 
-            bool hovered =
-                CheckCollisionPointRec(
-                    mouse,
-                    box);
+            bool hovered = CheckCollisionPointRec(mouse, box);
 
-            Color boxColor =
-                hovered
-                    ? Color{75, 75, 75, 245}
-                    : Color{35, 35, 35, 235};
+            Color boxColor = hovered ? Color{75, 75, 75, 245} : Color{35, 35, 35, 235};
 
-            DrawRectangleRounded(
-                box,
-                0.08f,
-                20,
-                boxColor);
+            DrawRectangleRounded(box, 0.08f, 20, boxColor);
 
-            DrawRectangleRoundedLines(
-                box,
-                0.08f,
-                20,
-                hovered
-                    ? WHITE
-                    : Color{150, 150, 150, 255});
+            DrawRectangleRoundedLines(box, 0.08f, 20, hovered ? WHITE  : Color{150, 150, 150, 255});
 
-            // ----------------------------------------------------
-            // Fighter image
-            // ----------------------------------------------------
-
-            Texture2D texture =
-                getFighterTexture(
-                    assets,
-                    fighter);
+            Texture2D texture = getFighterTexture(assets, fighter);
 
             if (texture.id != 0)
             {
                 const float imagePadding = 15.0f;
 
-                Rectangle source{
-                    0.0f,
-                    0.0f,
-                    static_cast<float>(
-                        texture.width),
-                    static_cast<float>(
-                        texture.height)};
+                Rectangle source{0.0f, 0.0f, static_cast<float>( texture.width), static_cast<float>( texture.height)};
 
-                Rectangle destination{
-                    box.x + imagePadding,
-                    box.y + imagePadding,
-                    box.width -
-                        2.0f * imagePadding,
-                    220.0f};
+                Rectangle destination{box.x + imagePadding, box.y + imagePadding, box.width - 2.0f * imagePadding, 220.0f};
 
-                DrawTexturePro(
-                    texture,
-                    source,
-                    destination,
-                    Vector2{0.0f, 0.0f},
-                    0.0f,
-                    WHITE);
+                DrawTexturePro(texture, source, destination, Vector2{0.0f, 0.0f}, 0.0f, WHITE);
             }
 
-            // ----------------------------------------------------
-            // Fighter name
-            // ----------------------------------------------------
+            std::string name = fighter->getName();
 
-            std::string name =
-                fighter->getName();
+            Vector2 nameSize = MeasureTextEx(font, name.c_str(), 22.0f, 1.0f);
 
-            Vector2 nameSize =
-                MeasureTextEx(
-                    font,
-                    name.c_str(),
-                    22.0f,
-                    1.0f);
+            DrawTextEx(font, name.c_str(), Vector2{box.x + (box.width - nameSize.x) / 2.0f, box.y + 245.0f}, 22.0f, 1.0f, WHITE);
 
-            DrawTextEx(
-                font,
-                name.c_str(),
+            string healthText = "HP: " + std::to_string(fighter->getHealth());
 
-                Vector2{
-                    box.x +
-                        (box.width -
-                         nameSize.x) /
-                            2.0f,
-                    box.y + 245.0f},
+            Vector2 healthSize = MeasureTextEx(font, healthText.c_str(), 18.0f, 1.0f);
 
-                22.0f,
-                1.0f,
-                WHITE);
-
-            // ----------------------------------------------------
-            // Health
-            // ----------------------------------------------------
-
-            std::string healthText =
-                "HP: " +
-                std::to_string(
-                    fighter->getHealth());
-
-            Vector2 healthSize =
-                MeasureTextEx(
-                    font,
-                    healthText.c_str(),
-                    18.0f,
-                    1.0f);
-
-            DrawTextEx(
-                font,
-                healthText.c_str(),
-
-                Vector2{
-                    box.x +
-                        (box.width -
-                         healthSize.x) /
-                            2.0f,
-                    box.y + 270.0f},
-
-                18.0f,
-                1.0f,
-                WHITE);
+            DrawTextEx(font, healthText.c_str(), Vector2{box.x + (box.width - healthSize.x) / 2.0f, box.y + 270.0f}, 18.0f, 1.0f, WHITE);
         }
     }
-
-    // ========================================================
-    // SELECT TARGET
-    // ========================================================
 
     if (phase == AttackPhase::SelectTarget)
     {
-        const char *title =
-            "CHOOSE YOUR TARGET";
+        const char *title = "CHOOSE YOUR TARGET";
 
         const float titleSize = 38.0f;
 
-        Vector2 titleMeasure =
-            MeasureTextEx(
-                font,
-                title,
-                titleSize,
-                2.0f);
+        Vector2 titleMeasure = MeasureTextEx(font, title, titleSize, 2.0f);
 
-        DrawTextEx(
-            font,
-            title,
+        DrawTextEx(font, title, Vector2{(GetScreenWidth() - titleMeasure.x) / 2.0f, 70.0f}, titleSize, 2.0f, WHITE);
 
-            Vector2{
-                (GetScreenWidth() -
-                 titleMeasure.x) /
-                    2.0f,
-                70.0f},
+        Vector2 mouse = GetMousePosition();
 
-            titleSize,
-            2.0f,
-            WHITE);
-
-        Vector2 mouse =
-            GetMousePosition();
-
-        for (size_t i = 0;
-             i < selectableTargets.size();
-             i++)
+        for (size_t i = 0; i < selectableTargets.size(); i++)
         {
-            Fighter *fighter =
-                selectableTargets[i];
+            Fighter *fighter = selectableTargets[i];
 
-            Rectangle box =
-                targetBoxes[i];
+            Rectangle box = targetBoxes[i];
 
-            bool hovered =
-                CheckCollisionPointRec(
-                    mouse,
-                    box);
+            bool hovered = CheckCollisionPointRec(mouse, box);
 
-            Color boxColor =
-                hovered
-                    ? Color{75, 75, 75, 245}
-                    : Color{35, 35, 35, 235};
+            Color boxColor = hovered ? Color{75, 75, 75, 245} : Color{35, 35, 35, 235};
 
-            DrawRectangleRounded(
-                box,
-                0.08f,
-                20,
-                boxColor);
+            DrawRectangleRounded(box, 0.08f, 20, boxColor);
 
-            DrawRectangleRoundedLines(
-                box,
-                0.08f,
-                20,
-                hovered
-                    ? WHITE
-                    : Color{150, 150, 150, 255});
+            DrawRectangleRoundedLines(box, 0.08f, 20, hovered ? WHITE : Color{150, 150, 150, 255});
 
-            // -------------------------------
-            // Fighter image
-            // -------------------------------
-
-            Texture2D texture =
-                getFighterTexture(
-                    assets,
-                    fighter);
+            Texture2D texture = getFighterTexture(assets, fighter);
 
             if (texture.id != 0)
             {
                 const float imagePadding = 15.0f;
 
-                Rectangle source{
-                    0.0f,
-                    0.0f,
-                    static_cast<float>(texture.width),
-                    static_cast<float>(texture.height)};
+                Rectangle source{0.0f, 0.0f, static_cast<float>(texture.width), static_cast<float>(texture.height)};
 
-                Rectangle destination{
-                    box.x + imagePadding,
-                    box.y + imagePadding,
-                    box.width - 2.0f * imagePadding,
-                    220.0f};
+                Rectangle destination{box.x + imagePadding, box.y + imagePadding, box.width - 2.0f * imagePadding, 220.0f};
 
-                DrawTexturePro(
-                    texture,
-                    source,
-                    destination,
-                    Vector2{0.0f, 0.0f},
-                    0.0f,
-                    WHITE);
+                DrawTexturePro(texture, source, destination, Vector2{0.0f, 0.0f}, 0.0f, WHITE);
             }
 
-            // -------------------------------
-            // Name
-            // -------------------------------
+            string name = fighter->getName();
 
-            std::string name =
-                fighter->getName();
+            Vector2 nameSize = MeasureTextEx(font, name.c_str(), 22.0f, 1.0f);
 
-            Vector2 nameSize =
-                MeasureTextEx(
-                    font,
-                    name.c_str(),
-                    22.0f,
-                    1.0f);
+            DrawTextEx(font, name.c_str(), Vector2{box.x + (box.width - nameSize.x) / 2.0f, box.y + 245.0f}, 22.0f, 1.0f, WHITE);
 
-            DrawTextEx(
-                font,
-                name.c_str(),
+            string healthText = "HP: " + std::to_string(fighter->getHealth());
 
-                Vector2{
-                    box.x +
-                        (box.width -
-                         nameSize.x) /
-                            2.0f,
+            Vector2 healthSize = MeasureTextEx(font, healthText.c_str(), 18.0f, 1.0f);
 
-                    box.y + 245.0f},
-
-                22.0f,
-                1.0f,
-                WHITE);
-
-            // -------------------------------
-            // HP
-            // -------------------------------
-
-            std::string healthText =
-                "HP: " +
-                std::to_string(
-                    fighter->getHealth());
-
-            Vector2 healthSize =
-                MeasureTextEx(
-                    font,
-                    healthText.c_str(),
-                    18.0f,
-                    1.0f);
-
-            DrawTextEx(
-                font,
-                healthText.c_str(),
-
-                Vector2{
-                    box.x +
-                        (box.width -
-                         healthSize.x) /
-                            2.0f,
-
-                    box.y + 270.0f},
-
-                18.0f,
-                1.0f,
-                WHITE);
+            DrawTextEx(font, healthText.c_str(), Vector2{box.x + (box.width - healthSize.x) / 2.0f, box.y + 270.0f}, 18.0f, 1.0f, WHITE);
         }
 
         return;
     }
 
-    // ========================================================
-    // ASK DEFENDER
-    // ========================================================
-
     if (phase == AttackPhase::AskDefenseCard)
     {
-        const char *title =
-            "DO YOU WANT TO PLAY A DEFENSE CARD?";
+        const char *title = "DO YOU WANT TO PLAY A DEFENSE CARD?";
 
         const float titleSize = 32.0f;
 
-        Vector2 titleMeasure =
-            MeasureTextEx(
-                font,
-                title,
-                titleSize,
-                2.0f);
+        Vector2 titleMeasure = MeasureTextEx(font, title, titleSize, 2.0f);
 
-        DrawTextEx(
-            font,
-            title,
+        DrawTextEx(font, title, Vector2{(GetScreenWidth() - titleMeasure.x) / 2.0f, 180.0f}, titleSize, 2.0f, WHITE);
 
-            Vector2{
-                (GetScreenWidth() -
-                 titleMeasure.x) /
-                    2.0f,
+        Rectangle yesButton{GetScreenWidth() / 2.0f - 230.0f, 430.0f, 200.0f, 70.0f};
 
-                180.0f},
+        Rectangle noButton{GetScreenWidth() / 2.0f + 30.0f, 430.0f, 200.0f, 70.0f};
 
-            titleSize,
-            2.0f,
-            WHITE);
+        Vector2 mouse = GetMousePosition();
 
-        // ----------------------------------------------------
-        // YES
-        // ----------------------------------------------------
+        bool yesHovered = CheckCollisionPointRec(mouse, yesButton);
 
-        Rectangle yesButton{
-            GetScreenWidth() / 2.0f - 230.0f,
-            430.0f,
-            200.0f,
-            70.0f};
+        bool noHovered = CheckCollisionPointRec(mouse, noButton);
 
-        // ----------------------------------------------------
-        // NO
-        // ----------------------------------------------------
+        DrawRectangleRounded(yesButton, 0.15f, 20, yesHovered ? Color{75, 75, 75, 245} : Color{35, 35, 35, 235});
 
-        Rectangle noButton{
-            GetScreenWidth() / 2.0f + 30.0f,
-            430.0f,
-            200.0f,
-            70.0f};
+        DrawRectangleRoundedLines(yesButton, 0.15f, 20, yesHovered ? WHITE : Color{150, 150, 150, 255});
 
-        Vector2 mouse =
-            GetMousePosition();
+        DrawRectangleRounded(noButton, 0.15f, 20, noHovered ? Color{75, 75, 75, 245} : Color{35, 35, 35, 235});
 
-        bool yesHovered =
-            CheckCollisionPointRec(
-                mouse,
-                yesButton);
-
-        bool noHovered =
-            CheckCollisionPointRec(
-                mouse,
-                noButton);
-
-        DrawRectangleRounded(
-            yesButton,
-            0.15f,
-            20,
-            yesHovered
-                ? Color{75, 75, 75, 245}
-                : Color{35, 35, 35, 235});
-
-        DrawRectangleRoundedLines(
-            yesButton,
-            0.15f,
-            20,
-            yesHovered
-                ? WHITE
-                : Color{150, 150, 150, 255});
-
-        DrawRectangleRounded(
-            noButton,
-            0.15f,
-            20,
-            noHovered
-                ? Color{75, 75, 75, 245}
-                : Color{35, 35, 35, 235});
-
-        DrawRectangleRoundedLines(
-            noButton,
-            0.15f,
-            20,
-            noHovered
-                ? WHITE
-                : Color{150, 150, 150, 255});
-
-        // ----------------------------------------------------
-        // YES TEXT
-        // ----------------------------------------------------
+        DrawRectangleRoundedLines(noButton, 0.15f, 20, noHovered ? WHITE : Color{150, 150, 150, 255});
 
         const char *yesText = "YES";
 
-        Vector2 yesSize =
-            MeasureTextEx(
-                font,
-                yesText,
-                26.0f,
-                1.0f);
+        Vector2 yesSize = MeasureTextEx(font, yesText, 26.0f, 1.0f);
 
-        DrawTextEx(
-            font,
-            yesText,
-
-            Vector2{
-                yesButton.x +
-                    (yesButton.width - yesSize.x) / 2.0f,
-
-                yesButton.y +
-                    (yesButton.height - yesSize.y) / 2.0f},
-
-            26.0f,
-            1.0f,
-            WHITE);
-
-        // ----------------------------------------------------
-        // NO TEXT
-        // ----------------------------------------------------
+        DrawTextEx(font, yesText, Vector2{yesButton.x +
+                    (yesButton.width - yesSize.x) / 2.0f, yesButton.y +
+                    (yesButton.height - yesSize.y) / 2.0f}, 26.0f, 1.0f, WHITE);
 
         const char *noText = "NO";
 
-        Vector2 noSize =
-            MeasureTextEx(
-                font,
-                noText,
-                26.0f,
-                1.0f);
+        Vector2 noSize = MeasureTextEx(font, noText, 26.0f, 1.0f);
 
-        DrawTextEx(
-            font,
-            noText,
-
-            Vector2{
-                noButton.x +
-                    (noButton.width - noSize.x) / 2.0f,
-
-                noButton.y +
-                    (noButton.height - noSize.y) / 2.0f},
-
-            26.0f,
-            1.0f,
-            WHITE);
+        DrawTextEx(font, noText, Vector2{noButton.x +
+                    (noButton.width - noSize.x) / 2.0f, noButton.y +
+                    (noButton.height - noSize.y) / 2.0f}, 26.0f, 1.0f, WHITE);
 
         return;
     }
 
-    // ========================================================
-    // SELECT DEFENSE CARD
-    // ========================================================
-
     if (phase == AttackPhase::SelectDefenseCard)
     {
-        const char *title =
-            "CHOOSE DEFENSE CARD";
+        const char *title = "CHOOSE DEFENSE CARD";
 
         const float titleSize = 38.0f;
 
-        Vector2 titleMeasure =
-            MeasureTextEx(
-                font,
-                title,
-                titleSize,
-                2.0f);
+        Vector2 titleMeasure = MeasureTextEx(font, title, titleSize, 2.0f);
 
-        DrawTextEx(
-            font,
-            title,
+        DrawTextEx(font, title, Vector2{(GetScreenWidth() - titleMeasure.x) / 2.0f, 60.0f}, titleSize, 2.0f, WHITE);
 
-            Vector2{
-                (GetScreenWidth() -
-                 titleMeasure.x) /
-                    2.0f,
-                60.0f},
+        Vector2 mouse = GetMousePosition();
 
-            titleSize,
-            2.0f,
-            WHITE);
-
-        Vector2 mouse =
-            GetMousePosition();
-
-        for (size_t i = 0;
-             i < selectableDefenseCards.size();
-             i++)
+        for (size_t i = 0; i < selectableDefenseCards.size(); i++)
         {
-            Card *card =
-                selectableDefenseCards[i];
+            Card *card = selectableDefenseCards[i];
 
-            Rectangle box =
-                defenseCardBoxes[i];
+            Rectangle box = defenseCardBoxes[i];
 
-            bool hovered =
-                CheckCollisionPointRec(
-                    mouse,
-                    box);
+            bool hovered = CheckCollisionPointRec(mouse, box);
 
-            Color boxColor =
-                hovered
-                    ? Color{75, 75, 75, 245}
-                    : Color{35, 35, 35, 235};
+            Color boxColor = hovered ? Color{75, 75, 75, 245} : Color{35, 35, 35, 235};
 
-            DrawRectangleRounded(
-                box,
-                0.08f,
-                20,
-                boxColor);
+            DrawRectangleRounded( box, 0.08f, 20, boxColor);
 
-            DrawRectangleRoundedLines(
-                box,
-                0.08f,
-                20,
-                hovered
-                    ? WHITE
-                    : Color{150, 150, 150, 255});
+            DrawRectangleRoundedLines(box, 0.08f, 20, hovered ? WHITE : Color{150, 150, 150, 255});
 
-            // -----------------------------
-            // Card image
-            // -----------------------------
-
-            Texture2D texture =
-                getCardTexture(
-                    assets,
-                    card);
+            Texture2D texture = getCardTexture(assets, card);
 
             if (texture.id != 0)
             {
                 const float padding = 14.0f;
 
-                Rectangle source{
-                    0.0f,
-                    0.0f,
-                    static_cast<float>(
-                        texture.width),
-                    static_cast<float>(
-                        texture.height)};
+                Rectangle source{0.0f, 0.0f, static_cast<float>(texture.width), static_cast<float>(texture.height)};
 
-                Rectangle destination{
-                    box.x + padding,
-                    box.y + padding,
+                Rectangle destination{box.x + padding,box.y + padding, box.width - 2.0f * padding, box.height - 65.0f};
 
-                    box.width -
-                        2.0f * padding,
-
-                    box.height -
-                        65.0f};
-
-                DrawTexturePro(
-                    texture,
-                    source,
-                    destination,
-                    Vector2{0.0f, 0.0f},
-                    0.0f,
-                    WHITE);
+                DrawTexturePro(texture, source, destination, Vector2{0.0f, 0.0f}, 0.0f, WHITE);
             }
 
-            // -----------------------------
-            // Card name BELOW image
-            // -----------------------------
+            string name = card->getName();
 
-            std::string name =
-                card->getName();
+            const float nameFontSize = 20.0f;
 
-            const float nameFontSize =
-                20.0f;
+            Vector2 nameSize = MeasureTextEx(font, name.c_str(), nameFontSize, 1.0f);
 
-            Vector2 nameSize =
-                MeasureTextEx(
-                    font,
-                    name.c_str(),
-                    nameFontSize,
-                    1.0f);
-
-            DrawTextEx(
-                font,
-                name.c_str(),
-
-                Vector2{
-                    box.x +
-                        (box.width -
-                         nameSize.x) /
-                            2.0f,
-
-                    box.y +
-                        box.height -
-                        40.0f},
-
-                nameFontSize,
-                1.0f,
-                WHITE);
+            DrawTextEx(font, name.c_str(), Vector2{box.x + (box.width - nameSize.x) / 2.0f, box.y + box.height - 40.0f},
+                        nameFontSize, 1.0f,WHITE);
         }
 
         return;
     }
 }
 
-// ============================================================
-// GETTERS
-// ============================================================
 
 bool AttackUI::isOpen() const
 {
@@ -1711,9 +856,8 @@ Texture2D AttackUI::getCardTexture(AssetManager *assets, Card *card)
         return {};
     }
 
-    std::string name = card->getName();
+    string name = card->getName();
 
-    // Dracula
     if (name == "Beastform")
         return assets->getCard("BeastForm");
 
@@ -1750,7 +894,6 @@ Texture2D AttackUI::getCardTexture(AssetManager *assets, Card *card)
     if (name == "Thirst For Sustenance")
         return assets->getCard("ThirstForSustenance");
 
-    // Sherlock
     if (name == "Administer Aid")
         return assets->getCard("AdministerAid");
 
@@ -1781,7 +924,6 @@ Texture2D AttackUI::getCardTexture(AssetManager *assets, Card *card)
     if (name == "Service Revolver")
         return assets->getCard("ServiceRevolver");
 
-    // Invisible Man
     if (name == "Coded Notes")
         return assets->getCard("CodedNotes");
 
