@@ -54,18 +54,6 @@ void Ambush::apply(Game &game,
     opponent->getDiscardPile().addCard(removedCard);
 
     fighter.addTempAttackBoost(boostValue);
-
-    cout << "\n========================================";
-
-    cout << "\n-< Ambush >- ACTIVATED!\n";
-
-    cout << "[!] Opponent discarded: " << removedCard->getName() << endl;
-
-    cout << "[+] Boost value: " << boostValue << endl;
-
-    cout << "[+] Attack receives +" << boostValue << " temporary boost.\n";
-
-    cout << "========================================\n";
 }
 
 EffectInputKind Ambush::getInputKind() const

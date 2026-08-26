@@ -33,16 +33,10 @@ void BeastForm::apply(Game &game,
 
     Hand &hand = player->getHand();
 
-    cout << "\n========================================";
-    cout << "\n-< Beastform >- ACTIVATED!\n";
-
     vector<int> selectedCards = choice.selectedCardIndices;
 
     if (selectedCards.empty())
     {
-        cout << "\n[o] No cards discarded.\n";
-        cout << "[+] Attack value increased by 0.\n";
-        cout << "========================================\n";
         return;
     }
 
@@ -71,12 +65,6 @@ void BeastForm::apply(Game &game,
     }
 
     fighter.addTempAttackBoost(discarded);
-
-    cout << "\n[+] " << discarded << " card(s) discarded.\n";
-
-    cout << "[+] Attack value increased by " << discarded << ".\n";
-
-    cout << "========================================\n";
 }
 
 EffectInputKind BeastForm::getInputKind() const

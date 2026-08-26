@@ -333,11 +333,8 @@ Fighter *Game::selectTarget(Player &currentPlayer, Fighter *user)
 
     if (targets.empty())
     {
-        cout << "\n[!] NO valid target found.\n";
         return nullptr;
     }
-
-    cout << "\n==========( Choose Target )==========\n";
 
     for (size_t i = 0; i < targets.size(); i++)
     {
@@ -1700,19 +1697,10 @@ bool Game::assignHero(int playerIndex, const std::string &heroName)
         return false;
     }
 
-    // =========================================
-    // PLAYER MUST NOT ALREADY HAVE A HERO
-    // =========================================
-
     if (player->hasHero())
     {
         return false;
     }
-
-    // =========================================
-    // CHECK THAT HERO IS NOT ALREADY SELECTED
-    // BY THE OTHER PLAYER
-    // =========================================
 
     for (Player *otherPlayer : players)
     {
@@ -1734,10 +1722,6 @@ bool Game::assignHero(int playerIndex, const std::string &heroName)
             return false;
         }
     }
-
-    // =========================================
-    // CREATE HERO
-    // =========================================
 
     if (heroName == "dracula")
     {
@@ -1784,10 +1768,6 @@ void Game::startGame()
         }
     }
 
-    // =========================================
-    // CREATE DECKS
-    // =========================================
-
     for (Player *player : players)
     {
         Hero *hero = player->getHero();
@@ -1811,10 +1791,6 @@ void Game::startGame()
         }
     }
 
-    // =========================================
-    // DRAW INITIAL HAND
-    // =========================================
-
     for (Player *player : players)
     {
         if (player == nullptr)
@@ -1823,14 +1799,6 @@ void Game::startGame()
         }
 
         int drawn = player->drawCards(5);
-
-        cout << "\nPlayer: "
-             << player->getHero()->getName()
-             << " | Cards drawn: "
-             << drawn
-             << " | Hand size: "
-             << player->getHand().getSize()
-             << '\n';
     }
 }
 
@@ -1838,15 +1806,10 @@ void Game::beginTurns()
 {
     if (youngerPlayer == nullptr || olderPlayer == nullptr)
     {
-        throw std::runtime_error(
-            "\n[!] ERROR : Players not determined yet! Call initialize() first.\n");
+        throw std::runtime_error("\n[!] ERROR : Players not determined yet!\n");
     }
 
     turnManager.startGame(youngerPlayer, olderPlayer);
-
-    std::cout << "\n[+] Turn manager started. First player: "
-              << youngerPlayer->getHero()->getName()
-              << std::endl;
 }
 
 void Game::setFeintBlocked(const std::string &message)
@@ -1884,9 +1847,7 @@ void Game::resetGame()
     turnManager = TurnManager();
     combatSystem = CombatSystem();
 
-    board = Board(); // اگه Board کپی/assignment داشته باشه؛ وگرنه board.reset() یا مشابه بسازید
-
-    // اگه فلگ‌های جدیدی که با هم اضافه کردیم (مثل feintBlockedFlag) هم هست، ریست کنید:
+    board = Board(); 
     feintBlockedFlag = false;
     feintBlockedMessage.clear();
 }
