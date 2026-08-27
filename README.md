@@ -25,7 +25,7 @@ Currently implemented fighters:
 * 🌫️ The Invisible Man
 
   * **Special Ability:** The Invisible Man can use Fog to move between spaces and conceal his position, making him difficult
-  * to target and allowing for strategic movement across the battlefield.
+      to target and allowing for strategic movement across the battlefield.
 
 ## 📂 Project Structure
 ```
