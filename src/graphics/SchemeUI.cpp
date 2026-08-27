@@ -164,8 +164,7 @@ void SchemeUI::update()
         }
     }
 
-    if (selectedIndex != -1 &&
-        CheckCollisionPointRec(mouse, playButton))
+    if (selectedIndex != -1 && CheckCollisionPointRec(mouse, playButton))
     {
         confirmed = true;
         open = false;
@@ -328,8 +327,7 @@ void SchemeUI::resetConfirmed()
 
 Card *SchemeUI::getSelectedCard() const
 {
-    if (selectedIndex < 0 ||
-        selectedIndex >= static_cast<int>(selectableCards.size()))
+    if (selectedIndex < 0 || selectedIndex >= static_cast<int>(selectableCards.size()))
     {
         return nullptr;
     }
