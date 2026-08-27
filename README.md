@@ -152,7 +152,7 @@ Unmatched/
 
 ### Clone the Repository
 ```bash
-git clone https://github.com/momoshinz/Unmatched-Graphics.git
+https://github.com/momoshinz/Unmatched-Graphics.git
 cd Unmatched
 ```
 
