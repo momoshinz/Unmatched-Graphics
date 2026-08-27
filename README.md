@@ -151,9 +151,9 @@ Unmatched/
 * **Git**
 
 ### Clone the Repository
-https://github.com/momoshinz/Unmatched-Graphics.git
 ```bash
-cd Unmatched
+git clone https://github.com/momoshinz/Unmatched-Graphics.git
+cd Unmatched-Graphics
 ```
 
 ### 📦 Download Game Assets
@@ -161,7 +161,7 @@ The game requires the `Unmatched_Assets` folder to run properly.
 
 Download the assets from the following link:
 
-```text
+```bash
 https://drive.google.com/file/d/1rFYiy6056YsT2NlpfybQbjv8QEl7wZyQ/view?usp=drivesdk
 ```
 
