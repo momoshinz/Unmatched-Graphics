@@ -17,7 +17,7 @@ private:
     TurnManager turnManager;
     TerminalUI ui;
     bool isMapSetUp = false;
-    bool feintBlockedFlag = false; // for sherlock special ability
+    bool feintBlockedFlag = false; 
     std::string feintBlockedMessage;
 
 public:
@@ -64,5 +64,11 @@ public:
     void setFeintBlocked(const std::string &message);
     bool consumeFeintBlockedFlag(std::string &outMessage);
 
+<<<<<<< HEAD
     void resetGame(); // to start a new game after exiting one
 };
+=======
+    void resetGame(); 
+};
+#endif
+>>>>>>> a9073d1d4f411fb1f12484d5667471d831251d21

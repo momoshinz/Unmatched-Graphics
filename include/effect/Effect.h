@@ -11,6 +11,7 @@ using namespace std;
 
 struct EffectChoice
 {
+<<<<<<< HEAD
     Space *selectedSpace = nullptr;
     Space *secondSpace = nullptr;
     Fighter *selectedFighter = nullptr;
@@ -19,6 +20,16 @@ struct EffectChoice
     int selectedOrder = 0;
     int selectedFogId = -1;
     int selectedOptionIndex = -1;
+=======
+    Space *selectedSpace = nullptr;    
+    Space *secondSpace = nullptr;       
+    Fighter *selectedFighter = nullptr; 
+    int selectedCardIndex = -1;         
+    vector<int> selectedCardIndices;    
+    int selectedOrder = 0;              
+    int selectedFogId = -1;            
+    int selectedOptionIndex = -1;     
+>>>>>>> a9073d1d4f411fb1f12484d5667471d831251d21
 };
 
 enum class EffectInputKind
@@ -28,12 +39,21 @@ enum class EffectInputKind
     ChooseReachableSpace,
     ChooseOpponentCardToBurn,
     ChooseEnemyFighter,
+<<<<<<< HEAD
     ChooseTwoCardsAndOrder,
     ChooseFighterMoveThenFogMove,
     ChooseLurkingOption,
     ChooseFogSourceAndDestination,
     ChooseFogAndDestination,
     ChooseEnemyAndFogDestination,
+=======
+    ChooseTwoCardsAndOrder,        
+    ChooseFighterMoveThenFogMove,  
+    ChooseLurkingOption,           
+    ChooseFogSourceAndDestination, 
+    ChooseFogAndDestination,       
+    ChooseEnemyAndFogDestination,  
+>>>>>>> a9073d1d4f411fb1f12484d5667471d831251d21
     ChooseDefeatedSisterAndZoneSpace,
     ChooseCardsToDiscard,
     ChooseAnyEmptySpace,
@@ -61,8 +81,13 @@ public:
     {
         return true;
     }
+<<<<<<< HEAD
     virtual int getMoveRange() const { return 0; }
     virtual int getFogMoveRange() const { return 0; }
+=======
+    virtual int getMoveRange() const { return 0; }   
+    virtual int getFogMoveRange() const { return 0; } 
+>>>>>>> a9073d1d4f411fb1f12484d5667471d831251d21
 
     virtual string getDescription() const = 0;
     virtual Effect *clone() const = 0;
