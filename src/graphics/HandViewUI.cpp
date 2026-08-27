@@ -4,7 +4,6 @@
 #include "fighter/Hero.h"
 #include "card/Hand.h"
 #include "card/Card.h"
-
 #include <algorithm>
 #include <unordered_map>
 
@@ -25,8 +24,39 @@ std::string HandViewUI::getCardTextureKeyForHandView(const Card *card, const std
         return (heroName == "DRACULA") ? "FeintDracula" : "FeintSherlock";
     }
 
-    static const std::unordered_map<std::string, std::string> nameToKey = {
-        {"Feeding Frenzy", "FeedingFrenzy"}, {"Beastform", "BeastForm"}, {"Ambush", "Ambush"}, {"Thirst For Sustenance", "ThirstForSustenance"}, {"Look Into My Eyes", "LookIntoMyEyes"}, {"Dash", "Dash"}, {"Exploit", "Exploit"}, {"Mistform", "MistForm"}, {"Baptism Of Blood", "BaptismOfBlood"}, {"Prey Upon", "PreyUpon"}, {"Ravening Seduction", "RaveningSeduction"}, {"The Game Is Afoot", "TheGameIsAfoot"}, {"Service Revolver", "ServiceRevolver"}, {"Counter Punch", "CounterPunch"}, {"Deduce Strategy", "DeduceStrategy"}, {"Education Never Ends", "EducationNeverEnds"}, {"Fixed Point", "FixedPoint"}, {"Study Methods", "StudyMethods"}, {"Administer Aid", "AdministerAid"}, {"Eliminate The Impossible", "EliminateTheImpossible"}, {"Master Of Disguise", "MasterOfDisguise"}, {"Coded Notes", "CodedNotes"}, {"Dreaming Of Revenge", "DreamingOfRevange"}, {"Emerge From Mist", "EmergeFromMist"}, {"Impossible To See", "ImpossibleToSee"}, {"Into Thin Air", "IntoThinAir"}, {"Lurking", "Lurking"}, {"Reign Of Terror", "ReignOfTerror"}, {"Rolling Fog", "RollingFog"}, {"Slip Away", "SlipAway"}, {"Step Lightly", "StepLightly"}};
+    static const std::unordered_map<std::string, std::string> nameToKey =
+        {
+            {"Feeding Frenzy", "FeedingFrenzy"},
+            {"Beastform", "BeastForm"},
+            {"Ambush", "Ambush"},
+            {"Thirst For Sustenance", "ThirstForSustenance"},
+            {"Look Into My Eyes", "LookIntoMyEyes"},
+            {"Dash", "Dash"},
+            {"Exploit", "Exploit"},
+            {"Mistform", "MistForm"},
+            {"Baptism Of Blood", "BaptismOfBlood"},
+            {"Prey Upon", "PreyUpon"},
+            {"Ravening Seduction", "RaveningSeduction"},
+            {"The Game Is Afoot", "TheGameIsAfoot"},
+            {"Service Revolver", "ServiceRevolver"},
+            {"Counter Punch", "CounterPunch"},
+            {"Deduce Strategy", "DeduceStrategy"},
+            {"Education Never Ends", "EducationNeverEnds"},
+            {"Fixed Point", "FixedPoint"},
+            {"Study Methods", "StudyMethods"},
+            {"Administer Aid", "AdministerAid"},
+            {"Eliminate The Impossible", "EliminateTheImpossible"},
+            {"Master Of Disguise", "MasterOfDisguise"},
+            {"Coded Notes", "CodedNotes"},
+            {"Dreaming Of Revenge", "DreamingOfRevange"},
+            {"Emerge From Mist", "EmergeFromMist"},
+            {"Impossible To See", "ImpossibleToSee"},
+            {"Into Thin Air", "IntoThinAir"},
+            {"Lurking", "Lurking"},
+            {"Reign Of Terror", "ReignOfTerror"},
+            {"Rolling Fog", "RollingFog"},
+            {"Slip Away", "SlipAway"},
+            {"Step Lightly", "StepLightly"}};
 
     auto it = nameToKey.find(name);
     return (it == nameToKey.end()) ? "" : it->second;
@@ -85,11 +115,9 @@ void HandViewUI::layout()
     const float backHeight = 50.0f;
     float lastRowBottom = startY + rowCount * (boxHeight + gapY);
 
-    backButton = Rectangle{
-        (GetScreenWidth() - backWidth) / 2.0f,
-        lastRowBottom + 20.0f,
-        backWidth,
-        backHeight};
+    backButton = Rectangle{(GetScreenWidth() - backWidth) / 2.0f, lastRowBottom + 20.0f,
+                           backWidth,
+                           backHeight};
 }
 
 void HandViewUI::update()
@@ -126,30 +154,24 @@ void HandViewUI::draw()
 
     DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), Color{0, 0, 0, 190});
 
-    std::string playerLabel =
-        (player != nullptr && player->getHero() != nullptr)
-            ? player->getHero()->getName() + "'S HAND"
-            : "HAND";
+    std::string playerLabel = (player != nullptr && player->getHero() != nullptr)
+                                  ? player->getHero()->getName() + "'S HAND"
+                                  : "HAND";
 
     Vector2 titleSize = MeasureTextEx(font, playerLabel.c_str(), 32.0f, 2.0f);
 
-    DrawTextEx(
-        font, playerLabel.c_str(),
-        Vector2{(GetScreenWidth() - titleSize.x) / 2.0f, 50.0f},
-        32.0f, 2.0f, WHITE);
+    DrawTextEx(font, playerLabel.c_str(), Vector2{(GetScreenWidth() - titleSize.x) / 2.0f, 50.0f},
+               32.0f, 2.0f, WHITE);
 
-    std::string heroName =
-        (player != nullptr && player->getHero() != nullptr) ? player->getHero()->getName() : "";
+    std::string heroName = (player != nullptr && player->getHero() != nullptr) ? player->getHero()->getName() : "";
 
     if (cards.empty())
     {
         const char *emptyText = "HAND IS EMPTY";
         Vector2 emptySize = MeasureTextEx(font, emptyText, 26.0f, 1.5f);
 
-        DrawTextEx(
-            font, emptyText,
-            Vector2{(GetScreenWidth() - emptySize.x) / 2.0f, 200.0f},
-            26.0f, 1.5f, WHITE);
+        DrawTextEx(font, emptyText, Vector2{(GetScreenWidth() - emptySize.x) / 2.0f, 200.0f},
+                   26.0f, 1.5f, WHITE);
     }
 
     for (size_t i = 0; i < cards.size() && i < cardBoxes.size(); i++)
@@ -170,8 +192,11 @@ void HandViewUI::draw()
             {
                 const float padding = 12.0f;
 
-                Rectangle source{0.0f, 0.0f, static_cast<float>(texture.width), static_cast<float>(texture.height)};
-                Rectangle destination{box.x + padding, box.y + padding, box.width - 2.0f * padding, box.height - 55.0f};
+                Rectangle source{0.0f, 0.0f, static_cast<float>(texture.width),
+                                 static_cast<float>(texture.height)};
+
+                Rectangle destination{box.x + padding, box.y + padding, box.width - 2.0f * padding,
+                                      box.height - 55.0f};
 
                 DrawTexturePro(texture, source, destination, Vector2{0.0f, 0.0f}, 0.0f, WHITE);
             }
@@ -180,10 +205,9 @@ void HandViewUI::draw()
         std::string name = card->getName();
         Vector2 nameSize = MeasureTextEx(font, name.c_str(), 17.0f, 1.0f);
 
-        DrawTextEx(
-            font, name.c_str(),
-            Vector2{box.x + (box.width - nameSize.x) / 2.0f, box.y + box.height - 32.0f},
-            17.0f, 1.0f, WHITE);
+        DrawTextEx(font, name.c_str(),
+                   Vector2{box.x + (box.width - nameSize.x) / 2.0f, box.y + box.height - 32.0f},
+                   17.0f, 1.0f, WHITE);
     }
 
     bool hovered = CheckCollisionPointRec(mouse, backButton);
@@ -195,8 +219,9 @@ void HandViewUI::draw()
     const char *backText = "BACK";
     Vector2 backTextSize = MeasureTextEx(font, backText, 24.0f, 1.5f);
 
-    DrawTextEx(
-        font, backText,
-        Vector2{backButton.x + (backButton.width - backTextSize.x) / 2.0f, backButton.y + (backButton.height - backTextSize.y) / 2.0f},
-        24.0f, 1.5f, WHITE);
+    DrawTextEx(font, backText,
+               Vector2{backButton.x +
+                           (backButton.width - backTextSize.x) / 2.0f,
+                       backButton.y + (backButton.height - backTextSize.y) / 2.0f},
+               24.0f, 1.5f, WHITE);
 }

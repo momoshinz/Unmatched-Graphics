@@ -18,17 +18,13 @@ void LoadingScreen::draw()
     if (background.id != 0)
     {
         DrawTexturePro(background,
-                       Rectangle{
-                           0.0f,
-                           0.0f,
-                           static_cast<float>(background.width),
-                           static_cast<float>(background.height)},
+                       Rectangle{0.0f, 0.0f,
+                                 static_cast<float>(background.width),
+                                 static_cast<float>(background.height)},
 
-                       Rectangle{
-                           0.0f,
-                           0.0f,
-                           static_cast<float>(GetScreenWidth()),
-                           static_cast<float>(GetScreenHeight())},
+                       Rectangle{0.0f, 0.0f,
+                                 static_cast<float>(GetScreenWidth()),
+                                 static_cast<float>(GetScreenHeight())},
 
                        Vector2{0.0f, 0.0f},
 
