@@ -12,14 +12,14 @@ using namespace std;
 
 struct EffectChoice
 {
-    Space *selectedSpace = nullptr;     // خونه‌ی اصلی (حرکت فایتر یا مقصد فاگ)
-    Space *secondSpace = nullptr;       // خونه‌ی دوم (وقتی هم فایتر هم فاگ حرکت می‌کنن)
-    Fighter *selectedFighter = nullptr; // فایتر انتخاب‌شده (دشمن یا هدف)
-    int selectedCardIndex = -1;         // یک کارت از یک دست
-    vector<int> selectedCardIndices;    // چند کارت (مثل CodedNotes)
-    int selectedOrder = 0;              // ترتیب انتخابی (CodedNotes)
-    int selectedFogId = -1;             // ایندکس فاگِ انتخابی در player->getFogs()
-    int selectedOptionIndex = -1;       // انتخاب بین چند گزینه (مثل Lurking)
+    Space *selectedSpace = nullptr;    
+    Space *secondSpace = nullptr;       
+    Fighter *selectedFighter = nullptr; 
+    int selectedCardIndex = -1;         
+    vector<int> selectedCardIndices;    
+    int selectedOrder = 0;              
+    int selectedFogId = -1;            
+    int selectedOptionIndex = -1;     
 };
 
 enum class EffectInputKind
@@ -29,13 +29,13 @@ enum class EffectInputKind
     ChooseReachableSpace,
     ChooseOpponentCardToBurn,
     ChooseEnemyFighter,
-    ChooseTwoCardsAndOrder,        // CodedNotes
-    ChooseFighterMoveThenFogMove,  // IntoThinAir
-    ChooseLurkingOption,           // Lurking
-    ChooseFogSourceAndDestination, // RollingFog
-    ChooseFogAndDestination,       // SlipAway
-    ChooseEnemyAndFogDestination,   // StepLightly
-    ChooseDefeatedSisterAndZoneSpace, // Baptism Of Blood
+    ChooseTwoCardsAndOrder,        
+    ChooseFighterMoveThenFogMove,  
+    ChooseLurkingOption,           
+    ChooseFogSourceAndDestination, 
+    ChooseFogAndDestination,       
+    ChooseEnemyAndFogDestination,  
+    ChooseDefeatedSisterAndZoneSpace,
     ChooseCardsToDiscard,
     ChooseAnyEmptySpace,
     ChooseFighterAndReachableSpace,
@@ -62,8 +62,8 @@ public:
     {
         return true;
     }
-    virtual int getMoveRange() const { return 0; }    // بُرد حرکت فایتر
-    virtual int getFogMoveRange() const { return 0; } // بُرد حرکت فاگ
+    virtual int getMoveRange() const { return 0; }   
+    virtual int getFogMoveRange() const { return 0; } 
 
     virtual string getDescription() const = 0;
     virtual Effect *clone() const = 0;

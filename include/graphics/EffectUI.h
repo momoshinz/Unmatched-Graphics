@@ -34,7 +34,6 @@ private:
     std::vector<Space *> candidateSpaces;
     int fogMoveRange = 0;
 
-    // for coded notes
     std::vector<Card *> candidateCards;
     std::vector<Rectangle> cardBoxes;
     int selectedCardIndex = -1;
@@ -73,7 +72,6 @@ public:
 
     static std::string getCardTextureKey(const Card *card, const std::string &heroName);
 
-    // for any kind of effect
     void setupChooseAdjacentEmptySpace();
     void setupChooseReachableSpace();
     void setupChooseOpponentCardToBurn();

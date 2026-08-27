@@ -75,9 +75,6 @@ public:
     void resolveCombat(Game &game, Fighter &attacker, Fighter &defender,
                        Card &attackCard, Card *defenceCard);
 
-    // ---------------------------------------------
-    // API جدید (غیربلاکینگ) - برای GameScreen
-    // ---------------------------------------------
     void beginCombat(Game &game, Fighter &attacker, Fighter &defender,
                      Card &attackCard, Card *defenceCard);
 
