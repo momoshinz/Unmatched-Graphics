@@ -94,6 +94,8 @@ private:
 
     SaveManager saveManager;
 
+    bool fogForYounger;
+
 public:
     MainMenu(AssetManager *assets, Game *game);
 

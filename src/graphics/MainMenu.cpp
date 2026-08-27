@@ -34,7 +34,8 @@ MainMenu::MainMenu(AssetManager *assets, Game *game)
       placementHeroPlaced(false),
       placementStartSpace(-1),
       placementSidekickIndex(0),
-      currentFogIndex(0)
+      currentFogIndex(0),
+      fogForYounger(false)
 {
 }
 
@@ -1217,6 +1218,21 @@ bool MainMenu::placeHeroOnSpace(int spaceId)
 
     if (placement == Placement::YOUNGER_HERO)
     {
+        if (player != nullptr && !player->getFogs().empty())
+        {
+            placement = Placement::FOG;
+            fogForYounger = true;
+
+            currentFogIndex = 0;
+
+            placementHeroPlaced = false;
+            placementStartSpace = -1;
+            selectedStartSpace = -1;
+            placementSidekickIndex = 0;
+
+            return true;
+        }
+
         if (placementPlayer == 1)
         {
             placementPlayer = 2;
@@ -1238,25 +1254,10 @@ bool MainMenu::placeHeroOnSpace(int spaceId)
 
     if (placement == Placement::OLDER_HERO)
     {
-        const vector<Player *> &players = game->getPlayers();
-
-        bool hasFog = false;
-        int fogPlayer = -1;
-
-        for (int i = 0; i < static_cast<int>(players.size()); i++)
-        {
-            if (players[i] != nullptr && !players[i]->getFogs().empty())
-            {
-                hasFog = true;
-                fogPlayer = i + 1;
-                break;
-            }
-        }
-
-        if (hasFog)
+        if (player != nullptr && !player->getFogs().empty())
         {
             placement = Placement::FOG;
-            placementPlayer = fogPlayer;
+            fogForYounger = false;
 
             currentFogIndex = 0;
 
@@ -1382,6 +1383,28 @@ void MainMenu::finishPlacement()
 {
     if (placement == Placement::YOUNGER_SIDEKICKS)
     {
+        const vector<Player *> &players = game->getPlayers();
+
+        Player *currentPlayer =
+            (placementPlayer >= 1 && placementPlayer <= static_cast<int>(players.size()))
+                ? players[placementPlayer - 1]
+                : nullptr;
+
+        if (currentPlayer != nullptr && !currentPlayer->getFogs().empty())
+        {
+            placement = Placement::FOG;
+            fogForYounger = true;
+
+            currentFogIndex = 0;
+
+            placementHeroPlaced = false;
+            placementStartSpace = -1;
+            selectedStartSpace = -1;
+            placementSidekickIndex = 0;
+
+            return;
+        }
+
         if (placementPlayer == 1)
         {
             placementPlayer = 2;
@@ -1405,29 +1428,15 @@ void MainMenu::finishPlacement()
     {
         const vector<Player *> &players = game->getPlayers();
 
-        bool hasFog = false;
+        Player *currentPlayer =
+            (placementPlayer >= 1 && placementPlayer <= static_cast<int>(players.size()))
+                ? players[placementPlayer - 1]
+                : nullptr;
 
-        for (Player *player : players)
-        {
-            if (player != nullptr && !player->getFogs().empty())
-            {
-                hasFog = true;
-                break;
-            }
-        }
-
-        if (hasFog)
+        if (currentPlayer != nullptr && !currentPlayer->getFogs().empty())
         {
             placement = Placement::FOG;
-
-            for (int i = 0; i < static_cast<int>(players.size()); i++)
-            {
-                if (players[i] != nullptr && !players[i]->getFogs().empty())
-                {
-                    placementPlayer = i + 1;
-                    break;
-                }
-            }
+            fogForYounger = false;
 
             currentFogIndex = 0;
 
@@ -1452,7 +1461,25 @@ void MainMenu::finishPlacement()
 
     if (placement == Placement::FOG)
     {
-        placement = Placement::FINISHED;
+        if (fogForYounger)
+        {
+            fogForYounger = false;
+
+            if (placementPlayer == 1)
+            {
+                placementPlayer = 2;
+            }
+            else
+            {
+                placementPlayer = 1;
+            }
+
+            placement = Placement::OLDER_HERO;
+        }
+        else
+        {
+            placement = Placement::FINISHED;
+        }
 
         placementHeroPlaced = false;
         placementStartSpace = -1;
@@ -1856,13 +1883,32 @@ bool MainMenu::placeFogOnSpace(int spaceId)
 
     if (currentFogIndex >= static_cast<int>(fogs.size()))
     {
-        placement = Placement::FINISHED;
         currentFogIndex = 0;
 
         placementHeroPlaced = false;
         placementStartSpace = -1;
         selectedStartSpace = -1;
         placementSidekickIndex = 0;
+
+        if (fogForYounger)
+        {
+            fogForYounger = false;
+
+            if (placementPlayer == 1)
+            {
+                placementPlayer = 2;
+            }
+            else
+            {
+                placementPlayer = 1;
+            }
+
+            placement = Placement::OLDER_HERO;
+        }
+        else
+        {
+            placement = Placement::FINISHED;
+        }
     }
 
     return true;
