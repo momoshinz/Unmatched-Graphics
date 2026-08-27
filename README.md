@@ -143,7 +143,7 @@ Unmatched/
 * **Git / GitHub** — Version control and project collaboration
 
 
-## How to run
+## 📜 How to run
 
 ### Prerequisites
 * **C++17 Compiler**
@@ -159,7 +159,7 @@ cd Unmatched-Graphics
 ### 📦 Download Game Assets
 The game requires the `Unmatched_Assets` folder to run properly.
 
-## Download the assets from the following link:
+### Download the assets from the following link:
 https://drive.google.com/file/d/1rFYiy6056YsT2NlpfybQbjv8QEl7wZyQ/view?usp=drivesdk
 
 After downloading, extract the assets and make sure the folder 
@@ -233,9 +233,9 @@ During every turn:
 3. Trigger special abilities.
 4. Defeat the opponent's Hero to win the match.
 
-## 👨‍💻 Team Members
+## 🌧️ Team Members
 - [Mohadese Nejatbakhsh](https://github.com/momoshinz)
 - [Dina Sharifypanah](https://github.com/Dinanooo)
 
-## Repository Link
+## ✨ Repository Link
 https://github.com/momoshinz/Unmatched-Graphics.git
