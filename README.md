@@ -159,7 +159,7 @@ cd Unmatched-Graphics
 ### 📦 Download Game Assets
 The game requires the `Unmatched_Assets` folder to run properly.
 
-Download the assets from the following link:
+## Download the assets from the following link:
 https://drive.google.com/file/d/1rFYiy6056YsT2NlpfybQbjv8QEl7wZyQ/view?usp=drivesdk
 
 After downloading, extract the assets and make sure the folder 
