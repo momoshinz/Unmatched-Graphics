@@ -35,7 +35,7 @@ int main()
         return 1;
     }
 
-    LoadingScreen loadingScreen(assets, 5.0f);
+    LoadingScreen loadingScreen(assets, 20.0f);
 
     while (!WindowShouldClose() && !loadingScreen.isFinished())
     {
