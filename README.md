@@ -151,8 +151,8 @@ Unmatched/
 * **Git**
 
 ### Clone the Repository
-```bash
 https://github.com/momoshinz/Unmatched-Graphics.git
+```bash
 cd Unmatched
 ```
 
