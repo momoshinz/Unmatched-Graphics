@@ -1,5 +1,4 @@
-#ifndef MAP_COORDINATES_H
-#define MAP_COORDINATES_H
+#pragma once
 
 #include "raylib.h"
 
@@ -10,5 +9,3 @@ struct SpaceGraphic
 };
 
 extern const SpaceGraphic SPACE_GRAPHICS[32];
-
-#endif

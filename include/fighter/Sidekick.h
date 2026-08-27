@@ -1,5 +1,4 @@
-#ifndef SIDEKICK_H
-#define SIDEKICK_H
+#pragma once
 
 #include "Fighter.h"
 
@@ -14,5 +13,3 @@ class Sidekick : public Fighter
         virtual bool isAbilityImmune() const override;
         virtual bool isHero() const override;
 };
-
-#endif

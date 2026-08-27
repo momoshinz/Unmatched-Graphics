@@ -22,7 +22,6 @@ private:
 
     Rectangle playButton{};
 
-    static std::string getCardTextureKey(const Card *card);
     Rectangle backButton{};
     bool emptyMessage = false;
 
@@ -37,6 +36,7 @@ public:
     bool isConfirmed() const;
     void resetConfirmed();
     Card *getSelectedCard() const;
+    static std::string getCardTextureKey(const Card *card);
 
     void reset();
 };

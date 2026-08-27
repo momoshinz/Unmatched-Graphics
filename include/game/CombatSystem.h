@@ -1,5 +1,4 @@
-#ifndef COMBATSYSTEM_H
-#define COMBATSYSTEM_H
+#pragma once
 using namespace std;
 #include <vector>
 #include <string>
@@ -75,9 +74,6 @@ public:
     void resolveCombat(Game &game, Fighter &attacker, Fighter &defender,
                        Card &attackCard, Card *defenceCard);
 
-    // ---------------------------------------------
-    // API جدید (غیربلاکینگ) - برای GameScreen
-    // ---------------------------------------------
     void beginCombat(Game &game, Fighter &attacker, Fighter &defender,
                      Card &attackCard, Card *defenceCard);
 
@@ -105,4 +101,3 @@ public:
     bool isCombatResolved() const;
     bool canFighterPlayCard(const Fighter &fighter, const Card &card) const;
 };
-#endif

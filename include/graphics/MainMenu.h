@@ -13,15 +13,6 @@ private:
     AssetManager *assets;
     Game *game;
     Board *board;
-    
-    void drawPlayerInput(
-        Font font,
-        const char *playerTitle,
-        const std::string &name,
-        const std::string &age,
-        bool enteringName,
-        bool enteringAge,
-        const char *buttonText);
 
     enum class State
     {
@@ -67,9 +58,6 @@ private:
     bool enteringName;
     bool enteringAge;
 
-    bool isPlayer1Complete() const;
-    bool isPlayer2Complete() const;
-
     enum class HeroSelectionPlayer
     {
         PLAYER_1,
@@ -84,20 +72,21 @@ private:
     bool player1HeroSelected;
     bool player2HeroSelected;
 
-    void drawHeroSelection(Font font);
-
-    float getMapScale() const;
-
-    Vector2 getMapPosition() const;
-
-    Vector2 mapImageToScreen(Vector2 imagePosition) const;
-
     SaveManager saveManager;
 
     bool fogForYounger;
 
 public:
     MainMenu(AssetManager *assets, Game *game);
+
+    void drawPlayerInput(
+        Font font,
+        const char *playerTitle,
+        const std::string &name,
+        const std::string &age,
+        bool enteringName,
+        bool enteringAge,
+        const char *buttonText);
 
     void update();
     void draw();
@@ -108,9 +97,7 @@ public:
 
     void startHeroSelection();
 
-    void drawHeroTexture(
-        Texture2D texture,
-        Rectangle box);
+    void drawHeroTexture(Texture2D texture, Rectangle box);
 
     void drawCenteredText(
         Font font,
@@ -120,7 +107,15 @@ public:
         float width,
         float fontSize);
 
+    bool isPlayer1Complete() const;
+    bool isPlayer2Complete() const;
+
+    void drawHeroSelection(Font font);
     void selectHero(const std::string &hero);
+
+    float getMapScale() const;
+    Vector2 getMapPosition() const;
+    Vector2 mapImageToScreen(Vector2 imagePosition) const;
 
     bool bothHeroesSelected() const;
 

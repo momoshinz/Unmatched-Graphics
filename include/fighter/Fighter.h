@@ -1,5 +1,4 @@
-#ifndef FIGHTER_H
-#define FIGHTER_H
+#pragma once
 #include <string>
 #include "utils/Types.h"
 
@@ -64,4 +63,3 @@ public:
 
     void setHealth(int health);
 };
-#endif

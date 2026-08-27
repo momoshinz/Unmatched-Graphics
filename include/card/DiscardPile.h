@@ -1,5 +1,4 @@
-#ifndef DISCARDPILE_H
-#define DISCARDPILE_H
+#pragma once
 #include <vector>
 
 using namespace std;
@@ -21,5 +20,3 @@ class DiscardPile
 
         const vector<Card *> &getCards() const;
 };
-
-#endif

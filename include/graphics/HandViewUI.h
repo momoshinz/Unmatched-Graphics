@@ -10,16 +10,6 @@ class Card;
 
 class HandViewUI
 {
-public:
-    explicit HandViewUI(AssetManager *assets);
-
-    void open(Player *player);
-    void update();
-    void draw();
-
-    bool isOpen() const;
-    void close();
-
 private:
     AssetManager *assets;
     bool open_ = false;
@@ -30,6 +20,17 @@ private:
     std::vector<Rectangle> cardBoxes;
     Rectangle backButton{};
 
-    static std::string getCardTextureKeyForHandView(const Card *card, const std::string &heroName);
+public:
+    explicit HandViewUI(AssetManager *assets);
+
+    void open(Player *player);
+    void update();
+    void draw();
+
+    bool isOpen() const;
+    void close();
+
     void layout();
+
+    static std::string getCardTextureKeyForHandView(const Card *card, const std::string &heroName);
 };

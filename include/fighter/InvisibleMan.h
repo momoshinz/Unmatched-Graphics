@@ -1,5 +1,4 @@
-#ifndef INVISIBLEMAN_H
-#define INVISIBLEMAN_H
+#pragma once
 using namespace std;
 #include "Hero.h"
 
@@ -11,5 +10,3 @@ public:
     bool isOnFog() const;
     bool canTeleport() const;
 };
-
-#endif

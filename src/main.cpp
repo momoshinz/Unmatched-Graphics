@@ -12,8 +12,8 @@
 
 int main()
 {
-    const int screenWidth = 1338;
-    const int screenHeight = 738;
+    const int screenWidth = 1630;
+    const int screenHeight = 930;
 
     InitWindow(screenWidth, screenHeight, "UNMATCHED");
     InitAudioDevice();
@@ -172,7 +172,7 @@ int main()
                         {
                             pendingWinnerHero = winnerHero;
                             winnerTransitionStarted = true;
-                            transition.setText("GAME OVER!");
+                            transition.setText("GAME OVER !");
 
                             nextScreen = Screen::WINNER;
 

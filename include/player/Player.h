@@ -1,5 +1,4 @@
-#ifndef PLAYER_H
-#define PLAYER_H
+#pragma once
 using namespace std;
 #include <vector>
 #include <string>
@@ -55,4 +54,3 @@ public:
     bool hasPlayableCard(const Fighter &fighter, CardType requiredType) const;
     bool consumeDeckEmptyFlag(); // we need a signal when deck is empty
 };
-#endif

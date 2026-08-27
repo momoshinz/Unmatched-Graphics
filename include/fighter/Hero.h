@@ -1,5 +1,4 @@
-#ifndef HERO_H
-#define HERO_H
+#pragma once
 
 #include "Fighter.h"
 #include <string>
@@ -27,5 +26,3 @@ class Hero : public Fighter
         virtual bool isAbilityImmune() const override; 
         virtual bool isHero() const override;
 };
-
-#endif

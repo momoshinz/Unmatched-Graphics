@@ -1,5 +1,4 @@
-#ifndef BOARD_H
-#define BOARD_H
+#pragma once
 #include <vector>
 #include "Space.h"
 #include "fighter/Fog.h"
@@ -38,4 +37,3 @@ public:
     void addFogConnections(Fighter *fighter, Space *current, vector<Space *> &nextSpaces) const;
     vector<Space*> getAvailableFogMoves(Fog* fog, int maxstep) const;
 };
-#endif

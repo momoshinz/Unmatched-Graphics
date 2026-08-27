@@ -1,5 +1,4 @@
-#ifndef SHERLOCK_H
-#define SHERLOCK_H
+#pragma once
 
 #include "Hero.h"
 #include "game/Game.h"
@@ -15,5 +14,3 @@ class Sherlock : public Hero
         virtual void useAbility(Game& game, Player &player) override;
         virtual bool isAbilityImmune() const override;
 };
-
-#endif

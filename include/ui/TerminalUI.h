@@ -1,5 +1,4 @@
-#ifndef TERMINALUI_H
-#define TERMINALUI_H
+#pragma once
 #include <string>
 #include <vector>
 using namespace std;
@@ -20,18 +19,10 @@ class TerminalUI
 private:
     static constexpr int INFO_WIDTH = 38;
     vector<CellPosition> homePositions;
-    void drawHomes(vector<string> &canvas) const;
 
 public:
     TerminalUI();
     ~TerminalUI() = default;
    
     string getAttackTypeString(Fighter *fighter) const;
-
-    void showCombatResult(const Fighter &attacker,
-                          const Fighter &defender,
-                          int damage) const;
-
 };
-
-#endif

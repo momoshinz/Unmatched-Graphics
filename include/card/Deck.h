@@ -1,5 +1,4 @@
-#ifndef DECK_H
-#define DECK_H
+#pragma once
 #include <vector>
 
 using namespace std;
@@ -31,5 +30,3 @@ class Deck
 
         void addToTop(Card* card);
 };
-
-#endif

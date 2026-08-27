@@ -1,5 +1,4 @@
-#ifndef FOG_H
-#define FOG_H
+#pragma once
 #include "Sidekick.h"
 
 
@@ -16,5 +15,3 @@ class Fog
         Space* getPosition() const;
         void setPosition(Space* space);
 };
-
-#endif

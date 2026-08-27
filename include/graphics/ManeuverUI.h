@@ -45,8 +45,6 @@ private:
     bool waitingForMoves = false;
     bool readyToFinalize = false;
 
-    static std::string getCardTextureKey(const Card *card, const std::string &heroName);
-
 public:
     explicit ManeuverUI(AssetManager *assets);
 
@@ -64,6 +62,7 @@ public:
 
     Fighter *getSelectedFighter() const;
     const std::vector<Space *> &getAvailableMoves() const;
+    static std::string getCardTextureKey(const Card *card, const std::string &heroName);
 
     void layoutAskButtons();
     void layoutFighterSelection();

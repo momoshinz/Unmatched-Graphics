@@ -19,15 +19,6 @@ enum class DraculaAbilityState
 
 class DraculaAbilityUI
 {
-public:
-    explicit DraculaAbilityUI(AssetManager *assets);
-
-    void open(Game *game, Hero *dracula, Player *player);
-    void update();
-    void draw();
-
-    bool isOpen() const;
-    bool consumeFinished();
 
 private:
     AssetManager *assets;
@@ -48,9 +39,20 @@ private:
     std::vector<Rectangle> fighterBoxes;
     int selectedIndex = -1;
 
+public:
+    explicit DraculaAbilityUI(AssetManager *assets);
+
+    void open(Game *game, Hero *dracula, Player *player);
+    void update();
+    void draw();
+
+    bool isOpen() const;
+    bool consumeFinished();
+
     void layoutAskButtons();
     void layoutNoTargetMessage();
     void layoutTargetSelection();
 
     void applyAbility(Fighter *target);
+
 };

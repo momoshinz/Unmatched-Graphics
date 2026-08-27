@@ -1,5 +1,4 @@
-#ifndef GAME_H
-#define GAME_H
+#pragma once
 #include "board/Board.h"
 #include "player/Player.h"
 #include "CombatSystem.h"
@@ -67,4 +66,3 @@ public:
 
     void resetGame(); // to start a new game after exiting one
 };
-#endif

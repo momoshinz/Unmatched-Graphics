@@ -1,5 +1,4 @@
-#ifndef SISTERS_H
-#define SISTERS_H
+#pragma once
 #include "Sidekick.h"
 #include <string>
 using namespace std;
@@ -15,4 +14,3 @@ class Sisters : public Sidekick
         int getID() const;
         bool isSister() const override;
 };
-#endif

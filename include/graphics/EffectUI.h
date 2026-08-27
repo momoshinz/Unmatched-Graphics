@@ -73,7 +73,7 @@ public:
 
     static std::string getCardTextureKey(const Card *card, const std::string &heroName);
 
-    // for any kind of effect
+    // for any type of effect
     void setupChooseAdjacentEmptySpace();
     void setupChooseReachableSpace();
     void setupChooseOpponentCardToBurn();

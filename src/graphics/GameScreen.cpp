@@ -26,8 +26,39 @@ static std::string getCardTextureKeyForHandLimit(const Card *card, const std::st
     {
         return (heroName == "DRACULA") ? "FeintDracula" : "FeintSherlock";
     }
-    static const std::unordered_map<std::string, std::string> nameToKey = {
-        {"Feeding Frenzy", "FeedingFrenzy"}, {"Beastform", "BeastForm"}, {"Ambush", "Ambush"}, {"Thirst For Sustenance", "ThirstForSustenance"}, {"Look Into My Eyes", "LookIntoMyEyes"}, {"Dash", "Dash"}, {"Exploit", "Exploit"}, {"Mistform", "MistForm"}, {"Baptism Of Blood", "BaptismOfBlood"}, {"Prey Upon", "PreyUpon"}, {"Ravening Seduction", "RaveningSeduction"}, {"The Game Is Afoot", "TheGameIsAfoot"}, {"Service Revolver", "ServiceRevolver"}, {"Counter Punch", "CounterPunch"}, {"Deduce Strategy", "DeduceStrategy"}, {"Education Never Ends", "EducationNeverEnds"}, {"Fixed Point", "FixedPoint"}, {"Study Methods", "StudyMethods"}, {"Administer Aid", "AdministerAid"}, {"Eliminate The Impossible", "EliminateTheImpossible"}, {"Master Of Disguise", "MasterOfDisguise"}, {"Coded Notes", "CodedNotes"}, {"Dreaming Of Revenge", "DreamingOfRevange"}, {"Emerge From Mist", "EmergeFromMist"}, {"Impossible To See", "ImpossibleToSee"}, {"Into Thin Air", "IntoThinAir"}, {"Lurking", "Lurking"}, {"Reign Of Terror", "ReignOfTerror"}, {"Rolling Fog", "RollingFog"}, {"Slip Away", "SlipAway"}, {"Step Lightly", "StepLightly"}};
+    static const std::unordered_map<std::string, std::string> nameToKey =
+        {
+            {"Feeding Frenzy", "FeedingFrenzy"},
+            {"Beastform", "BeastForm"},
+            {"Ambush", "Ambush"},
+            {"Thirst For Sustenance", "ThirstForSustenance"},
+            {"Look Into My Eyes", "LookIntoMyEyes"},
+            {"Dash", "Dash"},
+            {"Exploit", "Exploit"},
+            {"Mistform", "MistForm"},
+            {"Baptism Of Blood", "BaptismOfBlood"},
+            {"Prey Upon", "PreyUpon"},
+            {"Ravening Seduction", "RaveningSeduction"},
+            {"The Game Is Afoot", "TheGameIsAfoot"},
+            {"Service Revolver", "ServiceRevolver"},
+            {"Counter Punch", "CounterPunch"},
+            {"Deduce Strategy", "DeduceStrategy"},
+            {"Education Never Ends", "EducationNeverEnds"},
+            {"Fixed Point", "FixedPoint"},
+            {"Study Methods", "StudyMethods"},
+            {"Administer Aid", "AdministerAid"},
+            {"Eliminate The Impossible", "EliminateTheImpossible"},
+            {"Master Of Disguise", "MasterOfDisguise"},
+            {"Coded Notes", "CodedNotes"},
+            {"Dreaming Of Revenge", "DreamingOfRevange"},
+            {"Emerge From Mist", "EmergeFromMist"},
+            {"Impossible To See", "ImpossibleToSee"},
+            {"Into Thin Air", "IntoThinAir"},
+            {"Lurking", "Lurking"},
+            {"Reign Of Terror", "ReignOfTerror"},
+            {"Rolling Fog", "RollingFog"},
+            {"Slip Away", "SlipAway"},
+            {"Step Lightly", "StepLightly"}};
 
     auto it = nameToKey.find(name);
     return (it == nameToKey.end()) ? "" : it->second;
@@ -62,11 +93,7 @@ int GameScreen::update()
         return 0;
     }
 
-    // =========================================
-    // DRACULA START-OF-TURN ABILITY
-    // =========================================
-
-    // needs to be first due to the priority it has
+    // needs to be here due to the priority it has
     if (!guideOpen && !draculaAbilityUI.isOpen() && game->getTurnManager().getTurnJustStarted())
     {
         if (game->getTurnManager().consumeTurnStart())
@@ -102,15 +129,6 @@ int GameScreen::update()
         draculaAbilityUI.update();
     }
 
-    if (draculaAbilityUI.consumeFinished())
-    {
-        std::cout << "[.] Dracula ability phase finished." << std::endl;
-    }
-
-    // =========================================
-    // Button dimensions
-    // =========================================
-
     const float buttonWidth = 145.0f;
     const float buttonHeight = 48.0f;
     const float buttonGap = 15.0f;
@@ -122,9 +140,7 @@ int GameScreen::update()
     const float buttonY = 12.0f;
 
     Rectangle exitButton{startX, buttonY, buttonWidth, buttonHeight};
-
     Rectangle saveButton{startX + buttonWidth + buttonGap, buttonY, buttonWidth, buttonHeight};
-
     Rectangle guideButton{startX + 2.0f * (buttonWidth + buttonGap),
                           buttonY,
                           buttonWidth,
@@ -161,10 +177,6 @@ int GameScreen::update()
         }
         return 0;
     }
-
-    // =========================================
-    // Mouse click
-    // =========================================
 
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
     {
@@ -206,9 +218,6 @@ int GameScreen::update()
             }
             return 0;
         }
-        // =========================================
-        // DECK EMPTY POPUP (بالاترین اولویت)
-        // =========================================
 
         if (deckEmptyPopupOpen)
         {
@@ -218,18 +227,11 @@ int GameScreen::update()
             }
             return 0;
         }
-        // =========================================
-        // EXIT
-        // =========================================
 
         if (CheckCollisionPointRec(mousePosition, exitButton))
         {
             return 1;
         }
-
-        // =========================================
-        // SAVE GAME
-        // =========================================
 
         if (CheckCollisionPointRec(mousePosition, saveButton))
         {
@@ -238,15 +240,11 @@ int GameScreen::update()
             return 0;
         }
 
-        // =========================================
-        // GUIDE
-        // =========================================
-
         if (CheckCollisionPointRec(mousePosition, guideButton))
         {
             guideOpen = true;
 
-            // بستن تمام UIهای موقتی بازی
+            // temporarily closing all actions when the guide window gets opened
             attackUI.reset();
             schemeUI.resetConfirmed();
             maneuverUI.reset();
@@ -258,13 +256,7 @@ int GameScreen::update()
             return 0;
         }
 
-        // =========================================
-        // COMBAT RESULT REVEAL
-        // =========================================
-
-        if (combatInProgress &&
-            !combatResultPopupOpen &&
-            game->getCombatSystem().isAwaitingResultReveal())
+        if (combatInProgress && !combatResultPopupOpen && game->getCombatSystem().isAwaitingResultReveal())
         {
             if (CheckCollisionPointRec(mousePosition, resultRevealButton))
             {
@@ -292,16 +284,11 @@ int GameScreen::update()
             }
         }
 
-        // =========================================
-        // ACTION BUTTONS (فقط وقتی مانور باز نیست)
-        // =========================================
-
         if (!maneuverUI.isOpen() && !draculaAbilityUI.isOpen() && !combatInProgress)
         {
             if (CheckCollisionPointRec(mousePosition, attackButton))
             {
                 selectedAction = ActionChoice::ATTACK;
-                std::cout << "Selected Action: ATTACK" << std::endl;
                 Player *currentPlayer = game->getTurnManager().getCurrentPlayer();
 
                 if (currentPlayer != nullptr)
@@ -315,7 +302,6 @@ int GameScreen::update()
                     }
 
                     std::vector<Sidekick *> sidekicks = currentPlayer->getSideKicks();
-
                     for (Sidekick *sidekick : sidekicks)
                     {
                         if (sidekick != nullptr && sidekick->isAlive())
@@ -335,8 +321,6 @@ int GameScreen::update()
             {
                 selectedAction = ActionChoice::MANEUVER;
 
-                std::cout << "Selected Action: MANEUVER" << std::endl;
-
                 Player *currentPlayer = game->getTurnManager().getCurrentPlayer();
 
                 if (currentPlayer != nullptr)
@@ -351,8 +335,6 @@ int GameScreen::update()
             if (CheckCollisionPointRec(mousePosition, schemeButton))
             {
                 selectedAction = ActionChoice::SCHEME;
-
-                std::cout << "Selected Action: SCHEME" << std::endl;
 
                 Player *currentPlayer = game->getTurnManager().getCurrentPlayer();
 
@@ -392,15 +374,9 @@ int GameScreen::update()
             return 0;
         }
 
-        // =========================================
-        // MAP SPACE CLICK
-        // =========================================
         int clickedSpaceId = getClickedSpaceId();
-
         if (clickedSpaceId != -1)
         {
-            std::cout << "Clicked Space: " << clickedSpaceId << std::endl;
-
             if (maneuverUI.isSelectingSpace())
             {
                 for (Space *space : maneuverUI.getAvailableMoves())
@@ -417,11 +393,8 @@ int GameScreen::update()
             if (effectUI.isChoosingSpace())
             {
                 Space *clickedSpace = game->getBoard().getSpace(clickedSpaceId);
-
                 if (clickedSpace != nullptr)
                 {
-                    std::cout << "[+] Effect destination clicked: Space " << clickedSpace->getId() << std::endl;
-
                     effectUI.selectSpace(clickedSpace);
 
                     if (effectUI.isReady() && combatInProgress && combatEffectRequested)
@@ -434,7 +407,7 @@ int GameScreen::update()
                 }
             }
         }
-    } // <-- پایان if (IsMouseButtonPressed(...))
+    }
 
     if (combatInProgress)
     {
@@ -443,10 +416,8 @@ int GameScreen::update()
         if (combatSystem.isWaitingForEffectInput() && !combatEffectRequested)
         {
             Effect *pending = combatSystem.getPendingEffect();
-
             if (pending != nullptr && pending->getInputKind() == EffectInputKind::ShowOpponentHand)
             {
-                // به‌جای باز کردن خودکار، دکمه‌ی LOOK رو نشون بده
                 combatShowLookButton = true;
             }
             else
@@ -481,9 +452,7 @@ int GameScreen::update()
             if (currentPlayer != nullptr)
             {
                 Hand &attackerHand = currentPlayer->getHand();
-
                 const std::vector<Card *> &attackerCards = attackerHand.getCards();
-
                 for (int i = 0; i < static_cast<int>(attackerCards.size()); i++)
                 {
                     if (attackerCards[i] == chosenAttackCard)
@@ -497,9 +466,7 @@ int GameScreen::update()
             if (chosenDefenseCard != nullptr && defenderPlayer != nullptr)
             {
                 Hand &defenderHand = defenderPlayer->getHand();
-
                 const std::vector<Card *> &defenderCards = defenderHand.getCards();
-
                 for (int i = 0; i < static_cast<int>(defenderCards.size()); i++)
                 {
                     if (defenderCards[i] == chosenDefenseCard)
@@ -512,8 +479,7 @@ int GameScreen::update()
 
             if (removedAttackCard != nullptr)
             {
-                game->getCombatSystem().beginCombat(*game, *chosenAttacker, *chosenTarget,
-                                                    *removedAttackCard,
+                game->getCombatSystem().beginCombat(*game, *chosenAttacker, *chosenTarget, *removedAttackCard,
                                                     removedDefenceCard);
 
                 combatInProgress = true;
@@ -531,39 +497,28 @@ int GameScreen::update()
     if (schemeUI.isConfirmed())
     {
         Card *playedCard = schemeUI.getSelectedCard();
-
         if (playedCard != nullptr)
         {
             Player *currentPlayer = game->getTurnManager().getCurrentPlayer();
-
             if (currentPlayer != nullptr)
             {
                 Effect *effect = playedCard->getEffect();
-
                 if (effect == nullptr || effect->getInputKind() == EffectInputKind::None)
                 {
-                    // خودکار: مستقیم اجرا کن
                     if (effect != nullptr)
                     {
                         EffectChoice emptyChoice;
-                        effect->apply(*game, *currentPlayer->getHero(),
-                                      *currentPlayer->getHero(), *playedCard,
-                                      nullptr, false, emptyChoice);
+                        effect->apply(*game, *currentPlayer->getHero(), *currentPlayer->getHero(),
+                                      *playedCard, nullptr, false, emptyChoice);
                     }
 
                     finalizeSchemeCard(playedCard);
 
                     game->getTurnManager().useAction();
-
-                    std::cout << "[.] Actions remaining: "
-                              << game->getTurnManager().getRemainingActions()
-                              << std::endl;
-
                     checkAndEndTurnIfNeeded();
                 }
                 else
                 {
-                    // <<<< دقیقاً همینجا، به‌جای else فعلی، این نسخه رو بذارید >>>>
                     pendingSchemeCard = playedCard;
 
                     Fighter *actingFighter = currentPlayer->getHero();
@@ -594,7 +549,6 @@ int GameScreen::update()
     if (maneuverUI.needsAvailableMoves())
     {
         Fighter *fighter = maneuverUI.getFighterNeedingMoves();
-
         if (fighter != nullptr)
         {
             int movementBudget = maneuverUI.getMovementBudget();
@@ -603,7 +557,6 @@ int GameScreen::update()
 
             if (moves.empty())
             {
-                std::cout << "\n[!] No available moves for " << fighter->getName() << std::endl;
                 maneuverUI.finishAfterMove();
             }
             else
@@ -621,14 +574,7 @@ int GameScreen::update()
         {
             currentPlayer->drawCardToHand();
 
-            std::cout << "[+] Drew one card from maneuver." << std::endl;
-
             game->getTurnManager().useAction();
-
-            std::cout << "[.] Actions remaining: "
-                      << game->getTurnManager().getRemainingActions()
-                      << std::endl;
-
             checkAndEndTurnIfNeeded();
         }
     }
@@ -641,7 +587,6 @@ int GameScreen::update()
     if (effectUI.isReady() && pendingSchemeCard != nullptr)
     {
         Player *currentPlayer = game->getTurnManager().getCurrentPlayer();
-
         if (currentPlayer != nullptr)
         {
             Effect *effect = pendingSchemeCard->getEffect();
@@ -660,12 +605,8 @@ int GameScreen::update()
                     effectUI.getChoice());
             }
             finalizeSchemeCard(pendingSchemeCard);
+
             game->getTurnManager().useAction();
-
-            std::cout << "[.] Actions remaining: "
-                      << game->getTurnManager().getRemainingActions()
-                      << std::endl;
-
             checkAndEndTurnIfNeeded();
         }
         pendingSchemeCard = nullptr;
@@ -684,18 +625,9 @@ int GameScreen::update()
     if (combatInProgress && game->getCombatSystem().isFinished())
     {
         game->getTurnManager().useAction();
-
-        std::cout << "[.] Actions remaining: "
-                  << game->getTurnManager().getRemainingActions()
-                  << std::endl;
-
         checkAndEndTurnIfNeeded();
         combatInProgress = false;
     }
-
-    // =========================================
-    // FEINT BLOCKED POPUP
-    // =========================================
 
     if (!feintBlockedPopupOpen)
     {
@@ -709,31 +641,22 @@ int GameScreen::update()
         }
     }
 
-    // =========================================
-    // DECK EMPTY POPUP
-    // =========================================
-
     if (!deckEmptyPopupOpen)
     {
         Player *currentPlayer = game->getTurnManager().getCurrentPlayer();
-
         if (currentPlayer != nullptr && currentPlayer->consumeDeckEmptyFlag())
         {
             deckEmptyPopupOpen = true;
         }
 
         Player *waitingPlayer = game->getTurnManager().getWaitingPlayer();
-
         if (waitingPlayer != nullptr && waitingPlayer->consumeDeckEmptyFlag())
         {
             deckEmptyPopupOpen = true;
         }
     }
 
-    // =========================================
-    // HAND LIMIT POPUP
-    // =========================================
-    checkHandLimit(); // <-- خط جدید
+    checkHandLimit();
     return 0;
 }
 
@@ -745,24 +668,18 @@ void GameScreen::draw()
     }
 
     Texture2D background = assets->getMainPanelBackground();
-
     if (background.id != 0)
     {
-        DrawTexturePro(
-            background,
-            Rectangle{
-                0.0f,
-                0.0f,
-                static_cast<float>(background.width),
-                static_cast<float>(background.height)},
-            Rectangle{
-                0.0f,
-                0.0f,
-                static_cast<float>(GetScreenWidth()),
-                static_cast<float>(GetScreenHeight())},
-            Vector2{0.0f, 0.0f},
-            0.0f,
-            WHITE);
+        DrawTexturePro(background,
+                       Rectangle{0.0f, 0.0f,
+                                 static_cast<float>(background.width),
+                                 static_cast<float>(background.height)},
+                       Rectangle{0.0f, 0.0f,
+                                 static_cast<float>(GetScreenWidth()),
+                                 static_cast<float>(GetScreenHeight())},
+                       Vector2{0.0f, 0.0f},
+                       0.0f,
+                       WHITE);
     }
     else
     {
@@ -780,96 +697,47 @@ void GameScreen::draw()
         return;
     }
 
-    // ========================================================
-    // NORMAL GAME UI
-    // ========================================================
-
-    // ========================================================
-    // NORMAL GAME UI
-    // ========================================================
-
-    if (!deckEmptyPopupOpen &&
-        !handLimitPopupOpen &&
-        !feintBlockedPopupOpen &&
-        !guideOpen)
+    if (!deckEmptyPopupOpen && !handLimitPopupOpen && !feintBlockedPopupOpen && !guideOpen)
     {
-        // ====================================================
-        // HAND VIEW
-        // ====================================================
-
         if (handViewUI.isOpen())
         {
             handViewUI.draw();
         }
         else
         {
-            // =================================================
-            // NORMAL GAME UI
-            // =================================================
-
             drawCombatEffectText();
             drawResultRevealButton();
             drawLookButton();
 
-            // -------------------------------------------------
-            // ACTION BUTTONS
-            // -------------------------------------------------
-
-            if (!maneuverUI.isOpen() &&
-                !combatInProgress &&
-                !draculaAbilityUI.isOpen())
+            if (!maneuverUI.isOpen() && !combatInProgress && !draculaAbilityUI.isOpen())
             {
                 drawActionButtons();
             }
-
-            // -------------------------------------------------
-            // ATTACK UI
-            // -------------------------------------------------
 
             if (attackUI.isOpen())
             {
                 attackUI.draw();
             }
 
-            // -------------------------------------------------
-            // SCHEME UI
-            // -------------------------------------------------
-
             if (schemeUI.isOpen())
             {
                 schemeUI.draw();
             }
-
-            // -------------------------------------------------
-            // MANEUVER UI
-            // -------------------------------------------------
 
             if (maneuverUI.isOpen())
             {
                 maneuverUI.draw();
             }
 
-            // -------------------------------------------------
-            // EFFECT UI
-            // -------------------------------------------------
-
             if (effectUI.isOpen())
             {
                 effectUI.draw();
             }
 
-            // -------------------------------------------------
-            // COMBAT RESULT
-            // -------------------------------------------------
-
             if (combatResultPopupOpen)
             {
                 drawCombatResultPopup();
             }
-
-            // -------------------------------------------------
-            // DRACULA ABILITY
-            // -------------------------------------------------
 
             if (draculaAbilityUI.isOpen())
             {
@@ -878,17 +746,9 @@ void GameScreen::draw()
         }
     }
 
-    // ========================================================
-    // OTHER POPUPS
-    // ========================================================
-
     drawDeckEmptyPopup();
     drawHandLimitPopup();
     drawFeintBlockedPopup();
-
-    // ========================================================
-    // GUIDE - ALWAYS ON TOP
-    // ========================================================
 
     if (guideOpen)
     {
@@ -899,15 +759,10 @@ void GameScreen::draw()
 void GameScreen::drawMap()
 {
     Texture2D map = assets->getGameMap();
-
     if (map.id == 0)
     {
         return;
     }
-
-    // =====================================
-    // DRAW MAP
-    // =====================================
 
     float mapX;
     float mapY;
@@ -915,67 +770,27 @@ void GameScreen::drawMap()
     float mapWidth;
     float mapHeight;
 
-    calculateMapTransform(
-        mapX,
-        mapY,
-        scale,
-        mapWidth,
-        mapHeight);
+    calculateMapTransform(mapX, mapY, scale, mapWidth, mapHeight);
 
-    Rectangle source{
-        0.0f,
-        0.0f,
-        static_cast<float>(map.width),
-        static_cast<float>(map.height)};
+    Rectangle source{0.0f, 0.0f,
+                     static_cast<float>(map.width),
+                     static_cast<float>(map.height)};
 
-    Rectangle destination{
-        mapX,
-        mapY,
-        mapWidth,
-        mapHeight};
+    Rectangle destination{mapX, mapY, mapWidth, mapHeight};
 
-    DrawTexturePro(
-        map,
-        source,
-        destination,
-        Vector2{0.0f, 0.0f},
-        0.0f,
-        WHITE);
+    DrawTexturePro(map, source, destination, Vector2{0.0f, 0.0f}, 0.0f, WHITE);
 
-    // =====================================
-    // ROYAL CREAM MAP BORDERS
-    // =====================================
-
-    const Color royalCream = {
-        218, 204, 174, 255};
+    const Color royalCream = {218, 204, 174, 255};
 
     const float offset = 6.0f;
 
-    // TOP LINE
-    DrawLineEx(
-        Vector2{
-            mapX,
-            mapY - offset},
-        Vector2{
-            mapX + mapWidth,
-            mapY - offset},
-        2.5f,
-        royalCream);
+    DrawLineEx(Vector2{mapX, mapY - offset}, Vector2{mapX + mapWidth, mapY - offset},
+               2.5f,
+               royalCream);
 
-    // BOTTOM LINE
-    DrawLineEx(
-        Vector2{
-            mapX,
-            mapY + mapHeight + offset},
-        Vector2{
-            mapX + mapWidth,
-            mapY + mapHeight + offset},
-        2.5f,
-        royalCream);
-
-    // =====================================
-    // DRAW SPACE CIRCLES + NUMBERS
-    // =====================================
+    DrawLineEx(Vector2{mapX, mapY + mapHeight + offset}, Vector2{mapX + mapWidth, mapY + mapHeight + offset},
+               2.5f,
+               royalCream);
 
     drawSpaces();
     drawPlacedFighters();
@@ -983,10 +798,6 @@ void GameScreen::drawMap()
     drawManeuverMovableSpaces();
     drawEffectSelectableSpaces();
 }
-
-// =========================================
-// DRAW PLAYER PANELS
-// =========================================
 
 void GameScreen::drawPlayerPanels()
 {
@@ -1001,174 +812,70 @@ void GameScreen::drawPlayerPanels()
     const float panelHeight = GetScreenHeight() - 2.0f * margin;
 
     leftPlayerPanel.setBounds(Rectangle{margin, margin, panelWidth, panelHeight});
-
-    rightPlayerPanel.setBounds(Rectangle{GetScreenWidth() - panelWidth - margin,
-                                         margin,
+    rightPlayerPanel.setBounds(Rectangle{GetScreenWidth() - panelWidth - margin, margin,
                                          panelWidth,
                                          panelHeight});
 
     const auto &players = game->getPlayers();
-
     if (players.size() > 0)
     {
         leftPlayerPanel.draw(players[0]);
     }
-
     if (players.size() > 1)
     {
         rightPlayerPanel.draw(players[1]);
     }
 }
 
-// =========================================
-// DRAW TOP BUTTONS
-// =========================================
-
 void GameScreen::drawTopButtons()
 {
     Font font = assets->getGameFont();
-
-    // =========================================
-    // Button dimensions
-    // =========================================
 
     const float buttonWidth = 145.0f;
     const float buttonHeight = 48.0f;
 
     const float buttonGap = 15.0f;
 
-    const float totalWidth =
-        3.0f * buttonWidth +
-        2.0f * buttonGap;
+    const float totalWidth = 3.0f * buttonWidth + 2.0f * buttonGap;
 
-    const float startX =
-        (GetScreenWidth() - totalWidth) / 2.0f;
+    const float startX = (GetScreenWidth() - totalWidth) / 2.0f;
 
     const float buttonY = 12.0f;
 
-    // =========================================
-    // Button rectangles
-    // =========================================
+    Rectangle exitButton{startX, buttonY, buttonWidth, buttonHeight};
+    Rectangle saveButton{startX + buttonWidth + buttonGap, buttonY,
+                         buttonWidth,
+                         buttonHeight};
 
-    Rectangle exitButton{
-        startX,
-        buttonY,
-        buttonWidth,
-        buttonHeight};
+    Rectangle guideButton{startX + 2.0f * (buttonWidth + buttonGap), buttonY,
+                          buttonWidth,
+                          buttonHeight};
 
-    Rectangle saveButton{
-        startX + buttonWidth + buttonGap,
-        buttonY,
-        buttonWidth,
-        buttonHeight};
+    Vector2 mousePosition = GetMousePosition();
 
-    Rectangle guideButton{
-        startX + 2.0f * (buttonWidth + buttonGap),
-        buttonY,
-        buttonWidth,
-        buttonHeight};
+    Color normalColor{25, 25, 25, 190};
+    Color hoverColor{65, 65, 65, 210};
 
-    // =========================================
-    // Mouse
-    // =========================================
+    Color exitColor = CheckCollisionPointRec(mousePosition, exitButton)
+                          ? hoverColor
+                          : normalColor;
 
-    Vector2 mousePosition =
-        GetMousePosition();
+    DrawRectangleRounded(exitButton, 1.0f, 32, exitColor);
+    DrawRectangleRoundedLinesEx(exitButton, 1.0f, 32, 1.5f, WHITE);
 
-    // =========================================
-    // Colors
-    // =========================================
+    Color saveColor = CheckCollisionPointRec(mousePosition, saveButton)
+                          ? hoverColor
+                          : normalColor;
 
-    Color normalColor{
-        25,
-        25,
-        25,
-        190};
+    DrawRectangleRounded(saveButton, 1.0f, 32, saveColor);
+    DrawRectangleRoundedLinesEx(saveButton, 1.0f, 32, 1.5f, WHITE);
 
-    Color hoverColor{
-        65,
-        65,
-        65,
-        210};
+    Color guideColor = CheckCollisionPointRec(mousePosition, guideButton)
+                           ? hoverColor
+                           : normalColor;
 
-    // =========================================
-    // EXIT
-    // =========================================
-
-    Color exitColor =
-        CheckCollisionPointRec(
-            mousePosition,
-            exitButton)
-            ? hoverColor
-            : normalColor;
-
-    DrawRectangleRounded(
-        exitButton,
-        1.0f,
-        32,
-        exitColor);
-
-    // White rounded border
-    DrawRectangleRoundedLinesEx(
-        exitButton,
-        1.0f,
-        32,
-        1.5f,
-        WHITE);
-
-    // =========================================
-    // SAVE GAME
-    // =========================================
-
-    Color saveColor =
-        CheckCollisionPointRec(
-            mousePosition,
-            saveButton)
-            ? hoverColor
-            : normalColor;
-
-    DrawRectangleRounded(
-        saveButton,
-        1.0f,
-        32,
-        saveColor);
-
-    // White rounded border
-    DrawRectangleRoundedLinesEx(
-        saveButton,
-        1.0f,
-        32,
-        1.5f,
-        WHITE);
-
-    // =========================================
-    // GUIDE
-    // =========================================
-
-    Color guideColor =
-        CheckCollisionPointRec(
-            mousePosition,
-            guideButton)
-            ? hoverColor
-            : normalColor;
-
-    DrawRectangleRounded(
-        guideButton,
-        1.0f,
-        32,
-        guideColor);
-
-    // White rounded border
-    DrawRectangleRoundedLinesEx(
-        guideButton,
-        1.0f,
-        32,
-        1.5f,
-        WHITE);
-
-    // =========================================
-    // Text
-    // =========================================
+    DrawRectangleRounded(guideButton, 1.0f, 32, guideColor);
+    DrawRectangleRoundedLinesEx(guideButton, 1.0f, 32, 1.5f, WHITE);
 
     const float fontSize = 26.0f;
     const float spacing = 2.0f;
@@ -1177,134 +884,47 @@ void GameScreen::drawTopButtons()
     const char *saveText = "SAVE GAME";
     const char *guideText = "HELP";
 
-    // =========================================
-    // Measure text
-    // =========================================
+    Vector2 exitTextSize = MeasureTextEx(font, exitText, fontSize, spacing);
+    Vector2 saveTextSize = MeasureTextEx(font, saveText, fontSize, spacing);
+    Vector2 guideTextSize = MeasureTextEx(font, guideText, fontSize, spacing);
 
-    Vector2 exitTextSize =
-        MeasureTextEx(
-            font,
-            exitText,
-            fontSize,
-            spacing);
+    DrawTextEx(font, exitText,
+               Vector2{exitButton.x + (exitButton.width - exitTextSize.x) / 2.0f,
+                       exitButton.y + (exitButton.height - exitTextSize.y) / 2.0f},
+               fontSize,
+               spacing,
+               WHITE);
 
-    Vector2 saveTextSize =
-        MeasureTextEx(
-            font,
-            saveText,
-            fontSize,
-            spacing);
+    DrawTextEx(font, saveText,
+               Vector2{saveButton.x + (saveButton.width - saveTextSize.x) / 2.0f,
+                       saveButton.y + (saveButton.height - saveTextSize.y) / 2.0f},
+               fontSize,
+               spacing,
+               WHITE);
 
-    Vector2 guideTextSize =
-        MeasureTextEx(
-            font,
-            guideText,
-            fontSize,
-            spacing);
-
-    // =========================================
-    // EXIT text
-    // =========================================
-
-    DrawTextEx(
-        font,
-        exitText,
-
-        Vector2{
-            exitButton.x +
-                (exitButton.width -
-                 exitTextSize.x) /
-                    2.0f,
-
-            exitButton.y +
-                (exitButton.height -
-                 exitTextSize.y) /
-                    2.0f},
-
-        fontSize,
-        spacing,
-        WHITE);
-
-    // =========================================
-    // SAVE GAME text
-    // =========================================
-
-    DrawTextEx(
-        font,
-        saveText,
-
-        Vector2{
-            saveButton.x +
-                (saveButton.width -
-                 saveTextSize.x) /
-                    2.0f,
-
-            saveButton.y +
-                (saveButton.height -
-                 saveTextSize.y) /
-                    2.0f},
-
-        fontSize,
-        spacing,
-        WHITE);
-
-    // =========================================
-    // GUIDE text
-    // =========================================
-
-    DrawTextEx(
-        font,
-        guideText,
-
-        Vector2{
-            guideButton.x +
-                (guideButton.width -
-                 guideTextSize.x) /
-                    2.0f,
-
-            guideButton.y +
-                (guideButton.height -
-                 guideTextSize.y) /
-                    2.0f},
-
-        fontSize,
-        spacing,
-        WHITE);
+    DrawTextEx(font, guideText,
+               Vector2{guideButton.x + (guideButton.width - guideTextSize.x) / 2.0f,
+                       guideButton.y + (guideButton.height - guideTextSize.y) / 2.0f},
+               fontSize,
+               spacing,
+               WHITE);
 }
 
 void GameScreen::drawGuidePopup()
 {
     Font font = assets->getGuideFont();
-    // =========================================
-    // Dark overlay
-    // =========================================
+
     DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), Color{0, 0, 0, 120});
-    // =========================================
-    // Popup size
-    // =========================================
+
     const float popupWidth = 900.0f;
     const float popupHeight = 730.0f;
 
-    Rectangle popup{(GetScreenWidth() - popupWidth) / 2.0f,
-                    (GetScreenHeight() - popupHeight) / 2.0f,
+    Rectangle popup{(GetScreenWidth() - popupWidth) / 2.0f, (GetScreenHeight() - popupHeight) / 2.0f,
                     popupWidth,
                     popupHeight};
 
-    // =========================================
-    // Popup background
-    // =========================================
-
     DrawRectangleRounded(popup, 0.04f, 20, Color{25, 20, 18, 245});
-
-    // =========================================
-    // Popup border
-    // =========================================
-
     DrawRectangleRoundedLines(popup, 0.04f, 20, Color{180, 160, 130, 255});
-
-    // =========================================
-    // Title
-    // =========================================
 
     const char *title = "INSTRUCTIONS";
     const float titleSize = 38.0f;
@@ -1316,10 +936,6 @@ void GameScreen::drawGuidePopup()
                2.0f,
                WHITE);
 
-    // =========================================
-    // Guide text
-    // =========================================
-
     const float textSize = 25.0f;
     const float spacing = 1.5f;
 
@@ -1328,9 +944,6 @@ void GameScreen::drawGuidePopup()
 
     const float lineHeight = 32.0f;
 
-    // =========================================
-    // ACTIONS
-    // =========================================
     DrawTextEx(font, "[ ACTIONS ]", Vector2{x, y}, textSize, spacing, WHITE);
     y += lineHeight;
 
@@ -1345,213 +958,115 @@ void GameScreen::drawGuidePopup()
                WHITE);
     y += lineHeight;
 
-    DrawTextEx(
-        font,
-        "Scheme   ->>  Play a Scheme card.",
-        Vector2{x, y},
-        textSize,
-        spacing,
-        WHITE);
-
-    // =========================================
-    // RULES
-    // =========================================
-
+    DrawTextEx(font, "Scheme   ->>  Play a Scheme card.", Vector2{x, y},
+               textSize,
+               spacing,
+               WHITE);
     y += lineHeight * 1.4f;
 
-    DrawTextEx(
-        font,
-        "[ RULES ]",
-        Vector2{x, y},
-        textSize,
-        spacing,
-        WHITE);
-
+    DrawTextEx(font, "[ RULES ]", Vector2{x, y},
+               textSize,
+               spacing,
+               WHITE);
     y += lineHeight;
 
-    DrawTextEx(
-        font,
-        "[*] The younger player chooses the fighter and steps",
-        Vector2{x, y},
-        textSize,
-        spacing,
-        WHITE);
-
+    DrawTextEx(font, "[*] The younger player chooses the fighter and steps", Vector2{x, y},
+               textSize,
+               spacing,
+               WHITE);
     y += lineHeight;
 
-    DrawTextEx(
-        font,
-        "    onto the field first.",
-        Vector2{x, y},
-        textSize,
-        spacing,
-        WHITE);
-
+    DrawTextEx(font, "    onto the field first.", Vector2{x, y},
+               textSize,
+               spacing,
+               WHITE);
     y += lineHeight;
 
-    DrawTextEx(
-        font,
-        "[*] Each turn you have 2 actions.",
-        Vector2{x, y},
-        textSize,
-        spacing,
-        WHITE);
-
+    DrawTextEx(font, "[*] Each turn you have 2 actions.", Vector2{x, y},
+               textSize,
+               spacing,
+               WHITE);
     y += lineHeight;
 
-    DrawTextEx(
-        font,
-        "[*] Every Hero card carries a unique effect,",
-        Vector2{x, y},
-        textSize,
-        spacing,
-        WHITE);
-
+    DrawTextEx(font, "[*] Every Hero card carries a unique effect,", Vector2{x, y},
+               textSize,
+               spacing,
+               WHITE);
     y += lineHeight;
 
-    DrawTextEx(
-        font,
-        "    and on top of that each Hero possesses a special",
-        Vector2{x, y},
-        textSize,
-        spacing,
-        WHITE);
-
+    DrawTextEx(font, "    and on top of that each Hero possesses a special", Vector2{x, y},
+               textSize,
+               spacing,
+               WHITE);
     y += lineHeight;
 
-    DrawTextEx(
-        font,
-        "    ability of their own.",
-        Vector2{x, y},
-        textSize,
-        spacing,
-        WHITE);
-
+    DrawTextEx(font, "    ability of their own.", Vector2{x, y},
+               textSize,
+               spacing,
+               WHITE);
     y += lineHeight;
 
-    DrawTextEx(
-        font,
-        "[*] Your hand must never exceed 7 cards.",
-        Vector2{x, y},
-        textSize,
-        spacing,
-        WHITE);
-
+    DrawTextEx(font, "[*] Your hand must never exceed 7 cards.", Vector2{x, y},
+               textSize,
+               spacing,
+               WHITE);
     y += lineHeight;
 
-    DrawTextEx(
-        font, "[*] Fighters can move directly between the marked",
-        Vector2{x, y},
-        textSize,
-        spacing,
-        WHITE);
-
+    DrawTextEx(font, "[*] Fighters can move directly between the marked", Vector2{x, y},
+               textSize,
+               spacing,
+               WHITE);
     y += lineHeight;
 
-    DrawTextEx(
-        font, "    spaces, which are hidden passages.",
-        Vector2{x, y},
-        textSize,
-        spacing,
-        WHITE);
-
+    DrawTextEx(font, "    spaces, which are hidden passages.", Vector2{x, y},
+               textSize,
+               spacing,
+               WHITE);
     y += lineHeight;
 
-    DrawTextEx(
-        font,
-        "[*] Through tactical moves in each turn, your goal",
-        Vector2{x, y},
-        textSize,
-        spacing,
-        WHITE);
-
+    DrawTextEx(font, "[*] Through tactical moves in each turn, your goal", Vector2{x, y},
+               textSize,
+               spacing,
+               WHITE);
     y += lineHeight;
 
-    DrawTextEx(
-        font,
-        "    is clear : defeat the enemy Hero and claim VICTORY.",
-        Vector2{x, y},
-        textSize,
-        spacing,
-        WHITE);
-
-    // =========================================
-    // BACK BUTTON
-    // =========================================
+    DrawTextEx(font, "    is clear : defeat the enemy Hero and claim VICTORY.", Vector2{x, y},
+               textSize,
+               spacing,
+               WHITE);
 
     const float backWidth = 130.0f;
     const float backHeight = 42.0f;
 
-    Rectangle backButton{
-        (GetScreenWidth() - backWidth) / 2.0f,
-        popup.y + popup.height - 65.0f,
-        backWidth,
-        backHeight};
+    Rectangle backButton{(GetScreenWidth() - backWidth) / 2.0f, popup.y + popup.height - 65.0f,
+                         backWidth,
+                         backHeight};
 
-    Vector2 mousePosition =
-        GetMousePosition();
+    Vector2 mousePosition = GetMousePosition();
 
-    bool hovered =
-        CheckCollisionPointRec(
-            mousePosition,
-            backButton);
+    bool hovered = CheckCollisionPointRec(mousePosition, backButton);
 
-    Color backColor =
-        hovered
-            ? Color{75, 75, 75, 255}
-            : Color{40, 40, 40, 255};
+    Color backColor = hovered ? Color{75, 75, 75, 255} : Color{40, 40, 40, 255};
 
-    DrawRectangleRounded(
-        backButton,
-        1.0,
-        20,
-        backColor);
+    DrawRectangleRounded(backButton, 1.0, 20, backColor);
 
     const char *backText = "BACK";
-
     const float backTextSize = 24.0f;
 
-    Vector2 backTextMeasure =
-        MeasureTextEx(
-            font,
-            backText,
-            backTextSize,
-            1.5f);
+    Vector2 backTextMeasure = MeasureTextEx(font, backText, backTextSize, 1.5f);
 
-    DrawTextEx(
-        font,
-        backText,
-
-        Vector2{
-            backButton.x +
-                (backButton.width -
-                 backTextMeasure.x) /
-                    2.0f,
-
-            backButton.y +
-                (backButton.height -
-                 backTextMeasure.y) /
-                    2.0f},
-
-        backTextSize,
-        1.5f,
-        WHITE);
+    DrawTextEx(font, backText,
+               Vector2{backButton.x + (backButton.width - backTextMeasure.x) / 2.0f,
+                       backButton.y + (backButton.height - backTextMeasure.y) / 2.0f},
+               backTextSize,
+               1.5f,
+               WHITE);
 }
 
-// ============================================================
-// CALCULATE MAP TRANSFORMATION
-// ============================================================
-
-void GameScreen::calculateMapTransform(
-    float &mapX,
-    float &mapY,
-    float &scale,
-    float &mapWidth,
-    float &mapHeight) const
+void GameScreen::calculateMapTransform(float &mapX, float &mapY, float &scale,
+                                       float &mapWidth, float &mapHeight) const
 {
-    Texture2D map =
-        assets->getGameMap();
-
+    Texture2D map = assets->getGameMap();
     if (map.id == 0)
     {
         mapX = 0.0f;
@@ -1562,81 +1077,26 @@ void GameScreen::calculateMapTransform(
         return;
     }
 
-    // =========================================
-    // Map layout settings
-    // =========================================
-
     const float panelWidth = 300.0f;
     const float mapPadding = 15.0f;
     const float topSpace = 75.0f;
 
-    // =========================================
-    // Available map area
-    // =========================================
+    const float mapAreaX = panelWidth + mapPadding;
+    const float mapAreaWidth = GetScreenWidth() - 2.0f * (panelWidth + mapPadding);
+    const float mapAreaY = topSpace;
+    const float mapAreaHeight = GetScreenHeight() - topSpace;
 
-    const float mapAreaX =
-        panelWidth + mapPadding;
+    const float scaleX = mapAreaWidth / static_cast<float>(map.width);
+    const float scaleY = mapAreaHeight / static_cast<float>(map.height);
 
-    const float mapAreaWidth =
-        GetScreenWidth() -
-        2.0f * (panelWidth + mapPadding);
-
-    const float mapAreaY =
-        topSpace;
-
-    const float mapAreaHeight =
-        GetScreenHeight() -
-        topSpace;
-
-    // =========================================
-    // Calculate scale
-    // =========================================
-
-    const float scaleX =
-        mapAreaWidth /
-        static_cast<float>(map.width);
-
-    const float scaleY =
-        mapAreaHeight /
-        static_cast<float>(map.height);
-
-    scale =
-        std::min(scaleX, scaleY);
-
-    // Slight margin around map
+    scale = std::min(scaleX, scaleY);
     scale *= 0.95f;
 
-    // =========================================
-    // Final map dimensions
-    // =========================================
+    mapWidth = static_cast<float>(map.width) * scale;
+    mapHeight = static_cast<float>(map.height) * scale;
 
-    mapWidth =
-        static_cast<float>(map.width) *
-        scale;
-
-    mapHeight =
-        static_cast<float>(map.height) *
-        scale;
-
-    // =========================================
-    // Center map horizontally
-    // =========================================
-
-    mapX =
-        mapAreaX +
-        (mapAreaWidth - mapWidth) / 2.0f;
-
-    // =========================================
-    // Center map vertically
-    // =========================================
-
-    mapY =
-        mapAreaY +
-        (mapAreaHeight - mapHeight) / 2.0f;
-
-    // =========================================
-    // Move map slightly upward
-    // =========================================
+    mapX = mapAreaX + (mapAreaWidth - mapWidth) / 2.0f;
+    mapY = mapAreaY + (mapAreaHeight - mapHeight) / 2.0f;
 
     mapY -= 100.0f;
 }
@@ -1648,24 +1108,13 @@ int GameScreen::getClickedSpaceId()
         return -1;
     }
 
-    Texture2D map =
-        assets->getGameMap();
-
+    Texture2D map = assets->getGameMap();
     if (map.id == 0)
     {
         return -1;
     }
 
-    // =========================================
-    // Mouse position
-    // =========================================
-
-    Vector2 mouse =
-        GetMousePosition();
-
-    // =========================================
-    // Map transformation
-    // =========================================
+    Vector2 mouse = GetMousePosition();
 
     float mapX;
     float mapY;
@@ -1673,72 +1122,41 @@ int GameScreen::getClickedSpaceId()
     float mapWidth;
     float mapHeight;
 
-    calculateMapTransform(
-        mapX,
-        mapY,
-        scale,
-        mapWidth,
-        mapHeight);
-
+    calculateMapTransform(mapX, mapY, scale, mapWidth, mapHeight);
     if (scale <= 0.0f)
     {
         return -1;
     }
 
-    // =========================================
-    // Screen -> Original map image
-    // =========================================
+    float imageX = (mouse.x - mapX) / scale;
+    float imageY = (mouse.y - mapY) / scale;
 
-    float imageX =
-        (mouse.x - mapX) / scale;
-
-    float imageY =
-        (mouse.y - mapY) / scale;
-
-    // =========================================
-    // Outside map
-    // =========================================
-
-    if (imageX < 0.0f ||
-        imageY < 0.0f ||
-        imageX > static_cast<float>(map.width) ||
+    if (imageX < 0.0f || imageY < 0.0f || imageX > static_cast<float>(map.width) ||
         imageY > static_cast<float>(map.height))
     {
         return -1;
     }
 
-    // =========================================
-    // Check all 32 spaces
-    // =========================================
-
     for (int i = 0; i < 32; i++)
     {
-        const SpaceGraphic &space =
-            SPACE_GRAPHICS[i];
+        const SpaceGraphic &space = SPACE_GRAPHICS[i];
 
-        float dx =
-            imageX - space.center.x;
+        float dx = imageX - space.center.x;
+        float dy = imageY - space.center.y;
 
-        float dy =
-            imageY - space.center.y;
+        float distanceSquared = dx * dx + dy * dy;
 
-        float distanceSquared =
-            dx * dx + dy * dy;
-
-        float radiusSquared =
-            space.radius * space.radius;
+        float radiusSquared = space.radius * space.radius;
 
         if (distanceSquared <= radiusSquared)
         {
             return i + 1;
         }
     }
-
     return -1;
 }
 
-Vector2 GameScreen::mapImageToScreen(
-    Vector2 imagePosition) const
+Vector2 GameScreen::mapImageToScreen(Vector2 imagePosition) const
 {
     float mapX;
     float mapY;
@@ -1746,19 +1164,9 @@ Vector2 GameScreen::mapImageToScreen(
     float mapWidth;
     float mapHeight;
 
-    calculateMapTransform(
-        mapX,
-        mapY,
-        scale,
-        mapWidth,
-        mapHeight);
+    calculateMapTransform(mapX, mapY, scale, mapWidth, mapHeight);
 
-    return Vector2{
-        mapX +
-            imagePosition.x * scale,
-
-        mapY +
-            imagePosition.y * scale};
+    return Vector2{mapX + imagePosition.x * scale, mapY + imagePosition.y * scale};
 }
 
 void GameScreen::drawSpaces()
@@ -1776,48 +1184,25 @@ void GameScreen::drawSpaces()
     float mapWidth;
     float mapHeight;
 
-    calculateMapTransform(
-        mapX,
-        mapY,
-        scale,
-        mapWidth,
-        mapHeight);
+    calculateMapTransform(mapX, mapY, scale, mapWidth, mapHeight);
 
     for (int i = 0; i < 32; i++)
     {
-        Vector2 center =
-            mapImageToScreen(
-                SPACE_GRAPHICS[i].center);
+        Vector2 center = mapImageToScreen(SPACE_GRAPHICS[i].center);
 
-        float radius =
-            SPACE_GRAPHICS[i].radius * scale;
+        float radius = SPACE_GRAPHICS[i].radius * scale;
 
-        DrawCircleV(
-            center,
-            radius,
-            Color{255, 255, 255, 70});
+        DrawCircleV(center, radius, Color{255, 255, 255, 70});
 
-        std::string number =
-            std::to_string(i + 1);
+        std::string number = std::to_string(i + 1);
 
-        Vector2 textSize =
-            MeasureTextEx(
-                font,
-                number.c_str(),
-                30.0f,
-                1.0f);
+        Vector2 textSize = MeasureTextEx(font, number.c_str(), 30.0f, 1.0f);
 
-        DrawTextEx(
-            font,
-            number.c_str(),
-
-            Vector2{
-                center.x - textSize.x / 2.0f,
-                center.y - textSize.y / 2.0f},
-
-            30.0f,
-            1.0f,
-            WHITE);
+        DrawTextEx(font, number.c_str(),
+                   Vector2{center.x - textSize.x / 2.0f, center.y - textSize.y / 2.0f},
+                   30.0f,
+                   1.0f,
+                   WHITE);
     }
 }
 
@@ -1837,10 +1222,6 @@ void GameScreen::drawPlacedFighters()
         {
             continue;
         }
-
-        // =====================================
-        // HERO
-        // =====================================
 
         Hero *hero = player->getHero();
         if (hero != nullptr)
@@ -1880,10 +1261,6 @@ void GameScreen::drawPlacedFighters()
                 }
             }
         }
-
-        // =====================================
-        // SIDEKICKS
-        // =====================================
 
         std::vector<Sidekick *> sidekicks = player->getSideKicks();
         for (Sidekick *sidekick : sidekicks)
@@ -1931,15 +1308,12 @@ void GameScreen::drawPlacedFighters()
 
 void GameScreen::drawFogs()
 {
-    if (game == nullptr ||
-        assets == nullptr)
+    if (game == nullptr || assets == nullptr)
     {
         return;
     }
 
-    Texture2D fogTexture =
-        assets->getFogTexture();
-
+    Texture2D fogTexture = assets->getFogTexture();
     if (fogTexture.id == 0)
     {
         return;
@@ -1951,16 +1325,9 @@ void GameScreen::drawFogs()
     float mapWidth;
     float mapHeight;
 
-    calculateMapTransform(
-        mapX,
-        mapY,
-        scale,
-        mapWidth,
-        mapHeight);
+    calculateMapTransform(mapX, mapY, scale, mapWidth, mapHeight);
 
-    const std::vector<Player *> &players =
-        game->getPlayers();
-
+    const std::vector<Player *> &players = game->getPlayers();
     for (Player *player : players)
     {
         if (player == nullptr)
@@ -1968,9 +1335,7 @@ void GameScreen::drawFogs()
             continue;
         }
 
-        const std::vector<Fog *> &fogs =
-            player->getFogs();
-
+        const std::vector<Fog *> &fogs = player->getFogs();
         for (Fog *fog : fogs)
         {
             if (fog == nullptr)
@@ -1978,61 +1343,32 @@ void GameScreen::drawFogs()
                 continue;
             }
 
-            Space *space =
-                fog->getPosition();
-
+            Space *space = fog->getPosition();
             if (space == nullptr)
             {
                 continue;
             }
 
-            int spaceId =
-                space->getId();
-
-            if (spaceId < 1 ||
-                spaceId > 32)
+            int spaceId = space->getId();
+            if (spaceId < 1 || spaceId > 32)
             {
                 continue;
             }
 
-            // =====================================
-            // SPACE CENTER
-            // =====================================
-
-            Vector2 center =
-                mapImageToScreen(
-                    SPACE_GRAPHICS[spaceId - 1].center);
-
-            // =====================================
-            // FOG SIZE
-            // =====================================
+            Vector2 center = mapImageToScreen(SPACE_GRAPHICS[spaceId - 1].center);
 
             const float fogImageSize = 140.0f;
+            const float fogSize = fogImageSize * scale;
 
-            const float fogSize =
-                fogImageSize * scale;
+            Rectangle source{0.0f, 0.0f,
+                             static_cast<float>(fogTexture.width),
+                             static_cast<float>(fogTexture.height)};
 
-            Rectangle source{
-                0.0f,
-                0.0f,
-                static_cast<float>(
-                    fogTexture.width),
-                static_cast<float>(
-                    fogTexture.height)};
+            Rectangle destination{center.x - fogSize / 2.0f, center.y + 30.0f - fogSize / 2.0f,
+                                  fogSize,
+                                  fogSize};
 
-            Rectangle destination{
-                center.x - fogSize / 2.0f,
-                center.y + 30.0f - fogSize / 2.0f,
-                fogSize,
-                fogSize};
-
-            DrawTexturePro(
-                fogTexture,
-                source,
-                destination,
-                Vector2{0.0f, 0.0f},
-                0.0f,
-                WHITE);
+            DrawTexturePro(fogTexture, source, destination, Vector2{0.0f, 0.0f}, 0.0f, WHITE);
         }
     }
 }
@@ -2044,89 +1380,33 @@ void GameScreen::drawActionButtons()
         return;
     }
 
-    Font font =
-        assets->getGameFont();
-
-    // =========================================
-    // BUTTON SIZE
-    // =========================================
+    Font font = assets->getGameFont();
 
     const float buttonWidth = 180.0f;
     const float buttonHeight = 55.0f;
     const float gap = 15.0f;
 
-    // =========================================
-    // POSITION
-    // =========================================
+    const float totalWidth = 3.0f * buttonWidth + 2.0f * gap;
 
-    const float totalWidth =
-        3.0f * buttonWidth +
-        2.0f * gap;
+    const float startX = (GetScreenWidth() - totalWidth) / 2.0f;
+    const float buttonY = GetScreenHeight() - 160.0f;
 
-    const float startX =
-        (GetScreenWidth() - totalWidth) / 2.0f;
+    attackButton = Rectangle{startX, buttonY, buttonWidth, buttonHeight};
+    maneuverButton = Rectangle{startX + buttonWidth + gap,
+                               buttonY,
+                               buttonWidth,
+                               buttonHeight};
 
-    const float buttonY =
-        GetScreenHeight() - 160.0f;
+    schemeButton = Rectangle{startX + 2.0f * (buttonWidth + gap),
+                             buttonY,
+                             buttonWidth,
+                             buttonHeight};
 
-    // =========================================
-    // BUTTON RECTANGLES
-    // =========================================
+    Vector2 mousePosition = GetMousePosition();
 
-    attackButton = Rectangle{
-        startX,
-        buttonY,
-        buttonWidth,
-        buttonHeight};
-
-    maneuverButton = Rectangle{
-        startX +
-            buttonWidth +
-            gap,
-        buttonY,
-        buttonWidth,
-        buttonHeight};
-
-    schemeButton = Rectangle{
-        startX +
-            2.0f *
-                (buttonWidth + gap),
-        buttonY,
-        buttonWidth,
-        buttonHeight};
-
-    // =========================================
-    // MOUSE
-    // =========================================
-
-    Vector2 mousePosition =
-        GetMousePosition();
-
-    // =========================================
-    // COLORS
-    // =========================================
-
-    Color normalColor{
-        25,
-        25,
-        25,
-        220};
-
-    Color hoverColor{
-        70,
-        70,
-        70,
-        230};
-
-    Color selectedColor{
-        120,
-        85,
-        40,
-        240};
-
-    // =========================================
-    // ATTACK COLOR
-    // =========================================
+    Color normalColor{25, 25, 25, 220};
+    Color hoverColor{70, 70, 70, 230};
+    Color selectedColor{120, 85, 40, 240};
 
     Color attackColor;
 
@@ -2134,9 +1414,7 @@ void GameScreen::drawActionButtons()
     {
         attackColor = selectedColor;
     }
-    else if (CheckCollisionPointRec(
-                 mousePosition,
-                 attackButton))
+    else if (CheckCollisionPointRec(mousePosition, attackButton))
     {
         attackColor = hoverColor;
     }
@@ -2145,19 +1423,13 @@ void GameScreen::drawActionButtons()
         attackColor = normalColor;
     }
 
-    // =========================================
-    // MANEUVER COLOR
-    // =========================================
-
     Color maneuverColor;
 
     if (selectedAction == ActionChoice::MANEUVER)
     {
         maneuverColor = selectedColor;
     }
-    else if (CheckCollisionPointRec(
-                 mousePosition,
-                 maneuverButton))
+    else if (CheckCollisionPointRec(mousePosition, maneuverButton))
     {
         maneuverColor = hoverColor;
     }
@@ -2166,19 +1438,13 @@ void GameScreen::drawActionButtons()
         maneuverColor = normalColor;
     }
 
-    // =========================================
-    // SCHEME COLOR
-    // =========================================
-
     Color schemeColor;
 
     if (selectedAction == ActionChoice::SCHEME)
     {
         schemeColor = selectedColor;
     }
-    else if (CheckCollisionPointRec(
-                 mousePosition,
-                 schemeButton))
+    else if (CheckCollisionPointRec(mousePosition, schemeButton))
     {
         schemeColor = hoverColor;
     }
@@ -2187,132 +1453,40 @@ void GameScreen::drawActionButtons()
         schemeColor = normalColor;
     }
 
-    // =========================================
-    // DRAW BUTTONS
-    // =========================================
-
-    DrawRectangleRounded(
-        attackButton,
-        1.0f,
-        20,
-        attackColor);
-
-    DrawRectangleRounded(
-        maneuverButton,
-        1.0f,
-        20,
-        maneuverColor);
-
-    DrawRectangleRounded(
-        schemeButton,
-        1.0f,
-        20,
-        schemeColor);
-
-    // =========================================
-    // TEXT
-    // =========================================
+    DrawRectangleRounded(attackButton, 1.0f, 20, attackColor);
+    DrawRectangleRounded(maneuverButton, 1.0f, 20, maneuverColor);
+    DrawRectangleRounded(schemeButton, 1.0f, 20, schemeColor);
 
     const float fontSize = 25.0f;
     const float spacing = 1.5f;
 
-    const char *attackText =
-        "ATTACK";
+    const char *attackText = "ATTACK";
+    const char *maneuverText = "MANEUVER";
+    const char *schemeText = "SCHEME";
 
-    const char *maneuverText =
-        "MANEUVER";
+    Vector2 attackTextSize = MeasureTextEx(font, attackText, fontSize, spacing);
+    DrawTextEx(font, attackText,
+               Vector2{attackButton.x + (attackButton.width - attackTextSize.x) / 2.0f,
+                       attackButton.y + (attackButton.height - attackTextSize.y) / 2.0f},
+               fontSize,
+               spacing,
+               WHITE);
 
-    const char *schemeText =
-        "SCHEME";
+    Vector2 maneuverTextSize = MeasureTextEx(font, maneuverText, fontSize, spacing);
+    DrawTextEx(font, maneuverText,
+               Vector2{maneuverButton.x + (maneuverButton.width - maneuverTextSize.x) / 2.0f,
+                       maneuverButton.y + (maneuverButton.height - maneuverTextSize.y) / 2.0f},
+               fontSize,
+               spacing,
+               WHITE);
 
-    // =========================================
-    // ATTACK TEXT
-    // =========================================
-
-    Vector2 attackTextSize =
-        MeasureTextEx(
-            font,
-            attackText,
-            fontSize,
-            spacing);
-    DrawTextEx(
-        font,
-        attackText,
-
-        Vector2{
-            attackButton.x +
-                (attackButton.width -
-                 attackTextSize.x) /
-                    2.0f,
-
-            attackButton.y +
-                (attackButton.height -
-                 attackTextSize.y) /
-                    2.0f},
-
-        fontSize,
-        spacing,
-        WHITE);
-
-    // =========================================
-    // MANEUVER TEXT
-    // =========================================
-
-    Vector2 maneuverTextSize =
-        MeasureTextEx(
-            font,
-            maneuverText,
-            fontSize,
-            spacing);
-
-    DrawTextEx(
-        font,
-        maneuverText,
-
-        Vector2{
-            maneuverButton.x +
-                (maneuverButton.width -
-                 maneuverTextSize.x) /
-                    2.0f,
-
-            maneuverButton.y +
-                (maneuverButton.height -
-                 maneuverTextSize.y) /
-                    2.0f},
-
-        fontSize,
-        spacing,
-        WHITE);
-
-    // =========================================
-    // SCHEME TEXT
-    // =========================================
-
-    Vector2 schemeTextSize =
-        MeasureTextEx(
-            font,
-            schemeText,
-            fontSize,
-            spacing);
-
-    DrawTextEx(
-        font,
-        schemeText,
-
-        Vector2{
-            schemeButton.x +
-                (schemeButton.width -
-                 schemeTextSize.x) /
-                    2.0f,
-
-            schemeButton.y +
-                (schemeButton.height -
-                 schemeTextSize.y) /
-                    2.0f},
-
-        fontSize,
-        spacing,
-        WHITE);
+    Vector2 schemeTextSize = MeasureTextEx(font, schemeText, fontSize, spacing);
+    DrawTextEx(font, schemeText,
+               Vector2{schemeButton.x + (schemeButton.width - schemeTextSize.x) / 2.0f,
+                       schemeButton.y + (schemeButton.height - schemeTextSize.y) / 2.0f},
+               fontSize,
+               spacing,
+               WHITE);
 }
 
 Fighter *GameScreen::getClickedFighter()
@@ -2324,8 +1498,7 @@ Fighter *GameScreen::getClickedFighter()
 
     Vector2 mouse = GetMousePosition();
 
-    const std::vector<Player *> &players =
-        game->getPlayers();
+    const std::vector<Player *> &players = game->getPlayers();
 
     for (Player *player : players)
     {
@@ -2334,12 +1507,7 @@ Fighter *GameScreen::getClickedFighter()
             continue;
         }
 
-        // =====================================
-        // HERO
-        // =====================================
-
         Hero *hero = player->getHero();
-
         if (hero != nullptr && hero->isAlive())
         {
             Space *space = hero->getPosition();
@@ -2347,19 +1515,12 @@ Fighter *GameScreen::getClickedFighter()
             if (space != nullptr)
             {
                 int spaceId = space->getId();
-
                 if (spaceId >= 1 && spaceId <= 32)
                 {
-                    Vector2 center =
-                        mapImageToScreen(
-                            SPACE_GRAPHICS[spaceId - 1].center);
+                    Vector2 center = mapImageToScreen(SPACE_GRAPHICS[spaceId - 1].center);
 
-                    float distance =
-                        std::sqrt(
-                            (mouse.x - center.x) *
-                                (mouse.x - center.x) +
-                            (mouse.y - center.y) *
-                                (mouse.y - center.y));
+                    float distance = std::sqrt((mouse.x - center.x) * (mouse.x - center.x) +
+                                               (mouse.y - center.y) * (mouse.y - center.y));
 
                     if (distance <= 25.0f)
                     {
@@ -2369,42 +1530,29 @@ Fighter *GameScreen::getClickedFighter()
             }
         }
 
-        // =====================================
-        // SIDEKICKS
-        // =====================================
-
         for (Sidekick *sidekick : player->getSideKicks())
         {
-            if (sidekick == nullptr ||
-                !sidekick->isAlive())
+            if (sidekick == nullptr || !sidekick->isAlive())
             {
                 continue;
             }
 
             Space *space = sidekick->getPosition();
-
             if (space == nullptr)
             {
                 continue;
             }
 
             int spaceId = space->getId();
-
             if (spaceId < 1 || spaceId > 32)
             {
                 continue;
             }
 
-            Vector2 center =
-                mapImageToScreen(
-                    SPACE_GRAPHICS[spaceId - 1].center);
+            Vector2 center = mapImageToScreen(SPACE_GRAPHICS[spaceId - 1].center);
 
-            float distance =
-                std::sqrt(
-                    (mouse.x - center.x) *
-                        (mouse.x - center.x) +
-                    (mouse.y - center.y) *
-                        (mouse.y - center.y));
+            float distance = std::sqrt((mouse.x - center.x) * (mouse.x - center.x) +
+                                       (mouse.y - center.y) * (mouse.y - center.y));
 
             if (distance <= 20.0f)
             {
@@ -2412,7 +1560,6 @@ Fighter *GameScreen::getClickedFighter()
             }
         }
     }
-
     return nullptr;
 }
 
@@ -2423,16 +1570,13 @@ void GameScreen::drawTurnIndicator()
         return;
     }
 
-    Player *currentPlayer =
-        game->getTurnManager().getCurrentPlayer();
-
+    Player *currentPlayer = game->getTurnManager().getCurrentPlayer();
     if (currentPlayer == nullptr)
     {
         return;
     }
 
     Hero *hero = currentPlayer->getHero();
-
     if (hero == nullptr)
     {
         return;
@@ -2440,57 +1584,29 @@ void GameScreen::drawTurnIndicator()
 
     Font font = assets->getGameFont();
 
-    // =========================================
-    // لبه‌ی پایین نقشه
-    // =========================================
-
     float mapX;
     float mapY;
     float scale;
     float mapWidth;
     float mapHeight;
 
-    calculateMapTransform(
-        mapX,
-        mapY,
-        scale,
-        mapWidth,
-        mapHeight);
+    calculateMapTransform(mapX, mapY, scale, mapWidth, mapHeight);
 
     std::string text = "> Turn : " + hero->getName();
 
     const float fontSize = 28.0f;
     const float spacing = 2.0f;
 
-    Vector2 textSize =
-        MeasureTextEx(font, text.c_str(), fontSize, spacing);
+    Vector2 textSize = MeasureTextEx(font, text.c_str(), fontSize, spacing);
 
-    float textX =
-        (GetScreenWidth() - textSize.x) / 2.0f;
+    float textX = (GetScreenWidth() - textSize.x) / 2.0f;
+    float textY = mapY + mapHeight + 12.0f;
 
-    float textY =
-        mapY + mapHeight + 12.0f; // فاصله‌ی کم از لبه‌ی نقشه
+    Rectangle background{textX - 15.0f, textY - 6.0f, textSize.x + 30.0f, textSize.y + 12.0f};
 
-    // پس‌زمینه‌ی کوچیک برای خوانایی بهتر
-    Rectangle background{
-        textX - 15.0f,
-        textY - 6.0f,
-        textSize.x + 30.0f,
-        textSize.y + 12.0f};
+    DrawRectangleRounded(background, 1.0f, 16, Color{20, 20, 20, 190});
 
-    DrawRectangleRounded(
-        background,
-        1.0f,
-        16,
-        Color{20, 20, 20, 190});
-
-    DrawTextEx(
-        font,
-        text.c_str(),
-        Vector2{textX, textY},
-        fontSize,
-        spacing,
-        WHITE);
+    DrawTextEx(font, text.c_str(), Vector2{textX, textY}, fontSize, spacing, WHITE);
 }
 
 void GameScreen::checkAndEndTurnIfNeeded()
@@ -2501,24 +1617,12 @@ void GameScreen::checkAndEndTurnIfNeeded()
     }
 
     TurnManager &turnManager = game->getTurnManager();
-
     if (turnManager.hasActions())
     {
         return;
     }
 
     turnManager.endTurn();
-
-    Player *newCurrentPlayer = turnManager.getCurrentPlayer();
-
-    if (newCurrentPlayer != nullptr &&
-        newCurrentPlayer->getHero() != nullptr)
-    {
-        std::cout
-            << "[.] Turn ended. Next turn: "
-            << newCurrentPlayer->getHero()->getName()
-            << std::endl;
-    }
 }
 
 void GameScreen::drawManeuverMovableSpaces()
@@ -2534,12 +1638,7 @@ void GameScreen::drawManeuverMovableSpaces()
     float mapWidth;
     float mapHeight;
 
-    calculateMapTransform(
-        mapX,
-        mapY,
-        scale,
-        mapWidth,
-        mapHeight);
+    calculateMapTransform(mapX, mapY, scale, mapWidth, mapHeight);
 
     for (Space *space : maneuverUI.getAvailableMoves())
     {
@@ -2549,28 +1648,18 @@ void GameScreen::drawManeuverMovableSpaces()
         }
 
         int spaceId = space->getId();
-
         if (spaceId < 1 || spaceId > 32)
         {
             continue;
         }
 
-        Vector2 center =
-            mapImageToScreen(
-                SPACE_GRAPHICS[spaceId - 1].center);
+        Vector2 center = mapImageToScreen(SPACE_GRAPHICS[spaceId - 1].center);
 
-        float radius =
-            SPACE_GRAPHICS[spaceId - 1].radius * scale;
+        float radius = SPACE_GRAPHICS[spaceId - 1].radius * scale;
 
-        DrawCircleV(
-            center,
-            radius,
-            Color{80, 220, 100, 130});
+        DrawCircleV(center, radius, Color{80, 220, 100, 130});
 
-        DrawCircleLinesV(
-            center,
-            radius,
-            Color{120, 255, 150, 220});
+        DrawCircleLinesV(center, radius, Color{120, 255, 150, 220});
     }
 }
 
@@ -2610,7 +1699,6 @@ void GameScreen::drawEffectSelectableSpaces()
     for (Space *space : effectUI.getCandidateSpaces())
     {
         int spaceId = space->getId();
-
         if (spaceId < 1 || spaceId > 32)
         {
             continue;
@@ -2639,11 +1727,9 @@ void GameScreen::drawLookButton()
     const float buttonWidth = 160.0f;
     const float buttonHeight = 50.0f;
 
-    lookButton = Rectangle{
-        (GetScreenWidth() - buttonWidth) / 2.0f,
-        mapY + mapHeight + 110.0f, // کمی پایین‌تر از نوار "Turn"
-        buttonWidth,
-        buttonHeight};
+    lookButton = Rectangle{(GetScreenWidth() - buttonWidth) / 2.0f, mapY + mapHeight + 110.0f,
+                           buttonWidth,
+                           buttonHeight};
 
     Vector2 mouse = GetMousePosition();
     bool hovered = CheckCollisionPointRec(mouse, lookButton);
@@ -2658,14 +1744,12 @@ void GameScreen::drawLookButton()
 
     Vector2 textSize = MeasureTextEx(font, text, fontSize, 1.5f);
 
-    DrawTextEx(
-        font, text,
-        Vector2{
-            lookButton.x + (lookButton.width - textSize.x) / 2.0f,
-            lookButton.y + (lookButton.height - textSize.y) / 2.0f},
-
-        fontSize,
-        1.5f, WHITE);
+    DrawTextEx(font, text,
+               Vector2{
+                   lookButton.x + (lookButton.width - textSize.x) / 2.0f,
+                   lookButton.y + (lookButton.height - textSize.y) / 2.0f},
+               fontSize,
+               1.5f, WHITE);
 }
 
 void GameScreen::drawCombatEffectText()
@@ -2676,7 +1760,6 @@ void GameScreen::drawCombatEffectText()
     }
 
     const std::string &description = game->getCombatSystem().getCurrentEffectDescription();
-
     if (description.empty())
     {
         return;
@@ -2720,11 +1803,7 @@ void GameScreen::drawCombatEffectText()
     float textY = mapY + mapHeight + 55.0f;
     float blockHeight = lines.size() * lineHeight + 16.0f;
 
-    Rectangle background{
-        mapX + 20.0f,
-        textY - 8.0f,
-        maxWidth,
-        blockHeight};
+    Rectangle background{mapX + 20.0f, textY - 8.0f, maxWidth, blockHeight};
 
     DrawRectangleRounded(background, 0.15f, 12, Color{20, 20, 20, 190});
 
@@ -2732,12 +1811,9 @@ void GameScreen::drawCombatEffectText()
     {
         Vector2 lineSize = MeasureTextEx(font, lines[i].c_str(), fontSize, spacing);
 
-        DrawTextEx(
-            font, lines[i].c_str(),
-            Vector2{
-                mapX + 20.0f + (maxWidth - lineSize.x) / 2.0f,
-                textY + i * lineHeight},
-            fontSize, spacing, WHITE);
+        DrawTextEx(font, lines[i].c_str(),
+                   Vector2{mapX + 20.0f + (maxWidth - lineSize.x) / 2.0f, textY + i * lineHeight},
+                   fontSize, spacing, WHITE);
     }
 }
 
@@ -2766,11 +1842,9 @@ void GameScreen::drawResultRevealButton()
     const float buttonWidth = 220.0f;
     const float buttonHeight = 50.0f;
 
-    resultRevealButton = Rectangle{
-        (GetScreenWidth() - buttonWidth) / 2.0f,
-        mapY + mapHeight + 80.0f,
-        buttonWidth,
-        buttonHeight};
+    resultRevealButton = Rectangle{(GetScreenWidth() - buttonWidth) / 2.0f, mapY + mapHeight + 80.0f,
+                                   buttonWidth,
+                                   buttonHeight};
 
     Vector2 mouse = GetMousePosition();
     bool hovered = CheckCollisionPointRec(mouse, resultRevealButton);
@@ -2785,12 +1859,11 @@ void GameScreen::drawResultRevealButton()
 
     Vector2 textSize = MeasureTextEx(font, text, fontSize, 1.5f);
 
-    DrawTextEx(
-        font, text,
-        Vector2{
-            resultRevealButton.x + (resultRevealButton.width - textSize.x) / 2.0f,
-            resultRevealButton.y + (resultRevealButton.height - textSize.y) / 2.0f},
-        fontSize, 1.5f, WHITE);
+    DrawTextEx(font, text,
+               Vector2{
+                   resultRevealButton.x + (resultRevealButton.width - textSize.x) / 2.0f,
+                   resultRevealButton.y + (resultRevealButton.height - textSize.y) / 2.0f},
+               fontSize, 1.5f, WHITE);
 }
 
 void GameScreen::drawCombatResultPopup()
@@ -2808,11 +1881,9 @@ void GameScreen::drawCombatResultPopup()
     const float popupWidth = 500.0f;
     const float popupHeight = 350.0f;
 
-    Rectangle popup{
-        (GetScreenWidth() - popupWidth) / 2.0f,
-        (GetScreenHeight() - popupHeight) / 2.0f,
-        popupWidth,
-        popupHeight};
+    Rectangle popup{(GetScreenWidth() - popupWidth) / 2.0f, (GetScreenHeight() - popupHeight) / 2.0f,
+                    popupWidth,
+                    popupHeight};
 
     DrawRectangleRounded(popup, 0.06f, 20, Color{25, 20, 18, 245});
     DrawRectangleRoundedLines(popup, 0.06f, 20, Color{180, 160, 130, 255});
@@ -2822,10 +1893,8 @@ void GameScreen::drawCombatResultPopup()
 
     Vector2 titleTextSize = MeasureTextEx(font, title, titleSize, 2.0f);
 
-    DrawTextEx(
-        font, title,
-        Vector2{popup.x + (popup.width - titleTextSize.x) / 2.0f, popup.y + 25.0f},
-        titleSize, 2.0f, WHITE);
+    DrawTextEx(font, title, Vector2{popup.x + (popup.width - titleTextSize.x) / 2.0f, popup.y + 25.0f},
+               titleSize, 2.0f, WHITE);
 
     Fighter *attackerFighter = combatSystem.getAttacker();
     Fighter *defenderFighter = combatSystem.getDefender();
@@ -2837,13 +1906,11 @@ void GameScreen::drawCombatResultPopup()
 
     std::string attackLine = "Attack Value : " + std::to_string(attackValue);
     std::string defenceLine = "Defense Value : " + std::to_string(defenceValue);
-    std::string damageLine =
-        (defenderFighter != nullptr ? defenderFighter->getName() : "Defender") +
-        std::string(" took ") + std::to_string(damage) + " damage";
-    std::string winnerLine =
-        attackerWon
-            ? ((attackerFighter != nullptr ? attackerFighter->getName() : "Attacker") + std::string(" WINS the combat!"))
-            : ((defenderFighter != nullptr ? defenderFighter->getName() : "Defender") + std::string(" WINS the combat!"));
+    std::string damageLine = (defenderFighter != nullptr ? defenderFighter->getName() : "Defender") +
+                             std::string(" took ") + std::to_string(damage) + " damage";
+    std::string winnerLine = attackerWon
+                                 ? ((attackerFighter != nullptr ? attackerFighter->getName() : "Attacker") + std::string(" WINS the combat!"))
+                                 : ((defenderFighter != nullptr ? defenderFighter->getName() : "Defender") + std::string(" WINS the combat!"));
 
     const float lineFontSize = 24.0f;
     const float lineSpacing = 1.5f;
@@ -2867,11 +1934,9 @@ void GameScreen::drawCombatResultPopup()
     const float backWidth = 160.0f;
     const float backHeight = 50.0f;
 
-    resultBackButton = Rectangle{
-        popup.x + (popup.width - backWidth) / 2.0f,
-        popup.y + popup.height - 70.0f,
-        backWidth,
-        backHeight};
+    resultBackButton = Rectangle{popup.x + (popup.width - backWidth) / 2.0f, popup.y + popup.height - 70.0f,
+                                 backWidth,
+                                 backHeight};
 
     Vector2 mouse = GetMousePosition();
     bool hovered = CheckCollisionPointRec(mouse, resultBackButton);
@@ -2883,12 +1948,11 @@ void GameScreen::drawCombatResultPopup()
     const char *backText = "BACK";
     Vector2 backTextSize = MeasureTextEx(font, backText, 24.0f, 1.5f);
 
-    DrawTextEx(
-        font, backText,
-        Vector2{
-            resultBackButton.x + (resultBackButton.width - backTextSize.x) / 2.0f,
-            resultBackButton.y + (resultBackButton.height - backTextSize.y) / 2.0f},
-        24.0f, 1.5f, WHITE);
+    DrawTextEx(font, backText,
+               Vector2{
+                   resultBackButton.x + (resultBackButton.width - backTextSize.x) / 2.0f,
+                   resultBackButton.y + (resultBackButton.height - backTextSize.y) / 2.0f},
+               24.0f, 1.5f, WHITE);
 }
 
 void GameScreen::drawDeckEmptyPopup()
@@ -2900,7 +1964,7 @@ void GameScreen::drawDeckEmptyPopup()
 
     Font font = assets->getGameFont();
 
-    const char *message = "DECK IS EMPTY :< YOUR FIGHTERS TAKE 2 DAMAGE.";
+    const char *message = "DECK IS EMPTY! YOUR FIGHTERS TAKE 2 DAMAGE.";
     const float fontSize = 24.0f;
     const float spacing = 1.5f;
 
@@ -2909,26 +1973,19 @@ void GameScreen::drawDeckEmptyPopup()
     const float buttonWidth = 140.0f;
     const float buttonHeight = 48.0f;
 
-    // فاصله از پایین صفحه، درست جایی که قبلاً دکمه‌های اکشن بودن
     float textY = GetScreenHeight() - 130.0f;
     float textX = (GetScreenWidth() - textSize.x) / 2.0f;
 
-    Rectangle background{
-        textX - 20.0f,
-        textY - 10.0f,
-        textSize.x + 40.0f,
-        textSize.y + 20.0f};
+    Rectangle background{textX - 20.0f, textY - 10.0f, textSize.x + 40.0f, textSize.y + 20.0f};
 
     DrawRectangleRounded(background, 0.2f, 12, Color{80, 20, 20, 220});
     DrawRectangleRoundedLines(background, 0.2f, 12, Color{220, 100, 100, 255});
 
     DrawTextEx(font, message, Vector2{textX, textY}, fontSize, spacing, WHITE);
 
-    deckEmptyOkButton = Rectangle{
-        (GetScreenWidth() - buttonWidth) / 2.0f,
-        textY + textSize.y + 25.0f,
-        buttonWidth,
-        buttonHeight};
+    deckEmptyOkButton = Rectangle{(GetScreenWidth() - buttonWidth) / 2.0f, textY + textSize.y + 25.0f,
+                                  buttonWidth,
+                                  buttonHeight};
 
     Vector2 mouse = GetMousePosition();
     bool hovered = CheckCollisionPointRec(mouse, deckEmptyOkButton);
@@ -2941,12 +1998,11 @@ void GameScreen::drawDeckEmptyPopup()
     const char *okText = "OK";
     Vector2 okTextSize = MeasureTextEx(font, okText, 22.0f, 1.5f);
 
-    DrawTextEx(
-        font, okText,
-        Vector2{
-            deckEmptyOkButton.x + (deckEmptyOkButton.width - okTextSize.x) / 2.0f,
-            deckEmptyOkButton.y + (deckEmptyOkButton.height - okTextSize.y) / 2.0f},
-        22.0f, 1.5f, WHITE);
+    DrawTextEx(font, okText,
+               Vector2{
+                   deckEmptyOkButton.x + (deckEmptyOkButton.width - okTextSize.x) / 2.0f,
+                   deckEmptyOkButton.y + (deckEmptyOkButton.height - okTextSize.y) / 2.0f},
+               22.0f, 1.5f, WHITE);
 }
 
 void GameScreen::openHandLimitPopup(Player *player)
@@ -3006,11 +2062,10 @@ void GameScreen::openHandLimitPopup(Player *player)
     const float burnHeight = 55.0f;
     float lastRowBottom = startY + rowCount * (boxHeight + gapY);
 
-    handLimitBurnButton = Rectangle{
-        (GetScreenWidth() - burnWidth) / 2.0f,
-        lastRowBottom + 15.0f,
-        burnWidth,
-        burnHeight};
+    handLimitBurnButton = Rectangle{(GetScreenWidth() - burnWidth) / 2.0f,
+                                    lastRowBottom + 15.0f,
+                                    burnWidth,
+                                    burnHeight};
 
     handLimitPopupOpen = true;
 }
@@ -3023,7 +2078,6 @@ void GameScreen::checkHandLimit()
     }
 
     const std::vector<Player *> &players = game->getPlayers();
-
     for (Player *player : players)
     {
         if (player != nullptr && player->getHand().getSize() > 7)
@@ -3046,20 +2100,17 @@ void GameScreen::drawHandLimitPopup()
 
     DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), Color{0, 0, 0, 190});
 
-    const char *title = "HAND LIMIT EXCEEDED - CHOOSE A CARD TO DISCARD";
+    const char *title = "[!] HAND LIMIT EXCEEDED - CHOOSE A CARD TO DISCARD";
     const float titleSize = 30.0f;
 
     Vector2 titleTextSize = MeasureTextEx(font, title, titleSize, 2.0f);
 
-    DrawTextEx(
-        font, title,
-        Vector2{(GetScreenWidth() - titleTextSize.x) / 2.0f, 40.0f},
-        titleSize, 2.0f, WHITE);
+    DrawTextEx(font, title, Vector2{(GetScreenWidth() - titleTextSize.x) / 2.0f, 40.0f},
+               titleSize, 2.0f, WHITE);
 
-    std::string heroName =
-        (handLimitPlayer != nullptr && handLimitPlayer->getHero() != nullptr)
-            ? handLimitPlayer->getHero()->getName()
-            : "";
+    std::string heroName = (handLimitPlayer != nullptr && handLimitPlayer->getHero() != nullptr)
+                               ? handLimitPlayer->getHero()->getName()
+                               : "";
 
     for (size_t i = 0; i < handLimitCards.size(); i++)
     {
@@ -3081,11 +2132,9 @@ void GameScreen::drawHandLimitPopup()
         DrawRectangleRoundedLines(box, 0.08f, 20, (hovered || selected) ? WHITE : Color{150, 150, 150, 255});
 
         std::string textureKey = getCardTextureKeyForHandLimit(card, heroName);
-
         if (!textureKey.empty())
         {
             Texture2D texture = assets->getCard(textureKey);
-
             if (texture.id != 0)
             {
                 const float padding = 12.0f;
@@ -3100,10 +2149,9 @@ void GameScreen::drawHandLimitPopup()
         std::string name = card->getName();
         Vector2 nameSize = MeasureTextEx(font, name.c_str(), 18.0f, 1.0f);
 
-        DrawTextEx(
-            font, name.c_str(),
-            Vector2{box.x + (box.width - nameSize.x) / 2.0f, box.y + box.height - 35.0f},
-            18.0f, 1.0f, WHITE);
+        DrawTextEx(font, name.c_str(),
+                   Vector2{box.x + (box.width - nameSize.x) / 2.0f, box.y + box.height - 35.0f},
+                   18.0f, 1.0f, WHITE);
     }
 
     bool burnEnabled = (handLimitSelectedIndex != -1);
@@ -3122,13 +2170,12 @@ void GameScreen::drawHandLimitPopup()
     const char *burnText = "BURN";
     Vector2 burnTextSize = MeasureTextEx(font, burnText, 26.0f, 1.5f);
 
-    DrawTextEx(
-        font, burnText,
-        Vector2{
-            handLimitBurnButton.x + (handLimitBurnButton.width - burnTextSize.x) / 2.0f,
-            handLimitBurnButton.y + (handLimitBurnButton.height - burnTextSize.y) / 2.0f},
-        26.0f, 1.5f,
-        burnEnabled ? WHITE : Color{150, 150, 150, 150});
+    DrawTextEx(font, burnText,
+               Vector2{
+                   handLimitBurnButton.x + (handLimitBurnButton.width - burnTextSize.x) / 2.0f,
+                   handLimitBurnButton.y + (handLimitBurnButton.height - burnTextSize.y) / 2.0f},
+               26.0f, 1.5f,
+               burnEnabled ? WHITE : Color{150, 150, 150, 150});
 }
 
 void GameScreen::refreshSaveFiles()
@@ -3150,72 +2197,37 @@ void GameScreen::updateSaveMenu()
         return;
     }
 
-    // =========================================
-    // Existing Save Files
-    // =========================================
-
     for (size_t i = 0; i < saveButtons.size(); i++)
     {
         if (CheckCollisionPointRec(mousePosition, saveButtons[i]))
         {
             try
             {
-                // انتخاب Save قبلی = overwrite
                 saveManager.saveGame(game, saveFiles[i]);
-
-                std::cout
-                    << "\n[+] Save overwritten: "
-                    << saveFiles[i]
-                    << std::endl;
-
                 saveMenuOpen = false;
             }
             catch (const std::exception &e)
             {
-                std::cerr
-                    << "\n[!] Save failed: "
-                    << e.what()
-                    << std::endl;
+                std::cerr << "\n[!] Save failed: " << e.what() << std::endl;
             }
-
             return;
         }
     }
-
-    // =========================================
-    // NEW SAVE
-    // =========================================
 
     if (CheckCollisionPointRec(mousePosition, newSaveButton))
     {
         try
         {
-            std::string newSaveName =
-                saveManager.createNewSaveName();
-
+            std::string newSaveName = saveManager.createNewSaveName();
             saveManager.saveGame(game, newSaveName);
-
-            std::cout
-                << "\n[+] New save created: "
-                << newSaveName
-                << std::endl;
-
             saveMenuOpen = false;
         }
         catch (const std::exception &e)
         {
-            std::cerr
-                << "\n[!] Save failed: "
-                << e.what()
-                << std::endl;
+            std::cerr << "\n[!] Save failed: " << e.what() << std::endl;
         }
-
         return;
     }
-
-    // =========================================
-    // BACK
-    // =========================================
 
     if (CheckCollisionPointRec(mousePosition, saveMenuBackButton))
     {
@@ -3233,70 +2245,27 @@ void GameScreen::drawSaveMenu()
 
     Font font = assets->getGameFont();
 
-    // =========================================
-    // Dark Overlay
-    // =========================================
-
-    DrawRectangle(
-        0,
-        0,
-        GetScreenWidth(),
-        GetScreenHeight(),
-        Color{0, 0, 0, 190});
-
-    // =========================================
-    // Popup
-    // =========================================
+    DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), Color{0, 0, 0, 190});
 
     const float popupWidth = 650.0f;
     const float popupHeight = 600.0f;
 
-    Rectangle popup{
-        (GetScreenWidth() - popupWidth) / 2.0f,
-        (GetScreenHeight() - popupHeight) / 2.0f,
-        popupWidth,
-        popupHeight};
+    Rectangle popup{(GetScreenWidth() - popupWidth) / 2.0f, (GetScreenHeight() - popupHeight) / 2.0f,
+                    popupWidth,
+                    popupHeight};
 
-    DrawRectangleRounded(
-        popup,
-        0.05f,
-        20,
-        Color{25, 20, 18, 250});
-
-    DrawRectangleRoundedLines(
-        popup,
-        0.05f,
-        20,
-        Color{180, 160, 130, 255});
-
-    // =========================================
-    // Title
-    // =========================================
+    DrawRectangleRounded(popup, 0.05f, 20, Color{25, 20, 18, 250});
+    DrawRectangleRoundedLines(popup, 0.05f, 20, Color{180, 160, 130, 255});
 
     const char *title = "SAVE GAME";
-
     const float titleSize = 34.0f;
 
-    Vector2 titleSizeVec =
-        MeasureTextEx(
-            font,
-            title,
-            titleSize,
-            2.0f);
+    Vector2 titleSizeVec = MeasureTextEx(font, title, titleSize, 2.0f);
 
-    DrawTextEx(
-        font,
-        title,
-        Vector2{
-            popup.x + (popup.width - titleSizeVec.x) / 2.0f,
-            popup.y + 30.0f},
-        titleSize,
-        2.0f,
-        WHITE);
-
-    // =========================================
-    // Save Buttons
-    // =========================================
+    DrawTextEx(font, title, Vector2{popup.x + (popup.width - titleSizeVec.x) / 2.0f, popup.y + 30.0f},
+               titleSize,
+               2.0f,
+               WHITE);
 
     saveButtons.clear();
 
@@ -3304,177 +2273,86 @@ void GameScreen::drawSaveMenu()
     const float buttonHeight = 55.0f;
     const float buttonGap = 15.0f;
 
-    float startX =
-        popup.x + (popup.width - buttonWidth) / 2.0f;
-
+    float startX = popup.x + (popup.width - buttonWidth) / 2.0f;
     float startY = popup.y + 100.0f;
 
     Vector2 mousePosition = GetMousePosition();
 
     for (size_t i = 0; i < saveFiles.size(); i++)
     {
-        Rectangle button{
-            startX,
-            startY + i * (buttonHeight + buttonGap),
-            buttonWidth,
-            buttonHeight};
+        Rectangle button{startX, startY + i * (buttonHeight + buttonGap),
+                         buttonWidth,
+                         buttonHeight};
 
         saveButtons.push_back(button);
 
-        bool hovered =
-            CheckCollisionPointRec(
-                mousePosition,
-                button);
+        bool hovered = CheckCollisionPointRec(mousePosition, button);
 
-        Color buttonColor =
-            hovered
-                ? Color{75, 75, 75, 245}
-                : Color{35, 35, 35, 235};
+        Color buttonColor = hovered ? Color{75, 75, 75, 245} : Color{35, 35, 35, 235};
 
-        DrawRectangleRounded(
-            button,
-            0.1f,
-            20,
-            buttonColor);
+        DrawRectangleRounded(button, 0.1f, 20, buttonColor);
+        DrawRectangleRoundedLines(button, 0.1f, 20, hovered ? WHITE : Color{150, 150, 150, 255});
 
-        DrawRectangleRoundedLines(
-            button,
-            0.1f,
-            20,
-            hovered
-                ? WHITE
-                : Color{150, 150, 150, 255});
+        std::string text = saveFiles[i];
 
-        std::string text =
-            saveFiles[i];
+        Vector2 textSize = MeasureTextEx(font, text.c_str(), 23.0f, 1.5f);
 
-        Vector2 textSize =
-            MeasureTextEx(
-                font,
-                text.c_str(),
-                23.0f,
-                1.5f);
-
-        DrawTextEx(
-            font,
-            text.c_str(),
-            Vector2{
-                button.x +
-                    (button.width - textSize.x) / 2.0f,
-                button.y +
-                    (button.height - textSize.y) / 2.0f},
-            23.0f,
-            1.5f,
-            WHITE);
+        DrawTextEx(font, text.c_str(),
+                   Vector2{button.x + (button.width - textSize.x) / 2.0f,
+                           button.y + (button.height - textSize.y) / 2.0f},
+                   23.0f,
+                   1.5f,
+                   WHITE);
     }
 
-    // =========================================
-    // NEW SAVE BUTTON
-    // =========================================
+    float newSaveY = startY + saveFiles.size() * (buttonHeight + buttonGap);
 
-    float newSaveY =
-        startY +
-        saveFiles.size() *
-            (buttonHeight + buttonGap);
+    newSaveButton = Rectangle{startX, newSaveY, buttonWidth, buttonHeight};
 
-    newSaveButton = Rectangle{
-        startX,
-        newSaveY,
-        buttonWidth,
-        buttonHeight};
+    bool newSaveHovered = CheckCollisionPointRec(mousePosition, newSaveButton);
 
-    bool newSaveHovered =
-        CheckCollisionPointRec(
-            mousePosition,
-            newSaveButton);
+    DrawRectangleRounded(newSaveButton, 0.1f, 20,
+                         newSaveHovered
+                             ? Color{80, 110, 70, 245}
+                             : Color{45, 80, 40, 235});
 
-    DrawRectangleRounded(
-        newSaveButton,
-        0.1f,
-        20,
-        newSaveHovered
-            ? Color{80, 110, 70, 245}
-            : Color{45, 80, 40, 235});
-
-    DrawRectangleRoundedLines(
-        newSaveButton,
-        0.1f,
-        20,
-        newSaveHovered
-            ? WHITE
-            : Color{130, 180, 130, 255});
+    DrawRectangleRoundedLines(newSaveButton, 0.1f, 20,
+                              newSaveHovered
+                                  ? WHITE
+                                  : Color{130, 180, 130, 255});
 
     const char *newSaveText = "+ NEW SAVE";
 
-    Vector2 newSaveTextSize =
-        MeasureTextEx(font,
-                      newSaveText,
-                      23.0f,
-                      1.5f);
+    Vector2 newSaveTextSize = MeasureTextEx(font, newSaveText, 23.0f, 1.5f);
 
-    DrawTextEx(
-        font,
-        newSaveText,
-        Vector2{
-            newSaveButton.x +
-                (newSaveButton.width -
-                 newSaveTextSize.x) /
-                    2.0f,
-            newSaveButton.y +
-                (newSaveButton.height -
-                 newSaveTextSize.y) /
-                    2.0f},
-        23.0f,
-        1.5f,
-        WHITE);
+    DrawTextEx(font, newSaveText,
+               Vector2{newSaveButton.x + (newSaveButton.width - newSaveTextSize.x) / 2.0f,
+                       newSaveButton.y + (newSaveButton.height - newSaveTextSize.y) / 2.0f},
+               23.0f,
+               1.5f,
+               WHITE);
 
-    // =========================================
-    // BACK BUTTON
-    // =========================================
+    saveMenuBackButton = Rectangle{popup.x + (popup.width - 150.0f) / 2.0f, popup.y + popup.height - 75.0f,
+                                   150.0f,
+                                   48.0f};
 
-    saveMenuBackButton = Rectangle{
-        popup.x + (popup.width - 150.0f) / 2.0f,
-        popup.y + popup.height - 75.0f,
-        150.0f,
-        48.0f};
+    bool backHovered = CheckCollisionPointRec(mousePosition, saveMenuBackButton);
 
-    bool backHovered =
-        CheckCollisionPointRec(
-            mousePosition,
-            saveMenuBackButton);
-
-    DrawRectangleRounded(
-        saveMenuBackButton,
-        0.1f,
-        20,
-        backHovered
-            ? Color{75, 75, 75, 245}
-            : Color{35, 35, 35, 235});
+    DrawRectangleRounded(saveMenuBackButton, 0.1f, 20,
+                         backHovered
+                             ? Color{75, 75, 75, 245}
+                             : Color{35, 35, 35, 235});
 
     const char *backText = "BACK";
 
-    Vector2 backTextSize =
-        MeasureTextEx(
-            font,
-            backText,
-            22.0f,
-            1.5f);
+    Vector2 backTextSize = MeasureTextEx(font, backText, 22.0f, 1.5f);
 
-    DrawTextEx(
-        font,
-        backText,
-        Vector2{
-            saveMenuBackButton.x +
-                (saveMenuBackButton.width -
-                 backTextSize.x) /
-                    2.0f,
-            saveMenuBackButton.y +
-                (saveMenuBackButton.height -
-                 backTextSize.y) /
-                    2.0f},
-        22.0f,
-        1.5f,
-        WHITE);
+    DrawTextEx(font, backText,
+               Vector2{saveMenuBackButton.x + (saveMenuBackButton.width - backTextSize.x) / 2.0f,
+                       saveMenuBackButton.y + (saveMenuBackButton.height - backTextSize.y) / 2.0f},
+               22.0f,
+               1.5f,
+               WHITE);
 }
 void GameScreen::drawFeintBlockedPopup()
 {
@@ -3488,38 +2366,17 @@ void GameScreen::drawFeintBlockedPopup()
     const float fontSize = 22.0f;
     const float spacing = 1.5f;
 
-    Vector2 textSize =
-        MeasureTextEx(font, feintBlockedMessage.c_str(), fontSize, spacing);
+    Vector2 textSize = MeasureTextEx(font, feintBlockedMessage.c_str(), fontSize, spacing);
 
-    // بالای صفحه با کمی فاصله
     float textY = 70.0f;
     float textX = (GetScreenWidth() - textSize.x) / 2.0f;
 
-    Rectangle background{
-        textX - 20.0f,
-        textY - 10.0f,
-        textSize.x + 40.0f,
-        textSize.y + 20.0f};
+    Rectangle background{textX - 20.0f, textY - 10.0f, textSize.x + 40.0f, textSize.y + 20.0f};
 
-    DrawRectangleRounded(
-        background,
-        0.2f,
-        12,
-        Color{80, 20, 20, 220});
+    DrawRectangleRounded(background, 0.2f, 12, Color{80, 20, 20, 220});
+    DrawRectangleRoundedLines(background, 0.2f, 12, Color{220, 100, 100, 255});
 
-    DrawRectangleRoundedLines(
-        background,
-        0.2f,
-        12,
-        Color{220, 100, 100, 255});
-
-    DrawTextEx(
-        font,
-        feintBlockedMessage.c_str(),
-        Vector2{textX, textY},
-        fontSize,
-        spacing,
-        WHITE);
+    DrawTextEx(font, feintBlockedMessage.c_str(), Vector2{textX, textY}, fontSize, spacing, WHITE);
 }
 
 void GameScreen::resetPlayerPanelAnimations()
@@ -3560,33 +2417,20 @@ bool GameScreen::consumeGameOver(Hero *&outWinner)
             outWinner = hero2;
         }
     }
-
     return true;
 }
 
 void GameScreen::resetState()
 {
-    // ============================================
-    // GENERAL UI STATE
-    // ============================================
-
     guideOpen = false;
     selectedAction = ActionChoice::NONE;
     pendingSchemeCard = nullptr;
-
-    // ============================================
-    // ATTACK STATE
-    // ============================================
 
     attackPhase = AttackPhase::NONE;
 
     attackFighter = nullptr;
     attackTarget = nullptr;
     selectedAttackCard = nullptr;
-
-    // ============================================
-    // COMBAT STATE
-    // ============================================
 
     combatInProgress = false;
     combatEffectRequested = false;
@@ -3599,48 +2443,23 @@ void GameScreen::resetState()
     resultRevealButton = Rectangle{};
     resultBackButton = Rectangle{};
 
-    // ============================================
-    // DECK EMPTY POPUP
-    // ============================================
-
     deckEmptyPopupOpen = false;
     deckEmptyOkButton = Rectangle{};
 
-    // ============================================
-    // HAND LIMIT
-    // ============================================
-
     handLimitPopupOpen = false;
     handLimitPlayer = nullptr;
-
     handLimitCards.clear();
     handLimitCardBoxes.clear();
-
     handLimitSelectedIndex = -1;
-
     handLimitBurnButton = Rectangle{};
-
-    // ============================================
-    // EFFECT
-    // ============================================
 
     pendingEffectFighter = nullptr;
 
-    // ============================================
-    // SAVE MENU
-    // ============================================
-
     saveMenuOpen = false;
-
     saveFiles.clear();
     saveButtons.clear();
-
     newSaveButton = Rectangle{};
     saveMenuBackButton = Rectangle{};
-
-    // ============================================
-    // FEINT BLOCKED POPUP
-    // ============================================
 
     feintBlockedPopupOpen = false;
     feintBlockedMessage.clear();
@@ -3648,15 +2467,7 @@ void GameScreen::resetState()
     feintBlockedOkButton = Rectangle{};
     feintBlockedPopupTimer = 0.0f;
 
-    // ============================================
-    // GAME OVER
-    // ============================================
-
     gameOverTriggered = false;
-
-    // ============================================
-    // PLAYER PANELS
-    // ============================================
 
     resetPlayerPanelAnimations();
 }

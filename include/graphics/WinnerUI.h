@@ -7,16 +7,6 @@ class Hero;
 
 class WinnerUI
 {
-public:
-    explicit WinnerUI(AssetManager *assets);
-
-    void open(Hero *winnerHero);
-    void update();
-    void draw();
-
-    bool isOpen() const;
-    bool consumeReturnToMenu();
-
 private:
     AssetManager *assets;
     bool open_ = false;
@@ -25,5 +15,14 @@ private:
     Hero *winnerHero = nullptr;
     Rectangle returnTextBounds{};
 
+public:
+    explicit WinnerUI(AssetManager *assets);
+
+    void open(Hero *winnerHero);
+    void update();
+    void draw();
     static Texture2D getHeroTextureForWinnerUI(AssetManager *assets, Hero *hero);
+
+    bool isOpen() const;
+    bool consumeReturnToMenu();
 };

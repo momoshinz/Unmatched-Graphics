@@ -1,5 +1,4 @@
-#ifndef TYPES_H
-#define TYPES_H
+#pragma once
 using namespace std;
 
 enum class AttackType
@@ -41,5 +40,3 @@ enum class ZoneType
     Beige,
     Purple
 };
-
-#endif

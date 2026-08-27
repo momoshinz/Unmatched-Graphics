@@ -1,5 +1,4 @@
-#ifndef CARD_H
-#define CARD_H
+#pragma once
 #include <vector>
 #include <string>
 #include "utils/Types.h"
@@ -101,4 +100,3 @@ public:
     static Card createSlipAway();
     static Card createStepLightly();
 };
-#endif

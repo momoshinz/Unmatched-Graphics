@@ -1,5 +1,4 @@
-#ifndef SPACE_H
-#define SPACE_H
+#pragma once
 #include <vector>
 #include "utils/Types.h"
 
@@ -44,5 +43,3 @@ public:
     Fog *getFog() const;
     void setFog(Fog *fog);
 };
-
-#endif

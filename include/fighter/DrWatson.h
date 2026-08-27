@@ -1,5 +1,4 @@
-#ifndef WATSON_H
-#define WATSON_H
+#pragma once
 
 #include "Sidekick.h"
 
@@ -12,5 +11,3 @@ class Watson : public Sidekick
 
         bool isAbilityImmune() const override;
 };
-
-#endif

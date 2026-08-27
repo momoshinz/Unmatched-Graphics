@@ -1,5 +1,4 @@
-#ifndef PLAYER_PANEL_H
-#define PLAYER_PANEL_H
+#pragma once
 
 #include "raylib.h"
 #include <string>
@@ -14,10 +13,6 @@ class PlayerPanel
 private:
     AssetManager *assets;
     Rectangle bounds;
-
-    std::string getHeroTextureKey(const Hero *hero) const;
-
-    std::string getSidekickTextureKey(const Player *player) const;
 
     float textAnimationTimer;
     bool textAnimationFinished;
@@ -42,11 +37,12 @@ public:
         float spacing,
         float lineHeight) const;
 
+    std::string getHeroTextureKey(const Hero *hero) const;
+    std::string getSidekickTextureKey(const Player *player) const;
+
     void resetTextAnimation();
     bool isTextAnimationFinished() const;
 
     Rectangle getShowHandButtonBounds() const;
     void drawShowHandButton(const Player *player);
 };
-
-#endif

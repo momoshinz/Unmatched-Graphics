@@ -1,5 +1,4 @@
-#ifndef TURNMANAGER_H
-#define TURNMANAGER_H
+#pragma once
 
 class Player;
 
@@ -42,5 +41,3 @@ public:
     void setRemainingActions(int actions);
     void setTurnNumber(int number);
 };
-
-#endif

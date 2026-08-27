@@ -1,5 +1,4 @@
-#ifndef DRACULA_H
-#define DRACULA_H
+#pragma once
 using namespace std;
 #include "Hero.h"
 
@@ -10,4 +9,3 @@ class Dracula : public Hero
         ~Dracula() = default;
         virtual void useAbility(Game& game, Player &player) override;
 };
-#endif
