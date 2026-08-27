@@ -204,7 +204,7 @@ void MainMenu::draw()
     if (state != State::LOAD_GAME)
     {
         const char *title = "UNMATCHED";
-        const float titleSize = 58.0f;
+        const float titleSize = 54.0f;
         const float titleSpacing = 10.0f;
 
         Vector2 titleTextSize = MeasureTextEx(titleFont, title, titleSize, titleSpacing);
@@ -545,8 +545,6 @@ int MainMenu::handleInput()
 
         if (placement == Placement::FINISHED)
         {
-            std::cout << "=== PLACEMENT FINISHED ===" << std::endl;
-
             state = State::MAIN_MENU;
 
             return 4;
@@ -616,9 +614,7 @@ int MainMenu::handleInput()
                 return 2;
             }
 
-            if (CheckCollisionPointRec(
-                    mousePosition,
-                    exitButton))
+            if (CheckCollisionPointRec(mousePosition, exitButton))
             {
                 return 3;
             }
@@ -773,12 +769,12 @@ int MainMenu::handleInput()
         {
             if (CheckCollisionPointRec(mousePosition, draculaBox))
             {
-                selectHero("dracula");
+                selectHero("dracula_art_transparent");
             }
 
             if (CheckCollisionPointRec(mousePosition, sherlockBox))
             {
-                selectHero("sherlock");
+                selectHero("sherlock_transparent");
             }
 
             if (CheckCollisionPointRec(mousePosition, invisibleBox))
@@ -791,12 +787,12 @@ int MainMenu::handleInput()
         {
             if (CheckCollisionPointRec(mousePosition, draculaBox))
             {
-                selectHero("dracula");
+                selectHero("dracula_art_transparent");
             }
 
             if (CheckCollisionPointRec(mousePosition, sherlockBox))
             {
-                selectHero("sherlock");
+                selectHero("sherlock_transparent");
             }
 
             if (CheckCollisionPointRec(mousePosition, invisibleBox))
@@ -930,9 +926,9 @@ void MainMenu::drawHeroSelection(Font font)
             messageSpacing, WHITE);
     }
 
-    Texture2D dracula = assets->getCharacter("dracula");
+    Texture2D dracula = assets->getCharacter("dracula_art_transparent");
 
-    Texture2D sherlock = assets->getCharacter("sherlock");
+    Texture2D sherlock = assets->getCharacter("sherlock_transparent");
 
     Texture2D invisibleMan = assets->getCharacter("invisible_man");
 
@@ -962,7 +958,7 @@ void MainMenu::drawHeroSelection(Font font)
 
     Color draculaColor = normalColor;
 
-    if (player1Hero == "dracula" || player2Hero == "dracula")
+    if (player1Hero == "dracula_art_transparent" || player2Hero == "dracula_art_transparent")
     {
         draculaColor = selectedColor;
     }
@@ -973,7 +969,7 @@ void MainMenu::drawHeroSelection(Font font)
 
     Color sherlockColor = normalColor;
 
-    if (player1Hero == "sherlock" || player2Hero == "sherlock")
+    if (player1Hero == "sherlock_transparent" || player2Hero == "sherlock_transparent")
     {
         sherlockColor = selectedColor;
     }
@@ -1759,12 +1755,11 @@ void MainMenu::updatePlacement()
 
         if (CheckCollisionPointCircle(mouse, space7, radius7))
         {
-            if (placeHeroOnSpace(7))
+            if (!placeHeroOnSpace(7))
             {
-                cout << "Hero placed on Space 7" << std::endl;
+                return;
             }
-
-            return;
+            
         }
 
         Vector2 space22 = mapImageToScreen(SPACE_GRAPHICS[21].center);
@@ -1773,12 +1768,10 @@ void MainMenu::updatePlacement()
 
         if (CheckCollisionPointCircle(mouse, space22, radius22))
         {
-            if (placeHeroOnSpace(22))
+            if (!placeHeroOnSpace(22))
             {
-                cout << "Hero placed on Space 22" << std::endl;
+                return;
             }
-
-            return;
         }
 
         return;
@@ -1794,12 +1787,10 @@ void MainMenu::updatePlacement()
 
             if (CheckCollisionPointCircle(mouse, center, radius))
             {
-                if (placeSidekickOnSpace(i + 1))
+                if (!placeSidekickOnSpace(i + 1))
                 {
-                    cout << "Sidekick placed on Space " << i + 1 << endl;
+                    return;
                 }
-
-                return;
             }
         }
     }
@@ -1814,12 +1805,10 @@ void MainMenu::updatePlacement()
 
             if (CheckCollisionPointCircle(mouse, center, radius))
             {
-                if (placeFogOnSpace(i + 1))
+                if (!placeFogOnSpace(i + 1))
                 {
-                    cout << "Fog placed on Space " << i + 1 << endl;
+                    return;
                 }
-
-                return;
             }
         }
     }

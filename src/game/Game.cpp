@@ -291,7 +291,6 @@ Fighter *Game::selectTarget(Player &currentPlayer, Fighter *user)
     }
 
     int choice;
-    cout << "~~> ";
 
     cin >> choice;
 
@@ -337,8 +336,7 @@ void Game::processTurn()
                 }
                 catch (const exception &e)
                 {
-                    cerr << "\n[!] Error using Dracula's ability : "
-                         << e.what() << endl;
+                    cerr << "\n[!] Error using Dracula's ability : " << e.what() << endl;
                 }
             }
         }
@@ -786,8 +784,6 @@ void Game::saveGame(const string &filename)
     file << setw(4) << j;
 
     file.close();
-
-    cout << "\n[+] Game Saved Successfully.\n";
 }
 
 void Game::loadGame(const string &filename)
@@ -979,8 +975,7 @@ Player *Game::getOlderPlayer() const
 
 bool Game::assignHero(int playerIndex, const std::string &heroName)
 {
-    if (playerIndex < 1 ||
-        playerIndex > static_cast<int>(players.size()))
+    if (playerIndex < 1 || playerIndex > static_cast<int>(players.size()))
     {
         return false;
     }
@@ -999,8 +994,7 @@ bool Game::assignHero(int playerIndex, const std::string &heroName)
 
     for (Player *otherPlayer : players)
     {
-        if (otherPlayer == nullptr ||
-            otherPlayer == player)
+        if (otherPlayer == nullptr || otherPlayer == player)
         {
             continue;
         }
@@ -1018,7 +1012,7 @@ bool Game::assignHero(int playerIndex, const std::string &heroName)
         }
     }
 
-    if (heroName == "dracula")
+    if (heroName == "dracula_art_transparent")
     {
         player->setHero(new Dracula());
 
@@ -1026,7 +1020,7 @@ bool Game::assignHero(int playerIndex, const std::string &heroName)
         player->addSideKick(new Sisters(2));
         player->addSideKick(new Sisters(3));
     }
-    else if (heroName == "sherlock")
+    else if (heroName == "sherlock_transparent")
     {
         player->setHero(new Sherlock());
 

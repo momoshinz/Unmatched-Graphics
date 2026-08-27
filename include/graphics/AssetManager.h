@@ -8,9 +8,6 @@ class AssetManager
     private:
         Texture2D mainMenuBackground;
         Texture2D loadingBackground;
-        Texture2D actionIcons;
-        Texture2D rangedIcon;
-        Texture2D meleeIcon;
         Texture2D MainPanelBackground;
         Font gameFont;
         Font titleFont;
@@ -41,7 +38,6 @@ class AssetManager
         Font getGuideFont() const;
         Texture2D getCharacter(const std::string &name) const;
         Texture2D getCard(const std::string &name) const;
-        Texture2D getActionIcons() const;
         Texture2D getGameMap();
         Texture2D getMainPanelBackground() const;
         Texture2D getFogTexture() const;

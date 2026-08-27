@@ -18,7 +18,7 @@ Texture2D WinnerUI::getHeroTextureForWinnerUI(AssetManager *assets, Hero *hero)
     std::string name = hero->getName();
     if (name == "DRACULA")
     {
-        return assets->getCharacter("dracula");
+        return assets->getCharacter("dracula_art_transparent");
     }
 
     if (name == "SHERLOCK HOLMES")

@@ -22,7 +22,7 @@ static Texture2D getFighterTextureForDraculaUI(AssetManager *assets, Fighter *fi
     std::string name = fighter->getName();
 
     if (name == "DRACULA")
-        return assets->getCharacter("dracula");
+        return assets->getCharacter("dracula_art_transparent");
     if (name == "* Sister 1")
         return assets->getCharacter("sister1");
     if (name == "* Sister 2")

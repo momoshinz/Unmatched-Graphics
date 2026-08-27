@@ -5,7 +5,6 @@
 #include "fighter/Fighter.h"
 #include "fighter/Hero.h"
 #include "player/Player.h"
-#include <iostream>
 #include <string>
 
 AttackUI::AttackUI(AssetManager *assets) : assets(assets)
@@ -85,13 +84,11 @@ void AttackUI::openAttack(Player *player, const std::vector<Fighter *> &fighters
         fighterBoxes.push_back(box);
     }
     open = true;
-    std::cout << "Attack UI opened." << std::endl;
 }
 
 static Texture2D getFighterTexture(AssetManager *assets, Fighter *fighter)
 {
-    if (assets == nullptr ||
-        fighter == nullptr)
+    if (assets == nullptr || fighter == nullptr)
     {
         return {};
     }
@@ -100,7 +97,7 @@ static Texture2D getFighterTexture(AssetManager *assets, Fighter *fighter)
 
     if (name == "DRACULA")
     {
-        return assets->getCharacter("dracula");
+        return assets->getCharacter("dracula_art_transparent");
     }
 
     if (name == "* Sister 1")
@@ -184,8 +181,6 @@ void AttackUI::update()
             {
                 selectedAttacker = selectableFighters[i];
 
-                std::cout << "Attacker selected : " << selectedAttacker->getName() << std::endl;
-
                 selectableAttackCards.clear();
                 attackCardBoxes.clear();
 
@@ -256,8 +251,6 @@ void AttackUI::update()
             if (CheckCollisionPointRec(mouse, attackCardBoxes[i]))
             {
                 selectedAttackCardIndex = static_cast<int>(i);
-
-                std::cout << "Attack card selected: " << selectableAttackCards[i]->getName() << std::endl;
                 return;
             }
         }
@@ -267,8 +260,6 @@ void AttackUI::update()
             selectedAttackCard = selectableAttackCards[selectedAttackCardIndex];
 
             confirmedAttackCard = true;
-
-            std::cout << "Attack card confirmed: " << selectedAttackCard->getName() << std::endl;
 
             selectableTargets.clear();
             targetBoxes.clear();
@@ -350,8 +341,6 @@ void AttackUI::update()
             {
                 selectedTarget = selectableTargets[i];
 
-                std::cout << "Target selected : " << selectedTarget->getName() << std::endl;
-
                 phase = AttackPhase::AskDefenseCard;
 
                 return;
@@ -375,7 +364,6 @@ void AttackUI::update()
 
             if (selectedTarget == nullptr)
             {
-                std::cout << "[!] No defender selected." << std::endl;
                 open = false;
                 return;
             }
@@ -384,7 +372,6 @@ void AttackUI::update()
 
             if (defenderPlayer == nullptr)
             {
-                std::cout << "[!] Defender has no owner." << std::endl;
                 open = false;
                 return;
             }
@@ -444,7 +431,6 @@ void AttackUI::update()
 
             selectedDefenseCard = nullptr;
 
-            std::cout << "Defender chose NOT to play a defense card." << std::endl;
             open = false;
             attackConfirmed = true;
             return;
@@ -459,7 +445,6 @@ void AttackUI::update()
             {
                 selectedDefenseCard = selectableDefenseCards[i];
 
-                std::cout << "Defense card selected : " << selectedDefenseCard->getName() << std::endl;
                 open = false;
                 attackConfirmed = true;
 
@@ -667,7 +652,7 @@ void AttackUI::draw()
 
             string healthText = "HP: " + std::to_string(fighter->getHealth());
 
-            Vector2 healthSize = MeasureTextEx(font, healthText.c_str(), 18.0f, 1.0f);
+            Vector2 healthSize = MeasureTextEx(font, healthText.c_str(), 20.0f, 1.0f);
 
             DrawTextEx(font, healthText.c_str(), Vector2{box.x + (box.width - healthSize.x) / 2.0f, box.y + 270.0f}, 18.0f, 1.0f, WHITE);
         }
@@ -720,7 +705,7 @@ void AttackUI::draw()
 
             string healthText = "HP: " + std::to_string(fighter->getHealth());
 
-            Vector2 healthSize = MeasureTextEx(font, healthText.c_str(), 18.0f, 1.0f);
+            Vector2 healthSize = MeasureTextEx(font, healthText.c_str(), 20.0f, 1.0f);
 
             DrawTextEx(font, healthText.c_str(), Vector2{box.x + (box.width - healthSize.x) / 2.0f, box.y + 270.0f}, 18.0f, 1.0f, WHITE);
         }

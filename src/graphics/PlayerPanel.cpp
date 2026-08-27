@@ -502,12 +502,12 @@ std::string PlayerPanel::getHeroTextureKey(const Hero *hero) const
 
     if (name == "DRACULA")
     {
-        return "dracula";
+        return "dracula_art_transparent";
     }
 
     if (name == "SHERLOCK HOLMES")
     {
-        return "sherlock";
+        return "sherlock_transparent";
     }
 
     if (name == "INVISIBLE MAN")

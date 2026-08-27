@@ -82,10 +82,6 @@ void RaveningSeduction::apply(Game &game,
     {
         selected->takeDamage(damage);
     }
-    else
-    {
-        cout << "[!] No adjacent Sister. No damage dealt.\n";
-    }
 }
 
 EffectInputKind RaveningSeduction::getInputKind() const

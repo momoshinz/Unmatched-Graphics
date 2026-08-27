@@ -85,7 +85,6 @@ void SchemeUI::openScheme(const Hand &hand)
             backWidth,
             backHeight};
 
-        std::cout << "[!] No Scheme card in hand." << std::endl;
         return;
     }
 
@@ -129,8 +128,6 @@ void SchemeUI::openScheme(const Hand &hand)
     playButton = Rectangle{(GetScreenWidth() - playWidth) / 2.0f, lastRowBottom + 15.0f, playWidth, playHeight};
 
     open = true;
-
-    cout << "Scheme UI opened." << endl;
 }
 
 
@@ -163,9 +160,6 @@ void SchemeUI::update()
         if (CheckCollisionPointRec(mouse, cardBoxes[i]))
         {
             selectedIndex = static_cast<int>(i);
-
-            cout << "Scheme card selected: " << selectableCards[i]->getName() << endl;
-
             return;
         }
     }

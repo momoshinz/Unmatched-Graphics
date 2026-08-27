@@ -23,7 +23,6 @@ void ThirstForSustenance::apply(
 {
     if (!didUserWin)
     {
-        cout << "\n[!] ERROR : You didn't win in combat!\n";
         return;
     }
 

@@ -36,29 +36,17 @@ bool AssetManager::load()
     SetMusicVolume(gameMusic, 0.6f);
     gameMusic.looping = true;
 
-    characterTextures["dracula"] = LoadTexture("Unmatched_Assets/dracula/DracArtTran.png");
-    characterTextures["dracula_art"] = LoadTexture("Unmatched_Assets/dracula/DracArt.png");
     characterTextures["dracula_art_transparent"] = LoadTexture("Unmatched_Assets/dracula/DracArtTran.png");
-    characterTextures["dracula_health"] = LoadTexture("Unmatched_Assets/dracula/draculaHealth.png");
-    characterTextures["dracula_backcard"] = LoadTexture("Unmatched_Assets/dracula/draculaBackCard.png");
-    characterTextures["dracula-herocard"] = LoadTexture("Unmatched_Assets/dracula/dracHero.png");
     characterTextures["sisters"] = LoadTexture("Unmatched_Assets/dracula/3sisters.png");
     characterTextures["sister1"] = LoadTexture("Unmatched_Assets/dracula/sis1.png");
     characterTextures["sister2"] = LoadTexture("Unmatched_Assets/dracula/sis2.png");
     characterTextures["sister3"] = LoadTexture("Unmatched_Assets/dracula/sis3.png");
 
-    characterTextures["sherlock"] = LoadTexture("Unmatched_Assets/sherlock/holmsArtTransparent.png");
-    characterTextures["sherlock_art"] = LoadTexture("Unmatched_Assets/sherlock/holmsArt.png");
     characterTextures["sherlock_transparent"] = LoadTexture("Unmatched_Assets/sherlock/holmsArtTransparent.png");
-    characterTextures["sherlock_health"] = LoadTexture("Unmatched_Assets/sherlock/sherlockHealth.png");
-    characterTextures["sherlock_backcard"] = LoadTexture("Unmatched_Assets/sherlock/holmsBackCard.png");
-    characterTextures["sherlock_card"] = LoadTexture("Unmatched_Assets/sherlock/sherlockHerocard.png");
     characterTextures["watson"] = LoadTexture("Unmatched_Assets/sherlock/drwatson.png");
     characterTextures["drwatson"] = LoadTexture("Unmatched_Assets/sherlock/watson.png");
-    characterTextures["watson_health"] = LoadTexture("Unmatched_Assets/sherlock/watsonHealth.png");
 
     characterTextures["invisible_man"] = LoadTexture("Unmatched_Assets/invisibleMan/invisibleManArT.png");
-    characterTextures["invisible_man_transparent"] = LoadTexture("Unmatched_Assets/invisibleMan/tranInv.png");
     characterTextures["foggy"] = LoadTexture("Unmatched_Assets/invisibleMan/Fogs.png");
     fogTexture = LoadTexture("Unmatched_Assets/invisibleMan/fog.png");
 
@@ -97,10 +85,6 @@ bool AssetManager::load()
     cardTextures["RollingFog"] = LoadTexture("Unmatched_Assets/cards/invisibleMan/rolling-fog.png");
     cardTextures["SlipAway"] = LoadTexture("Unmatched_Assets/cards/invisibleMan/slip-away.png");
     cardTextures["StepLightly"] = LoadTexture("Unmatched_Assets/cards/invisibleMan/step-lightly.png");
-
-    actionIcons = LoadTexture("Unmatched_Assets/actions.png");
-    rangedIcon = LoadTexture("Unmatched_Assets/ranged.png");
-    meleeIcon = LoadTexture("Unmatched_Assets/melee.png");
 
     if (!isTextureValid(mainMenuBackground))
     {
@@ -177,24 +161,6 @@ void AssetManager::unload()
     {
         UnloadTexture(fogTexture);
         fogTexture = {};
-    }
-
-    if (actionIcons.id != 0)
-    {
-        UnloadTexture(actionIcons);
-        actionIcons = {};
-    }
-
-    if (rangedIcon.id != 0)
-    {
-        UnloadTexture(rangedIcon);
-        rangedIcon = {};
-    }
-
-    if (meleeIcon.id != 0)
-    {
-        UnloadTexture(meleeIcon);
-        meleeIcon = {};
     }
 
     if (winnerBackground.id != 0)
@@ -281,11 +247,6 @@ Texture2D AssetManager::getCard(const std::string &name) const
         return {};
     }
     return it->second;
-}
-
-Texture2D AssetManager::getActionIcons() const
-{
-    return actionIcons;
 }
 
 bool AssetManager::isLoaded() const

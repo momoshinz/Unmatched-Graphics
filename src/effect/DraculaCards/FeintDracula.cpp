@@ -43,15 +43,7 @@ void FeintDracula::apply(Game &game,
 
         if (opponentHero != nullptr && opponentHero->isAbilityImmune())
         {
-            cout << "\n========================================\n";
-            cout << "-< Feint >- BLOCKED!\n";
-            cout << "[!] " << opponentHero->getName()
-                 << "'s and Dr. Watson's abilities can never be disabled.\n";
-            cout << "========================================\n";
-
-            game.setFeintBlocked(
-                opponentHero->getName() +
-                " and Dr. Watson's abilities can never be disabled!");
+            game.setFeintBlocked(opponentHero->getName() + " and Dr. Watson's abilities can never be disabled!");
 
             return;
         }

@@ -31,18 +31,7 @@ void Dash::apply(Game &game,
 
     Space *destination = choice.selectedSpace;
 
-    if (game.getBoard().moveFighter(&fighter, destination))
-    {
-        cout << "[+] " << fighter.getName()
-             << " moved from home "
-             << currentPos->getId()
-             << " to home "
-             << destination->getId()
-             << "!\n";
-
-        cout << "========================================\n";
-    }
-    else
+    if (!game.getBoard().moveFighter(&fighter, destination))
     {
         throw runtime_error("\n[!] ERROR : FAILED to move fighter!\n");
     }

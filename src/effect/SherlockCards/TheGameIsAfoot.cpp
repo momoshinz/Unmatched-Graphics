@@ -34,6 +34,11 @@ void TheGameIsAfoot::apply(Game &game, Fighter &fighter, Fighter &target,
     }
 
     Space *destination = choice.selectedSpace;
+
+    if (!game.getBoard().moveFighter(&fighter, destination))
+    {
+        throw runtime_error("\n[!] ERROR : Could not move Sherlock to the selected home!\n");
+    }
 }
 
 EffectInputKind TheGameIsAfoot::getInputKind() const

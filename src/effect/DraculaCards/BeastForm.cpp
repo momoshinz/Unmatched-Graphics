@@ -59,8 +59,6 @@ void BeastForm::apply(Game &game,
         {
             player->getDiscardPile().addCard(discardedCard);
             discarded++;
-
-            cout << "[-] Discarded : " << discardedCard->getName() << endl;
         }
     }
 

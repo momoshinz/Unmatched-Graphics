@@ -23,7 +23,7 @@ static Texture2D getFighterTextureForEffectUI(AssetManager *assets, Fighter *fig
     std::string name = fighter->getName();
     if (name == "DRACULA")
     {
-        return assets->getCharacter("dracula");
+        return assets->getCharacter("dracula_art_transparent");
     }
     if (name == "* Sister 1")
     {
@@ -40,7 +40,7 @@ static Texture2D getFighterTextureForEffectUI(AssetManager *assets, Fighter *fig
 
     if (name == "SHERLOCK HOLMES")
     {
-        return assets->getCharacter("sherlock_art");
+        return assets->getCharacter("sherlock_transparent");
     }
     if (name == "* Dr. Watson")
     {
