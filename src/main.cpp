@@ -12,8 +12,8 @@
 
 int main()
 {
-    const int screenWidth = 1630;
-    const int screenHeight = 930;
+    const int screenWidth = 1338;
+    const int screenHeight = 738;
 
     InitWindow(screenWidth, screenHeight, "UNMATCHED");
     InitAudioDevice();
