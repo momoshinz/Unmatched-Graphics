@@ -27,7 +27,6 @@ public:
 
     void initialize(int age1, int age2);
     void addPlayer(Player *player);
-    void run(bool loaded = false);
     void processTurn();
     void processPlayerAction();
     void playSchemeCard();
@@ -50,7 +49,6 @@ public:
     TurnManager &getTurnManager();
     const TurnManager &getTurnManager() const;
     TerminalUI &getUI();
-    void placeFog(Fog *fog);
 
     void saveGame(const string &filename);
     void loadGame(const string &filename);
@@ -61,7 +59,6 @@ public:
     Player *getOlderPlayer() const;
 
     bool assignHero(int playerIndex, const std::string &heroName);
-    void drawInitialCards();
     void startGame();
     void beginTurns();
 

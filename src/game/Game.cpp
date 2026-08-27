@@ -151,14 +151,12 @@ void Game::initialize(int age1, int age2)
 {
     if (age1 <= 0 || age2 <= 0)
     {
-        throw invalid_argument(
-            "\n[!] ERROR : Age must be greater than 0!\n");
+        throw invalid_argument("\n[!] ERROR : Age must be greater than 0!\n");
     }
 
     if (age1 > 100 || age2 > 100)
     {
-        throw invalid_argument(
-            "\n[!] ERROR : Age cannot be greater than 100!\n");
+        throw invalid_argument("\n[!] ERROR : Age cannot be greater than 100!\n");
     }
 
     Player *player1 = new Player(age1);
@@ -182,7 +180,6 @@ void Game::initialize(int age1, int age2)
     }
     else
     {
-
         if (GetRandomValue(0, 1) == 0)
         {
             youngerPlayer = player1;
@@ -314,34 +311,6 @@ void Game::processPlayerAction()
     {
         throw runtime_error("\n[!] ERROR : Current player not found!\n");
     }
-
-    int choice;
-    cin >> choice;
-    while (choice < 1 || choice > 4)
-    {
-        cout << "\n[!] ERROR : Invalid choice! :( Try again.\n";
-        cout << "\n ~~> ";
-        cin >> choice;
-    }
-
-    switch (choice)
-    {
-    case 1:
-        maneuver();
-        break;
-
-    case 2:
-        attack();
-        break;
-
-    case 3:
-        playSchemeCard();
-        break;
-
-    case 4:
-        saveMenu();
-        break;
-    }
 }
 
 void Game::processTurn()
@@ -355,8 +324,6 @@ void Game::processTurn()
         {
             throw runtime_error("\n[!] ERROR : Current player not found!\n");
         }
-
-        ui.renderScreen(*this);
 
         Hero *hero = currentPlayer->getHero();
 
@@ -414,126 +381,7 @@ void Game::maneuver()
         throw runtime_error("\n[!] ERROR : Current player not found!\n");
     }
 
-    vector<Fighter *> fighters;
-
-    if (currentPlayer->getHero() != nullptr && currentPlayer->getHero()->isAlive())
-    {
-        fighters.push_back(currentPlayer->getHero());
-    }
-
-    for (Sidekick *sidekick : currentPlayer->getSideKicks())
-    {
-        if (sidekick != nullptr && sidekick->isAlive())
-        {
-            fighters.push_back(sidekick);
-        }
-    }
-
-    if (fighters.empty())
-    {
-        throw runtime_error("\n[!] ERROR : No fighter available! :<\n");
-    }
-
     currentPlayer->drawCardToHand();
-
-    unordered_map<Fighter *, int> movedDistance;
-
-    for (Fighter *fighter : fighters)
-    {
-        movedDistance[fighter] = 0;
-    }
-
-    while (true)
-    {
-        int fighterChoice;
-        cout << "~~> ";
-        cin >> fighterChoice;
-
-        if (fighterChoice == 0)
-            break;
-
-        if (fighterChoice < 1 || fighterChoice > fighters.size())
-        {
-            continue;
-        }
-
-        Fighter *fighter = fighters[fighterChoice - 1];
-
-        if (movedDistance[fighter] >= fighter->getMovement())
-        {
-            continue;
-        }
-
-        int answer = 0;
-
-        while (answer < 1 || answer > 2)
-        {
-            cin >> answer;
-        }
-
-        if (answer == 2)
-            continue;
-
-        int remainingMovement = fighter->getMovement() - movedDistance[fighter];
-
-        int totalMovement = remainingMovement;
-
-        if (!currentPlayer->getHand().isEmpty())
-        {
-            int boostAnswer = 0;
-
-            while (boostAnswer < 1 || boostAnswer > 2)
-            {
-                cin >> boostAnswer;
-            }
-
-            if (boostAnswer == 1)
-            {
-                int cardIndex = 0;
-
-                while (cardIndex < 1 || cardIndex > currentPlayer->getHand().getSize())
-                {
-                    cin >> cardIndex;
-                }
-
-                Card *discardedCard = currentPlayer->getHand().removeCard(cardIndex - 1);
-
-                if (discardedCard != nullptr)
-                {
-                    totalMovement += discardedCard->getBoost();
-                    currentPlayer->getDiscardPile().addCard(discardedCard);
-                }
-            }
-        }
-
-        auto availableMoves = board.getAvailableMovesWithDistance(fighter, totalMovement);
-
-        if (availableMoves.empty())
-        {
-            continue;
-        }
-
-        int choice = 0;
-
-        while (choice < 1 || choice > availableMoves.size())
-        {
-            choice = ui.chooseSpace();
-
-            if (choice < 1 || choice > availableMoves.size())
-            {
-                cout << "\n[!] Invalid choice! :<\n";
-            }
-        }
-
-        board.moveFighter(fighter, availableMoves[choice - 1].first);
-
-        movedDistance[fighter] += availableMoves[choice - 1].second;
-
-        ui.renderScreen(*this);
-
-    }
-
-    turnManager.useAction();
 }
 
 void Game::playSchemeCard()
@@ -545,126 +393,47 @@ void Game::playSchemeCard()
         throw runtime_error("\n[!] ERROR : Current player not found!\n");
     }
 
-    vector<Fighter *> fighters;
+    Card *scheme = nullptr;
 
-    if (currentPlayer->getHero() != nullptr && currentPlayer->getHero()->isAlive())
+    if (scheme == nullptr)
     {
-        fighters.push_back(currentPlayer->getHero());
+        return;
     }
 
-    for (Sidekick *sidekick : currentPlayer->getSideKicks())
+    Hero *hero = currentPlayer->getHero();
+    if (hero == nullptr)
     {
-        if (sidekick != nullptr && sidekick->isAlive())
+        return;
+    }
+
+    try
+    {
+        Effect *effect = scheme->getEffect();
+
+        if (effect != nullptr)
         {
-            fighters.push_back(sidekick);
-        }
-    }
+            EffectChoice choice;
 
-    if (fighters.empty())
-    {
-        throw runtime_error("\n[!] ERROR : No fighter available!\n");
-    }
-
-    int fighterChoice = 0;
-    while (true)
-    {
-        cin >> fighterChoice;
-
-        if (cin.fail())
-        {
-            cin.clear();
-            cin.ignore(1000, '\n');
-            continue;
+            effect->apply(*this, *hero, *hero, *scheme, nullptr, false, choice);
         }
 
-        if (fighterChoice >= 1 && fighterChoice <= fighters.size())
-        {
-            break;
-        }
-    }
-
-    Fighter *fighter = fighters[fighterChoice - 1];
-
-    Hand &hand = currentPlayer->getHand();
-
-    while (true)
-    {
-        vector<int> playableSchemes;
-
-        int displayIndex = 1;
+        Hand &hand = currentPlayer->getHand();
 
         for (int i = 0; i < hand.getSize(); i++)
         {
-            Card *card = hand.getCard(i);
-
-            if (card == nullptr)
-                continue;
-
-            if (!card->isScheme())
-                continue;
-
-            if (!card->isPlayableBy(*fighter))
-                continue;
-
-            playableSchemes.push_back(i);
-
-            displayIndex++;
-        }
-
-        if (playableSchemes.empty())
-        {
-            return;
-        }
-
-        int choice = 0;
-        while (true)
-        {
-            cin >> choice;
-
-            if (cin.fail())
+            if (hand.getCard(i) == scheme)
             {
-                cin.clear();
-                cin.ignore(1000, '\n');
-                continue;
-            }
-
-            if (choice >= 1 && choice <= playableSchemes.size())
-            {
+                Card *playedCard = hand.removeCard(i);
+                currentPlayer->getDiscardPile().addCard(playedCard);
                 break;
             }
         }
 
-        int handIndex = playableSchemes[choice - 1];
-        Card *scheme = hand.getCard(handIndex);
-
-        try
-        {
-            Effect *effect = scheme->getEffect();
-            EffectChoice choice;
-            if (effect != nullptr)
-            {
-                effect->apply(
-                    *this,
-                    *fighter,
-                    *fighter,
-                    *scheme,
-                    nullptr,
-                    false,
-                    choice);
-            }
-            hand.removeCard(handIndex);
-            currentPlayer->getDiscardPile().addCard(scheme);
-
-            ui.renderScreen(*this);
-
-            turnManager.useAction();
-            return;
-        }
-        catch (const exception &e)
-        {
-            cerr << "\n[!] Error playing card: " << e.what() << endl;
-            return;
-        }
+        turnManager.useAction();
+    }
+    catch (const exception &e)
+    {
+        cerr << "\n[!] Error playing Scheme card: " << e.what() << endl;
     }
 }
 
@@ -722,8 +491,6 @@ void Game::attack()
     {
         return;
     }
-
-    ui.renderScreen(*this);
 
     Card *attackCard = nullptr;
 
@@ -810,8 +577,6 @@ void Game::attack()
 
     combatSystem.resolveCombat(*this, *attacker, *defender, *attackCard, defenceCard);
 
-    ui.renderScreen(*this);
-
     turnManager.useAction();
 }
 
@@ -822,62 +587,6 @@ void Game::discardUntilHandLimit()
     if (currentPlayer == nullptr)
     {
         throw runtime_error("\n[!] ERROR : Current player NOT found!\n");
-    }
-
-    while (turnManager.checkHandLimit())
-    {
-        int choice = ui.chooseCard(*currentPlayer);
-
-        if (choice < 1 || choice > currentPlayer->getHand().getSize())
-        {
-            throw out_of_range("\n[!] ERROR : Invalid card!\n");
-        }
-
-        Card *discarded = currentPlayer->getHand().removeCard(choice - 1);
-
-        currentPlayer->getDiscardPile().addCard(discarded);
-    }
-}
-
-void Game::run(bool loaded)
-{
-
-    vector<string> entries =
-        {
-            "New Game",
-            "Load Game",
-            "Exit"};
-
-    int selected = 0;
-
-    try
-    {
-        if (!loaded)
-        {
-            // initialize();
-        }
-
-        while (!isGameOver())
-        {
-            try
-            {
-                processTurn();
-            }
-            catch (const exception &e)
-            {
-                cerr << "\n[!] Error in turn: " << e.what() << endl;
-                cout << "\n[.] Press Enter to continue...";
-                cin.ignore();
-                cin.get();
-            }
-        }
-
-        endGame();
-    }
-    catch (const exception &e)
-    {
-        cerr << "\n[!] Game initialization failed : " << e.what() << endl;
-        return;
     }
 }
 
@@ -911,15 +620,6 @@ void Game::endGame()
 
     Hero *hero1 = players[0]->getHero();
     Hero *hero2 = players[1]->getHero();
-
-    if (hero1->isAlive() && !hero2->isAlive())
-    {
-        ui.showWinner(*players[0]);
-    }
-    else if (!hero1->isAlive() && hero2->isAlive())
-    {
-        ui.showWinner(*players[1]);
-    }
 }
 
 const TurnManager &Game::getTurnManager() const
@@ -935,55 +635,6 @@ const Board &Game::getBoard() const
 const CombatSystem &Game::getCombatSystem() const
 {
     return combatSystem;
-}
-
-void Game::placeFog(Fog *fog)
-{
-    if (fog == nullptr)
-    {
-        return;
-    }
-
-    while (true)
-    {
-        ui.renderBoardOnly(*this);
-
-        vector<Space *> validSpaces;
-
-        for (Space *space : board.getSpaces())
-        {
-            if (space->hasFogToken())
-            {
-                continue;
-            }
-
-            validSpaces.push_back(space);
-        }
-
-        int choice;
-        cin >> choice;
-
-        if (cin.fail())
-        {
-            cin.clear();
-            cin.ignore(1000, '\n');
-            continue;
-        }
-
-        if (choice < 1 || choice > static_cast<int>(validSpaces.size()))
-        {
-            cout << "\n[!] Invalid choice!\n";
-            continue;
-        }
-
-        Space *selectedSpace = validSpaces[choice - 1];
-
-        fog->setPosition(selectedSpace);
-        selectedSpace->setFog(fog);
-        selectedSpace->setFogToken(true);
-
-        break;
-    }
 }
 
 void Game::saveGame(const string &filename)
@@ -1316,127 +967,6 @@ void Game::loadGame(const string &filename)
     turnManager.setTurnJustStarted(j["Turn"]["TurnJustStarted"]);
 }
 
-void Game::saveMenu()
-{
-    int slot = 1;
-    while (true)
-    {
-        string filename = "save" + to_string(slot) + ".json";
-
-        ifstream file(filename);
-
-        if (!file)
-            break;
-
-        cout << slot << ". " << filename << endl;
-
-        slot++;
-    }
-    cout << slot << ". New Save\n";
-    cout << "0. Cancel\n";
-
-    int choice;
-
-    while (true)
-    {
-        cout << "\n> Choose slot: ";
-        cin >> choice;
-
-        if (choice >= 0 && choice <= 3)
-            break;
-
-        cout << "\n[!] ERROR : Invalid choice!\n";
-    }
-
-    if (choice == 0)
-        return;
-
-    string filename = "save" + to_string(choice) + ".json";
-
-    ifstream test(filename);
-
-    if (test)
-    {
-        int answer;
-
-        cout << "\nThis slot already contains a saved game.\n";
-        cout << "Overwrite?\n";
-        cout << "1. Yes\n";
-        cout << "2. No\n";
-        cout << "Choice: ";
-
-        cin >> answer;
-
-        if (answer != 1)
-            return;
-    }
-
-    saveGame(filename);
-}
-
-bool Game::loadMenu()
-{
-    vector<string> saves;
-
-    int slot = 1;
-
-    while (true)
-    {
-        string filename = "save" + to_string(slot) + ".json";
-
-        ifstream file(filename);
-
-        if (!file)
-            break;
-
-        saves.push_back(filename);
-        slot++;
-    }
-
-    if (saves.empty())
-    {
-        cout << "\n[!] ERROR : No saved games found.\n";
-        cout << "> Press Enter to return...";
-        return false;
-    }
-
-    cout << "\n========== LOAD GAME ==========\n";
-
-    for (int i = 0; i < saves.size(); i++)
-    {
-        cout << i + 1 << ". " << saves[i] << endl;
-    }
-
-    cout << "0. Back\n";
-
-    int choice;
-
-    while (true)
-    {
-        cout << "\n> Choose a save: ";
-        cin >> choice;
-
-        if (cin.fail())
-        {
-            cin.clear();
-            cin.ignore(1000, '\n');
-            continue;
-        }
-
-        if (choice == 0)
-            return false;
-
-        if (choice >= 1 && choice <= saves.size())
-            break;
-
-        cout << "\n[!] ERROR : Invalid choice!\n";
-    }
-
-    loadGame(saves[choice - 1]);
-
-    return true;
-}
-
 Player *Game::getYoungerPlayer() const
 {
     return youngerPlayer;
@@ -1612,7 +1142,7 @@ void Game::resetGame()
     turnManager = TurnManager();
     combatSystem = CombatSystem();
 
-    board = Board(); 
+    board = Board();
     feintBlockedFlag = false;
     feintBlockedMessage.clear();
 }

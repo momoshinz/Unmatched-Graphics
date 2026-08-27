@@ -149,14 +149,14 @@ int main()
                         game.beginTurns();
                         nextScreen = Screen::GAME;
 
-                        transition.setText("FIGHTERS, GET READY! . . .");
+                        transition.setText("GET READY FOR THE BATTLE ! . . .");
                         transition.start(TransitionType::Fade, 1.0f, 2.5f);
                     }
 
                     else if (result == 5)
                     {
                         nextScreen = Screen::GAME;
-                        transition.setText("FIGHTERS, GET READY ! . . .");
+                        transition.setText("GET READY FOR THE BATTLE ! . . .");
                         transition.start(TransitionType::Fade, 1.0f, 2.5f);
                     }
                 }

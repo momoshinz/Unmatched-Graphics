@@ -1228,7 +1228,7 @@ void EffectUI::draw()
         const float titleSize = 28.0f;
         Vector2 titleTextSize = MeasureTextEx(font, title, titleSize, 1.5f);
 
-        DrawTextEx(font, title, Vector2{(GetScreenWidth() - titleTextSize.x) / 2.0f, 72.0f},
+        DrawTextEx(font, title, Vector2{(GetScreenWidth() - titleTextSize.x) / 2.0f, 68.0f},
                    titleSize,
                    1.5f,
                    WHITE);

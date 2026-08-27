@@ -1,7 +1,6 @@
 #include "game/TurnManager.h"
 #include "player/Player.h"
 #include "fighter/Hero.h"
-#include "ui/MapTemplate.h"
 #include <stdexcept>
 #include <iostream>
 using namespace std;
