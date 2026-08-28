@@ -8,20 +8,6 @@ out/
 cmake-build-*/
 
 # =========================================
-# CMake generated files
-# =========================================
-
-CMakeCache.txt
-CMakeFiles/
-CMakeScripts/
-cmake_install.cmake
-install_manifest.txt
-compile_commands.json
-CTestTestfile.cmake
-_deps/
-Makefile
-
-# =========================================
 # Compiled binaries / objects
 # =========================================
 *.o
@@ -36,3 +22,13 @@ Makefile
 *.pdb
 *.ilk
 *.exp
+
+# =========================================
+# Temporary files
+# =========================================
+
+*.tmp
+*.temp
+*.bak
+*.swp
+*~
