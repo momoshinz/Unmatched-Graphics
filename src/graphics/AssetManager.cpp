@@ -86,28 +86,43 @@ bool AssetManager::load()
     cardTextures["SlipAway"] = LoadTexture("Unmatched_Assets/cards/invisibleMan/slip-away.png");
     cardTextures["StepLightly"] = LoadTexture("Unmatched_Assets/cards/invisibleMan/step-lightly.png");
 
-    if (!isTextureValid(mainMenuBackground))
+    if (!isTextureValid(mainMenuBackground) || !isTextureValid(loadingBackground) ||
+        !isTextureValid(gameMap) || !isTextureValid(MainPanelBackground) ||
+        !isTextureValid(winnerBackground) || !isTextureValid(fogTexture))
     {
         unload();
         return false;
     }
 
-    if (!isTextureValid(loadingBackground))
+    if (gameFont.texture.id == 0 || titleFont.texture.id == 0 || loading.texture.id == 0 ||
+        guideFont.texture.id == 0)
     {
         unload();
         return false;
     }
 
-    if (!isTextureValid(gameMap))
+    if (!IsMusicValid(gameMusic))
     {
         unload();
         return false;
     }
 
-    if (gameFont.texture.id == 0)
+    for (const auto &[name, texture] : characterTextures)
     {
-        unload();
-        return false;
+        if (!isTextureValid(texture))
+        {
+            unload();
+            return false;
+        }
+    }
+
+    for (const auto &[name, texture] : cardTextures)
+    {
+        if (!isTextureValid(texture))
+        {
+            unload();
+            return false;
+        }
     }
     loaded = true;
     return true;
@@ -139,6 +154,18 @@ void AssetManager::unload()
         MainPanelBackground = {};
     }
 
+    if (winnerBackground.id != 0)
+    {
+        UnloadTexture(winnerBackground);
+        winnerBackground = {};
+    }
+
+    if (fogTexture.id != 0)
+    {
+        UnloadTexture(fogTexture);
+        fogTexture = {};
+    }
+
     if (gameFont.texture.id != 0)
     {
         UnloadFont(gameFont);
@@ -157,16 +184,10 @@ void AssetManager::unload()
         loading = {};
     }
 
-    if (fogTexture.id != 0)
+    if (guideFont.texture.id != 0)
     {
-        UnloadTexture(fogTexture);
-        fogTexture = {};
-    }
-
-    if (winnerBackground.id != 0)
-    {
-        UnloadTexture(winnerBackground);
-        winnerBackground = {};
+        UnloadFont(guideFont);
+        guideFont = {};
     }
 
     for (auto &[name, texture] : characterTextures)
@@ -186,6 +207,12 @@ void AssetManager::unload()
         }
     }
     cardTextures.clear();
+
+    if (IsMusicValid(gameMusic))
+    {
+        UnloadMusicStream(gameMusic);
+        gameMusic = {};
+    }
     loaded = false;
 }
 
